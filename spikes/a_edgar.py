@@ -38,7 +38,7 @@ CACHE = ROOT / "data" / "cache" / "edgar"
 OUT = ROOT / "spikes" / "out"
 INPUTS = ROOT / "spikes" / "inputs"
 
-MIN_INTERVAL = 0.25  # seconds between live requests: 4 req/s, well under SEC's 10 req/s cap
+MIN_INTERVAL = 0.5  # seconds between live requests: 2 req/s per process, so parallel agents stay under SEC's 10 req/s
 
 # (display name, candidate us-gaap concepts, press-release row-label regex)
 METRICS = [
