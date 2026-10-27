@@ -1,0 +1,24 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": "web",
+      "framework": "nextjs"
+    },
+    "api": {
+      "root": ".",
+      "framework": "fastapi",
+      "entrypoint": "receipts.api:app",
+      "functions": {
+        "receipts/api.py": {
+          "maxDuration": 300,
+          "excludeFiles": "{web/**,spikes/**,eval/**,tests/**,docs/**,graft/**,scripts/**,.claude/**,data/cache/**,data/eval_*/**,data/api_cache/**}"
+        }
+      }
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ]
+}

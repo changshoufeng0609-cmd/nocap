@@ -29,12 +29,13 @@ import re
 import tempfile
 import time
 import unicodedata
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import TimeoutError as FuturesTimeout
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import Any, Callable, Optional, get_args
+from typing import Any, Callable, Iterator, Optional, Sequence, get_args
 
 import openai
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -775,3 +776,211 @@ def extract(text: str, context: Optional[str] = None, **kwargs: Any) -> list[typ
     for w in result.warnings:
         log.warning(w)
     return result.claims
+
+
+# ---------------------------------------------------------------------------
+# Streaming: one result per passage as soon as it is done (receipts.stream, POST /api/check)
+# ---------------------------------------------------------------------------
+INTERACTIVE_TIMEOUT_S = 30.0    # per HTTP attempt while a person waits on the answer
+INTERACTIVE_ATTEMPTS = 2        # one retry
+INTERACTIVE_MAX_SLEEP_S = 4.0   # longest backoff between the attempts
+
+
+@dataclass
+class PassageResult:
+    """One passage's extraction, yielded by iter_extract() as soon as that passage is done.
+
+    claims are located, normalized and basis-expanded exactly as in extract_detailed(), with ids that continue
+    across results. call has the keys of an ExtractResult.calls record (status, cached, usage, cost_usd, ...)."""
+
+    passage: int                 # 1-based, document order
+    start: int                   # offset of the passage in the text
+    chars: int
+    claims: list[types.Claim]
+    call: dict[str, Any]
+    warnings: list[str] = field(default_factory=list)
+
+    @property
+    def ok(self) -> bool:
+        return self.call.get("status") == "ok"
+
+    @property
+    def cost_usd(self) -> float:
+        return float(self.call.get("cost_usd") or 0.0)
+
+
+def call_with_deadline(fn: Callable[[], Any], *, sleep: Callable[[float], None],
+                       max_attempts: int = INTERACTIVE_ATTEMPTS, deadline: Optional[float] = None,
+                       max_sleep_s: float = INTERACTIVE_MAX_SLEEP_S) -> _CallOutcome:
+    """call_with_retry() for an interactive request: at most max_attempts attempts, short backoff, and no retry that
+    would start after `deadline` (a time.monotonic() value). The same failures are retried (429/500/502/503, honoring
+    Retry-After up to max_sleep_s, and connection errors); a client timeout or a 504 is not, as it would recur."""
+    t0 = time.monotonic()
+    attempts = max(1, max_attempts)
+    err: Optional[dict[str, Any]] = None
+    attempt = 0
+    while attempt < attempts:
+        attempt += 1
+        wait: Optional[float] = None
+        try:
+            return _CallOutcome(True, fn(), attempt, time.monotonic() - t0)
+        except openai.APIStatusError as e:
+            body = e.body if isinstance(e.body, dict) else {}
+            err = {"kind": "http_error", "status": e.status_code, "code": getattr(e, "code", None),
+                   "message": str(body.get("message") or e.message)[:300]}
+            if e.status_code in RETRYABLE_STATUS:
+                after = _retry_after_s(getattr(e.response, "headers", None))
+                wait = after if after is not None else 2.0 ** (attempt - 1)
+        except openai.APITimeoutError:
+            err = {"kind": "client_timeout", "status": None, "message": "no response before the per-call timeout"}
+        except openai.APIConnectionError as e:
+            err = {"kind": "connection_error", "status": None, "message": str(e)[:300]}
+            wait = 2.0 ** (attempt - 1)
+        except openai.OpenAIError as e:
+            err = {"kind": "sdk_error", "status": None, "message": f"{type(e).__name__}: {str(e)[:300]}"}
+        if wait is None or attempt >= attempts:
+            break
+        wait = min(wait + random.uniform(0, 0.25), max_sleep_s)
+        if deadline is not None and time.monotonic() + wait >= deadline:
+            break
+        sleep(wait)
+    return _CallOutcome(False, None, attempt, time.monotonic() - t0, err)
+
+
+def _requests_for(text: str, context: Optional[str], effort: str,
+                  max_output_tokens: int) -> tuple[list[tuple[int, str]], list[dict[str, Any]], list[str]]:
+    """Passages, request bodies and request hashes, with the context handled as in extract_detailed()."""
+    if context is None:
+        context = infer_context(text)
+    context = (context or "").strip() or None
+    passages = split_passages(text)
+    requests = [build_request(p, context, effort=effort, max_output_tokens=max_output_tokens) for _, p in passages]
+    return passages, requests, [request_hash(r) for r in requests]
+
+
+def request_keys(text: str, context: Optional[str] = None, *, effort: str = EFFORT,
+                 max_output_tokens: int = MAX_OUTPUT_TOKENS) -> list[str]:
+    """The cache key (request hash) of every passage call, in document order. context: None infers, "" is none."""
+    return _requests_for(text, context, effort, max_output_tokens)[2]
+
+
+def _first_hit(caches: Sequence[_Cache], key: str) -> Optional[tuple[dict[str, Any], ModelResponse]]:
+    for cache in caches:
+        hit = cache.get(key)
+        if hit:
+            status, resp, _ = validate_output(hit["output_text"])
+            if status == "ok" and resp is not None:
+                return hit, resp
+    return None
+
+
+def passages_to_call(text: str, context: Optional[str] = None, *, cache_dirs: Sequence[Path] = (CACHE_DIR,),
+                     effort: str = EFFORT, max_output_tokens: int = MAX_OUTPUT_TOKENS) -> int:
+    """How many passages of `text` need a model call: those with no schema-valid response in any of cache_dirs.
+    0 means extraction is free. context: None infers it from the first passage, "" sends none."""
+    caches = [_Cache(d) for d in cache_dirs]
+    return sum(_first_hit(caches, k) is None for k in request_keys(text, context, effort=effort,
+                                                                   max_output_tokens=max_output_tokens))
+
+
+def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[openai.OpenAI] = None,
+                 cache_dir: Optional[Path] = CACHE_DIR, extra_cache_dirs: Sequence[Path] = (),
+                 use_cache: bool = True, concurrency: int = CONCURRENCY, effort: str = EFFORT,
+                 max_output_tokens: int = MAX_OUTPUT_TOKENS, timeout_s: float = INTERACTIVE_TIMEOUT_S,
+                 max_attempts: int = INTERACTIVE_ATTEMPTS, deadline: Optional[float] = None,
+                 sleep: Callable[[float], None] = time.sleep) -> Iterator[PassageResult]:
+    """extract_detailed() as a stream: one PassageResult per passage, yielded as soon as that passage is done.
+
+    Cached passages come first, in document order (cache_dir, then the read-only extra_cache_dirs), then live calls
+    in the order they finish, up to `concurrency` in flight. A live call gets `timeout_s` per HTTP attempt and at
+    most `max_attempts` attempts; `deadline` (a time.monotonic() value) bounds the whole extraction, and a passage
+    still running then is yielded as failed (status "deadline"). A failed passage is yielded with no claims and
+    ok False; nothing is raised for it. ExtractionError is raised only when a call is needed and there is no key.
+
+    Claim ids run c1, c2, ... in the order results are yielded: unique within the draft, but for live calls not
+    necessarily in document order (sort by span_start for that). Uncovered-number warnings need the whole draft
+    and are not produced here; extract_detailed() still reports them.
+    """
+    passages, requests, keys = _requests_for(text, context, effort, max_output_tokens)
+    if not passages:
+        return
+    write_cache = _Cache(cache_dir if use_cache else None)
+    read_caches = [write_cache, *(_Cache(d) for d in extra_cache_dirs)] if use_cache else []
+    next_id = 1
+
+    def result(i: int, call: dict[str, Any], model_resp: Optional[ModelResponse]) -> PassageResult:
+        nonlocal next_id
+        start, passage = passages[i]
+        rec = {"passage": i + 1, "start": start, "chars": len(passage), "request_sha256": keys[i], **call}
+        warnings: list[str] = []
+        claims: list[types.Claim] = []
+        if model_resp is None:
+            detail = (rec.get("error") or {}).get("message") or rec.get("problem") or rec.get("status")
+            warnings.append(f"passage {i + 1} (offset {start}) was not extracted: {rec.get('status')}: {detail}")
+        else:
+            built, _ = build_claims([(start, passage, model_resp.claims)], warnings)
+            claims = [c.model_copy(update={"id": f"c{next_id + k}"}) for k, c in enumerate(built)]
+            next_id += len(claims)
+        return PassageResult(i + 1, start, len(passage), claims, rec, warnings)
+
+    misses: list[int] = []
+    for i, key in enumerate(keys):
+        hit = _first_hit(read_caches, key)
+        if hit is None:
+            misses.append(i)
+            continue
+        record, resp = hit
+        yield result(i, {"status": "ok", "cached": True, "usage": record.get("usage"), "cost_usd": 0.0,
+                         "latency_s": 0.0}, resp)
+    if not misses:
+        return
+    if client is None:
+        client = make_client(timeout=timeout_s)
+
+    def attempt_timeout() -> float:
+        if deadline is None:
+            return timeout_s
+        return max(1.0, min(timeout_s, deadline - time.monotonic()))
+
+    def work(i: int) -> tuple[int, dict[str, Any], Optional[ModelResponse]]:
+        out = call_with_deadline(lambda: client.responses.create(**requests[i], timeout=attempt_timeout()),
+                                 sleep=sleep, max_attempts=max_attempts, deadline=deadline)
+        rec: dict[str, Any] = {"cached": False, "attempts": out.attempts, "latency_s": round(out.latency_s, 2)}
+        if not out.ok:
+            rec.update(status=out.error["kind"], error=out.error)
+            return i, rec, None
+        resp = out.response
+        usage = _usage(resp)
+        output_text = resp.output_text or ""
+        status, model_resp, problem = validate_output(output_text)
+        rec.update(status=status, problem=problem, response_id=resp.id, response_status=resp.status, usage=usage,
+                   cost_usd=round(cost_usd(usage), 6))
+        if status == "ok":
+            write_cache.put(keys[i], {"request_sha256": keys[i], "model": MODEL, "effort": effort,
+                                      "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                                      "response_id": resp.id, "usage": usage, "output_text": output_text})
+        return i, rec, model_resp
+
+    pool = ThreadPoolExecutor(max_workers=max(1, min(concurrency, len(misses))))
+    futures = {pool.submit(work, i): i for i in misses}
+    finished: set[int] = set()
+    try:
+        remaining = None if deadline is None else max(0.0, deadline - time.monotonic())
+        try:
+            for fut in as_completed(futures, timeout=remaining):
+                i = futures[fut]
+                finished.add(i)
+                try:
+                    _, rec, model_resp = fut.result()
+                except Exception as e:  # a bug in one passage's handling must not sink the others
+                    rec, model_resp = {"cached": False, "status": "internal_error",
+                                       "error": {"kind": "internal_error", "message": type(e).__name__}}, None
+                yield result(i, rec, model_resp)
+        except FuturesTimeout:
+            for i in misses:
+                if i not in finished:
+                    finished.add(i)
+                    yield result(i, {"cached": False, "status": "deadline",
+                                     "error": {"kind": "deadline", "message": "the check ran out of time"}}, None)
+    finally:
+        pool.shutdown(wait=False, cancel_futures=True)
