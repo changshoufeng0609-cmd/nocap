@@ -3,7 +3,10 @@
 companyfacts (XBRL) lacks three things a fact-checker needs: figures released on earnings day before
 the 10-Q, non-GAAP measures, and segment revenue. All three are in the HTML tables of the Item 2.02
 8-K exhibit (EX-99.1, or a later EX-99.x when the press release itself has no tables, as at BAC).
-This module turns those tables into Facts. The LLM proposes, code decides:
+Further EX-99 exhibits whose tables fit one model call are mapped too: NVIDIA's revenue by market
+platform is only in its CFO commentary (EX-99.2). Every fiscal quarter is covered, Q4 included: its
+release pairs with the 10-K instead of a 10-Q. This module turns those tables into Facts. The LLM
+proposes, code decides:
 
   1. parse_tables(): every <table> becomes rows of verbatim cell texts. A lone "$" cell is dropped and
      a lone ")" or "%" cell is glued to the number before it, so "(1,234" + ")" reads "(1,234)" (the
@@ -23,9 +26,10 @@ This module turns those tables into Facts. The LLM proposes, code decides:
 
 Output: data/pr_facts/<TICKER>/<accession>.jsonl, one types.Fact JSON per line (read by receipts.store),
 and a sidecar <accession>.report.json listing every rejected column, row and cell with its reason.
-With --validate, press-release GAAP facts are compared with the 10-Q XBRL facts for the same metric
-and period; the report goes to data/pr_facts/_validation.json.
+With --validate, press-release GAAP facts are compared with the paired 10-Q's (or, for Q4, 10-K's) XBRL
+facts for the same metric and period; the report goes to data/pr_facts/_validation.json.
 
+  .venv/bin/python -m receipts.press_release --quarters 8 --validate --budget-usd 2.70   # all 10 companies
   .venv/bin/python -m receipts.press_release --tickers NVDA NFLX --quarters 2 --validate
   .venv/bin/python -m receipts.press_release --dry-run     # parse and pick tables, no model calls
   .venv/bin/python -m receipts.press_release --offline --validate   # caches only, no network
@@ -302,7 +306,9 @@ _CHANGE_COL = re.compile(r"change|growth|\by/y\b|\bq/q\b|\byoy\b|\bqoq\b|o/\(u\)
                          r"|\bincrease\b|\bdecrease\b|\bppts?\b|\bbps\b|\bpts\b", re.I)
 _ADJUST_COL = re.compile(r"\badjustments?\b|\bimpact\b|\bless\b|hedging|\breconciling\b|\beffect\b"
                          r"|constant[- ]currency|\bf/?x\b", re.I)
-_NONGAAP_RE = re.compile(r"non[\s-]*gaap|\badjusted\b|\bcore\b|\bmanaged\b|excluding|\bex-|\bFTE\b"
+# "ex-" as in "ex-FX" or "ex-items", never an exhibit label: "EX-99.2" in a CFO commentary's heading once marked
+# its GAAP summary table non-GAAP.
+_NONGAAP_RE = re.compile(r"non[\s-]*gaap|\badjusted\b|\bcore\b|\bmanaged\b|excluding|\bex-(?!\d)|\bFTE\b"
                          r"|fully[- ]taxable[- ]equivalent", re.I)
 _TO_COMMON_RE = re.compile(r"(?:applicable|available|attributable)\s+to\s+common", re.I)
 _CONTINUING_RE = re.compile(r"continuing operations", re.I)
@@ -577,16 +583,16 @@ def relevance(t: PTable) -> float:
     return rows + (5 if _STATEMENT_HEADING.search(" | ".join(t.heading)) else 0)
 
 
-def select_candidates(cands: list[PTable]) -> tuple[list[PTable], list[PTable]]:
+def select_candidates(cands: list[PTable], *, char_cap: int = MAX_EXHIBIT_CHARS) -> tuple[list[PTable], list[PTable]]:
     """(kept, dropped). Small exhibits keep every candidate; big ones (bank supplements) keep the most
-    relevant tables within MAX_TABLES_PER_EXHIBIT and MAX_EXHIBIT_CHARS, in document order."""
+    relevant tables within MAX_TABLES_PER_EXHIBIT and `char_cap` (MAX_EXHIBIT_CHARS), in document order."""
     sizes = {t.index: len(render_table(t)) for t in cands}
-    if len(cands) <= MAX_TABLES_PER_EXHIBIT and sum(sizes.values()) <= MAX_EXHIBIT_CHARS:
+    if len(cands) <= MAX_TABLES_PER_EXHIBIT and sum(sizes.values()) <= char_cap:
         return cands, []
     kept: set[int] = set()
     total = 0
     for t in sorted(cands, key=lambda t: (-relevance(t), t.index)):
-        if len(kept) < MAX_TABLES_PER_EXHIBIT and total + sizes[t.index] <= MAX_EXHIBIT_CHARS:
+        if len(kept) < MAX_TABLES_PER_EXHIBIT and total + sizes[t.index] <= char_cap:
             kept.add(t.index)
             total += sizes[t.index]
     return [t for t in cands if t.index in kept], [t for t in cands if t.index not in kept]
@@ -1318,6 +1324,77 @@ def decide_table(t: PTable, m: TableMap, ctx: FilingContext) -> tuple[list[Fact]
     return facts, rej
 
 
+# Transposed reconciliation tables (Microsoft): one row per year and basis, one column per metric, e.g.
+#   Three Months Ended December 31, / Net Income      <- column header: period words and the metric
+#   2025 As Adjusted (non-GAAP) | $30,875              <- row label: the year and the basis
+# The model's schema (rows are metrics, columns are periods) can't express this, so code reads it alone, from
+# verbatim text only: the year from the row label, month and day from the header, the metric from a fixed list.
+_TRANSPOSED_ROW = re.compile(r"^\s*(?P<year>(?:19|20)\d{2})\s+As\s+(?:Reported|Adjusted)\s*\(\s*(?P<basis>GAAP|non-GAAP)"
+                             r"\s*\)\s*$", re.I)
+_TRANSPOSED_PERIOD = re.compile(r"\b(?P<span>three|twelve)\s+months\s+ended\s+(?P<mon>jan(?:uary)?|feb(?:ruary)?|"
+                                r"mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|"
+                                r"nov(?:ember)?|dec(?:ember)?)\.?\s+(?P<day>\d{1,2})\b", re.I)
+_TRANSPOSED_METRICS = {"revenue": "revenue", "revenues": "revenue", "operating income": "operating_income",
+                       "net income": "net_income", "diluted earnings per share": "eps_diluted"}
+
+
+def transposed_facts(t: PTable, ctx: FilingContext) -> tuple[list[Fact], list[dict]]:
+    """Facts from a transposed GAAP/non-GAAP reconciliation table, decided by code alone; ([], []) for any
+    other layout. A column must name exactly one period ('Three Months Ended December 31,') and one metric
+    from _TRANSPOSED_METRICS; a row must read 'YYYY As Reported (GAAP)' or 'YYYY As Adjusted (non-GAAP)'; the
+    period end must be one the fiscal calendar or the exhibit knows; every cell is parsed verbatim."""
+    rows = [(r, _TRANSPOSED_ROW.match(r.label)) for r in t.rows]
+    rows = [(r, m) for r, m in rows if m]
+    if len(rows) < 2:
+        return [], []
+    facts: list[Fact] = []
+    rej: list[dict] = []
+    for c in range(len(t.columns)):
+        header = " ".join(t.columns[c])
+        periods_named = list(_TRANSPOSED_PERIOD.finditer(header))
+        metric_text = clean_text(t.columns[c][-1] if t.columns[c] else "").rstrip(":").casefold()
+        metric = _TRANSPOSED_METRICS.get(metric_text)
+        if len(periods_named) != 1 or metric is None:
+            continue
+        p = periods_named[0]
+        duration = "quarter" if p["span"].lower() == "three" else "annual"
+        for r, m in rows:
+            text = r.cells.get(c)
+            value = parse_number(text)
+            if value is None:
+                continue
+            try:
+                end = date(int(m["year"]), _MONTHS[p["mon"][:3].lower()], int(p["day"]))
+            except ValueError:
+                continue
+            if end not in ctx.known_dates:
+                _reject(rej, t, "transposed_period_unknown", row=r.rid, col=c, detail=f"{end}: {r.label} / {header}")
+                continue
+            if end > ctx.accepted_at.date():
+                continue
+            per_share = metric == "eps_diluted"
+            if per_share:
+                full, unit, decimals = value, "USD/share", frac_digits(text)
+            else:
+                if t.scale is None:
+                    _reject(rej, t, "scale_unknown", row=r.rid, col=c, detail="transposed table without a unit header")
+                    continue
+                full = value * Decimal(int(SCALE_FACTOR[t.scale]))
+                unit, decimals = "USD", _decimals(t.scale, frac_digits(text))
+            try:
+                start = ctx.calendar.period_start(end, duration)
+            except ValueError:
+                continue
+            fy, fp = ctx.calendar.fiscal(end, duration)
+            facts.append(Fact(cik=ctx.cik, ticker=ctx.ticker, metric=metric, concept=None,
+                              basis="non-GAAP" if m["basis"].lower() == "non-gaap" else "GAAP", segment=None,
+                              value=float(full), unit=unit, period_start=start, period_end=end, fiscal_year=fy,
+                              fiscal_period=fp, source="press_release", form="8-K", accession=ctx.accession,
+                              accepted_at=ctx.accepted_at, url=ctx.url,
+                              locator=f"{r.label} | {t.columns[c][-1]} | {text}", decimals=decimals))
+    return facts, rej
+
+
 def _half_unit(f: Fact) -> float:
     return 0.5 * 10 ** (-(f.decimals if f.decimals is not None else 0))
 
@@ -1366,15 +1443,27 @@ class FilingJob:
     conflicts: list[dict] = field(default_factory=list)
     error: Optional[str] = None
     _maps: dict[int, TableMap] = field(default_factory=dict)
+    # Further exhibits of the same 8-K with their own tables, e.g. NVIDIA's CFO commentary (EX-99.2), which
+    # holds the revenue-by-market-platform table the press release lacks. Each part has its own context,
+    # requests and table maps; decide_job() merges and dedupes the facts of all parts.
+    secondary: list["FilingJob"] = field(default_factory=list)
+
+    def parts(self) -> list["FilingJob"]:
+        return [self, *self.secondary]
+
+
+PAIRED_FORMS = ("10-Q", "10-K")
 
 
 def earnings_pairs(filings: list[dict], quarters: int) -> list[tuple[dict, dict]]:
-    """(earnings 8-K, 10-Q) for the most recent `quarters` quarters whose 10-Q is filed: the first
-    Item 2.02 8-K filed between the quarter end and the 10-Q."""
-    tenqs = sorted((f for f in filings if f["form"] == "10-Q"), key=lambda f: f["reportDate"] or "", reverse=True)
+    """(earnings 8-K, periodic report) for the most recent `quarters` fiscal quarters whose report is filed:
+    the first Item 2.02 8-K filed between the period end and the report. Quarters 1-3 pair with their 10-Q;
+    the fourth quarter pairs with the 10-K, whose XBRL checks the release's full-year columns."""
+    reports = sorted((f for f in filings if f["form"] in PAIRED_FORMS), key=lambda f: f["reportDate"] or "",
+                     reverse=True)
     eightks = [f for f in filings if f["form"] == "8-K" and "2.02" in (f.get("items") or "")]
     pairs = []
-    for q in tenqs:
+    for q in reports:
         cands = [k for k in eightks if (q["reportDate"] or "") <= k["filingDate"] <= q["filingDate"]]
         if cands:
             pairs.append((min(cands, key=lambda k: k["acceptanceDateTime"]), q))
@@ -1424,10 +1513,46 @@ def plan_requests(job: FilingJob, *, effort: str) -> None:
     flush()
 
 
-def prepare_job(ed: Any, ticker: str, cik: int, company: str, eightk: dict, tenq: Optional[dict],
-                calendar: FiscalCalendar, *, effort: str) -> FilingJob:
+# A further EX-99 exhibit is fetched only when its listed size could hold financial tables without being a
+# full statistical supplement (JPM's 3 MB financial supplement would need many calls; tiny exhibits and slide
+# decks hold no HTML tables). Its candidate tables must then fit in one model call (BATCH_CHARS).
+SECONDARY_EXHIBIT_BYTES = (50_000, 1_000_000)
+
+
+def _exhibit_tables(html: bytes | str, *, char_cap: int = MAX_EXHIBIT_CHARS) -> tuple[list[PTable], list[PTable],
+                                                                                        list[dict]]:
+    """(all tables, candidate tables, skipped) for one exhibit."""
+    tables = parse_tables(html)
+    cands, skipped = [], []
+    for t in tables:
+        why = candidate_reason(t)
+        (skipped.append({"table": t.index, "reason": why}) if why else cands.append(t))
+    cands, dropped = select_candidates(cands, char_cap=char_cap)
+    skipped += [{"table": t.index, "reason": "less relevant than the kept tables (exhibit size cap)"}
+                for t in dropped]
+    return tables, cands, skipped
+
+
+def _context_for(ticker: str, cik: int, company: str, eightk: dict, doc: dict, cands: list[PTable],
+                 calendar: FiscalCalendar) -> FilingContext:
     from receipts.edgar import parse_accepted
 
+    doc_dates = {d for t in cands for c in t.columns for d in parse_dates(" ".join(c))}
+    doc_dates |= {d for t in cands for d in parse_dates(" ".join(t.heading))}
+    return FilingContext(ticker=ticker, cik=cik, company=company, accession=eightk["accessionNumber"],
+                         accepted_at=parse_accepted(eightk["acceptanceDateTime"]), url=doc["url"],
+                         exhibit=doc["type"].upper(), calendar=calendar, doc_dates=doc_dates)
+
+
+def _listed_bytes(doc: dict) -> Optional[int]:
+    s = re.sub(r"[^\d]", "", str(doc.get("size") or ""))
+    return int(s) if s else None
+
+
+def prepare_job(ed: Any, ticker: str, cik: int, company: str, eightk: dict, tenq: Optional[dict],
+                calendar: FiscalCalendar, *, effort: str, secondary: bool = True) -> FilingJob:
+    """The primary exhibit is the first EX-99 (EX-99.1 first) with at least two candidate tables. Later EX-99
+    exhibits with candidate tables that fit one model call are mapped too, as secondary parts."""
     job = FilingJob(ticker, cik, company, eightk, tenq)
     accession = eightk["accessionNumber"]
     try:
@@ -1436,64 +1561,81 @@ def prepare_job(ed: Any, ticker: str, cik: int, company: str, eightk: dict, tenq
         job.error = f"filing index: {e}"
         return job
     for doc in docs:
+        if job.ctx is not None:  # the primary exhibit is chosen: this one can only be secondary
+            if not secondary:
+                break
+            size = _listed_bytes(doc)
+            lo, hi = SECONDARY_EXHIBIT_BYTES
+            if size is not None and not lo <= size <= hi:
+                job.exhibits_tried.append({"type": doc["type"], "url": doc["url"], "role": "secondary",
+                                           "skipped": f"listed size {size:,} bytes outside {lo:,}..{hi:,}"})
+                continue
         try:
             html = ed.get(doc["url"])
         except Exception as e:
             job.exhibits_tried.append({"type": doc["type"], "url": doc["url"], "error": str(e)[:200]})
             continue
-        tables = parse_tables(html)
-        cands, skipped = [], []
-        for t in tables:
-            why = candidate_reason(t)
-            (skipped.append({"table": t.index, "reason": why}) if why else cands.append(t))
-        cands, dropped = select_candidates(cands)
-        skipped += [{"table": t.index, "reason": "less relevant than the kept tables (exhibit size cap)"}
-                    for t in dropped]
+        if job.ctx is not None:
+            tables, cands, skipped = _exhibit_tables(html, char_cap=BATCH_CHARS)
+            job.exhibits_tried.append({"type": doc["type"], "url": doc["url"], "role": "secondary",
+                                       "tables": len(tables), "candidates": len(cands)})
+            if cands:
+                part = FilingJob(ticker, cik, company, eightk, tenq, tables=tables, candidates=cands,
+                                 skipped=skipped, ctx=_context_for(ticker, cik, company, eightk, doc, cands, calendar))
+                plan_requests(part, effort=effort)
+                job.secondary.append(part)
+            continue
+        tables, cands, skipped = _exhibit_tables(html)
         job.exhibits_tried.append({"type": doc["type"], "url": doc["url"], "tables": len(tables),
                                    "candidates": len(cands)})
         if len(cands) >= 2 or (cands and doc is docs[-1]):
             job.tables, job.candidates, job.skipped = tables, cands, skipped
-            doc_dates = {d for t in cands for c in t.columns for d in parse_dates(" ".join(c))}
-            doc_dates |= {d for t in cands for d in parse_dates(" ".join(t.heading))}
-            job.ctx = FilingContext(ticker=ticker, cik=cik, company=company, accession=accession,
-                                    accepted_at=parse_accepted(eightk["acceptanceDateTime"]), url=doc["url"],
-                                    exhibit=doc["type"].upper(), calendar=calendar, doc_dates=doc_dates)
+            job.ctx = _context_for(ticker, cik, company, eightk, doc, cands, calendar)
             plan_requests(job, effort=effort)
-            return job
-    job.error = "no exhibit with candidate financial tables"
+    if job.ctx is None:
+        job.error = "no exhibit with candidate financial tables"
     return job
 
 
 def run_model(jobs: list[FilingJob], mapper: SparkMapper, concurrency: int = 8) -> None:
-    work = [(job, req, idx) for job in jobs for req, idx in job.requests]
+    work = [(part, req, idx) for job in jobs for part in job.parts() for req, idx in part.requests]
 
     def one(item: tuple[FilingJob, dict, list[int]]) -> tuple[FilingJob, list[int], MapOutcome]:
-        job, req, idx = item
-        return job, idx, mapper.map(req, label=f"{job.ticker} {job.eightk['accessionNumber']} tables {idx}")
+        part, req, idx = item
+        exhibit = f" {part.ctx.exhibit}" if part.ctx is not None and part.ctx.exhibit != "EX-99.1" else ""
+        return part, idx, mapper.map(req, label=f"{part.ticker} {part.eightk['accessionNumber']}{exhibit} tables {idx}")
 
     with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool:
-        for job, idx, out in pool.map(one, work):
-            job.outcomes.append({"tables": idx, "status": out.status, "cached": out.cached,
-                                 "cost_usd": round(out.cost_usd, 6), "usage": out.usage,
-                                 "latency_s": round(out.latency_s, 1), "problem": out.problem,
-                                 "request_hash": out.request_hash})
+        for part, idx, out in pool.map(one, work):
+            part.outcomes.append({"tables": idx, "status": out.status, "cached": out.cached,
+                                  "cost_usd": round(out.cost_usd, 6), "usage": out.usage,
+                                  "latency_s": round(out.latency_s, 1), "problem": out.problem,
+                                  "request_hash": out.request_hash})
             if out.parsed is not None:
                 for tm in out.parsed.tables:
-                    if tm.table in idx and tm.table not in job._maps:
-                        job._maps[tm.table] = tm
+                    if tm.table in idx and tm.table not in part._maps:
+                        part._maps[tm.table] = tm
 
 
 def decide_job(job: FilingJob) -> None:
+    """Code's decision on every part of the filing; facts of all exhibits are deduped together, so two exhibits
+    that disagree about one figure drop it (ambiguity never becomes evidence)."""
     if job.ctx is None:
         return
     facts: list[Fact] = []
-    for t in job.candidates:
-        tm = job._maps.get(t.index)
-        if tm is None:
+    for part in job.parts():
+        if part.ctx is None:
             continue
-        f, r = decide_table(t, tm, job.ctx)
-        facts += f
-        job.rejections += r
+        for t in part.candidates:
+            tf, tr = transposed_facts(t, part.ctx)  # code-only layout; independent of the model's map
+            facts += tf
+            r = list(tr)
+            tm = part._maps.get(t.index)
+            if tm is not None:
+                f, rr = decide_table(t, tm, part.ctx)
+                facts += f
+                r += rr
+            job.rejections += [dict(x, exhibit=part.ctx.exhibit) if part is not job else x for x in r]
     job.facts, job.conflicts = dedupe(facts)
 
 
@@ -1503,7 +1645,8 @@ def write_job(job: FilingJob, out_dir: Path = PR_FACTS_DIR) -> Optional[Path]:
     folder = out_dir / job.ticker.upper()
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / f"{job.ctx.accession}.jsonl"
-    complete = all(o["status"] == "ok" for o in job.outcomes) and bool(job.outcomes)
+    outcomes = [o for part in job.parts() for o in part.outcomes]
+    complete = all(o["status"] == "ok" for o in outcomes) and bool(outcomes)
     if job.facts or complete:  # never overwrite earlier facts with an empty, failed run
         tmp = path.with_suffix(".jsonl.tmp")
         tmp.write_text("".join(f.model_dump_json() + "\n" for f in job.facts))
@@ -1511,9 +1654,13 @@ def write_job(job: FilingJob, out_dir: Path = PR_FACTS_DIR) -> Optional[Path]:
     report = {
         "ticker": job.ticker, "cik": job.cik, "accession": job.ctx.accession, "exhibit": job.ctx.exhibit,
         "url": job.ctx.url, "accepted_at": job.ctx.accepted_at.isoformat(),
-        "tenq": job.tenq["accessionNumber"] if job.tenq else None, "exhibits_tried": job.exhibits_tried,
+        "tenq": job.tenq["accessionNumber"] if job.tenq else None,
+        "paired_form": job.tenq.get("form") if job.tenq else None, "exhibits_tried": job.exhibits_tried,
         "tables": len(job.tables), "candidates": [t.index for t in job.candidates], "skipped": job.skipped,
-        "model_calls": job.outcomes, "facts": len(job.facts),
+        "secondary": [{"exhibit": p.ctx.exhibit, "url": p.ctx.url, "tables": len(p.tables),
+                       "candidates": [t.index for t in p.candidates], "skipped": p.skipped}
+                      for p in job.secondary if p.ctx is not None],
+        "model_calls": outcomes, "facts": len(job.facts),
         "rejections": job.rejections, "rejection_counts": dict(Counter(r["reason"] for r in job.rejections)),
         "conflicts": job.conflicts,
     }
@@ -1564,6 +1711,7 @@ def _tolerance(fact: Fact) -> float:
 def _mismatch_reason(gaap: dict, fact: Fact, concept: str, x: dict, paired: Optional[str],
                      concepts: dict[str, tuple[tuple[str, ...], str]]) -> str:
     pv, xv = fact.value, x["val"]
+    names, unit = concepts[fact.metric]
     if xv and pv:
         ratio = pv / xv
         for k in (1e3, 1e6, 1e-3, 1e-6):
@@ -1573,9 +1721,16 @@ def _mismatch_reason(gaap: dict, fact: Fact, concept: str, x: dict, paired: Opti
             for n in (2, 3, 4, 5, 10, 20, 25, 50):
                 if math.isclose(ratio, 1 / n, rel_tol=0.02):
                     return f"stock split: XBRL {x['form']} filed {x.get('filed')} is pre-split ({n}-for-1)"
+                if math.isclose(ratio, n, rel_tol=0.02):
+                    return (f"stock split: the press release predates a {n}-for-1 split; XBRL {x['form']} filed "
+                            f"{x.get('filed')} is split-adjusted")
+    same = [f for f in _xbrl_candidates(gaap, concept, unit, fact) if abs(f["val"] - pv) <= _tolerance(fact)]
+    if same:  # another XBRL version of this very period agrees: the period was restated after one of them
+        s = min(same, key=lambda f: f.get("filed") or "")
+        return (f"restated: {s['form']} {s['accn']} (filed {s.get('filed')}) reports the press-release value; "
+                f"{x['form']} {x['accn']} (filed {x.get('filed')}) restates it")
     if math.isclose(pv, -xv, rel_tol=1e-9, abs_tol=_tolerance(fact)):
         return "sign"
-    names, unit = concepts[fact.metric]
     for other in names:
         if other != concept:
             for f in _xbrl_candidates(gaap, other, unit, fact):
@@ -1584,6 +1739,9 @@ def _mismatch_reason(gaap: dict, fact: Fact, concept: str, x: dict, paired: Opti
     if x["accn"] != paired and (x.get("filed") or "") < fact.accepted_at.date().isoformat():
         return (f"recast? the only XBRL value is from an older {x['form']} (filed {x.get('filed')}); the "
                 "press release may show a restated prior period")
+    if x["accn"] != paired and (x.get("filed") or "") > fact.accepted_at.date().isoformat():
+        return (f"recast? the only XBRL value is from a later {x['form']} (filed {x.get('filed')}), which may "
+                "restate this period")
     near = [f for f in gaap.get(concept, {}).get("units", {}).get(unit, [])
             if f.get("form") in _PERIODIC_FORMS and f.get("end") and abs(f["val"] - pv) <= _tolerance(fact)
             and abs((date.fromisoformat(f["end"]) - fact.period_end).days) <= 400]
@@ -1592,8 +1750,11 @@ def _mismatch_reason(gaap: dict, fact: Fact, concept: str, x: dict, paired: Opti
     return "value or definition differs"
 
 
+RESTATEMENT_REASONS = ("restated", "recast?", "stock split")
+
+
 def validate(jobs: list[FilingJob], companyfacts: dict[int, dict]) -> dict[str, Any]:
-    """Gate: press-release GAAP, company-level facts vs the paired 10-Q's XBRL facts for the same metric and
+    """Gate: press-release GAAP, company-level facts vs the paired 10-Q's (10-K's) XBRL facts for the same metric and
     period (current quarter, prior-year comparatives, year to date). Facts for periods that 10-Q does not
     cover (prior quarters, five-quarter trend tables) are compared with the latest-filed 10-Q/10-K fact
     and reported separately. Non-GAAP and segment facts are never compared (companyfacts has neither)."""
@@ -1637,12 +1798,16 @@ def validate(jobs: list[FilingJob], companyfacts: dict[int, dict]) -> dict[str, 
                     "period": f"{f.period_start}..{f.period_end}", "press_release": f.value, "locator": f.locator,
                     "xbrl": x["val"], "concept": concept, "xbrl_accession": x["accn"],
                     "reason": _mismatch_reason(gaap, f, concept, x, paired, concepts)})
+    for m in mismatches:  # restatements and recasts: the release was right when published
+        m["restatement"] = m["reason"].startswith(RESTATEMENT_REASONS)
     for rec in per.values():
         rec["agreement"] = rec["matched"] / rec["compared"] if rec["compared"] else None
         rec["other_agreement"] = rec["other_matched"] / rec["other_compared"] if rec["other_compared"] else None
     tot = {k: sum(r[k] for r in per.values()) for k in ("compared", "matched", "other_compared", "other_matched")}
     tot["agreement"] = tot["matched"] / tot["compared"] if tot["compared"] else None
     tot["other_agreement"] = tot["other_matched"] / tot["other_compared"] if tot["other_compared"] else None
+    tot["mismatches_restatement"] = sum(m["restatement"] for m in mismatches)
+    tot["mismatches_unexplained"] = sum(not m["restatement"] for m in mismatches)
     return {"per_company": per, "overall": tot, "mismatches": mismatches}
 
 
@@ -1654,9 +1819,9 @@ def _pct(x: Optional[float]) -> str:
 
 
 def print_validation(report: dict[str, Any]) -> None:
-    print("\nValidation: press-release GAAP facts vs the paired 10-Q's XBRL (same metric and period). "
-          "'other' = periods that 10-Q lacks, vs the latest 10-Q/10-K.")
-    print(f"{'ticker':<7}{'8-Ks':>5}{'facts':>7}{'10-Q cmp':>9}{'match':>7}{'agree':>8}{'other cmp':>10}"
+    print("\nValidation: press-release GAAP facts vs the paired 10-Q's (Q4: 10-K's) XBRL (same metric and period). "
+          "'other' = periods that report lacks, vs the latest 10-Q/10-K.")
+    print(f"{'ticker':<7}{'8-Ks':>5}{'facts':>7}{'pair cmp':>9}{'match':>7}{'agree':>8}{'other cmp':>10}"
           f"{'match':>7}{'agree':>8}{'no XBRL':>8}{'nonGAAP':>8}{'segment':>8}")
     for t, r in report["per_company"].items():
         print(f"{t:<7}{r['filings']:>5}{r['facts']:>7}{r['compared']:>9}{r['matched']:>7}{_pct(r['agreement']):>8}"
@@ -1665,6 +1830,8 @@ def print_validation(report: dict[str, Any]) -> None:
     o = report["overall"]
     print(f"{'overall':<7}{'':>5}{'':>7}{o['compared']:>9}{o['matched']:>7}{_pct(o['agreement']):>8}"
           f"{o['other_compared']:>10}{o['other_matched']:>7}{_pct(o['other_agreement']):>8}")
+    print(f"mismatches: {o['mismatches_restatement']} restatements or recasts (the release was right when published), "
+          f"{o['mismatches_unexplained']} unexplained")
     for m in report["mismatches"]:
         print(f"  MISMATCH [{m['scope']}] {m['ticker']} {m['accession']} {m['metric']} {m['period']}: press release "
               f"{m['press_release']:,} ({m['locator']!r}) vs {m['concept']} {m['xbrl']:,} -> {m['reason']}")
@@ -1675,7 +1842,7 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
                                             "code decides).")
     p.add_argument("--tickers", nargs="+", default=list(DEFAULT_TICKERS),
                    help="tickers, space or comma separated (default: the 10 project companies)")
-    p.add_argument("--quarters", type=int, default=2, help="most recent quarters whose 10-Q is filed (default 2)")
+    p.add_argument("--quarters", type=int, default=2, help="most recent fiscal quarters whose 10-Q or 10-K is filed (default 2)")
     p.add_argument("--validate", action="store_true", help="compare GAAP facts with 10-Q XBRL facts")
     p.add_argument("--effort", choices=("minimal", "low"), default="minimal", help="reasoning.effort")
     p.add_argument("--budget-usd", type=float, default=1.0,
@@ -1683,6 +1850,8 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     p.add_argument("--max-sec-requests", type=int, default=120, help="cap on live SEC requests (default 120)")
     p.add_argument("--concurrency", type=int, default=6, help="model calls in flight (default 6)")
     p.add_argument("--offline", action="store_true", help="caches only: no SEC or Model API network calls")
+    p.add_argument("--no-secondary", action="store_true",
+                   help="map only the primary exhibit (skip further EX-99 exhibits such as a CFO commentary)")
     p.add_argument("--dry-run", action="store_true", help="parse and pick tables, print the plan; no model calls")
     args = p.parse_args(argv)
     args.tickers = [t.strip().upper() for raw in args.tickers for t in raw.split(",") if t.strip()]
@@ -1710,22 +1879,26 @@ def main(argv: Optional[list[str]] = None) -> int:
         calendar = FiscalCalendar(companyfacts[cik])
         pairs = earnings_pairs(filings, args.quarters)
         if not pairs:
-            print(f"{ticker}: no earnings 8-K paired with a filed 10-Q since {since}")
+            print(f"{ticker}: no earnings 8-K paired with a filed 10-Q or 10-K since {since}")
         for eightk, tenq in pairs:
-            jobs.append(prepare_job(ed, ticker, cik, company, eightk, tenq, calendar, effort=args.effort))
+            jobs.append(prepare_job(ed, ticker, cik, company, eightk, tenq, calendar, effort=args.effort,
+                                    secondary=not args.no_secondary))
 
     print(f"{'ticker':<7}{'8-K accession':<22}{'exhibit':<9}{'tables':>7}{'cands':>6}{'calls':>6}{'rows':>6}"
-          f"{'~chars':>8}  10-Q")
+          f"{'~chars':>8}  paired report")
     for job in jobs:
-        rows = sum(len(t.rows) for t in job.candidates)
-        chars = sum(len(r["input"]) for r, _ in job.requests)
-        print(f"{job.ticker:<7}{job.eightk['accessionNumber']:<22}{(job.ctx.exhibit if job.ctx else '-'):<9}"
-              f"{len(job.tables):>7}{len(job.candidates):>6}{len(job.requests):>6}{rows:>6}{chars:>8}  "
-              f"{job.tenq['accessionNumber'] if job.tenq else '-'}" + (f"  ERROR {job.error}" if job.error else ""))
+        for part in job.parts():
+            rows = sum(len(t.rows) for t in part.candidates)
+            chars = sum(len(r["input"]) for r, _ in part.requests)
+            print(f"{job.ticker:<7}{job.eightk['accessionNumber']:<22}{(part.ctx.exhibit if part.ctx else '-'):<9}"
+                  f"{len(part.tables):>7}{len(part.candidates):>6}{len(part.requests):>6}{rows:>6}{chars:>8}  "
+                  + (f"{job.tenq['form']} {job.tenq['accessionNumber']} ({job.tenq.get('reportDate')})"
+                     if job.tenq and part is job else "")
+                  + (f"  ERROR {job.error}" if job.error and part is job else ""))
     print(f"SEC: live requests {ed.live_requests}, cache hits {ed.cache_hits}")
     if args.dry_run:
         mapper = SparkMapper(effort=args.effort, budget_usd=args.budget_usd, offline=True)
-        reqs = [r for j in jobs for r, _ in j.requests]
+        reqs = [r for j in jobs for p in j.parts() for r, _ in p.requests]
         todo = [r for r in reqs if not mapper.cached(r)]
         est = sum(SparkMapper.estimate_usd(r) for r in todo)
         print(f"dry run: {len(reqs)} model calls planned, {len(reqs) - len(todo)} cached, ~${est:.3f} for the rest; "
@@ -1738,13 +1911,14 @@ def main(argv: Optional[list[str]] = None) -> int:
     for job in jobs:
         decide_job(job)
         path = write_job(job)
-        calls = Counter(o["status"] + ("(cached)" if o["cached"] else "") for o in job.outcomes)
+        outcomes = [o for p in job.parts() for o in p.outcomes]
+        calls = Counter(o["status"] + ("(cached)" if o["cached"] else "") for o in outcomes)
         rej = Counter(r["reason"] for r in job.rejections)
         print(f"{job.ticker:<6} {job.eightk['accessionNumber']}  facts {len(job.facts):>3}  "
               f"(GAAP {sum(f.basis == 'GAAP' for f in job.facts)}, non-GAAP {sum(f.basis == 'non-GAAP' for f in job.facts)}, "
               f"segment {sum(bool(f.segment) for f in job.facts)})  calls {dict(calls)}  rejected {dict(rej)}"
               + (f"  -> {path.relative_to(ROOT)}" if path else "") + (f"  ERROR {job.error}" if job.error else ""))
-        for o in job.outcomes:
+        for o in outcomes:
             if o["status"] != "ok":
                 print(f"    call for tables {o['tables']}: {o['status']} {o['problem'] or ''}")
     print(f"Spark: live calls {mapper.live_calls}, cached {mapper.cached_calls}, spend this run ${mapper.spent_run:.4f}, "
