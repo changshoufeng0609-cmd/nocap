@@ -196,9 +196,9 @@ class ClaimsResponse(BaseModel):
     claims: list[Claim] = Field(description="One claim per numeric fact stated in the document, in document order.")
 
 
-def build_json_schema() -> dict[str, Any]:
-    """ClaimsResponse as a plain JSON schema for text.format: $defs inlined, titles dropped."""
-    raw = ClaimsResponse.model_json_schema()
+def build_json_schema(model: type[BaseModel] = ClaimsResponse) -> dict[str, Any]:
+    """A pydantic model as a plain JSON schema for text.format: $defs inlined, titles dropped."""
+    raw = model.model_json_schema()
     defs = raw.pop("$defs", {})
 
     def clean(node: Any, in_properties: bool = False) -> Any:
@@ -520,10 +520,13 @@ def _norm_field(name: str, v: Any) -> Any:
         return None
     if name == "value":
         return round(float(v), 9)
+    if isinstance(v, list):
+        return tuple(v)
     return re.sub(r"\s+", " ", v).strip().casefold() if isinstance(v, str) else v
 
 
-def consistency(valid_runs: list[dict[str, Any]]) -> dict[str, Any]:
+def consistency(valid_runs: list[dict[str, Any]], typed_fields: tuple[str, ...] = TYPED_FIELDS,
+                text_fields: tuple[str, ...] = TEXT_FIELDS) -> dict[str, Any]:
     """Claims are identified across runs by (input number token their value points at, rank among the
     claims on that token), so 'GAAP and non-GAAP gross margins were both 75.0%' stays two claims."""
     if len(valid_runs) < 2:
@@ -551,7 +554,7 @@ def consistency(valid_runs: list[dict[str, Any]]) -> dict[str, Any]:
     def same(a: tuple[int, int], f: str) -> bool:
         return len({_norm_field(f, d[a][f]) for d in per_run}) == 1
 
-    identical = sum(all(same(a, f) for f in TYPED_FIELDS) for a in common)
+    identical = sum(all(same(a, f) for f in typed_fields) for a in common)
     return {
         "valid_runs": len(valid_runs),
         "claim_counts": [len(r["claims"]) for r in valid_runs],
@@ -564,7 +567,7 @@ def consistency(valid_runs: list[dict[str, Any]]) -> dict[str, Any]:
         "typed_fields_identical": identical,
         "typed_fields_identical_rate": identical / len(common) if common else None,
         "field_agreement": {f: (sum(same(a, f) for a in common) / len(common) if common else None)
-                            for f in TYPED_FIELDS + TEXT_FIELDS},
+                            for f in typed_fields + text_fields},
     }
 
 
@@ -794,7 +797,7 @@ def _refusal(resp: Any) -> Optional[str]:
     return None
 
 
-def validate_output(output_text: str) -> tuple[str, Optional[ClaimsResponse], Optional[str]]:
+def validate_output(output_text: str, model: type[BaseModel] = ClaimsResponse) -> tuple[str, Any, Optional[str]]:
     if not output_text.strip():
         return "empty_output", None, "the response has no output_text"
     try:
@@ -802,7 +805,7 @@ def validate_output(output_text: str) -> tuple[str, Optional[ClaimsResponse], Op
     except json.JSONDecodeError as e:
         return "invalid_json", None, f"{e.msg} (char {e.pos} of {len(output_text)})"
     try:
-        return "ok", ClaimsResponse.model_validate_json(output_text), None
+        return "ok", model.model_validate_json(output_text), None
     except ValidationError as e:
         errs = e.errors()
         detail = "; ".join(f"{'.'.join(str(x) for x in err['loc'])}: {err['type']}" for err in errs[:5])
