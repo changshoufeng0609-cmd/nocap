@@ -445,8 +445,12 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             return error_response("The evidence database isn't available on this server.", False)
         ctx = _extract.infer_context(text) if context is None else context
         spark_dirs = [d for d in (settings.spark_cache_dir, *settings.spark_read_dirs) if d is not None]
-        calls = (_extract.passages_to_call(text, ctx or "", cache_dirs=spark_dirs) if settings.use_caches
-                 else len(_extract.split_passages(text)))
+        try:
+            calls = (_extract.passages_to_call(text, ctx or "", cache_dirs=spark_dirs) if settings.use_caches
+                     else len(_extract.split_passages(text)))
+        except _extract.ExtractionError:
+            log.error("check %s rejected reason=model_configuration", tag)
+            return error_response(_stream.MSG_NO_MODEL, False)
         token: Optional[int] = None
         client = None
         if calls:

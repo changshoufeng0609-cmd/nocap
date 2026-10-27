@@ -47,6 +47,7 @@ from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, get_args
+from urllib.parse import urlsplit
 
 import openai
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -345,9 +346,30 @@ def make_backend(name: str = "meta", **changes: Any) -> Backend:
     changes = {k: v for k, v in changes.items() if v not in (None, "")}
     if name == "meta" and "model" in changes and "prices" not in changes:
         changes["prices"] = META_PRICES.get(changes["model"], PRICE_PER_M)
-    b = replace(BACKENDS[name], **changes)
+    try:
+        b = replace(BACKENDS[name], **changes)
+    except TypeError:
+        raise ExtractionError("unknown extraction backend setting") from None
     if b.structured not in STRUCTURED_MODES:
         raise ExtractionError(f"structured output mode {b.structured!r} is not one of {', '.join(STRUCTURED_MODES)}")
+    if b.effort is not None and b.effort not in b.effort_levels:
+        raise ExtractionError(f"reasoning effort must be one of {', '.join(b.effort_levels)} for {name}")
+    if b.max_output_tokens is not None and (type(b.max_output_tokens) is not int or b.max_output_tokens <= 0):
+        raise ExtractionError("RECEIPTS_EXTRACT_MAX_TOKENS must be a positive integer")
+    if (not isinstance(b.min_timeout_s, (int, float)) or not math.isfinite(b.min_timeout_s)
+            or b.min_timeout_s < 0 or ("min_timeout_s" in changes and b.min_timeout_s == 0)):
+        raise ExtractionError("RECEIPTS_EXTRACT_TIMEOUT_S must be a finite positive number")
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", b.api_key_env):
+        raise ExtractionError("RECEIPTS_EXTRACT_API_KEY_ENV must be an environment variable name, not a key")
+    if b.base_url:
+        try:
+            url = urlsplit(b.base_url)
+            valid_url = (url.scheme in ("https", "http") and bool(url.hostname) and not url.username
+                         and not url.password and not url.query and not url.fragment)
+        except ValueError:
+            valid_url = False
+        if not valid_url:
+            raise ExtractionError("extraction base URL must be an absolute HTTP(S) URL without credentials, query or fragment")
     try:
         _require_allowed(b.model, b)
     except ValueError as e:
@@ -407,9 +429,11 @@ def backend_tag(backend: Optional[Backend] = None) -> str:
 
 def _effort_for(b: Backend, effort: str) -> str:
     level = b.effort or effort
-    if b.protocol == "responses" or level in b.effort_levels:
+    if level in b.effort_levels:
         return level
-    return b.effort_levels[0]  # "minimal" exists only on Meta Model API; open weights start at "low"
+    if b.effort is None and level == EFFORT and b.protocol == "chat":
+        return b.effort_levels[0]  # inherited "minimal" is Meta-only; open weights start at "low"
+    raise ExtractionError(f"reasoning effort must be one of {', '.join(b.effort_levels)} for {b.name}")
 
 
 def build_request(passage: str, context: Optional[str], *, effort: str = EFFORT,
@@ -426,7 +450,7 @@ def build_request(passage: str, context: Optional[str], *, effort: str = EFFORT,
             "text": {"format": {"type": "json_schema", "name": SCHEMA_NAME,
                                 "description": "Typed numeric claims found in the passage.",
                                 "schema": SCHEMA, "strict": True}},
-            "reasoning": {"effort": b.effort or effort},
+            "reasoning": {"effort": _effort_for(b, effort)},
             "max_output_tokens": b.max_output_tokens or max_output_tokens,
             "store": False,  # nothing to chain; keeps drafts off the server (prefix caching still works)
         }
@@ -458,7 +482,7 @@ def request_key(request: dict[str, Any], backend: Optional[Backend] = None) -> s
     """The response-cache key of one call: request_hash() on Meta Model API (unchanged, so existing caches stay
     valid); elsewhere salted with the endpoint, so two servers answering to the same model name never share."""
     b = backend or active_backend()
-    if b.protocol == "responses":
+    if b.name == "meta" and b.protocol == "responses" and b.base_url.rstrip("/") == BASE_URL:
         return request_hash(request)
     return request_hash({"backend": b.name, "base_url": b.base_url, "request": request})
 
@@ -783,16 +807,29 @@ def _chat_result(resp: Any, structured_fallback: bool = False) -> _ChatResult:
                        structured_fallback=structured_fallback)
 
 
+def _unsupported_response_format(error: openai.BadRequestError) -> bool:
+    """Only downgrade when the server explicitly rejects the output-format feature, not arbitrary bad input."""
+    body = error.body if isinstance(error.body, dict) else {}
+    if isinstance(body.get("error"), dict):
+        body = body["error"]
+    param = str(body.get("param") or "").lower()
+    message = str(body.get("message") or "").lower()
+    identifies_format = param.startswith("response_format") or "response_format" in message
+    unsupported = any(word in message for word in ("not supported", "unsupported", "unknown parameter",
+                                                   "unrecognized", "not permitted", "not allowed"))
+    return identifies_format and unsupported
+
+
 def send_request(client: Any, request: dict[str, Any], backend: Backend, **kwargs: Any) -> Any:
     """One model call. Meta Model API: client.responses.create(**request), exactly as before. Chat backends: Chat
-    Completions; a 400 on a request carrying response_format is retried once without it (the schema is still in the
-    system message), since OpenAI-compatible servers differ in which response_format shapes they accept."""
+    Completions; an explicit unsupported response_format error is retried once without it (the schema remains in
+    the system message). Other 400s, including malformed schemas and context overflow, are not retried."""
     if backend.protocol == "responses":
         return client.responses.create(**request, **kwargs)
     try:
         return _chat_result(client.chat.completions.create(**request, **kwargs))
-    except openai.BadRequestError:
-        if "response_format" not in request:
+    except openai.BadRequestError as error:
+        if "response_format" not in request or not _unsupported_response_format(error):
             raise
         log.warning("%s rejected response_format; retrying once with the schema in the prompt only", backend.name)
         plain = {k: v for k, v in request.items() if k != "response_format"}
