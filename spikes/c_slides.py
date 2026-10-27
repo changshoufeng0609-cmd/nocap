@@ -287,10 +287,43 @@ def box_coverage(inner: tuple[int, int, int, int], outer: tuple[int, int, int, i
     return ix * iy / ((inner[2] - inner[0] + 1) * (inner[3] - inner[1] + 1))
 
 
+def merge_bar_instances(dets: list[Detection], size: tuple[int, int], max_w_frac: float = 0.15,
+                        min_n: int = 3) -> list[Detection]:
+    """SAM 3.1 is an instance segmenter. On stacked bars it returns every column as its own "bar chart"
+    (BofA slide 10: five ~146 px boxes; "chart" and "graph" matched nothing). Merge >= min_n narrow,
+    row-aligned boxes of one concept into a single chart region. Wide boxes are whole charts and stay apart."""
+    W = size[0]
+    out: list[Detection] = []
+    for key in sorted({(d.method, d.concept) for d in dets}):
+        group = [d for d in dets if (d.method, d.concept) == key]
+        narrow = sorted((d for d in group if d.box[2] - d.box[0] + 1 <= max_w_frac * W), key=lambda d: d.box[0])
+        rows: list[list[Detection]] = []
+        for d in narrow:
+            for row in rows:
+                top, bottom = min(r.box[1] for r in row), max(r.box[3] for r in row)
+                overlap = min(bottom, d.box[3]) - max(top, d.box[1])
+                if overlap >= 0.5 * min(bottom - top, d.box[3] - d.box[1]):
+                    row.append(d)
+                    break
+            else:
+                rows.append([d])
+        merged_ids = set()
+        for row in rows:
+            if len(row) >= min_n:
+                box = (min(r.box[0] for r in row), min(r.box[1] for r in row),
+                       max(r.box[2] for r in row), max(r.box[3] for r in row))
+                conf = max((r.confidence for r in row if r.confidence is not None), default=None)
+                out.append(Detection(key[0], key[1], "+".join(r.object_id for r in row), box, conf))
+                merged_ids |= {id(r) for r in row}
+        out += [d for d in group if id(d) not in merged_ids]
+    return out
+
+
 def select_chart_regions(dets: list[Detection], size: tuple[int, int], max_crops: int) -> list[Detection]:
-    """Chart detections worth cropping: most confident (then largest) first, near-duplicates dropped."""
+    """Chart regions worth cropping: per-bar instances merged, most confident (then largest) first,
+    near-duplicates dropped."""
     min_area = 0.01 * size[0] * size[1]
-    charts = [d for d in dets if "chart" in d.concept.lower() and d.area() >= min_area]
+    charts = [d for d in merge_bar_instances(dets, size) if "chart" in d.concept.lower() and d.area() >= min_area]
     charts.sort(key=lambda d: (d.confidence if d.confidence is not None else 0.0, d.area()), reverse=True)
     picked: list[Detection] = []
     for d in charts:
@@ -307,6 +340,7 @@ class Crop:
     rect: tuple[int, int, int, int]  # half-open l, t, r, b in working pixels, padded
     path: Path
     data_url: str
+    upscale: float = 1.0             # small crops are enlarged so tiny axis text stays legible
 
 
 def make_crops(img: Image.Image, regions: list[Detection], name: str) -> list[Crop]:
@@ -317,12 +351,18 @@ def make_crops(img: Image.Image, regions: list[Detection], name: str) -> list[Cr
         # A SAM "bar chart" box can hug the plotted bars. On the live synthetic run it left out the title,
         # the tick labels, and the data label above the tallest bar. So pad more above (data labels) and
         # below (axis labels) than at the sides. The full slide is sent too, so titles are never lost.
-        px, top, bottom = max(12, round(0.06 * bw)), max(16, round(0.12 * bh)), max(16, round(0.10 * bh))
+        # Bottom padding also covers axis labels, which Tesla prints rotated (~65 px tall).
+        px, top, bottom = max(12, round(0.06 * bw)), max(16, round(0.12 * bh)), max(24, round(0.16 * bh))
         rect = (max(0, x1 - px), max(0, y1 - top), min(img.width, x2 + 1 + px), min(img.height, y2 + 1 + bottom))
         crop = img.crop(rect)
+        # A chart that fills a third of a 1365x1055 slide crops to ~450 px with tiny axis text.
+        # Enlarge small crops (long side to >= 1024 px, at most 3x) so the zoom adds legibility.
+        factor = min(3.0, 1024 / max(crop.size)) if max(crop.size) < 1024 else 1.0
+        if factor > 1.0:
+            crop = crop.resize((round(crop.width * factor), round(crop.height * factor)), Image.Resampling.LANCZOS)
         path = OUT_DIR / f"c_crop_{name}_{i}.png"
         crop.save(path)
-        crops.append(Crop(d, rect, path, png_data_url(crop)))
+        crops.append(Crop(d, rect, path, png_data_url(crop), round(factor, 3)))
     return crops
 
 
@@ -743,6 +783,8 @@ def grounding_to_detections(parsed: dict[str, Any], size: tuple[int, int]) -> li
     return dets
 
 
+VALUE_SOURCES = ("printed_label", "axis_estimate")
+
 CHART_SCHEMA = {
     "type": "object",
     "properties": {
@@ -754,8 +796,12 @@ CHART_SCHEMA = {
                 "period": {"type": "string", "description": "X-axis category exactly as printed, e.g. \"Q1'24\"."},
                 "value": {"type": "number", "description": "Plotted value as a plain number in the chart's unit."},
                 "unit": {"type": "string", "description": "Unit stated on the chart, e.g. '$M', '%', or ''."},
+                # Design rule: only printed labels can be verified exactly; axis estimates are approximate.
+                "source": {"type": "string", "enum": list(VALUE_SOURCES),
+                           "description": "printed_label if the number is printed on the chart; "
+                                          "axis_estimate if it was estimated from the axis scale."},
             },
-            "required": ["label", "period", "value", "unit"], "additionalProperties": False}},
+            "required": ["label", "period", "value", "unit", "source"], "additionalProperties": False}},
     },
     "required": ["chart_title", "series"], "additionalProperties": False,
 }
@@ -769,8 +815,11 @@ Return chart_title (the chart's title as printed, or "" if it has none) and seri
 - period: the x-axis category exactly as printed (for example "Q1'24", "1Q25", "FY2023").
 - value: the number as printed in the point's data label, written as a plain number with no thousands separators, currency symbols, or unit words. If a point has no data label, estimate its value from the axis scale.
 - unit: the unit stated on the chart (for example "$M", "$B", "%"), or "" if none is stated.
+- source: "printed_label" when the number is printed on the chart for that point; "axis_estimate" when you estimated it from the axis scale. Never mark an estimate as printed_label.
 
 Rules:
+- For stacked bars, report each printed segment and also the printed total of the stack, as its own series labeled "Total" plus the measure (for example "Total noninterest expense").
+- If the legend, the title, or a footnote marks a number as adjusted, non-GAAP, or FTE, say so in its label (for example "Efficiency ratio (adjusted, non-GAAP)"), so GAAP and non-GAAP values are never mixed.
 - Report each data point once, even if it appears in more than one image.
 - Do not include numbers that are not plotted in a chart, such as totals or growth rates quoted in the slide's text.
 - Leave out any data point you cannot read."""
@@ -938,6 +987,7 @@ def score_chart(series: list[dict[str, Any]], truth: dict[str, Any]) -> dict[str
         tol = max(0.01 * abs(p["value"]), half_step)
         rows.append({"period": p["period"], "truth": p["value"],
                      "read": None if best is None else best[2], "read_raw": None if best is None else best[0],
+                     "source": None if best is None else best[0].get("source"),
                      "abs_err": None if best is None else round(best[1], 6),
                      "rel_err_pct": None if best is None else round(100 * best[1] / abs(p["value"]), 3),
                      "within_tol": best is not None and best[1] <= tol + 1e-9,
@@ -947,7 +997,13 @@ def score_chart(series: list[dict[str, Any]], truth: dict[str, Any]) -> dict[str
     known = {p["canonical"] for p in truth["points"]}
     extras = [i for i in series if canonical_period(i.get("period", "")) not in known]
     acc = hits / len(rows) if rows else 0.0
-    return {"accuracy": round(acc, 4), "hits": hits, "total": len(rows),
+    by_source: dict[str, dict[str, int]] = {}
+    for r in rows:
+        b = by_source.setdefault(r["source"] or "not_read", {"total": 0, "within_tol": 0, "exact": 0})
+        b["total"] += 1
+        b["within_tol"] += r["within_tol"]
+        b["exact"] += r["exact"]
+    return {"accuracy": round(acc, 4), "hits": hits, "total": len(rows), "by_source": by_source,
             "exact": sum(r["exact"] for r in rows), "extra_items": len(extras), "extras": extras,
             "duplicates": sum(max(0, r["candidates"] - 1) for r in rows),
             "gate": ACCURACY_GATE, "passes_gate": acc >= ACCURACY_GATE, "rows": rows,
@@ -1117,17 +1173,19 @@ def run_pipeline(client: Any, img: Image.Image, *, name: str, source: dict[str, 
     print(f"  {len(series)} value(s), title {chart.get('chart_title', '')!r}  |  {c['latency_s']:.1f}s, "
           f"${c['cost_usd']:.4f}{' (cached)' if c['cached'] else ''}, usage {c['usage']}")
     for item in series:
-        print(f"    {item.get('label', '')!s:<24} {item.get('period', '')!s:<10} {item.get('value')!s:>12} {item.get('unit', '')}")
+        print(f"    {item.get('label', '')!s:<28} {item.get('period', '')!s:<10} {item.get('value')!s:>12} "
+              f"{item.get('unit', '')!s:<6} {item.get('source', '')}")
     chart_path = OUT_DIR / f"c_chart_{name}.json"
     chart_path.write_text(json.dumps({
         "source": source, "model": SPARK_MODEL, "effort": effort, "created_at": _now(),
+        "rule": "only series items with source=printed_label can be verified exactly; axis_estimate is approximate",
         "regions_sent": [{"method": x.det.method, "concept": x.det.concept, "object_id": x.det.object_id,
                           "crop_half_open": list(x.rect), "file": x.path.name} for x in crops],
         "chart": chart}, indent=2))
     run["chart"] = {k: c[k] for k in ("status", "latency_s", "usage", "cost_usd", "cached", "effort", "response_id")}
     run["chart"]["n_values"] = len(series)
     run["chart"]["crops"] = [{"file": x.path.name, "rect_half_open": list(x.rect), "concept": x.det.concept,
-                              "method": x.det.method} for x in crops]
+                              "method": x.det.method, "upscale": x.upscale} for x in crops]
 
     if truth is not None:
         run["accuracy"] = score_chart(series, truth)
@@ -1165,6 +1223,27 @@ def run_pipeline(client: Any, img: Image.Image, *, name: str, source: dict[str, 
     return run
 
 
+def run_sam_only(client: Any, img: Image.Image, *, name: str, concepts: list[str], cache: Cache, ledger: bool) -> None:
+    """SAM 3.1 boxes and overlay only ($0.0025 per concept), for tuning noun phrases cheaply."""
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    data_url = png_data_url(img)
+    dets: list[Detection] = []
+    total = 0.0
+    for concept in concepts:
+        r = sam_segment(client, concept, data_url, cache=cache, ledger=ledger, run_name=name)
+        records, diags = parse_sam_output(r["output_text"])
+        dets += [Detection("sam-3.1", concept, rec.object_id, (rec.x1, rec.y1, rec.x2, rec.y2), rec.confidence, rec.mask)
+                 for rec in records]
+        total += r["cost_usd"]
+        print(f"  '{concept}': {len(records)} match(es) "
+              + ", ".join(f"{list((x.x1, x.y1, x.x2, x.y2))} c={x.confidence}" for x in records)
+              + f"  |  {r['latency_s']:.1f}s, ${r['cost_usd']:.4f}{' (cached)' if r['cached'] else ''}"
+              + (f"  diagnostics: {diags}" if diags else ""))
+    out = render_overlay(img, dets, OUT_DIR / f"c_overlay_{name}.png", title=f"Spike C · {name} · SAM only",
+                         notes=[f"Masks: {_mask_status(dets)}.", f"Concepts: {', '.join(concepts)}."], crop_rects=[])
+    print(f"SAM-only cost ${total:.4f}; overlay {out}")
+
+
 def print_summary(run: dict[str, Any]) -> None:
     print(f"\n== Spike C summary: {run['name']} ==")
     for s in run["sam"]:
@@ -1186,6 +1265,8 @@ def print_summary(run: dict[str, Any]) -> None:
         print(f"Chart reading accuracy: {a['hits']}/{a['total']} = {a['accuracy']:.0%} within ±1% or rounding; "
               f"exact {a['exact']}/{a['total']}; extra items {a['extra_items']}; "
               f"gate {int(ACCURACY_GATE * 100)}% -> {'PASS' if a['passes_gate'] else 'FAIL'}")
+        print("   by source: " + "; ".join(f"{s} {b['exact']}/{b['total']} exact, {b['within_tol']}/{b['total']} within ±1%"
+                                         for s, b in a["by_source"].items()))
         for r in a["rows"]:
             flag = "ok " if r["within_tol"] else "MISS"
             print(f"   {flag} {r['period']:<6} truth {r['truth']:>9,.1f}  read {r['read'] if r['read'] is not None else '-':>10}"
@@ -1380,6 +1461,15 @@ def run_selftest() -> int:
     check("unit scales", (unit_scale("$M"), unit_scale("USD billions"), unit_scale("%"), unit_scale("$ in millions"))
           == (1e6, 1e9, None, 1e6))
     check("0-1000 grid to pixels, clamped at 1001", (to_pixels(500, 1600), to_pixels(1001, 1600), to_pixels(0, 900)) == (800, 1599, 0))
+    columns = [Detection("sam-3.1", "bar chart", str(i), b, 0.61) for i, b in enumerate(
+        [(1113, 184, 1259, 352), (882, 199, 1027, 352), (420, 208, 564, 352), (188, 210, 334, 353), (651, 199, 796, 352)])]
+    charts3 = [Detection("sam-3.1", "bar chart", str(i), b, 0.6) for i, b in enumerate(
+        [(519, 339, 867, 622), (110, 326, 446, 637), (943, 326, 1299, 637)])]
+    merged = merge_bar_instances(columns, (1365, 1055))
+    check("five per-column SAM boxes (live BofA slide 10) merge into one chart region",
+          len(merged) == 1 and merged[0].box == (188, 184, 1259, 353), f"{[m.box for m in merged]}")
+    check("three wide side-by-side charts (live Tesla slide 23) stay separate",
+          len(merge_bar_instances(charts3, (1365, 1055))) == 3)
     check("chart schema fits the strict subset", not _strict_ok(CHART_SCHEMA), "; ".join(_strict_ok(CHART_SCHEMA)))
     check("grounding schema fits the strict subset", not _strict_ok(GROUNDING_SCHEMA), "; ".join(_strict_ok(GROUNDING_SCHEMA)))
     check("missing or blank MODEL_API_KEY is detected",
@@ -1398,10 +1488,13 @@ def run_selftest() -> int:
     sam_line = (f"<0f>0<|box;x1={x1};y1={y1};x2={x2};y2={y2};w={W};h={H};c=0.93|>"
                 f"<|mask;x=0;y=0;c=0.93;data={y2 - y1 + 1},{x2 - x1 + 1},!...|>\n")
     wrong = dict(zip([p for p, _ in SYNTH_POINTS], [v for _, v in SYNTH_POINTS]))
-    series = [{"label": "Revenue", "period": p, "value": v, "unit": "$M"} for p, v in wrong.items()]
+    series = [{"label": "Revenue", "period": p, "value": v, "unit": "$M", "source": "printed_label"}
+              for p, v in wrong.items()]
     series[4]["period"] = "1Q25"                               # alternate period format, still a hit
-    series[6]["value"] = round(series[6]["value"] * 1.03, 1)   # 3% off, a miss
-    series.append({"label": "Revenue", "period": "FY2025", "value": 5241.0, "unit": "$M"})  # not plotted: an extra
+    series[6]["value"] = round(series[6]["value"] * 1.03, 1)   # 3% off, a miss...
+    series[6]["source"] = "axis_estimate"                      # ...that the model says it estimated
+    series.append({"label": "Revenue", "period": "FY2025", "value": 5241.0, "unit": "$M",
+                   "source": "printed_label"})                 # not plotted: an extra
     chart_payload = {"chart_title": "Example Corp revenue ($M)", "series": series}
     api = _MockMetaAPI(
         sam={"bar chart": [_mock_sam_sse([], "resp_sam_err", error_code="server_shutting_down"),
@@ -1439,8 +1532,10 @@ def run_selftest() -> int:
     check("Spark got the full image plus the SAM crop", len(images_sent) == 2 and len(run["chart"]["crops"]) == 1)
     crop = Image.open(OUT_DIR / run["chart"]["crops"][0]["file"])
     l, t, r_, b_ = run["chart"]["crops"][0]["rect_half_open"]
-    check("crop = SAM box plus padding, inside the image", crop.size == (r_ - l, b_ - t) and l <= x1 and t <= y1
-          and r_ > x2 and b_ > y2 and r_ <= W and b_ <= H, f"{crop.size}")
+    f = run["chart"]["crops"][0]["upscale"]
+    check("crop = SAM box plus padding, inside the image, enlarged to a 1024 px long side",
+          crop.size == (round((r_ - l) * f), round((b_ - t) * f)) and max(crop.size) == 1024 and l <= x1 and t <= y1
+          and r_ > x2 and b_ > y2 and r_ <= W and b_ <= H, f"{crop.size}, upscale {f}")
     expected_spark = (3120 * 1.25 + 690 * 4.25) / 1e6
     check("Spark cost from usage at Standard prices", abs(run["chart"]["cost_usd"] - expected_spark) < 1e-12,
           f"${run['chart']['cost_usd']:.7f}")
@@ -1448,14 +1543,20 @@ def run_selftest() -> int:
     check("accuracy scorer: 7/8 within tolerance (one 3% miss), 1 extra item, alternate period format matched",
           (a["hits"], a["total"], a["extra_items"], a["passes_gate"]) == (7, 8, 1, True) and a["rows"][4]["within_tol"]
           and not a["rows"][6]["within_tol"])
+    check("accuracy split by source: printed_label 7/7 exact, axis_estimate 0/1",
+          a["by_source"] == {"printed_label": {"total": 7, "within_tol": 7, "exact": 7},
+                             "axis_estimate": {"total": 1, "within_tol": 0, "exact": 0}}, json.dumps(a["by_source"]))
     check("box check: the mocked SAM box boxed the known chart", run["box_check"]["best"]["sam-3.1"]["boxed_chart"])
     check("grounding fallback not called when SAM found a chart", run["grounding"] is None and len(spark_reqs) == 1)
     ov = Image.open(run["outputs"]["overlay"])
     check("overlay PNG written: full slide width, header and footer added", ov.format == "PNG" and ov.size[0] == W and ov.size[1] > H,
           f"{run['outputs']['overlay']} {ov.size}")
     saved = json.loads(Path(run["outputs"]["chart_json"]).read_text())
-    check("chart JSON saved with series[] of {label, period, value, unit}",
-          all(set(i) == {"label", "period", "value", "unit"} for i in saved["chart"]["series"]))
+    check("chart JSON saved with series[] of {label, period, value, unit, source}",
+          all(set(i) == {"label", "period", "value", "unit", "source"} for i in saved["chart"]["series"]))
+    item_schema = sb["text"]["format"]["schema"]["properties"]["series"]["items"]
+    check("schema sent: source is a required enum of printed_label | axis_estimate",
+          "source" in item_schema["required"] and item_schema["properties"]["source"]["enum"] == ["printed_label", "axis_estimate"])
 
     print("\n[4] pipeline: SAM finds nothing, so Muse Spark grounding boxes are used (mocked)")
     norm = [round(x1 * 1000 / W), round(y1 * 1000 / H), round(x2 * 1000 / W), round(y2 * 1000 / H)]
@@ -1529,6 +1630,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-output-tokens", type=int, default=12000, help="Muse Spark cap, reasoning included (default 12000)")
     p.add_argument("--no-labels", action="store_true", help="with --synthetic: no data labels, so values come off the axis")
     p.add_argument("--no-cache", action="store_true", help="don't read cached model results (still writes them)")
+    p.add_argument("--sam-only", action="store_true", help="only SAM 3.1 boxes and the overlay; no Muse Spark calls")
     return p
 
 
@@ -1553,6 +1655,10 @@ def main(argv: list[str] | None = None) -> int:
             name = args.name or stem
         name = re.sub(r"[^A-Za-z0-9._-]+", "_", name)
         client = make_client()  # exits with a clear message if MODEL_API_KEY is missing
+        if args.sam_only:
+            run_sam_only(client, img, name=name, concepts=args.concepts,
+                         cache=Cache(CACHE_DIR, read=not args.no_cache), ledger=True)
+            return 0
         run_pipeline(client, img, name=name, source=source, concepts=args.concepts, grounding=args.grounding,
                      effort=args.effort, detail=args.detail, max_crops=args.max_crops,
                      max_output_tokens=args.max_output_tokens, cache=Cache(CACHE_DIR, read=not args.no_cache),
