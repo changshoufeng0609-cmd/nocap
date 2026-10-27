@@ -15,6 +15,17 @@ in 3 of 3 runs, 8.9-11 s wall time, about $0.04 per run.
 
     from receipts.extract import extract
     claims = extract(draft_text, context="NVIDIA Q2 FY2027")
+
+Backends (docs/open-weights.md). RECEIPTS_EXTRACT_BACKEND picks where the model runs; unset, it is Meta Model API
+with muse-spark-1.3 and the request bytes above, so every cached response stays valid:
+  * meta       Meta Model API, Responses API, strict text.format schema (muse-wonder-1.0 via RECEIPTS_EXTRACT_MODEL);
+  * fireworks  Muse Spark Open on Fireworks serverless, Chat Completions, JSON mode plus the schema in the prompt;
+  * baseten    Muse Spark Open on Baseten Model APIs, Chat Completions, schema in the prompt (no JSON mode there);
+  * modal      Muse Glimmer on your own Modal deployment (deploy/modal_glimmer.py), vLLM, response_format
+               json_schema. Private mode: the draft goes only to a server in your workspace.
+RECEIPTS_EXTRACT_BASE_URL, _MODEL, _API_KEY_ENV (the NAME of the variable holding the key), _STRUCTURED, _EFFORT,
+_MAX_TOKENS and _TIMEOUT_S override a preset. A non-default backend never falls back to Meta: a missing key or URL
+is an ExtractionError, and its responses are cached under keys salted with the endpoint.
 """
 from __future__ import annotations
 
@@ -31,11 +42,11 @@ import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from concurrent.futures import TimeoutError as FuturesTimeout
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import Any, Callable, Iterator, Optional, Sequence, get_args
+from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, get_args
 
 import openai
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -50,13 +61,16 @@ CACHE_DIR = REPO_ROOT / "data" / "cache" / "spark"
 
 BASE_URL = "https://api.meta.ai/v1"
 MODEL = "muse-spark-1.3"
-ALLOWED_MODELS = frozenset({MODEL})  # Standard-mode IDs only; never "-contributor" for user drafts
+# Standard-mode IDs only; never "-contributor" for user drafts (Meta may train on Contributor-mode traffic)
+ALLOWED_MODELS = frozenset({MODEL, "muse-spark-1.2", "muse-spark-1.1", "muse-wonder-1.0"})
 EFFORT = "minimal"
 CONCURRENCY = 10
 MAX_OUTPUT_TOKENS = 8000             # per passage; reasoning and JSON share the budget
 TIMEOUT_S = 120.0                    # per HTTP attempt
 SCHEMA_NAME = "receipts_claims"
 PRICE_PER_M = {"input": 1.25, "cached_input": 0.15, "output": 4.25}  # USD, Standard mode, 2026-10-27
+META_PRICES = {m: PRICE_PER_M for m in ("muse-spark-1.3", "muse-spark-1.2", "muse-spark-1.1")} | {
+    "muse-wonder-1.0": {"input": 4.00, "cached_input": 0.20, "output": 20.00}}
 RETRYABLE_STATUS = frozenset({429, 500, 502, 503})  # 504 is not retried: it would time out again
 MAX_ATTEMPTS = 4
 MAX_RETRY_SLEEP_S = 60.0
@@ -251,30 +265,202 @@ Example input: {json.dumps(format_input(_EX_PASSAGE, _EX_CONTEXT))}
 Example claims (other fields omitted): {json.dumps(_EX_CLAIMS)}"""
 
 
-def _require_allowed(model: str) -> str:
-    if model not in ALLOWED_MODELS:
+# Chat Completions backends get the same instructions plus the schema itself: with JSON mode, or no enforcement at
+# all, the prompt is the only place the model sees the field descriptions, and vLLM's guided decoding enforces the
+# grammar without showing the descriptions to the model either.
+CHAT_INSTRUCTIONS = (f"{INSTRUCTIONS}\n\nReply with one JSON object and nothing else: no prose and no code fences. It "
+                     f"must validate against this JSON schema, in which every property is required and every enum is "
+                     f"closed:\n{json.dumps(SCHEMA, ensure_ascii=False, separators=(',', ':'))}")
+
+
+def _require_allowed(model: str, backend: Optional["Backend"] = None) -> str:
+    """Meta Model API takes Standard-mode IDs only. No backend takes a Contributor-mode ID."""
+    if "-contributor" in model or ((backend is None or backend.protocol == "responses") and model not in ALLOWED_MODELS):
         raise ValueError(f"model {model!r} is not on the Standard-mode allowlist {sorted(ALLOWED_MODELS)}")
     return model
 
 
+# ---------------------------------------------------------------------------
+# Backends: Meta Model API by default, or an open-weight model behind an OpenAI-compatible endpoint
+# ---------------------------------------------------------------------------
+STRUCTURED_MODES = ("json_schema", "json_object", "prompt")
+OPEN_EFFORTS = ("low", "medium", "high", "xhigh")  # Muse Spark Open and Muse Glimmer: no "minimal" and no "none"
+_ZERO_PRICES = {"input": 0.0, "cached_input": 0.0, "output": 0.0}  # compute-billed per GPU-second, not per token
+_SPARK_OPEN_PRICES = {"input": 1.25, "cached_input": 0.15, "output": 4.25}  # Fireworks and Baseten, 2026-10-27
+
+
+@dataclass(frozen=True)
+class Backend:
+    """Where extraction runs. Every backend speaks the OpenAI wire format, so a switch is base_url plus model.
+
+    api_key_env is the NAME of the environment variable that holds the key; no key is ever stored here."""
+
+    name: str                                  # meta | fireworks | baseten | modal
+    base_url: str
+    model: str
+    api_key_env: str
+    base_url_env: str = ""                     # where a per-deployment URL comes from (modal: RECEIPTS_MODAL_BASE_URL)
+    protocol: str = "chat"                     # "responses" (Meta Model API) or "chat" (Chat Completions)
+    structured: str = "json_schema"            # chat: json_schema | json_object | prompt (the schema is always in the prompt)
+    effort_param: str = "reasoning_effort"     # chat: reasoning_effort | chat_template_kwargs | none
+    effort_levels: tuple[str, ...] = OPEN_EFFORTS
+    effort: Optional[str] = None               # replaces the caller's effort (RECEIPTS_EXTRACT_EFFORT)
+    max_output_tokens: Optional[int] = None    # replaces the caller's limit: open models reason for longer
+    min_timeout_s: float = 0.0                 # per-attempt floor: a 30B model on one GPU needs more than 30 s
+    prices: Mapping[str, float] = field(default_factory=lambda: dict(PRICE_PER_M))  # USD per 1M tokens
+    open_weights: bool = False
+    self_hosted: bool = False                  # the server runs in your own workspace: private mode
+    hosting: str = ""                          # one line for reports
+
+
+BACKENDS: dict[str, Backend] = {
+    "meta": Backend("meta", BASE_URL, MODEL, "MODEL_API_KEY", protocol="responses", effort_param="reasoning",
+                    effort_levels=("minimal", "low", "medium", "high", "xhigh", "max"), prices=PRICE_PER_M,
+                    hosting="Meta Model API"),
+    # dev.meta.ai/docs/muse-spark-open/deploy#fireworks-ai documents JSON mode; Fireworks' json_schema mode turns
+    # reasoning output off, so JSON mode plus the schema in the prompt is the documented path
+    "fireworks": Backend("fireworks", "https://api.fireworks.ai/inference/v1",
+                         "accounts/fireworks/models/muse-spark-open", "FIREWORKS_API_KEY", structured="json_object",
+                         max_output_tokens=12000, min_timeout_s=60.0, prices=_SPARK_OPEN_PRICES, open_weights=True,
+                         hosting="Fireworks serverless (partner inference)"),
+    # docs.baseten.co Model APIs: "All except Muse Spark Open support structured outputs and JSON mode". The hackathon
+    # model slug is muse-spark-open-1026, not the docs' muse-spark-open (Participant Guide).
+    "baseten": Backend("baseten", "https://inference.baseten.co/v1", "meta-models/muse-spark-open-1026",
+                       "BASETEN_API_KEY", structured="prompt", max_output_tokens=12000, min_timeout_s=60.0,
+                       prices=_SPARK_OPEN_PRICES, open_weights=True, hosting="Baseten Model APIs (partner inference)"),
+    # deploy/modal_glimmer.py serves Muse Glimmer under the name "muse-glimmer"; `modal deploy` prints the URL, which
+    # goes in RECEIPTS_MODAL_BASE_URL. The key is a Modal Proxy Token: MODAL_PROXY_TOKEN_ID + "." + _SECRET.
+    "modal": Backend("modal", "", "muse-glimmer", "MODAL_PROXY_TOKEN", base_url_env="RECEIPTS_MODAL_BASE_URL",
+                     effort_param="chat_template_kwargs", max_output_tokens=12000, min_timeout_s=180.0,
+                     prices=_ZERO_PRICES, open_weights=True, self_hosted=True,
+                     hosting="Modal, your own workspace (vLLM, one H100)"),
+}
+
+
+def make_backend(name: str = "meta", **changes: Any) -> Backend:
+    """A preset with some fields replaced, e.g. make_backend("meta", model="muse-wonder-1.0"). Empty values are
+    ignored. Raises ExtractionError for an unknown name or setting."""
+    if name not in BACKENDS:
+        raise ExtractionError(f"unknown extraction backend {name!r}: choose one of {', '.join(BACKENDS)}")
+    changes = {k: v for k, v in changes.items() if v not in (None, "")}
+    if name == "meta" and "model" in changes and "prices" not in changes:
+        changes["prices"] = META_PRICES.get(changes["model"], PRICE_PER_M)
+    b = replace(BACKENDS[name], **changes)
+    if b.structured not in STRUCTURED_MODES:
+        raise ExtractionError(f"structured output mode {b.structured!r} is not one of {', '.join(STRUCTURED_MODES)}")
+    try:
+        _require_allowed(b.model, b)
+    except ValueError as e:
+        raise ExtractionError(str(e)) from None
+    return b
+
+
+def settings_env() -> dict[str, str]:
+    """os.environ over the RECEIPTS_* lines of .env (settings, never keys), without changing os.environ."""
+    values: dict[str, str] = {}
+    with contextlib.suppress(ImportError, OSError, ValueError):
+        from dotenv import dotenv_values
+
+        values = {k: v for k, v in dotenv_values(DOTENV_PATH).items() if k.startswith("RECEIPTS_") and v}
+    return {**values, **os.environ}
+
+
+def resolve_backend(env: Optional[Mapping[str, str]] = None) -> Backend:
+    """The backend RECEIPTS_EXTRACT_* select (env defaults to settings_env()). An unknown backend or a bad setting is
+    an ExtractionError: a run meant to be private must never fall back to Meta Model API."""
+    env = settings_env() if env is None else env
+
+    def get(key: str) -> str:
+        return (env.get(f"RECEIPTS_EXTRACT_{key}") or "").strip()
+
+    name = (get("BACKEND") or "meta").lower()
+    base_url = get("BASE_URL")  # overrides any preset; otherwise a per-deployment URL comes from its own variable
+    if not base_url and name in BACKENDS and BACKENDS[name].base_url_env:
+        base_url = (env.get(BACKENDS[name].base_url_env) or "").strip()
+    changes: dict[str, Any] = {"model": get("MODEL"), "api_key_env": get("API_KEY_ENV"),
+                               "base_url": base_url.rstrip("/"), "structured": get("STRUCTURED"),
+                               "effort": get("EFFORT")}
+    for key, field_name, cast in (("MAX_TOKENS", "max_output_tokens", int), ("TIMEOUT_S", "min_timeout_s", float)):
+        if get(key):
+            try:
+                changes[field_name] = cast(get(key))
+            except ValueError:
+                raise ExtractionError(f"RECEIPTS_EXTRACT_{key}={get(key)!r} is not a number") from None
+    return make_backend(name, **changes)
+
+
+def active_backend() -> Backend:
+    """The backend this process extracts with: RECEIPTS_EXTRACT_* from the environment or .env, else Meta Model API."""
+    return resolve_backend()
+
+
+def backend_tag(backend: Optional[Backend] = None) -> str:
+    """'' on the default backend; otherwise a label, so that recorded checks and eval results of one backend or
+    model are never replayed for another (receipts.stream, eval/eval.py)."""
+    b = backend or active_backend()
+
+    def key(x: Backend) -> tuple[Any, ...]:
+        return x.name, x.model, x.base_url, x.protocol, x.structured, x.effort, x.max_output_tokens
+
+    return "" if key(b) == key(BACKENDS["meta"]) else "|".join(str(v or "") for v in key(b))
+
+
+def _effort_for(b: Backend, effort: str) -> str:
+    level = b.effort or effort
+    if b.protocol == "responses" or level in b.effort_levels:
+        return level
+    return b.effort_levels[0]  # "minimal" exists only on Meta Model API; open weights start at "low"
+
+
 def build_request(passage: str, context: Optional[str], *, effort: str = EFFORT,
-                  max_output_tokens: int = MAX_OUTPUT_TOKENS) -> dict[str, Any]:
-    return {
-        "model": _require_allowed(MODEL),
-        "instructions": INSTRUCTIONS,
-        "input": format_input(passage, context),
-        "text": {"format": {"type": "json_schema", "name": SCHEMA_NAME,
-                            "description": "Typed numeric claims found in the passage.",
-                            "schema": SCHEMA, "strict": True}},
-        "reasoning": {"effort": effort},
-        "max_output_tokens": max_output_tokens,
-        "store": False,  # nothing to chain; keeps drafts off the server (prefix caching still works)
+                  max_output_tokens: int = MAX_OUTPUT_TOKENS, backend: Optional[Backend] = None) -> dict[str, Any]:
+    """One passage call. On Meta Model API: the Spike B2 Responses request, unchanged byte for byte. Elsewhere: a Chat
+    Completions body with the same instructions and input, the schema in the system message, and response_format
+    where the backend supports it."""
+    b = backend or active_backend()
+    if b.protocol == "responses":
+        return {
+            "model": _require_allowed(b.model, b),
+            "instructions": INSTRUCTIONS,
+            "input": format_input(passage, context),
+            "text": {"format": {"type": "json_schema", "name": SCHEMA_NAME,
+                                "description": "Typed numeric claims found in the passage.",
+                                "schema": SCHEMA, "strict": True}},
+            "reasoning": {"effort": b.effort or effort},
+            "max_output_tokens": b.max_output_tokens or max_output_tokens,
+            "store": False,  # nothing to chain; keeps drafts off the server (prefix caching still works)
+        }
+    request: dict[str, Any] = {
+        "model": _require_allowed(b.model, b),
+        "messages": [{"role": "system", "content": CHAT_INSTRUCTIONS},
+                     {"role": "user", "content": format_input(passage, context)}],
+        "max_tokens": b.max_output_tokens or max_output_tokens,
     }
+    if b.structured == "json_schema":
+        request["response_format"] = {"type": "json_schema", "json_schema": {
+            "name": SCHEMA_NAME, "description": "Typed numeric claims found in the passage.", "schema": SCHEMA,
+            "strict": True}}
+    elif b.structured == "json_object":
+        request["response_format"] = {"type": "json_object"}
+    if b.effort_param == "reasoning_effort":
+        request["reasoning_effort"] = _effort_for(b, effort)
+    elif b.effort_param == "chat_template_kwargs":  # vLLM and SGLang pass it to Muse Glimmer's chat template
+        request["extra_body"] = {"chat_template_kwargs": {"reasoning_strength": _effort_for(b, effort)}}
+    return request
 
 
 def request_hash(request: dict[str, Any]) -> str:
     blob = json.dumps(request, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def request_key(request: dict[str, Any], backend: Optional[Backend] = None) -> str:
+    """The response-cache key of one call: request_hash() on Meta Model API (unchanged, so existing caches stay
+    valid); elsewhere salted with the endpoint, so two servers answering to the same model name never share."""
+    b = backend or active_backend()
+    if b.protocol == "responses":
+        return request_hash(request)
+    return request_hash({"backend": b.name, "base_url": b.base_url, "request": request})
 
 
 # ---------------------------------------------------------------------------
@@ -463,6 +649,12 @@ def _usage(resp: Any) -> Optional[dict[str, int]]:
     u = getattr(resp, "usage", None)
     if u is None:
         return None
+    if getattr(u, "input_tokens", None) is None and getattr(u, "prompt_tokens", None) is not None:  # Chat Completions
+        ptd, ctd = getattr(u, "prompt_tokens_details", None), getattr(u, "completion_tokens_details", None)
+        return {"input_tokens": int(u.prompt_tokens or 0),
+                "cached_tokens": int(getattr(ptd, "cached_tokens", 0) or 0),
+                "output_tokens": int(getattr(u, "completion_tokens", 0) or 0),
+                "reasoning_tokens": int(getattr(ctd, "reasoning_tokens", 0) or 0)}
     itd, otd = getattr(u, "input_tokens_details", None), getattr(u, "output_tokens_details", None)
     return {"input_tokens": int(u.input_tokens or 0),
             "cached_tokens": int(getattr(itd, "cached_tokens", 0) or 0),
@@ -470,12 +662,14 @@ def _usage(resp: Any) -> Optional[dict[str, int]]:
             "reasoning_tokens": int(getattr(otd, "reasoning_tokens", 0) or 0)}
 
 
-def cost_usd(usage: Optional[dict[str, int]]) -> float:
+def cost_usd(usage: Optional[dict[str, int]], prices: Optional[Mapping[str, float]] = None) -> float:
+    """USD for one call's usage at `prices` (USD per 1M tokens; default muse-spark-1.3 Standard mode)."""
     if not usage:
         return 0.0
+    p = PRICE_PER_M if prices is None else prices
     cached = min(usage["cached_tokens"], usage["input_tokens"])
-    return ((usage["input_tokens"] - cached) * PRICE_PER_M["input"] + cached * PRICE_PER_M["cached_input"]
-            + usage["output_tokens"] * PRICE_PER_M["output"]) / 1e6
+    return ((usage["input_tokens"] - cached) * p["input"] + cached * p["cached_input"]
+            + usage["output_tokens"] * p["output"]) / 1e6
 
 
 def validate_output(output_text: str) -> tuple[str, Optional[ModelResponse], Optional[str]]:
@@ -493,22 +687,160 @@ def validate_output(output_text: str) -> tuple[str, Optional[ModelResponse], Opt
         return "schema_error", None, f"{len(errs)} validation error(s): {detail}"
 
 
-def _load_api_key() -> str:
+def validate_claims_lenient(output_text: str) -> tuple[str, Optional[ModelResponse], Optional[str], int]:
+    """validate_output() for chat backends, where the schema may not be enforced: claims are checked one at a time,
+    so a malformed claim costs that claim, not the passage. Keys outside the schema are dropped and a missing segment
+    is null; nothing else is filled in. Returns (status, response with the valid claims, problem, claims rejected)."""
+    if not output_text.strip():
+        return "empty_output", None, "the response has no output text", 0
+    try:
+        data = json.loads(output_text)
+    except json.JSONDecodeError as e:
+        return "invalid_json", None, f"{e.msg} (char {e.pos} of {len(output_text)})", 0
+    items = data.get("claims") if isinstance(data, dict) else None
+    if not isinstance(items, list):
+        return "schema_error", None, "the JSON has no claims list", 0
+    fields, good, errors = set(ModelClaim.model_fields), [], []
+    for i, item in enumerate(items):
+        if not isinstance(item, dict):
+            errors.append(f"claims.{i}: not an object")
+            continue
+        try:
+            good.append(ModelClaim.model_validate_json(json.dumps(
+                {"segment": None, **{k: v for k, v in item.items() if k in fields}})))
+        except ValidationError as e:
+            errors.append(f"claims.{i}: " + "; ".join(f"{'.'.join(str(x) for x in err['loc'])}: {err['type']}"
+                                                      for err in e.errors()[:3]))
+    problem = f"{len(errors)} claim(s) rejected by the schema: {' | '.join(errors[:5])}" if errors else None
+    return "ok", ModelResponse(claims=good), problem, len(errors)
+
+
+def check_output(output_text: str, backend: Backend) -> tuple[str, Optional[ModelResponse], Optional[str], int]:
+    """(status, parsed response, problem, claims rejected) under the backend's rules: Meta's strict schema is
+    all-or-nothing, as before; chat backends are validated claim by claim."""
+    if backend.protocol == "responses":
+        return (*validate_output(output_text), 0)
+    return validate_claims_lenient(output_text)
+
+
+_FENCE_RE = re.compile(r"```(?:json|JSON)?[ \t]*\n?(.*?)```", re.S)
+_THINK_RE = re.compile(r"<think>.*?</think>", re.S)
+
+
+def _is_json(s: str) -> bool:
+    try:
+        json.loads(s)
+    except ValueError:
+        return False
+    return True
+
+
+def json_from_message(content: str) -> tuple[str, Optional[str]]:
+    """The JSON in an assistant message, and how it was recovered (None if the message was pure JSON). Backends
+    without enforced structured output wrap JSON in code fences or a sentence, or return the bare claims list."""
+    s, repairs = content.strip(), []
+    if "<think>" in s:
+        s, _ = _THINK_RE.subn("", s)
+        s = s.strip()
+        repairs.append("think_block")
+    if not _is_json(s):
+        m = _FENCE_RE.search(s)
+        i, j = s.find("{"), s.rfind("}")
+        if m and _is_json(m.group(1).strip()):
+            s = m.group(1).strip()
+            repairs.append("code_fence")
+        elif i != -1 and j > i and _is_json(s[i:j + 1]):
+            s = s[i:j + 1]
+            repairs.append("surrounding_text")
+    with contextlib.suppress(ValueError):
+        if isinstance(json.loads(s), list):
+            s = json.dumps({"claims": json.loads(s)}, ensure_ascii=False)
+            repairs.append("bare_list")
+    return s, "+".join(repairs) or None
+
+
+@dataclass
+class _ChatResult:
+    """A Chat Completions response in the shape the extractor reads from a Responses one."""
+
+    id: str
+    status: str                       # "completed", or "incomplete" when the token limit cut the answer off
+    output_text: str                  # the JSON found in the assistant message
+    usage: Any
+    finish_reason: Optional[str] = None
+    repair: Optional[str] = None      # how the JSON was recovered from the message, if it needed recovering
+    structured_fallback: bool = False  # the server rejected response_format; the schema in the prompt carried it
+
+
+def _chat_result(resp: Any, structured_fallback: bool = False) -> _ChatResult:
+    choices = getattr(resp, "choices", None) or []
+    choice = choices[0] if choices else None
+    message = getattr(choice, "message", None)
+    text, repair = json_from_message(getattr(message, "content", None) or "")
+    finish = getattr(choice, "finish_reason", None)
+    return _ChatResult(id=str(getattr(resp, "id", "") or ""), status="incomplete" if finish == "length" else "completed",
+                       output_text=text, usage=getattr(resp, "usage", None), finish_reason=finish, repair=repair,
+                       structured_fallback=structured_fallback)
+
+
+def send_request(client: Any, request: dict[str, Any], backend: Backend, **kwargs: Any) -> Any:
+    """One model call. Meta Model API: client.responses.create(**request), exactly as before. Chat backends: Chat
+    Completions; a 400 on a request carrying response_format is retried once without it (the schema is still in the
+    system message), since OpenAI-compatible servers differ in which response_format shapes they accept."""
+    if backend.protocol == "responses":
+        return client.responses.create(**request, **kwargs)
+    try:
+        return _chat_result(client.chat.completions.create(**request, **kwargs))
+    except openai.BadRequestError:
+        if "response_format" not in request:
+            raise
+        log.warning("%s rejected response_format; retrying once with the schema in the prompt only", backend.name)
+        plain = {k: v for k, v in request.items() if k != "response_format"}
+        return _chat_result(client.chat.completions.create(**plain, **kwargs), structured_fallback=True)
+
+
+def _chat_details(resp: Any) -> dict[str, Any]:
+    """Call-record fields only a chat backend has, and only when they say something."""
+    if not isinstance(resp, _ChatResult):
+        return {}
+    out: dict[str, Any] = {}
+    if resp.finish_reason not in (None, "stop"):
+        out["finish_reason"] = resp.finish_reason
+    if resp.repair:
+        out["json_repair"] = resp.repair
+    if resp.structured_fallback:
+        out["structured_fallback"] = True
+    return out
+
+
+def _load_api_key(backend: Optional[Backend] = None) -> str:
+    b = backend or BACKENDS["meta"]
     with contextlib.suppress(ImportError):
         from dotenv import load_dotenv
 
         load_dotenv(DOTENV_PATH, override=False)  # a variable already exported in the shell wins
-    key = os.environ.get("MODEL_API_KEY", "").strip()
+    key = os.environ.get(b.api_key_env, "").strip()
+    if not key and b.name == "modal":  # `modal workspace proxy-tokens create` prints an ID and a secret
+        tid, secret = (os.environ.get(f"{b.api_key_env}_{p}", "").strip() for p in ("ID", "SECRET"))
+        key = f"{tid}.{secret}" if tid and secret else ""
     if not key:
-        raise ExtractionError("MODEL_API_KEY is not set: add MODEL_API_KEY=<key> to .env (template: env.example) "
-                              "or export it. Nothing was sent.")
+        hint = " (or MODAL_PROXY_TOKEN_ID and MODAL_PROXY_TOKEN_SECRET)" if b.name == "modal" else ""
+        raise ExtractionError(f"{b.api_key_env} is not set{hint}: add {b.api_key_env}=<key> to .env (template: "
+                              f"env.example) or export it. Nothing was sent.")
     return key
 
 
-def make_client(api_key: Optional[str] = None, *, timeout: float = TIMEOUT_S, http_client: Any = None) -> openai.OpenAI:
-    """OpenAI SDK client for Meta Model API. The key goes to the SDK only and is never logged."""
-    kwargs: dict[str, Any] = {"api_key": api_key or _load_api_key(), "base_url": BASE_URL, "max_retries": 0,
-                              "timeout": timeout}
+def make_client(api_key: Optional[str] = None, *, timeout: float = TIMEOUT_S, http_client: Any = None,
+                backend: Optional[Backend] = None) -> openai.OpenAI:
+    """OpenAI SDK client for the extraction backend (default: the active one, normally Meta Model API). The key goes
+    to the SDK only and is never logged. A self-hosted backend gets at least its own per-attempt timeout."""
+    b = backend or active_backend()
+    if not b.base_url:
+        where = b.base_url_env or "RECEIPTS_EXTRACT_BASE_URL"
+        raise ExtractionError(f"the {b.name} backend has no endpoint: set {where} to the server URL plus /v1, e.g. "
+                              f"the one `modal deploy` printed (docs/open-weights.md). Nothing was sent.")
+    kwargs: dict[str, Any] = {"api_key": api_key or _load_api_key(b), "base_url": b.base_url, "max_retries": 0,
+                              "timeout": max(timeout, b.min_timeout_s)}
     if http_client is not None:
         kwargs["http_client"] = http_client
     return openai.OpenAI(**kwargs)
@@ -677,6 +1009,8 @@ class ExtractResult:
     calls: list[dict[str, Any]] = field(default_factory=list)  # one record per passage
     uncovered: list[dict[str, Any]] = field(default_factory=list)
     wall_s: float = 0.0
+    model: str = MODEL
+    backend: str = "meta"
 
     @property
     def cost_usd(self) -> float:
@@ -687,31 +1021,58 @@ class ExtractResult:
         return sum(bool(c.get("cached")) for c in self.calls)
 
 
+def _read_response(resp: Any, b: Backend) -> tuple[dict[str, Any], Optional[ModelResponse], str]:
+    """Call-record fields, the parsed response (None unless usable) and the output text of one model response."""
+    usage = _usage(resp)
+    output_text = resp.output_text or ""
+    status, model_resp, problem, rejected = check_output(output_text, b)
+    rec: dict[str, Any] = {"status": status, "problem": problem, "response_id": resp.id,
+                           "response_status": resp.status, "usage": usage,
+                           "cost_usd": round(cost_usd(usage, b.prices), 6)}
+    if rejected:
+        rec["claims_rejected"] = rejected
+    rec.update(_chat_details(resp))
+    return rec, (model_resp if status == "ok" else None), output_text
+
+
+def _cache_record(key: str, b: Backend, effort: str, resp: Any, usage: Optional[dict[str, int]], output_text: str,
+                  latency_s: float) -> dict[str, Any]:
+    rec = {"request_sha256": key, "model": b.model, "effort": _effort_for(b, effort),
+           "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+           "response_id": resp.id, "usage": usage, "output_text": output_text, "latency_s": round(latency_s, 2)}
+    if b.name != "meta":
+        rec["backend"] = b.name
+    return rec
+
+
 def extract_detailed(text: str, context: Optional[str] = None, *, client: Optional[openai.OpenAI] = None,
                      cache_dir: Optional[Path] = CACHE_DIR, use_cache: bool = True, concurrency: int = CONCURRENCY,
                      effort: str = EFFORT, max_output_tokens: int = MAX_OUTPUT_TOKENS,
-                     sleep: Callable[[float], None] = time.sleep) -> ExtractResult:
+                     sleep: Callable[[float], None] = time.sleep, backend: Optional[Backend] = None) -> ExtractResult:
     """extract() plus diagnostics: the context line used, warnings, per-call usage and cost, uncovered numbers.
 
     context=None infers the line from the first passage; context="" sends none. Offsets index `text` as given.
+    backend: where the model runs (default: active_backend(), normally Meta Model API).
     """
     t0 = time.monotonic()
+    b = backend or active_backend()
     if context is None:
         context = infer_context(text)
     context = (context or "").strip() or None
     passages = split_passages(text)
     if not passages:
-        return ExtractResult([], context)
+        return ExtractResult([], context, model=b.model, backend=b.name)
     cache = _Cache(cache_dir if use_cache else None)
-    requests = [build_request(p, context, effort=effort, max_output_tokens=max_output_tokens) for _, p in passages]
-    keys = [request_hash(r) for r in requests]
+    requests = [build_request(p, context, effort=effort, max_output_tokens=max_output_tokens, backend=b)
+                for _, p in passages]
+    keys = [request_key(r, b) for r in requests]
     calls: list[dict[str, Any]] = [{"passage": i + 1, "start": s, "chars": len(p), "request_sha256": k}
                                    for i, ((s, p), k) in enumerate(zip(passages, keys))]
     parsed: list[Optional[ModelResponse]] = [None] * len(passages)
     misses: list[int] = []
     for i, key in enumerate(keys):
         hit = cache.get(key)
-        status, resp, _ = validate_output(hit["output_text"]) if hit else ("miss", None, None)
+        status, resp, _, _ = check_output(hit["output_text"], b) if hit else ("miss", None, None, 0)
         if status == "ok" and resp is not None:
             parsed[i] = resp
             calls[i].update(status="ok", cached=True, usage=hit.get("usage"), cost_usd=0.0, latency_s=0.0)
@@ -720,24 +1081,19 @@ def extract_detailed(text: str, context: Optional[str] = None, *, client: Option
 
     if misses:
         if client is None:
-            client = make_client()
+            client = make_client(backend=b)
 
         def work(i: int) -> tuple[int, dict[str, Any], Optional[ModelResponse]]:
-            out = call_with_retry(lambda: client.responses.create(**requests[i]), sleep=sleep)
+            out = call_with_retry(lambda: send_request(client, requests[i], b), sleep=sleep)
             rec: dict[str, Any] = {"cached": False, "attempts": out.attempts, "latency_s": round(out.latency_s, 2)}
             if not out.ok:
                 rec.update(status=out.error["kind"], error=out.error)
                 return i, rec, None
-            resp = out.response
-            usage = _usage(resp)
-            output_text = resp.output_text or ""
-            status, model_resp, problem = validate_output(output_text)
-            rec.update(status=status, problem=problem, response_id=resp.id, response_status=resp.status,
-                       usage=usage, cost_usd=round(cost_usd(usage), 6))
-            if status == "ok":
-                cache.put(keys[i], {"request_sha256": keys[i], "model": MODEL, "effort": effort,
-                                    "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                                    "response_id": resp.id, "usage": usage, "output_text": output_text})
+            fields, model_resp, output_text = _read_response(out.response, b)
+            rec.update(fields)
+            if model_resp is not None:
+                cache.put(keys[i], _cache_record(keys[i], b, effort, out.response, fields["usage"], output_text,
+                                                 out.latency_s))
             return i, rec, model_resp
 
         workers = max(1, min(concurrency, len(misses)))
@@ -762,7 +1118,7 @@ def extract_detailed(text: str, context: Optional[str] = None, *, client: Option
     claims, ranges = build_claims(per_passage, warnings)
     uncovered = uncovered_numbers(text, ranges)
     warnings.extend(f"no claim covers the number {t['text']!r} at offset {t['start']}" for t in uncovered)
-    return ExtractResult(claims, context, warnings, calls, uncovered, round(time.monotonic() - t0, 2))
+    return ExtractResult(claims, context, warnings, calls, uncovered, round(time.monotonic() - t0, 2), b.model, b.name)
 
 
 def extract(text: str, context: Optional[str] = None, **kwargs: Any) -> list[types.Claim]:
@@ -847,40 +1203,46 @@ def call_with_deadline(fn: Callable[[], Any], *, sleep: Callable[[float], None],
     return _CallOutcome(False, None, attempt, time.monotonic() - t0, err)
 
 
-def _requests_for(text: str, context: Optional[str], effort: str,
-                  max_output_tokens: int) -> tuple[list[tuple[int, str]], list[dict[str, Any]], list[str]]:
-    """Passages, request bodies and request hashes, with the context handled as in extract_detailed()."""
+def _requests_for(text: str, context: Optional[str], effort: str, max_output_tokens: int,
+                  backend: Optional[Backend] = None) -> tuple[list[tuple[int, str]], list[dict[str, Any]], list[str]]:
+    """Passages, request bodies and cache keys, with the context handled as in extract_detailed()."""
+    b = backend or active_backend()
     if context is None:
         context = infer_context(text)
     context = (context or "").strip() or None
     passages = split_passages(text)
-    requests = [build_request(p, context, effort=effort, max_output_tokens=max_output_tokens) for _, p in passages]
-    return passages, requests, [request_hash(r) for r in requests]
+    requests = [build_request(p, context, effort=effort, max_output_tokens=max_output_tokens, backend=b)
+                for _, p in passages]
+    return passages, requests, [request_key(r, b) for r in requests]
 
 
 def request_keys(text: str, context: Optional[str] = None, *, effort: str = EFFORT,
-                 max_output_tokens: int = MAX_OUTPUT_TOKENS) -> list[str]:
+                 max_output_tokens: int = MAX_OUTPUT_TOKENS, backend: Optional[Backend] = None) -> list[str]:
     """The cache key (request hash) of every passage call, in document order. context: None infers, "" is none."""
-    return _requests_for(text, context, effort, max_output_tokens)[2]
+    return _requests_for(text, context, effort, max_output_tokens, backend)[2]
 
 
-def _first_hit(caches: Sequence[_Cache], key: str) -> Optional[tuple[dict[str, Any], ModelResponse]]:
+def _first_hit(caches: Sequence[_Cache], key: str,
+               backend: Optional[Backend] = None) -> Optional[tuple[dict[str, Any], ModelResponse]]:
+    b = backend or BACKENDS["meta"]
     for cache in caches:
         hit = cache.get(key)
         if hit:
-            status, resp, _ = validate_output(hit["output_text"])
+            status, resp, _, _ = check_output(hit["output_text"], b)
             if status == "ok" and resp is not None:
                 return hit, resp
     return None
 
 
 def passages_to_call(text: str, context: Optional[str] = None, *, cache_dirs: Sequence[Path] = (CACHE_DIR,),
-                     effort: str = EFFORT, max_output_tokens: int = MAX_OUTPUT_TOKENS) -> int:
+                     effort: str = EFFORT, max_output_tokens: int = MAX_OUTPUT_TOKENS,
+                     backend: Optional[Backend] = None) -> int:
     """How many passages of `text` need a model call: those with no schema-valid response in any of cache_dirs.
     0 means extraction is free. context: None infers it from the first passage, "" sends none."""
+    b = backend or active_backend()
     caches = [_Cache(d) for d in cache_dirs]
-    return sum(_first_hit(caches, k) is None for k in request_keys(text, context, effort=effort,
-                                                                   max_output_tokens=max_output_tokens))
+    return sum(_first_hit(caches, k, b) is None for k in request_keys(text, context, effort=effort,
+                                                                      max_output_tokens=max_output_tokens, backend=b))
 
 
 def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[openai.OpenAI] = None,
@@ -888,7 +1250,8 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
                  use_cache: bool = True, concurrency: int = CONCURRENCY, effort: str = EFFORT,
                  max_output_tokens: int = MAX_OUTPUT_TOKENS, timeout_s: float = INTERACTIVE_TIMEOUT_S,
                  max_attempts: int = INTERACTIVE_ATTEMPTS, deadline: Optional[float] = None,
-                 sleep: Callable[[float], None] = time.sleep) -> Iterator[PassageResult]:
+                 sleep: Callable[[float], None] = time.sleep,
+                 backend: Optional[Backend] = None) -> Iterator[PassageResult]:
     """extract_detailed() as a stream: one PassageResult per passage, yielded as soon as that passage is done.
 
     Cached passages come first, in document order (cache_dir, then the read-only extra_cache_dirs), then live calls
@@ -900,8 +1263,13 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
     Claim ids run c1, c2, ... in the order results are yielded: unique within the draft, but for live calls not
     necessarily in document order (sort by span_start for that). Uncovered-number warnings need the whole draft
     and are not produced here; extract_detailed() still reports them.
+
+    backend: where the model runs (default: active_backend()). A self-hosted backend raises timeout_s to its own
+    per-attempt floor (a 30B model on one GPU can't answer in 30 s); `deadline` still bounds the whole extraction.
     """
-    passages, requests, keys = _requests_for(text, context, effort, max_output_tokens)
+    b = backend or active_backend()
+    timeout_s = max(timeout_s, b.min_timeout_s)
+    passages, requests, keys = _requests_for(text, context, effort, max_output_tokens, b)
     if not passages:
         return
     write_cache = _Cache(cache_dir if use_cache else None)
@@ -925,7 +1293,7 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
 
     misses: list[int] = []
     for i, key in enumerate(keys):
-        hit = _first_hit(read_caches, key)
+        hit = _first_hit(read_caches, key, b)
         if hit is None:
             misses.append(i)
             continue
@@ -935,7 +1303,7 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
     if not misses:
         return
     if client is None:
-        client = make_client(timeout=timeout_s)
+        client = make_client(timeout=timeout_s, backend=b)
 
     def attempt_timeout() -> float:
         if deadline is None:
@@ -943,22 +1311,17 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
         return max(1.0, min(timeout_s, deadline - time.monotonic()))
 
     def work(i: int) -> tuple[int, dict[str, Any], Optional[ModelResponse]]:
-        out = call_with_deadline(lambda: client.responses.create(**requests[i], timeout=attempt_timeout()),
+        out = call_with_deadline(lambda: send_request(client, requests[i], b, timeout=attempt_timeout()),
                                  sleep=sleep, max_attempts=max_attempts, deadline=deadline)
         rec: dict[str, Any] = {"cached": False, "attempts": out.attempts, "latency_s": round(out.latency_s, 2)}
         if not out.ok:
             rec.update(status=out.error["kind"], error=out.error)
             return i, rec, None
-        resp = out.response
-        usage = _usage(resp)
-        output_text = resp.output_text or ""
-        status, model_resp, problem = validate_output(output_text)
-        rec.update(status=status, problem=problem, response_id=resp.id, response_status=resp.status, usage=usage,
-                   cost_usd=round(cost_usd(usage), 6))
-        if status == "ok":
-            write_cache.put(keys[i], {"request_sha256": keys[i], "model": MODEL, "effort": effort,
-                                      "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                                      "response_id": resp.id, "usage": usage, "output_text": output_text})
+        fields, model_resp, output_text = _read_response(out.response, b)
+        rec.update(fields)
+        if model_resp is not None:
+            write_cache.put(keys[i], _cache_record(keys[i], b, effort, out.response, fields["usage"], output_text,
+                                                   out.latency_s))
         return i, rec, model_resp
 
     pool = ThreadPoolExecutor(max_workers=max(1, min(concurrency, len(misses))))

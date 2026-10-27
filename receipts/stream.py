@@ -114,8 +114,23 @@ def data_fingerprint(data_dir: Path) -> str:
     return "stat-" + h.hexdigest()[:16]
 
 
+def model_name() -> str:
+    """The extraction model this process uses (receipts.extract.active_backend()): muse-spark-1.3 by default."""
+    try:
+        return _extract.active_backend().model
+    except Exception:
+        return MODEL
+
+
 def cache_fingerprint(data_dir: Path) -> str:
-    return hashlib.sha256(f"{data_fingerprint(data_dir)}|{code_fingerprint()}".encode()).hexdigest()[:20]
+    """Evidence, code and, off the default backend, the extraction backend: a check recorded with one model is never
+    replayed as another's (a private-mode run must not serve a Muse Spark recording, nor the reverse)."""
+    try:
+        tag = _extract.backend_tag()
+    except Exception:  # a misconfigured backend matches no recording
+        tag = "invalid-backend"
+    base = f"{data_fingerprint(data_dir)}|{code_fingerprint()}" + (f"|{tag}" if tag else "")
+    return hashlib.sha256(base.encode()).hexdigest()[:20]
 
 
 # ---------------------------------------------------------------------------
@@ -172,7 +187,7 @@ class EventCache:
     def put(self, key: str, fingerprint: str, events: Sequence[Event]) -> bool:
         if self.write_dir is None:
             return False
-        record = {"version": CACHE_VERSION, "key": key, "fingerprint": fingerprint, "model": MODEL,
+        record = {"version": CACHE_VERSION, "key": key, "fingerprint": fingerprint, "model": model_name(),
                   "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                   "events": [{"event": n, "data": d} for n, d in events]}
         return write_json_atomic(self.write_dir / f"{key}.json", record)
@@ -284,4 +299,4 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
         return
     stats.complete = True
     yield emit("done", {"counts": dict(stats.counts), "latency_s": round(time.monotonic() - t0, 2),
-                        "cost_usd": round(stats.cost_usd, 6), "model": MODEL})
+                        "cost_usd": round(stats.cost_usd, 6), "model": model_name()})

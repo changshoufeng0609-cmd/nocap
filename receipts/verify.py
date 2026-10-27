@@ -81,11 +81,17 @@ METRIC_LABELS = {
 GENERIC_ENTITIES = frozenset({"", "the company", "company", "we", "our", "us", "it", "the firm", "the group",
                               "management", "the business", "n/a", "none", "unknown"})
 
-_APPROX_RE = re.compile(r"(?:\b(?:approximately|approx\.?|about|around|roughly|nearly|almost|close\s+to|some|circa)"
-                        r"|~)\s*$")
-_LOWER_RE = re.compile(r"\b(?:more\s+than|over|above|exceeding|in\s+excess\s+of|at\s+least|upwards?\s+of"
-                       r"|north\s+of)\s*$")
-_UPPER_RE = re.compile(r"\b(?:less\s+than|under|below|at\s+most|up\s+to|no\s+more\s+than)\s*$")
+# Hedge and bound words right before a number decide how it is compared (hedge_of). Longer phrases are listed first,
+# so "no more than" is an upper bound, not "more than".
+_HEDGES: tuple[tuple[str, bool, re.Pattern[str]], ...] = tuple((kind, inclusive, re.compile(rx + r"\s*$")) for kind, inclusive, rx in (
+    ("upper", True, r"\b(?:no\s+more\s+than|not\s+more\s+than|at\s+most|up\s+to|a\s+maximum\s+of)"),
+    ("lower", True, r"\b(?:no\s+less\s+than|not\s+less\s+than|at\s+least|upwards?\s+of|a\s+minimum\s+of)"),
+    ("nearly", True, r"\b(?:nearly|almost|just\s+(?:under|below|shy\s+of)|a\s+little\s+under)"),
+    ("lower", False, r"\b(?:more\s+than|greater\s+than|higher\s+than|over|above|exceed(?:ing|ed|s)?"
+                     r"|in\s+excess\s+of|north\s+of|surpass(?:ing|ed|es)?|topp(?:ing|ed)|just\s+over)"),
+    ("upper", False, r"\b(?:less\s+than|fewer\s+than|lower\s+than|under|below|south\s+of)"),
+    ("approx", True, r"(?:\b(?:approximately|approx\.?|about|around|roughly|close\s+to|some|circa|an\s+estimated)|~)"),
+))
 _DOWN_RE = re.compile(r"\b(?:down|declin\w*|decreas\w*|fell|fall\w*|dropp?\w*|lower|shr[ai]nk\w*|shrunk"
                       r"|contract\w*)\b")
 _LOSS_RE = re.compile(r"\bloss(?:es)?\b")
@@ -527,6 +533,48 @@ def _half_unit(f: Fact) -> float:
     return {"USD/share": 0.005, "%": 0.05}.get(f.unit, 0.5)
 
 
+@dataclass(frozen=True)
+class Hedge:
+    """How the draft qualifies its number. lower / upper: a bound on the filed value (strict, or inclusive for
+    "at least" / "at most"); nearly: slightly below the number; approx: either side, within the approximation band."""
+
+    kind: str        # "lower" | "upper" | "nearly" | "approx"
+    inclusive: bool
+
+    @property
+    def words(self) -> str:
+        return {("lower", False): "more than", ("lower", True): "at least", ("upper", False): "less than",
+                ("upper", True): "at most", ("nearly", True): "just under"}.get((self.kind, self.inclusive),
+                                                                               "approximately")
+
+
+def hedge_of(claim: Claim) -> Optional[Hedge]:
+    """The hedge or bound word right before the claim's number (or leading its value_text: 'over $28 billion')."""
+    span, vt = claim.span_text or "", claim.value_text or ""
+    i = span.find(vt) if vt else -1
+    lead = re.match(r"[^\d$€£¥+\-−(]*", vt).group(0)
+    text = " ".join(f"{span[:i] if i >= 0 else ''} {lead}".lower().split())[-40:]
+    for kind, inclusive, rx in _HEDGES:
+        if rx.search(text):
+            return Hedge(kind, inclusive)
+    return None
+
+
+SPLIT_RATIOS = (2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 30, 40, 50, 100)
+
+
+def split_ratio(a: Fact, b: Fact) -> Optional[int]:
+    """n when two versions of one per-share figure differ by an n-for-1 (or 1-for-n) stock split, allowing each value
+    its own rounding ($5.87 vs $0.59 is Netflix's 10-for-1). None when no ratio fits, or several do (cents can't
+    tell 2-for-1 from 3-for-1), so a genuine restatement ($0.89 vs $0.90) is never taken for a split."""
+    va, vb = abs(a.value), abs(b.value)
+    if not va or not vb or (a.value > 0) != (b.value > 0):
+        return None
+    (big, fb), (small, fs) = sorted(((va, a), (vb, b)), key=lambda x: -x[0])
+    fits = [n for n in SPLIT_RATIOS if abs(big - n * small) <= n * _half_unit(fs) + _half_unit(fb) + 1e-12]
+    return fits[0] if len(fits) == 1 else None
+
+
 def _best_obs(obs: Iterable[Obs]) -> Obs:
     """The receipt to cite for a match: a filing over a press release, the original version first."""
     return min(obs, key=lambda o: (_source_rank(o.primary), o.public_at))
@@ -613,9 +661,42 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
                      f"exchange rates, so Receipts can't check it.")
     entity = resolve_claim_entity(claim, store, context)
     if entity is None:
-        who = claim.entity.strip() or "the company"
-        return plain("unverifiable", "ambiguous", f"Couldn't match \"{who}\" to a company in the SEC filings database.")
+        return unresolved_entity(claim, store, as_of_dt)
     return _Check(claim, store, entity, as_of_dt, context, reading).run()
+
+
+def _join(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} and {names[-1]}"
+
+
+def unresolved_entity(claim: Claim, store: EvidenceStore, as_of: Optional[datetime] = None) -> Verdict:
+    """'?' for a company the store doesn't resolve, saying why: a generic subject with no company in the context, a
+    name that mixes or abbreviates covered companies, or a company outside Receipts' coverage (named plainly, with
+    the list of covered companies, instead of suggesting it isn't in EDGAR)."""
+    who = " ".join((claim.entity or "").split())
+
+    def plain(reason: str, explanation: str) -> Verdict:
+        return Verdict(claim_id=claim.id, status="unverifiable", reason=reason, explanation=explanation, as_of=as_of)
+
+    if who.casefold() in GENERIC_ENTITIES:
+        return plain("ambiguous", "The draft doesn't say which company this figure belongs to.")
+    covered = known_companies(store)
+    if not covered:
+        return plain("ambiguous", f"Couldn't match \"{who}\" to a company in the SEC filings database.")
+    try:
+        from receipts.store import ALIASES
+    except Exception:
+        ALIASES = {}
+    mentioned = [name for _cik, ticker, name in covered
+                 if any(re.search(rf"(?<![\w&]){re.escape(a)}(?![\w&])", who, re.I) for a in [ticker, *ALIASES.get(ticker, [])])]
+    if len(mentioned) > 1:
+        return plain("ambiguous", f"\"{who}\" names more than one company ({_join(mentioned)}), so Receipts can't "
+                                  f"tell whose figure this is.")
+    if mentioned:  # "Amazon Web Services": a unit of a covered company, never checked against its company-wide total
+        return plain("ambiguous", f"\"{who}\" is part of {mentioned[0]}, not the whole company, so Receipts doesn't "
+                                  f"check it against {possessive(mentioned[0])} company-wide filings.")
+    return plain("no_evidence", f"Receipts covers {len(covered)} companies today: {_join([n for _, _, n in covered])}; "
+                                f"\"{who}\" isn't one of them, so there is no filing data to check it against.")
 
 
 class _Check:
@@ -643,6 +724,8 @@ class _Check:
         self.claimed = claimed_value(claim, change=self.growth_base is not None)
         self.tol = tolerance(claim)
         self._facts: dict[tuple[Any, ...], list[Fact]] = {}
+        self.hedge = hedge_of(claim)
+        self.superseded: list[tuple[Obs, Obs, int]] = []  # (pre-split version, the version that replaced it, ratio)
 
     # -- verdicts ------------------------------------------------------------
     def verdict(self, status: str, reason: str, explanation: str, *, evidence: Iterable[Fact] = (),
@@ -728,7 +811,27 @@ class _Check:
             elif _fact_kind(f) != want:
                 continue
             out.append(Obs(float(f.value), (f,)))
+        if metric in PER_SHARE_METRICS and len(out) > 1:
+            out = self._split_consistent(out)
         return out
+
+    def _split_consistent(self, obs: list[Obs]) -> list[Obs]:
+        """Per-share versions of one figure that differ by a stock-split ratio: only those on the share basis of the
+        latest version visible at as_of count (with no as_of, the latest version). A split restates every earlier
+        per-share figure, so the pre-split number no longer describes the shares. Versions that differ for other
+        reasons (BAC's 2026 restatement) all still count."""
+        visible = [o for o in obs if self.public(o)]
+        if len(visible) < 2:
+            return obs
+        latest = max(visible, key=lambda o: (o.public_at, -_source_rank(o.primary)))
+        keep = []
+        for o in obs:
+            n = split_ratio(o.primary, latest.primary) if self.public(o) else None
+            if n:
+                self.superseded.append((o, latest, n))
+            else:
+                keep.append(o)
+        return keep
 
     def growth(self, cik: int, cal: list[CalEntry], rp: ResolvedPeriod, comparison: str, basis: Optional[str],
                segment: Optional[str]) -> list[Obs]:
@@ -791,10 +894,76 @@ class _Check:
     def alternative_matches(self, rp: ResolvedPeriod) -> tuple[Optional[str], list[Obs]]:
         """A match under another reading of the same wording ('EPS' read as basic rather than diluted)."""
         for metric in self.alternatives:
-            hits = [o for o in self.matches(self.level(self.cik, metric, rp, self.basis, self.segment)) if self.public(o)]
+            hits = [o for o in self.accepts(self.level(self.cik, metric, rp, self.basis, self.segment)) if self.public(o)]
             if hits:
                 return metric, hits
         return None, []
+
+    # -- bounds: "more than", "at most", "nearly" are authoritative ---------------------------------
+    @property
+    def bounded(self) -> bool:
+        return self.hedge is not None and self.hedge.kind in ("lower", "upper", "nearly")
+
+    def bound_test(self, o: Obs) -> Optional[bool]:
+        """Whether the filed value meets the draft's bound: True, False, or None when the value's own rounding
+        (a change computed from rounded inputs) straddles it. No tolerance is added: "more than $4.5 billion" is
+        false for $4.459 billion. A decline or a loss bounds the magnitude ("fell more than 30%" is below -30%).
+        "nearly X" means slightly below X: within the approximation band under it, and never above it."""
+        h = self.hedge
+        assert h is not None
+        sign = -1.0 if self.claimed < 0 else 1.0
+        x, lo, hi = sign * self.claimed, sign * o.value - o.err, sign * o.value + o.err
+        if h.kind == "nearly":
+            band = max(2 * self.tol, 0.01 * abs(x))
+            if hi < x - band or lo > x:
+                return False
+            return True if (lo >= x - band and hi <= x) else None
+
+        def meets(v: float) -> bool:
+            if h.kind == "lower":
+                return v >= x if h.inclusive else v > x
+            return v <= x if h.inclusive else v < x
+
+        a, b = meets(lo), meets(hi)
+        return a if a == b else None
+
+    def accepts(self, obs: Iterable[Obs]) -> list[Obs]:
+        """Observations the claim is right about: its bound when it states one, else equality within tolerance."""
+        if self.bounded:
+            return [o for o in obs if self.bound_test(o) is True]
+        return self.matches(obs)
+
+    def _bounded(self, rp: ResolvedPeriod, pub: list[Obs]) -> Verdict:
+        """A bounded claim ("more than $4.5 billion", "nearly 20%") is judged by its bound alone, never by plain
+        equality within tolerance. Unmet on the stated basis but met on the other one the draft never named, or a bank
+        headline that may be the managed figure: "?", as for any ambiguity."""
+        words = self.hedge.words if self.hedge else ""
+        tests = [(o, self.bound_test(o)) for o in pub]
+        ok = [o for o, t in tests if t is True]
+        if ok:
+            return self._verified(rp, ok, note=f", which is {words} {self.c.value_text}")
+        actual = _current_obs(pub)
+        if any(t is None for _, t in tests):
+            return self.verdict("unverifiable", "ambiguous",
+                                f"{self.co_s} {form_phrase(actual.primary)} reports that {self.statement(actual, rp)}, "
+                                f"which is too close to {self.c.value_text} to tell, given the rounding of the figures "
+                                f"it is computed from.", evidence=actual.facts)
+        if not self.basis_stated:
+            other = "GAAP" if self.basis == "non-GAAP" else "non-GAAP"
+            alt = [o for o in self.observe(rp, basis=other) if self.public(o) and self.bound_test(o) is True]
+            if alt:
+                best = _best_obs(alt)
+                return self.verdict("unverifiable", "ambiguous",
+                                    f"{self.co_s} {other} {self.mlabel(False)} for {self.plabel(rp)} was "
+                                    f"{self.fmt(best.value)}, which is {words} {self.c.value_text}, but the draft doesn't "
+                                    f"say {other}, and the {self.basis or 'GAAP'} figure is {self.fmt(actual.value)}.",
+                                    evidence=[*best.facts, *actual.facts])
+        bank = self._bank_headline(rp, actual)
+        if bank is not None:
+            return bank
+        return self.wrong("value_mismatch", actual,
+                          f"{self.co_s} {form_phrase(actual.primary)} reports that {self.statement(actual, rp)}, "
+                          f"which is not {words} {self.c.value_text}.")
 
     # -- the rules -------------------------------------------------------------
     def run(self) -> Verdict:
@@ -807,7 +976,7 @@ class _Check:
             return self.verdict("unverifiable", "ambiguous", "The draft doesn't say which segment this revenue is for.")
         level_claim = self.growth_base is None
         rp = periods.resolve_in_calendar(c.period_text, self.cal, context=self.context, period_type=c.period_type,
-                                         comparison=c.comparison if level_claim else "YoY")
+                                         comparison=c.comparison if level_claim else "YoY", as_of=self.as_of)
         if rp is None:
             said = c.period_text.strip() or "no period"
             return self.verdict("unverifiable", "ambiguous",
@@ -820,15 +989,17 @@ class _Check:
         pub = [o for o in obs_all if self.public(o)]
         if not pub:
             return self._look_ahead(rp, obs_all)
+        if self.bounded:
+            return self._bounded(rp, pub)
         hits = self.matches(pub)
         if hits:
             return self._verified(rp, hits)
-        for check in (self._hedged, self._comparison_base, self._alternative_reading):
+        for check in (self._approximate, self._comparison_base, self._alternative_reading):
             v = check(rp, pub)
             if v is not None:
                 return v
         actual = _current_obs(pub)
-        for diagnose in (self._diag_period, self._diag_scale, self._diag_basis, self._diag_entity,
+        for diagnose in (self._diag_split, self._diag_period, self._diag_scale, self._diag_basis, self._diag_entity,
                          self._bank_headline):
             v = diagnose(rp, actual)
             if v is not None:
@@ -863,12 +1034,12 @@ class _Check:
                     f"(non-GAAP figures come only from earnings releases)")
         else:
             text = f"No filing fact for {self.co_s} {self.mlabel()} for {self.plabel(rp)}"
-        hint = self._other_period_match(rp)
+        hint = None if self.bounded else self._other_period_match(rp)  # equality hints don't fit a bound
         if hint is not None:
             orp, o = hint
             text += f"; {self.c.value_text} matches its {self.mlabel()} for {self.plabel(orp)}"
             return self.verdict("unverifiable", "no_evidence", text + ".", evidence=o.facts)
-        if self.basis == "non-GAAP" and rp.period_end is not None:  # GAAP and non-GAAP often coincide: a hint only
+        if self.basis == "non-GAAP" and rp.period_end is not None and not self.bounded:  # a hint only
             gaap = [o for o in self.matches(self.observe(rp, basis="GAAP")) if self.public(o)]
             if gaap:
                 text += f"; {self.c.value_text} matches its GAAP {self.mlabel(False)}"
@@ -918,7 +1089,7 @@ class _Check:
         release = self.earnings_release(rp)
         release_at = to_utc(release["accepted_at"]) if release else None
         has_release_fact = any(f.source == "press_release" for o in obs_all for f in o.facts)
-        value_ok = bool(self.matches(obs_all))
+        value_ok = bool(self.accepts(obs_all))
         filed = _current_obs(obs_all)
         what = f"{self.co_s} {self.mlabel()} for {self.plabel(rp)}"
         if release_at is not None and release_at <= first.public_at:
@@ -956,8 +1127,14 @@ class _Check:
         public = [(cmp, [o for o in obs if self.public(o)]) for cmp, obs in readings]
         if not any(obs for _, obs in public):
             return self._look_ahead(rp, [o for _, obs in readings for o in obs])
+        if self.bounded and any(self.bound_test(o) is None for _, obs in public for o in obs) and not any(
+                self.accepts(obs) for _, obs in public):
+            return self.verdict("unverifiable", "ambiguous",
+                                f"{self.co_s} {self.mlabel()} for {self.plabel(rp)} is too close to {self.c.value_text} "
+                                f"to tell, given the rounding of the figures it is computed from.",
+                                evidence=[f for _, obs in public for o in obs for f in o.facts])
         for cmp, obs in public:
-            hits = self.matches(obs)
+            hits = self.accepts(obs)
             if hits:
                 best = _best_obs(hits)
                 return self.verdict("verified", "match",
@@ -966,36 +1143,42 @@ class _Check:
         parts = [f"{self.fmt(_current_obs(obs).value)} {_cmp_words(cmp)}" for cmp, obs in public if obs]
         if all(obs for _, obs in public):
             actual = _current_obs(public[0][1])
+            tail = (f"neither of which is {self.hedge.words} {self.c.value_text}" if self.bounded and len(parts) > 1
+                    else f"which is not {self.hedge.words} {self.c.value_text}" if self.bounded
+                    else f"not {self.c.value_text}")
             return self.wrong("value_mismatch", actual,
-                              f"{self.co_s} {self.mlabel()} for {self.plabel(rp)} was {' and '.join(parts)}, "
-                              f"not {self.c.value_text}.", extra=[f for _, obs in public for o in obs for f in o.facts])
+                              f"{self.co_s} {self.mlabel()} for {self.plabel(rp)} was {' and '.join(parts)}, {tail}.",
+                              extra=[f for _, obs in public for o in obs for f in o.facts])
         return self.verdict("unverifiable", "ambiguous",
                             f"The draft doesn't say what the {self.c.value_text} change is measured against, and "
                             f"{self.co_s} {self.mlabel()} for {self.plabel(rp)} was {' and '.join(parts)}.",
                             evidence=[f for _, obs in public for o in obs for f in o.facts])
 
-    def _hedged(self, rp: ResolvedPeriod, pub: list[Obs]) -> Optional[Verdict]:
-        i = self.c.span_text.find(self.c.value_text)
-        before = self.c.span_text[:i].lower()[-30:] if i >= 0 else ""
-        if _APPROX_RE.search(before):
-            band = max(2 * self.tol, 0.01 * abs(self.claimed))
-            near = self.matches(pub, tol=band)
-            if near:
-                best = _best_obs(near)
-                return self.verdict("approximate", "approximate",
-                                    f"Close enough for an approximation: {self.co_s} {form_phrase(best.primary)} "
-                                    f"reports that {self.statement(best, rp)}.", evidence=best.facts)
-        bound = "lower" if _LOWER_RE.search(before) else "upper" if _UPPER_RE.search(before) else None
-        if bound:
-            ok = [o for o in pub if (o.value >= self.claimed - self.tol if bound == "lower"
-                                     else o.value <= self.claimed + self.tol)]
-            if ok:
-                best = _best_obs(ok)
-                word = "more" if bound == "lower" else "less"
-                return self.verdict("verified", "match",
-                                    f"Matches {self.co_s} {form_phrase(best.primary)}: "
-                                    f"{self.statement(best, rp)}, which is {word} than {self.c.value_text}.",
-                                    evidence=best.facts)
+    def _approximate(self, rp: ResolvedPeriod, pub: list[Obs]) -> Optional[Verdict]:
+        """'approximately $97 billion': right within the approximation band, max(2 x the written half-unit, 1%),
+        on either side, and shown as approximate (≈); an exact match was already verified."""
+        if self.hedge is None or self.hedge.kind != "approx":
+            return None
+        band = max(2 * self.tol, 0.01 * abs(self.claimed))
+        near = self.matches(pub, tol=band)
+        if not near:
+            return None
+        best = _best_obs(near)
+        return self.verdict("approximate", "approximate",
+                            f"Close enough for an approximation: {self.co_s} {form_phrase(best.primary)} "
+                            f"reports that {self.statement(best, rp)}.", evidence=best.facts)
+
+    def _diag_split(self, rp: ResolvedPeriod, actual: Obs) -> Optional[Verdict]:
+        """The per-share figure as first reported, before a stock split restated it (Netflix's $5.87, now $0.59)."""
+        for old, new, n in self.superseded:
+            if old.primary.period_end != rp.period_end or not self.matches([old]):
+                continue
+            split = (f"a {n}-for-1 stock split" if abs(old.value) > abs(new.value)
+                     else f"a 1-for-{n} reverse stock split")
+            return self.wrong("value_mismatch", actual,
+                              f"{self.c.value_text} is {self.co_s} {self.mlabel()} for {self.plabel(rp)} as reported "
+                              f"before {split}; on today's share count it is {self.fmt(actual.value)}.",
+                              extra=old.facts)
         return None
 
     def _comparison_base(self, rp: ResolvedPeriod, pub: list[Obs]) -> Optional[Verdict]:
@@ -1009,7 +1192,7 @@ class _Check:
         if _PRIOR_Q_RE.search(words):
             shifted.append(periods.shift(rp, self.cal, quarters=-1))
         for srp in shifted:
-            hits = [o for o in self.matches(self.observe(srp)) if self.public(o)]
+            hits = [o for o in self.accepts(self.observe(srp)) if self.public(o)]
             if hits and srp is not None:
                 return self._verified(srp, hits, note=", the comparison period the sentence cites")
         return None
@@ -1110,7 +1293,7 @@ class _Check:
                 continue
             ocal = periods.calendar(self.store, ocik)
             orp = periods.resolve_in_calendar(c.period_text, ocal, context=self.context, period_type=c.period_type,
-                                              comparison=c.comparison)
+                                              comparison=c.comparison, as_of=self.as_of)
             if orp is None or orp.period_end is None:
                 orp = periods.nearest(ocal, rp)
             if orp is None:

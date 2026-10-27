@@ -14,6 +14,11 @@ Phrasings (case-insensitive):
   calendar phrasing   "third quarter of 2026", "Q3 2026", "3Q26", "Q3'26", "2026": only for
                       companies whose fiscal year is the calendar year; ambiguous otherwise
   relative            "the quarter", "", "second quarter", "full year": filled from the context
+  month-named quarter "June quarter", "the September quarter 2026", "December-quarter results"
+                      (Apple's and Microsoft's own phrasing): the company's fiscal quarter that ends in
+                      that month. The year comes from the phrase, else the context (its date or year),
+                      else the latest such quarter that has ended by as_of (or today); that quarter may
+                      not be reported yet (period_end None), and an earlier year is never guessed.
   comparison base     "a year ago", "previous quarter": for a level claim, the context period
                       shifted back; for a percent change, the context period itself
 Unsupported, so None: year-to-date spans ("six months ended ...", "first half").
@@ -145,6 +150,10 @@ _SHIFT_YEAR_RE = re.compile(r"\ba\s+year\s+(?:ago|earlier|before)\b|\byear[\s-]+
 _SHIFT_QUARTER_RE = re.compile(r"\b(?:previous|prior|preceding)\s+quarter\b|\bsequential(?:ly)?\b"
                                r"|\bquarter[\s-]+over[\s-]+quarter\b")
 _SHIFT_AMBIGUOUS_RE = re.compile(r"\blast\s+(?:quarter|year)\b")  # "last quarter" may mean the latest one
+# "June quarter", "June-quarter", "the September quarter", "quarter ended in June" (a month with no day: dates are
+# matched by _DATE_RE first and blanked out of the text this runs on)
+_MONTH_Q_RE = re.compile(rf"\b(?P<mon>{_MON})\.?[\s-]+quarters?\b"
+                         rf"|\bquarters?\s+end(?:ed|ing)?\s+(?:in\s+)?(?P<mon2>{_MON})\b(?!\.?\s+\d{{1,2}}\b)")
 
 
 @dataclass(frozen=True)
@@ -155,6 +164,7 @@ class ParsedPeriod:
     fiscal: bool = False            # "fiscal" or "FY" was written
     end: Optional[date] = None      # an explicit end date
     shift: Optional[str] = None     # "year" | "quarter" | "ambiguous": a comparison-base phrase
+    month: Optional[int] = None     # "June quarter": the quarter that ends in this calendar month
 
 
 def _year(s: str) -> int:
@@ -181,6 +191,8 @@ def parse(text: Optional[str]) -> ParsedPeriod:
         rest = s[:dm.start()] + " " * (dm.end() - dm.start()) + s[dm.end():]
     quarter = year = None
     fiscal = bool(_FISCAL_WORD_RE.search(rest))
+    mq = _MONTH_Q_RE.search(rest)
+    month = _MONTHS[(mq.group("mon") or mq.group("mon2"))[:3]] if mq else None
     m = _ORD_Q_RE.search(rest)
     if m:
         quarter = _ORD[m.group("ord")]
@@ -213,7 +225,7 @@ def parse(text: Optional[str]) -> ParsedPeriod:
         kind = None
     shift = ("year" if _SHIFT_YEAR_RE.search(s) else "quarter" if _SHIFT_QUARTER_RE.search(s)
              else "ambiguous" if _SHIFT_AMBIGUOUS_RE.search(s) else None)
-    return ParsedPeriod(kind, quarter, year, fiscal, end, shift)
+    return ParsedPeriod(kind, quarter, year, fiscal, end, shift, month)
 
 
 # ---------------------------------------------------------------------------
@@ -283,8 +295,51 @@ def _hint(period_type: Optional[str]) -> Optional[str]:
     return {"quarter": "quarter", "annual": "annual"}.get(period_type or "")
 
 
+def _nominal(end: date) -> date:
+    """The month a quarter end is named for. 52/53-week calendars can end a quarter in the first week of the next month
+    (Apple's June quarter of fiscal 2023 ended July 1), so such an end stands for the last day of the previous month."""
+    return end - timedelta(days=end.day) if end.day <= 7 else end
+
+
+def _last_day(year: int, month: int) -> date:
+    return (date(year + (month == 12), month % 12 + 1, 1) - timedelta(days=1))
+
+
+def _by_month(cal: list[CalEntry], p: ParsedPeriod, context: Optional[str],
+              as_of: Optional[date]) -> Optional[ResolvedPeriod]:
+    """'June quarter': the company's fiscal quarter that ends in that month. Which year: the phrase's own ("June quarter
+    2026" is a calendar year, "June quarter of fiscal 2026" a fiscal one), else the context's (its date, or its year),
+    else the latest one that has ended by as_of (today without one). A year the anchor rules out is never guessed:
+    when the latest such quarter isn't reported yet, it resolves with period_end None ("no evidence yet")."""
+    assert p.month is not None
+    pattern = {(e.fiscal_period, e.fiscal_year - _nominal(e.end).year) for e in cal
+               if e.fiscal_period in QUARTERS and _nominal(e.end).month == p.month}
+    if len(pattern) != 1:
+        return None  # no quarter of this company ends in that month (NVIDIA has no June quarter), or it moved
+    fp, offset = pattern.pop()
+    if p.year is not None:
+        return _at(cal, p.year if p.fiscal else p.year + offset, fp)
+    c = parse(context) if context else None
+    if c is not None and c.end is not None:
+        anchor = c.end + timedelta(days=7)  # another company's quarter may end a few days later in the same month
+    elif c is not None and c.year is not None and c.kind not in ("ytd", "conflict"):
+        return _at(cal, c.year if c.fiscal else c.year + offset, fp)
+    else:
+        anchor = _as_date(as_of) or date.today()
+
+    def end_in(year: int) -> date:
+        e = lookup(cal, year + offset, fp)
+        return e.end if e is not None else _last_day(year, p.month)
+
+    year = anchor.year
+    while end_in(year) > anchor:
+        year -= 1
+    return _at(cal, year + offset, fp)
+
+
 def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, context: Optional[str] = None,
-                        period_type: Optional[str] = None, comparison: Optional[str] = None) -> Optional[ResolvedPeriod]:
+                        period_type: Optional[str] = None, comparison: Optional[str] = None,
+                        as_of: Any = None) -> Optional[ResolvedPeriod]:
     p = parse(period_text)
     hint = _hint(period_type)
     level = comparison in (None, "none")  # a comparison-base phrase moves a level claim, not a percent change
@@ -292,6 +347,11 @@ def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, cont
         return None
     if p.end is not None:
         return _by_end(cal, p.end, kind=p.kind or hint, quarter=p.quarter)
+    if p.month is not None:
+        rp = _by_month(cal, p, context, _as_date(as_of))
+        if rp is not None and level and p.shift in ("year", "quarter"):
+            rp = shift(rp, cal, years=-1 if p.shift == "year" else 0, quarters=-1 if p.shift == "quarter" else 0)
+        return rp
     if p.year is not None and (p.kind != "quarter" or p.quarter is not None):
         return _by_year(cal, p)
     if level and p.shift == "ambiguous":
@@ -314,16 +374,18 @@ def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, cont
 
 
 def resolve_period(period_text: Optional[str], store: EvidenceStore, cik: int, *, context: Optional[str] = None,
-                   period_type: Optional[str] = None, comparison: Optional[str] = None) -> Optional[ResolvedPeriod]:
+                   period_type: Optional[str] = None, comparison: Optional[str] = None,
+                   as_of: Any = None) -> Optional[ResolvedPeriod]:
     """Claim.period_text (plus an optional document context such as "NVIDIA Q2 FY2027") resolved on the
     company's fiscal calendar to (fiscal_year, fiscal_period, period_end), or None when ambiguous.
 
     period_type ("quarter" / "annual") breaks the Q4-versus-full-year tie when both end on the same
     date. comparison ("none", "QoQ", "YoY", "sequential") says whether "a year ago" moves the period
-    (a level figure) or describes the comparison base (a percent change).
+    (a level figure) or describes the comparison base (a percent change). as_of anchors a month-named quarter
+    with no year ("the June quarter") to the latest one that had ended by then.
     """
     return resolve_in_calendar(period_text, calendar(store, cik), context=context, period_type=period_type,
-                               comparison=comparison)
+                               comparison=comparison, as_of=as_of)
 
 
 resolve = resolve_period
