@@ -270,6 +270,8 @@ def implied_segment(claim: Claim) -> Optional[str]:
     for m in _REVENUE_SUBJECT_RE.finditer(claim.span_text[:i] if i > 0 else claim.span_text):
         candidates.append(m.group(1))
     for raw in candidates:
+        if phrase := periods.find_period_phrase(raw):
+            raw = raw.replace(phrase, "", 1)
         words = [w for w in re.sub(r"(?:'s|’s)\b", "", raw).replace(",", " ").split()]
         keep = [w for w in words if w.casefold().strip(".") not in _GENERIC_QUALIFIERS
                 and w.casefold() not in company and not re.fullmatch(r"(?:fy|q[1-4])?'?\d{2,4}", w.casefold())]
@@ -554,6 +556,9 @@ def hedge_of(claim: Claim) -> Optional[Hedge]:
     i = span.find(vt) if vt else -1
     lead = re.match(r"[^\d$€£¥+\-−(]*", vt).group(0)
     text = " ".join(f"{span[:i] if i >= 0 else ''} {lead}".lower().split())[-40:]
+    # Extraction may leave the currency sign in span_text while value_text starts at the digit.
+    # It is formatting around the same amount, not a word separating the bound from its number.
+    text = re.sub(r"[\s$€£¥+\-−(]+$", "", text)
     for kind, inclusive, rx in _HEDGES:
         if rx.search(text):
             return Hedge(kind, inclusive)
@@ -704,6 +709,12 @@ class _Check:
                  context: Optional[str], reading: Optional[Reading] = None):
         self.c, self.store, self.as_of, self.context = claim, store, as_of, context
         self.cik, self.ticker = entity
+        context_companies = context_entities(context, store)
+        if context_companies and all(cik != self.cik for cik, _, _ in context_companies):
+            # A named month can share a calendar year/date across companies, but not another company's FY.
+            cp = periods.parse(context)
+            if periods.parse(claim.period_text).month is None or cp.fiscal:
+                self.context = None
         name = " ".join(re.sub(r"\([^)]*\)", " ", claim.entity).split())  # "Amazon (AMZN)" -> "Amazon"
         self.company = name if name.casefold() not in GENERIC_ENTITIES else self.ticker
         self.co_s = possessive(self.company)
@@ -823,14 +834,27 @@ class _Check:
         visible = [o for o in obs if self.public(o)]
         if len(visible) < 2:
             return obs
-        latest = max(visible, key=lambda o: (o.public_at, -_source_rank(o.primary)))
+        def version_order(o: Obs) -> tuple[datetime, int]:
+            return o.public_at, -_source_rank(o.primary)
+
+        visible.sort(key=version_order, reverse=True)
         keep = []
         for o in obs:
-            n = split_ratio(o.primary, latest.primary) if self.public(o) else None
-            if n:
-                self.superseded.append((o, latest, n))
-            else:
+            replacement = None
+            if self.public(o):
+                for newer in visible:
+                    if version_order(newer) <= version_order(o):
+                        continue
+                    n = split_ratio(o.primary, newer.primary)
+                    if n:
+                        replacement = (o, newer, n)
+                        break
+            if replacement is None:
                 keep.append(o)
+            else:
+                # A later genuine restatement can obscure the original ratio: 5.87 -> 0.59 -> 0.60.
+                # The intervening split still supersedes 5.87; both post-split versions remain usable.
+                self.superseded.append(replacement)
         return keep
 
     def growth(self, cik: int, cal: list[CalEntry], rp: ResolvedPeriod, comparison: str, basis: Optional[str],
@@ -915,9 +939,9 @@ class _Check:
         x, lo, hi = sign * self.claimed, sign * o.value - o.err, sign * o.value + o.err
         if h.kind == "nearly":
             band = max(2 * self.tol, 0.01 * abs(x))
-            if hi < x - band or lo > x:
+            if hi < x - band or lo >= x:
                 return False
-            return True if (lo >= x - band and hi <= x) else None
+            return True if (lo >= x - band and hi < x) else None
 
         def meets(v: float) -> bool:
             if h.kind == "lower":
@@ -1175,9 +1199,10 @@ class _Check:
                 continue
             split = (f"a {n}-for-1 stock split" if abs(old.value) > abs(new.value)
                      else f"a 1-for-{n} reverse stock split")
+            basis_time = f"visible at {fmt_ts(self.as_of)}" if self.as_of else "in the latest filing"
             return self.wrong("value_mismatch", actual,
                               f"{self.c.value_text} is {self.co_s} {self.mlabel()} for {self.plabel(rp)} as reported "
-                              f"before {split}; on today's share count it is {self.fmt(actual.value)}.",
+                              f"before {split}; on the share basis {basis_time} it is {self.fmt(actual.value)}.",
                               extra=old.facts)
         return None
 

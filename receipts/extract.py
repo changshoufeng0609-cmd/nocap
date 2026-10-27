@@ -1047,6 +1047,7 @@ def _cache_record(key: str, b: Backend, effort: str, resp: Any, usage: Optional[
 
 def extract_detailed(text: str, context: Optional[str] = None, *, client: Optional[openai.OpenAI] = None,
                      cache_dir: Optional[Path] = CACHE_DIR, use_cache: bool = True, concurrency: int = CONCURRENCY,
+                     extra_cache_dirs: Sequence[Path] = (),
                      effort: str = EFFORT, max_output_tokens: int = MAX_OUTPUT_TOKENS,
                      sleep: Callable[[float], None] = time.sleep, backend: Optional[Backend] = None) -> ExtractResult:
     """extract() plus diagnostics: the context line used, warnings, per-call usage and cost, uncovered numbers.
@@ -1063,6 +1064,7 @@ def extract_detailed(text: str, context: Optional[str] = None, *, client: Option
     if not passages:
         return ExtractResult([], context, model=b.model, backend=b.name)
     cache = _Cache(cache_dir if use_cache else None)
+    read_caches = [cache, *(_Cache(d) for d in extra_cache_dirs)] if use_cache else []
     requests = [build_request(p, context, effort=effort, max_output_tokens=max_output_tokens, backend=b)
                 for _, p in passages]
     keys = [request_key(r, b) for r in requests]
@@ -1071,9 +1073,9 @@ def extract_detailed(text: str, context: Optional[str] = None, *, client: Option
     parsed: list[Optional[ModelResponse]] = [None] * len(passages)
     misses: list[int] = []
     for i, key in enumerate(keys):
-        hit = cache.get(key)
-        status, resp, _, _ = check_output(hit["output_text"], b) if hit else ("miss", None, None, 0)
-        if status == "ok" and resp is not None:
+        found = _first_hit(read_caches, key, b)
+        if found is not None:
+            hit, resp = found
             parsed[i] = resp
             calls[i].update(status="ok", cached=True, usage=hit.get("usage"), cost_usd=0.0, latency_s=0.0)
         else:

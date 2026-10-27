@@ -19,6 +19,7 @@ Query semantics (the verifier relies on these):
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 import threading
@@ -26,7 +27,7 @@ import unicodedata
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Mapping, Optional
 
 from receipts.types import Basis, Fact, Metric
 
@@ -35,6 +36,17 @@ DB_PATH = ROOT / "data" / "facts.sqlite"
 PR_DIR = ROOT / "data" / "pr_facts"
 SCHEMA_VERSION = "1"
 ANY_SEGMENT = "*"
+
+
+def default_data_dir(env: Optional[Mapping[str, str]] = None, *, root: Optional[Path] = None) -> Path:
+    """Shared CLI/API evidence location; explicit overrides never silently use other data."""
+    env = os.environ if env is None else env
+    root = ROOT if root is None else root
+    if value := (env.get("RECEIPTS_DATA_DIR") or "").strip():
+        path = Path(value).expanduser()
+        return path if path.is_absolute() else root / path
+    data = root / "data"
+    return data if (data / "facts.sqlite").exists() else data / "snapshot"
 
 
 # --------------------------------------------------------------------------- metric mapping
@@ -291,9 +303,9 @@ def _sort_key(f: Fact):
 class Store:
     """EvidenceStore backed by data/facts.sqlite (read-only) plus data/pr_facts JSONL files."""
 
-    def __init__(self, db_path: Path | str = DB_PATH, pr_dir: Path | str = PR_DIR):
-        self.db_path = Path(db_path)
-        self.pr_dir = Path(pr_dir)
+    def __init__(self, db_path: Path | str | None = None, pr_dir: Path | str | None = None):
+        self.db_path = Path(db_path) if db_path is not None else default_data_dir() / "facts.sqlite"
+        self.pr_dir = Path(pr_dir) if pr_dir is not None else self.db_path.parent / "pr_facts"
         if not self.db_path.exists():
             raise FileNotFoundError(
                 f"{self.db_path} does not exist. Build it with: python -m receipts.ingest "

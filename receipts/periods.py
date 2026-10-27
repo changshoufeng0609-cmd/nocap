@@ -357,9 +357,11 @@ def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, cont
     if level and p.shift == "ambiguous":
         return None
     c = parse(context) if context else None
-    if c is None or c.kind in ("ytd", "conflict") or (c.end is None and c.year is None):
+    if c is None or c.kind in ("ytd", "conflict") or (c.end is None and c.year is None and c.month is None):
         return None
-    if c.end is not None:
+    if c.month is not None:
+        base = _by_month(cal, c, None, _as_date(as_of))
+    elif c.end is not None:
         base = _by_end(cal, c.end, kind=c.kind, quarter=c.quarter)
     elif c.kind == "quarter" and c.quarter is None:
         return None
@@ -419,6 +421,7 @@ def label(rp: ResolvedPeriod, cal: list[CalEntry]) -> str:
 # Finding a period phrase in running text (used to infer a document context line)
 # ---------------------------------------------------------------------------
 _PHRASE_RES = (
+    re.compile(rf"\b{_MON}\.?[\s-]+quarter(?:\s+(?:of\s+)?(?:fiscal\s+)?\d{{4}})?\b"),
     re.compile(rf"\b(?:(?:first|second|third|fourth)[\s-]+(?:fiscal[\s-]+)?quarter|three\s+months|fiscal\s+year|quarter"
                rf"|year|twelve\s+months)\s+ended\s+{_MON}\.?\s+\d{{1,2}},?\s+\d{{4}}"),
     re.compile(r"\b(?:first|second|third|fourth)[\s-]+(?:fiscal[\s-]+)?quarter\s+(?:of\s+)?(?:fiscal\s+(?:year\s+)?)?"

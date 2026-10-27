@@ -53,6 +53,8 @@ def check_detailed(text: str, *, as_of: Any = None, context: Optional[str] = Non
     """
     as_of_dt = _verify.to_utc(as_of)
     store = store if store is not None else default_store()  # fail before spending on the model API
+    if "extra_cache_dirs" not in extract_kwargs and hasattr(store, "db_path"):
+        extract_kwargs["extra_cache_dirs"] = [store.db_path.parent / "spark_cache"]
     ctx = _extract.infer_context(text) if context is None else (context.strip() or None)
     extraction = _extract.extract_detailed(text, ctx if ctx is not None else "", **extract_kwargs)
     results: list[tuple[Claim, Verdict]] = []

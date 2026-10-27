@@ -77,10 +77,8 @@ def _num(env: Mapping[str, str], name: str, default: float) -> float:
 
 def default_data_dir(env: Mapping[str, str]) -> Path:
     """RECEIPTS_DATA_DIR, else data/ when it holds facts.sqlite (local dev), else data/snapshot (a deploy)."""
-    if (env.get("RECEIPTS_DATA_DIR") or "").strip():
-        return _path(env["RECEIPTS_DATA_DIR"].strip())
-    data = REPO_ROOT / "data"
-    return data if (data / "facts.sqlite").exists() else data / "snapshot"
+    from receipts.store import default_data_dir as resolve_data_dir
+    return resolve_data_dir(env, root=REPO_ROOT)
 
 
 @dataclass(frozen=True)
