@@ -1,6 +1,7 @@
 """Receipts HTTP API (docs/api-contract.md; deploy and local dev: docs/deploy.md).
 
     POST /api/check     server-sent events: meta, claim..., verdict..., then done (or error)
+    POST /api/fix       constrained Wonder corrections, followed by deterministic re-verification
     GET  /api/examples  demo drafts, pre-cached so the demo never waits on the model
     GET  /api/health    data snapshot date, companies and fact count
 
@@ -290,6 +291,15 @@ class CheckBody(BaseModel):
     example_id: Optional[str] = None
 
 
+class FixBody(BaseModel):
+    """Only draft inputs cross the trust boundary; verdicts and receipts are recomputed here."""
+    model_config = ConfigDict(extra="forbid")
+
+    text: str
+    as_of: Optional[str] = None
+    context: Optional[str] = None
+
+
 class Rejected(Exception):
     def __init__(self, reason: str, message: str, retryable: bool):
         super().__init__(reason)
@@ -362,7 +372,8 @@ def _configure_logging() -> None:
 
 
 def create_app(settings: Optional[Settings] = None, *, store: Any = None,
-               client_factory: Optional[Callable[[], Any]] = None) -> FastAPI:
+               client_factory: Optional[Callable[[], Any]] = None,
+               wonder_client_factory: Optional[Callable[[], Any]] = None) -> FastAPI:
     """The API. Tests pass their own settings, a store and a client factory; the module-level app reads the env."""
     settings = settings or Settings.from_env()
     _configure_logging()
@@ -378,7 +389,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                          settings.api_cache_dir / "_spend.json" if settings.api_cache_dir else None)
     make_client = client_factory or (lambda: _extract.make_client(timeout=settings.model_timeout_s))
     lock = threading.Lock()
-    shared: dict[str, Any] = {"store": store, "client": None}
+    shared: dict[str, Any] = {"store": store, "client": None, "wonder_client": None}
 
     def get_store() -> Any:
         with lock:
@@ -395,14 +406,23 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                 shared["client"] = make_client()  # ExtractionError when MODEL_API_KEY is missing
             return shared["client"]
 
+    def get_wonder_client() -> Any:
+        with lock:
+            if shared["wonder_client"] is None:
+                shared["wonder_client"] = (wonder_client_factory() if wonder_client_factory else
+                    _extract.make_client(timeout=settings.model_timeout_s,
+                                         backend=_extract.make_backend("meta", model="muse-wonder-1.0")))
+            return shared["wonder_client"]
+
     app.state.settings, app.state.limiter, app.state.ledger, app.state.cache = settings, limiter, ledger, cache
 
-    async def parse(request: Request) -> tuple[str, Optional[str], Optional[str], Optional[str]]:
+    async def parse(request: Request, body_type: type[BaseModel] = CheckBody
+                    ) -> tuple[str, Optional[str], Optional[str], Optional[str]]:
         body = await request.body()
         if len(body) > settings.max_body_bytes:
             raise Rejected("body_too_large", "The request is too large.", False)
         try:
-            req = CheckBody.model_validate_json(body)
+            req = body_type.model_validate_json(body)
         except ValidationError:
             raise Rejected("bad_request", "The request must be JSON with the draft in a text field.", False)
         text = req.text
@@ -419,7 +439,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         if context is not None and len(context) > MAX_CONTEXT_CHARS:
             raise Rejected("bad_context", f"context must be one short line ({MAX_CONTEXT_CHARS} characters or "
                                           f"fewer).", False)
-        return text, as_of, context, (req.example_id or None)
+        return text, as_of, context, (getattr(req, "example_id", None) or None)
 
     @app.post("/api/check")
     async def check(request: Request) -> StreamingResponse:
@@ -490,6 +510,48 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                      stats.cost_usd, stored, f" error={stats.error}" if stats.error else "")
 
         return sse_response(_from_thread(events, finish, settings.keepalive_s))
+
+    @app.post("/api/fix")
+    async def fix(request: Request) -> StreamingResponse:
+        from receipts.rewrite import RewriteStats, fix_events
+
+        started = time.monotonic()
+        try:
+            text, as_of, context, _ = await parse(request, FixBody)
+        except Rejected as r:
+            log.info("fix rejected reason=%s", r.reason)
+            return error_response(r.message, r.retryable)
+        key = _stream.draft_key(text, as_of, context)
+        try:
+            evidence_store = get_store()
+        except Exception as e:
+            log.error("fix draft=%s store unavailable error=%s", key[:12], type(e).__name__)
+            return error_response("The evidence database isn't available on this server.", False)
+        wait = limiter.acquire(client_ip(request))
+        if wait is not None:
+            return error_response("Too many live checks or fixes from your network. Try again in a few minutes.", True)
+        # The original and revised draft can both need extraction. Wonder has a separate, larger allowance;
+        # cached extraction saves actual spend, but never bypasses a fix request's admission guard.
+        estimate = max(0.35, 0.15 + 2 * len(_extract.split_passages(text)) *
+                       max(0.05, settings.est_cost_per_call_usd))
+        token = ledger.reserve(estimate)
+        if token is None:
+            return error_response("Receipts has reached today's budget for fixes. Checks of the examples still work.",
+                                  False)
+        stats = RewriteStats()
+        events = fix_events(
+            text, as_of=as_of, context=context, store=evidence_store, stats=stats,
+            extract_client_factory=get_client, wonder_client_factory=get_wonder_client,
+            cache_dir=settings.spark_cache_dir, extra_cache_dirs=settings.spark_read_dirs,
+            use_cache=settings.use_caches, timeout_s=settings.model_timeout_s,
+            max_attempts=settings.model_attempts, deadline=started + settings.check_deadline_s)
+
+        def finish_fix() -> None:
+            ledger.settle(token, stats.cost_usd)
+            log.info("fix draft=%s complete=%s calls=%d latency=%.2fs cost=$%.4f", key[:12], stats.complete,
+                     stats.model_calls, time.monotonic() - started, stats.cost_usd)
+
+        return sse_response(_from_thread(events, finish_fix, settings.keepalive_s))
 
     @app.get("/api/examples")
     def examples() -> list[dict[str, Any]]:

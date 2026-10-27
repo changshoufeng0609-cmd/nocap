@@ -98,6 +98,35 @@ export interface CheckRequest {
   example_id: string | null;
 }
 
+export type FixRequest = Pick<CheckRequest, "text" | "as_of" | "context">;
+export type FixStage = "checking" | "rewriting" | "verifying";
+
+export interface FixChange {
+  claim_id: string;
+  before: string;
+  after: string;
+  /** Python character offsets in the original draft (Unicode code points, not UTF-16). */
+  start: number;
+  end: number;
+  explanation: string;
+  evidence: Fact[];
+}
+
+export interface FixResult {
+  original_text: string;
+  rewritten_text: string;
+  /** Corrected means every original wrong claim was repaired; ? claims can remain. */
+  status: "corrected" | "partial" | "unchanged";
+  changes: FixChange[];
+  remaining: { claim_id: string; reason: string; explanation: string }[];
+  results: { claim: Claim; verdict: Verdict }[];
+  counts: Record<Status, number>;
+  cost_usd: number;
+  latency_s: number;
+  model: string;
+  extraction_model: string;
+}
+
 export interface Example {
   id: string;
   title: string;

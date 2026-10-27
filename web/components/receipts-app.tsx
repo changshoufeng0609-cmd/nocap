@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { ClaimsList } from "@/components/claims-list";
 import { AsOfPicker, ExamplePicker, type AsOfState } from "@/components/draft-controls";
+import { FixWithReceipts } from "@/components/fix-with-receipts";
 import { HighlightedDraft } from "@/components/highlighted-draft";
 import { HowItWorks } from "@/components/how-it-works";
 import { ReceiptDetail } from "@/components/receipt-detail";
@@ -397,7 +398,12 @@ export function ReceiptsApp() {
                   if (ex) loadExample(ex);
                 }}
               />
-              <AsOfPicker asOf={asOf} nowValue={nowValue} onChange={setAsOf} />
+              <AsOfPicker asOf={asOf} nowValue={nowValue} onChange={(next) => {
+                cancel();
+                setAsOf(next);
+                setView("edit");
+                setSelectedId(null);
+              }} />
             </div>
 
             {showResults && !(state.phase === "error" && !claims.length) ? <SummaryStrip state={state} /> : null}
@@ -500,6 +506,10 @@ export function ReceiptsApp() {
           {panel}
         </aside>
       </div>
+
+      {showResults && state.phase === "done" && state.done && state.done.counts.wrong > 0 && state.request ? (
+        <FixWithReceipts key={state.run} request={state.request} />
+      ) : null}
 
       <Sheet open={!isDesktop && !!receipt} onOpenChange={(open) => !open && setSelectedId(null)}>
         <SheetContent

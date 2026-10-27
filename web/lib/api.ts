@@ -1,5 +1,5 @@
 import { readSSE } from "./sse";
-import type { CheckRequest, Claim, DoneEvent, ErrorEvent, Example, Health, MetaEvent, Verdict } from "./types";
+import type { CheckRequest, Claim, DoneEvent, ErrorEvent, Example, FixRequest, FixResult, FixStage, Health, MetaEvent, Verdict } from "./types";
 
 /** NEXT_PUBLIC_RECEIPTS_MOCK=1 replays web/fixtures from Next.js route handlers under /mock-api. */
 export const MOCK = process.env.NEXT_PUBLIC_RECEIPTS_MOCK === "1";
@@ -174,5 +174,89 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
   }
   if (!finished && !signal.aborted) {
     h.onError({ message: "The check ended before every claim had a verdict.", retryable: true });
+  }
+}
+
+export interface FixHandlers {
+  onProgress: (stage: FixStage) => void;
+  onResult: (result: FixResult) => void;
+  onError: (error: ErrorEvent) => void;
+}
+
+function isFixResult(value: unknown): value is FixResult {
+  const r = value as FixResult | null;
+  if (!(!!r && typeof r.original_text === "string" && typeof r.rewritten_text === "string" &&
+    ["corrected", "partial", "unchanged"].includes(r.status) &&
+    Array.isArray(r.changes) && r.changes.every((c) => !!c && typeof c.claim_id === "string" &&
+      typeof c.before === "string" && typeof c.after === "string" && typeof c.explanation === "string" &&
+      Number.isInteger(c.start) && Number.isInteger(c.end) && Array.isArray(c.evidence)) &&
+    Array.isArray(r.remaining) && r.remaining.every((x) => !!x && typeof x.claim_id === "string" && typeof x.explanation === "string") &&
+    Array.isArray(r.results) && r.results.every((x) => !!x && !!x.claim && !!x.verdict && Array.isArray(x.verdict.evidence)) &&
+    !!r.counts && ["verified", "wrong", "unverifiable", "approximate"].every((s) =>
+      Number.isFinite(r.counts[s as keyof typeof r.counts])) &&
+    Number.isFinite(r.cost_usd) && Number.isFinite(r.latency_s))) return false;
+
+  // The comparison and citation export must reproduce the exact server-verified text.
+  const chars = Array.from(r.original_text);
+  let cursor = 0;
+  let rebuilt = "";
+  for (const change of [...r.changes].sort((a, b) => a.start - b.start)) {
+    if (change.start < cursor || change.end <= change.start || change.end > chars.length ||
+      chars.slice(change.start, change.end).join("") !== change.before) return false;
+    rebuilt += chars.slice(cursor, change.start).join("") + change.after;
+    cursor = change.end;
+  }
+  return rebuilt + chars.slice(cursor).join("") === r.rewritten_text;
+}
+
+/** Only the draft and its time/context are submitted; receipts and proposed changes come from the server. */
+export async function streamFix(req: FixRequest, h: FixHandlers, signal: AbortSignal): Promise<void> {
+  let finished = false;
+  const fail = (error: ErrorEvent) => {
+    if (!signal.aborted && !finished) {
+      finished = true;
+      h.onError(error);
+    }
+  };
+  try {
+    const res = await fetch(`${API_BASE}/fix`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify({ text: req.text, as_of: req.as_of, context: req.context }),
+      cache: "no-store",
+      signal,
+    });
+    if (signal.aborted) return;
+    if (!res.ok || !res.body) {
+      fail(await errorFromResponse(res));
+      return;
+    }
+    if (!(res.headers.get("content-type") ?? "").includes("text/event-stream")) {
+      fail({ message: "The Receipts API sent an unexpected correction response.", retryable: true });
+      return;
+    }
+    for await (const msg of readSSE(res.body, signal)) {
+      if (signal.aborted) return;
+      let data: unknown;
+      try { data = JSON.parse(msg.data); } catch { continue; }
+      if (!data || typeof data !== "object") continue;
+      const d = data as Record<string, unknown>;
+      if (msg.event === "progress" && ["checking", "rewriting", "verifying"].includes(d.stage as string)) {
+        h.onProgress(d.stage as FixStage);
+      } else if (msg.event === "result") {
+        if (!isFixResult(data) || data.original_text !== req.text) {
+          fail({ message: "The correction response did not match this draft. Please try again.", retryable: true });
+        } else {
+          finished = true;
+          h.onResult({ ...data, changes: [...data.changes].sort((a, b) => a.start - b.start) });
+        }
+      } else if (msg.event === "error") {
+        fail({ message: typeof d.message === "string" && d.message ? d.message : "The correction could not be completed.", retryable: d.retryable === true });
+      }
+      if (finished) return;
+    }
+    fail({ message: "The connection ended before the corrections were verified.", retryable: true });
+  } catch {
+    fail({ message: "Couldn't finish the correction request. Check the connection and try again.", retryable: true });
   }
 }
