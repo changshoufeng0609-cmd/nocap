@@ -83,7 +83,12 @@ _YEAR_AGO_RE = re.compile(r"\ba\s+year\s+(?:ago|earlier|before)\b|\byear[\s-]+(?
 _PRIOR_Q_RE = re.compile(r"\b(?:previous|prior|preceding|last)\s+quarter\b|\bsequential(?:ly)?\b")
 _NUM_RE = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?")
 _NON_GAAP_WORDS_RE = re.compile(r"\b(?:non[\s-]?gaap|adjusted|managed|fte|fully[\s-]taxable[\s-]equivalent|underlying"
-                                r"|organic|pro[\s-]forma)\b", re.I)
+                                r"|organic|pro[\s-]forma"
+                                # constant-currency / FX-neutral growth is not the reported figure (Day 2 eval:
+                                # 10 of 11 false alarms were these, compared against reported growth)
+                                r"|constant[\s-]currenc(?:y|ies)|currency[\s-]neutral|ex[\s-]?fx"
+                                r"|(?:fx|f/x)[\s-]?neutral|on\s+an?\s+(?:fx|f/x|foreign[\s-]exchange)\b)", re.I)
+_NEGATIVE_RE = re.compile(r"\b(?:negative|minus)\b")
 # Words before "revenue" that don't name a segment: totals, bases, periods, and possessives.
 _GENERIC_QUALIFIERS = frozenset(
     "total net gross reported record quarterly annual consolidated overall company group companywide company-wide "
@@ -147,7 +152,9 @@ def claimed_value(claim: Claim) -> float:
     if claim.unit in ("USD", "shares"):
         v *= SCALE_FACTOR.get(claim.scale, 1.0)
     words = f"{claim.span_text} {claim.metric_text}".lower()
-    if v > 0 and claim.metric == "revenue_growth" and _DOWN_RE.search(words):
+    if v > 0 and _NEGATIVE_RE.search(words):
+        v = -v  # "free cash flow was negative $2.12 billion"
+    elif v > 0 and claim.metric == "revenue_growth" and _DOWN_RE.search(words):
         v = -v  # "revenue fell 5%"
     elif v > 0 and claim.metric in ("net_income", "operating_income") and _LOSS_RE.search(words):
         v = -v  # "a net loss of $1.2 billion"
