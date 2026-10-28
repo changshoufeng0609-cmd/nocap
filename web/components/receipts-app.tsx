@@ -110,7 +110,7 @@ export function ReceiptsApp() {
     onDone: (_done, { claims, verdicts }) => {
       if (!claims) {
         toast("No financial figures found in this draft.", {
-          description: "Receipts checks numbers such as revenue, EPS, margins, growth and guidance.",
+          description: "NoCap checks numbers such as revenue, EPS, margins, growth and guidance.",
         });
       }
       const c = displayCounts(verdicts);
@@ -372,7 +372,7 @@ export function ReceiptsApp() {
           <p className="text-sm text-muted-foreground">
             {state.phase === "error"
               ? "No claims were checked."
-              : "No financial figures found. Receipts checks numbers such as revenue, EPS, margins, growth and guidance."}
+              : "No financial figures found. NoCap checks numbers such as revenue, EPS, margins, growth and guidance."}
           </p>
         )}
       </div>
@@ -508,7 +508,7 @@ export function ReceiptsApp() {
 
         <aside
           id={isDesktop ? PANEL_ID : undefined}
-          aria-label={selectedClaim && isDesktop ? "Receipt" : showResults ? "Claims" : "About Receipts"}
+          aria-label={selectedClaim && isDesktop ? "Receipt" : showResults ? "Claims" : "About NoCap"}
           className="min-w-0 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto lg:pr-1 lg:pb-4"
         >
           {panel}

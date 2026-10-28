@@ -16,9 +16,9 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "Receipts · Every financial number, checked against SEC filings",
+  title: "NoCap · Check financial numbers against SEC filings",
   description:
-    "Paste a draft and Receipts checks every financial number against SEC EDGAR filings before it ships, with a receipt for each one.",
+    "Check numeric claims in an earnings draft against SEC filing evidence. Inspect the source behind each supported verdict and see what remains unverifiable.",
 };
 
 export const viewport: Viewport = {

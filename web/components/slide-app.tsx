@@ -146,13 +146,13 @@ export function SlideApp() {
             </div>
             <AsOfPicker asOf={asOf} nowValue={nowValue} onChange={(next) => { invalidate(); setAsOf(next); }} />
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">On check, the image is sent to Meta for reading. Receipts does not save the upload.</p>
+              <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">On check, the image is sent to Meta for reading. NoCap does not save the upload.</p>
               <Button onClick={check} disabled={!upload || running || preparing || MOCK} size="lg" className="min-h-10">
                 {running || preparing ? <Loader2Icon className="animate-spin" aria-hidden /> : <ScanLineIcon aria-hidden />}
                 {preparing ? "Opening image…" : running ? "Checking slide…" : "Check slide"}
               </Button>
             </div>
-            {MOCK ? <p className="text-xs text-muted-foreground">Slide checks require the live Receipts API. Start the app without mock mode to use this feature.</p> : null}
+            {MOCK ? <p className="text-xs text-muted-foreground">Slide checks require the live NoCap API. Start the app without mock mode to use this feature.</p> : null}
             {inputError ? <p role="alert" className="text-sm text-bad">{inputError}</p> : null}
           </div>
 

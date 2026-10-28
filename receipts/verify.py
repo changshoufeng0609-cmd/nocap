@@ -137,7 +137,7 @@ _BASE_METRIC_WORDS: tuple[tuple[str, re.Pattern[str]], ...] = tuple((m, re.compi
                            r"|\b(?:total\s+)?non-?interest\s+expenses?\b"),
     ("net_income", r"\bnet\s+(?:income|earnings|profit)\b"),
 ))
-# Level metrics whose percent change Receipts derives from two periods' facts (cur / prev - 1).
+# Level metrics whose percent change NoCap derives from two periods' facts (cur / prev - 1).
 GROWTH_BASES = frozenset({"revenue", "segment_revenue", "operating_income", "net_income", "eps_diluted", "eps_basic",
                           "operating_expenses", "gross_profit", "cost_of_revenue", "research_and_development",
                           "operating_cash_flow", "free_cash_flow", "net_interest_income"})
@@ -425,7 +425,7 @@ def _is_change(claim: Claim) -> bool:
 
 
 def interpret(claim: Claim) -> Optional[Reading]:
-    """How the verifier reads a claim, or None when it names nothing Receipts tracks (then "?", never "✗").
+    """How the verifier reads a claim, or None when it names nothing NoCap tracks (then "?", never "✗").
 
     * revenue_growth: a percent change of revenue (or of a segment's revenue).
     * A percent figure on a level metric with change wording ("operating income increased 11%"): its change.
@@ -671,11 +671,11 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
     if reading is None:
         what = f" ({claim.metric_text})" if claim.metric_text else ""
         return plain("unverifiable", "no_evidence",
-                     f"Receipts doesn't track this kind of figure{what} yet, so there is no filing fact to check.")
+                     f"NoCap doesn't track this kind of figure{what} yet, so there is no filing fact to check.")
     if currency_neutral(claim):
         return plain("unverifiable", "no_evidence",
                      f"{claim.value_text} is a constant-currency (FX-neutral) figure; filings report results at actual "
-                     f"exchange rates, so Receipts can't check it.")
+                     f"exchange rates, so NoCap can't check it.")
     entity = resolve_claim_entity(claim, store, context)
     if entity is None:
         return unresolved_entity(claim, store, as_of_dt)
@@ -688,7 +688,7 @@ def _join(names: list[str]) -> str:
 
 def unresolved_entity(claim: Claim, store: EvidenceStore, as_of: Optional[datetime] = None) -> Verdict:
     """'?' for a company the store doesn't resolve, saying why: a generic subject with no company in the context, a
-    name that mixes or abbreviates covered companies, or a company outside Receipts' coverage (named plainly, with
+    name that mixes or abbreviates covered companies, or a company outside NoCap's coverage (named plainly, with
     the list of covered companies, instead of suggesting it isn't in EDGAR)."""
     who = " ".join((claim.entity or "").split())
 
@@ -707,12 +707,12 @@ def unresolved_entity(claim: Claim, store: EvidenceStore, as_of: Optional[dateti
     mentioned = [name for _cik, ticker, name in covered
                  if any(re.search(rf"(?<![\w&]){re.escape(a)}(?![\w&])", who, re.I) for a in [ticker, *ALIASES.get(ticker, [])])]
     if len(mentioned) > 1:
-        return plain("ambiguous", f"\"{who}\" names more than one company ({_join(mentioned)}), so Receipts can't "
+        return plain("ambiguous", f"\"{who}\" names more than one company ({_join(mentioned)}), so NoCap can't "
                                   f"tell whose figure this is.")
     if mentioned:  # "Amazon Web Services": a unit of a covered company, never checked against its company-wide total
-        return plain("ambiguous", f"\"{who}\" is part of {mentioned[0]}, not the whole company, so Receipts doesn't "
+        return plain("ambiguous", f"\"{who}\" is part of {mentioned[0]}, not the whole company, so NoCap doesn't "
                                   f"check it against {possessive(mentioned[0])} company-wide filings.")
-    return plain("no_evidence", f"Receipts covers {len(covered)} companies today: {_join([n for _, _, n in covered])}; "
+    return plain("no_evidence", f"NoCap covers {len(covered)} companies today: {_join([n for _, _, n in covered])}; "
                                 f"\"{who}\" isn't one of them, so there is no filing data to check it against.")
 
 
@@ -1017,7 +1017,7 @@ class _Check:
                                 "This figure exceeds the supported numeric range after applying its units or precision.")
         if not self._unit_fits():
             return self.verdict("unverifiable", "no_evidence",
-                                f"Receipts checks {self.mlabel(False)} in {_unit_words(self.metric)}, and this figure "
+                                f"NoCap checks {self.mlabel(False)} in {_unit_words(self.metric)}, and this figure "
                                 f"is written in {_unit_words_of(c.unit)}.")
         if self.metric == "segment_revenue" and not self.segment:
             return self.verdict("unverifiable", "ambiguous", "The draft doesn't say which segment this revenue is for.")
@@ -1150,7 +1150,7 @@ class _Check:
                 return self.verdict(
                     "unverifiable", "no_evidence",
                     f"{self.co_s} earnings release for {self.plabel(rp)} (8-K accepted {fmt_ts(release_at)}) was "
-                    f"out by the as-of time {fmt_ts(self.as_of)}, but Receipts has no press-release figure for its "
+                    f"out by the as-of time {fmt_ts(self.as_of)}, but NoCap has no press-release figure for its "
                     f"{self.mlabel()}, and its {form_phrase(binding)} came later, at {fmt_ts(binding.accepted_at)}.")
         elif has_release_fact or release_at is not None:
             text = (f"{what} wasn't public until its {form_phrase(binding)} was accepted at "
@@ -1158,7 +1158,7 @@ class _Check:
         else:
             return self.verdict(
                 "unverifiable", "no_evidence",
-                f"The first filing with {what} that Receipts holds is its {form_phrase(binding)}, accepted at "
+                f"The first filing with {what} that NoCap holds is its {form_phrase(binding)}, accepted at "
                 f"{fmt_ts(binding.accepted_at)}, after the as-of time {fmt_ts(self.as_of)}, and the earnings release "
                 f"that may have come earlier can't be dated.")
         if not value_ok:
@@ -1384,7 +1384,7 @@ class _Check:
 
 
 def known_companies(store: EvidenceStore) -> list[tuple[int, str, str]]:
-    """(cik, ticker, display name) for every company in Receipts' universe that the store resolves. The universe is
+    """(cik, ticker, display name) for every company in NoCap's universe that the store resolves. The universe is
     receipts.store.ALIASES (the ten project companies); a store that doesn't know a ticker just skips it."""
     try:
         from receipts.store import ALIASES

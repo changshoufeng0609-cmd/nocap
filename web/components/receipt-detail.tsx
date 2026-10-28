@@ -167,7 +167,7 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No filing holds this figure, so there is nothing to cite. Receipts marks it ? rather than guessing.
+              No filing holds this figure, so there is nothing to cite. NoCap marks it ? rather than guessing.
             </p>
           )}
         </section>

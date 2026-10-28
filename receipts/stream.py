@@ -42,7 +42,7 @@ RESULT_MODULES = ("types.py", "extract.py", "periods.py", "verify.py", "store.py
 
 Event = tuple[str, dict[str, Any]]
 
-MSG_INTERNAL = "Receipts hit an internal error while checking this draft. Please try again."
+MSG_INTERNAL = "NoCap hit an internal error while checking this draft. Please try again."
 MSG_NO_MODEL = "Live checks are unavailable right now because the model API is not configured. The examples still work."
 
 
@@ -242,7 +242,7 @@ def verdict_for(claim: Claim, store: EvidenceStore, as_of: Optional[datetime], c
     except Exception as e:
         log.error("verify failed draft=%s claim=%s error=%s", draft_hash[:12], claim.id, type(e).__name__)
         return Verdict(claim_id=claim.id, status="unverifiable", reason="no_evidence", as_of=as_of,
-                       explanation=f"Receipts hit an internal error ({type(e).__name__}) checking this claim.")
+                       explanation=f"NoCap hit an internal error ({type(e).__name__}) checking this claim.")
 
 
 def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: Optional[str],

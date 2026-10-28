@@ -1,8 +1,8 @@
-# AGENTS.md: Receipts
+# AGENTS.md: NoCap
 
 Project instructions for coding agents such as Codex and Muse Code. Claude Code reads `CLAUDE.md`; both files point to the same sources of truth.
 
-- **What this is:** Receipts verifies every financial number in a draft against SEC filings. It's our entry in the Meta Global AI Developer Hackathon (Indie track, team **NoCap**).
+- **What this is:** NoCap verifies every financial number in a draft against SEC filings. It's our entry in the Meta Global AI Developer Hackathon (Indie track, team **NoCap**).
 - **Spec and design rules:** `.claude/reference/project.md`
 - **Current handoff and task list:** `docs/HANDOFF.md`. Read it before doing anything.
 

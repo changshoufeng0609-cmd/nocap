@@ -1,4 +1,4 @@
-# The Receipts API as Vercel's Python builder sees it (docs/deploy.md). In this directory pyproject.toml takes
+# The NoCap API as Vercel's Python builder sees it (docs/deploy.md). In this directory pyproject.toml takes
 # precedence over requirements.txt, so the deployed function gets only what receipts.api imports at runtime.
 # Local development, the CLI, ingestion and tests keep using requirements.txt. Python is pinned in .python-version.
 [project]

@@ -1,4 +1,4 @@
-"""Receipts HTTP API (docs/api-contract.md; deploy and local dev: docs/deploy.md).
+"""NoCap HTTP API (docs/api-contract.md; deploy and local dev: docs/deploy.md).
 
     POST /api/check     server-sent events: meta, claim..., verdict..., then done (or error)
     POST /api/fix       constrained Wonder corrections, followed by deterministic re-verification
@@ -379,7 +379,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
     """The API. Tests pass their own settings, a store and a client factory; the module-level app reads the env."""
     settings = settings or Settings.from_env()
     _configure_logging()
-    app = FastAPI(title="Receipts API", version="0.3.0", docs_url="/api/docs", redoc_url=None,
+    app = FastAPI(title="NoCap API", version="0.3.0", docs_url="/api/docs", redoc_url=None,
                   openapi_url="/api/openapi.json")
     if settings.cors_origins:
         app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins), allow_methods=["GET", "POST"],
@@ -499,7 +499,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             if token is None:
                 log.warning("check %s rejected reason=daily_budget spent=$%.4f cap=$%.2f", tag,
                             ledger.spent_today(), settings.daily_budget_usd)
-                return error_response("Receipts has reached today's budget for live checks. The examples still "
+                return error_response("NoCap has reached today's budget for live checks. The examples still "
                                       "work, and live checks resume tomorrow (UTC).", False)
 
         stats = _stream.CheckStats()
@@ -546,7 +546,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                        max(0.05, settings.est_cost_per_call_usd))
         token = ledger.reserve(estimate)
         if token is None:
-            return error_response("Receipts has reached today's budget for fixes. Checks of the examples still work.",
+            return error_response("NoCap has reached today's budget for fixes. Checks of the examples still work.",
                                   False)
         stats = RewriteStats()
         events = fix_events(
@@ -598,7 +598,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             return error_response("Too many live checks from your network. Try again in a few minutes.", True)
         token = ledger.reserve(slides.RESERVE_USD)
         if token is None:
-            return error_response("Receipts has reached today's budget for slide checks. Text examples still work.", False)
+            return error_response("NoCap has reached today's budget for slide checks. Text examples still work.", False)
         stats = slides.SlideStats()
         events = slides.slide_events(image, store=evidence_store, context=context, as_of=as_of, stats=stats,
                                      client_factory=get_slide_client, timeout_s=settings.model_timeout_s,

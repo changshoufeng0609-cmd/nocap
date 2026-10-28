@@ -26,10 +26,10 @@ export function SiteHeader() {
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <LogoMark className="size-7 shrink-0" />
-            <h1 className="font-serif text-[1.7rem] leading-none font-semibold tracking-[-0.015em]">Receipts</h1>
+            <h1 className="font-serif text-[1.7rem] leading-none font-semibold tracking-[-0.015em]">NoCap</h1>
           </div>
           <p className="mt-2.5 text-[0.95rem] text-pretty text-muted-foreground">
-            Every financial number, checked against SEC filings before it ships.
+            Check financial numbers against SEC filings before you publish.
           </p>
           <p className="mt-1.5 text-xs text-muted-foreground sm:hidden">{BUILT_ON}</p>
         </div>

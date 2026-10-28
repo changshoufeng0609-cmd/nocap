@@ -39,7 +39,7 @@ async function errorFromResponse(res: Response): Promise<ErrorEvent> {
   let message = await bodyMessage(res);
   if (GENERIC.test(message)) message = "";
   if (!message && res.status >= 500) {
-    return { message: "The Receipts API isn't responding.", retryable: true };
+    return { message: "The NoCap API isn't responding.", retryable: true };
   }
   if (res.status === 429) {
     return { message: message || "Too many checks in a short time. Wait a moment, or try an example.", retryable: true };
@@ -47,8 +47,8 @@ async function errorFromResponse(res: Response): Promise<ErrorEvent> {
   if (!message) {
     message =
       res.status === 404
-        ? "The Receipts API isn't available at this address."
-        : `The Receipts API returned an error (HTTP ${res.status}).`;
+        ? "The NoCap API isn't available at this address."
+        : `The NoCap API returned an error (HTTP ${res.status}).`;
   }
   return { message, retryable: res.status >= 500 };
 }
@@ -64,7 +64,7 @@ export async function fetchExamples(signal?: AbortSignal): Promise<Example[]> {
     res = await fetch(`${API_BASE}/examples`, { signal, headers: { Accept: "application/json" } });
   } catch (e) {
     if (signal?.aborted) throw e;
-    throw new ApiError("Couldn't reach the Receipts API to load the examples.", true);
+    throw new ApiError("Couldn't reach the NoCap API to load the examples.", true);
   }
   if (!res.ok) {
     const err = await errorFromResponse(res);
@@ -114,7 +114,7 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
       signal,
     });
   } catch {
-    if (!signal.aborted) h.onError({ message: "Couldn't reach the Receipts API.", retryable: true });
+    if (!signal.aborted) h.onError({ message: "Couldn't reach the NoCap API.", retryable: true });
     return;
   }
   if (!res.ok || !res.body) {
@@ -125,7 +125,7 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
   if (!type.includes("text/event-stream")) {
     if (!signal.aborted) {
       const message = await bodyMessage(res);
-      h.onError({ message: message || "The Receipts API sent an unexpected response.", retryable: true });
+      h.onError({ message: message || "The NoCap API sent an unexpected response.", retryable: true });
     }
     return;
   }
@@ -232,7 +232,7 @@ export async function streamFix(req: FixRequest, h: FixHandlers, signal: AbortSi
       return;
     }
     if (!(res.headers.get("content-type") ?? "").includes("text/event-stream")) {
-      fail({ message: "The Receipts API sent an unexpected correction response.", retryable: true });
+      fail({ message: "The NoCap API sent an unexpected correction response.", retryable: true });
       return;
     }
     for await (const msg of readSSE(res.body, signal)) {

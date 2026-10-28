@@ -4,7 +4,7 @@ import { DISPLAY_STATUSES, STATUS_META } from "@/lib/claims";
 const STEPS = [
   {
     title: "Extract",
-    body: "Muse Spark reads the draft and turns every figure into a typed claim: metric, value, unit, period, company.",
+    body: "Muse Spark extracts numeric claims from the draft: metric, value, unit, period and company. Review the highlights for omissions or misreadings.",
   },
   {
     title: "Verify",
@@ -12,7 +12,7 @@ const STEPS = [
   },
   {
     title: "Cite",
-    body: "Every verdict comes with its receipt: the filing, accession number, and the time EDGAR accepted it.",
+    body: "Inspect the filing, accession number and EDGAR acceptance time behind supported verdicts. A claim without usable evidence remains unverifiable.",
   },
 ];
 

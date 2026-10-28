@@ -2,7 +2,7 @@
 
 This folder is the user's entry for the Meta Global AI Developer Hackathon (Meta × Cerebral Valley, virtual, 10 days).
 
-- **Project (decided 2026-10-27):** **Receipts** (working name), a fact-checker that verifies every financial number in a draft against SEC filings, built for financial journalists and analysts. Indie track, Build for Your World. Spec: `.claude/reference/project.md`.
+- **Project (decided 2026-10-27):** **NoCap** (renamed from Receipts by the user on 2026-10-28), a fact-checker that verifies every financial number in a draft against SEC filings, built for financial journalists and analysts. Indie track, Build for Your World. Spec: `.claude/reference/project.md`.
 
 - **Submission deadline: Thu 11/05 10:00 Taipei** (Wed 11/04 9:00 PM ET). Treat 11/05 09:00 Taipei as the hard stop. Credit claims close at the same time.
 - **Official rubric:** Impact 30%, Use of Meta AI Tooling 25%, Technical Depth & Execution 20%, Demo 25%. Stage One is a pass/fail check that the project fits a theme and genuinely uses Meta models.

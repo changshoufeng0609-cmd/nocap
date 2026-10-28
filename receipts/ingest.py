@@ -576,7 +576,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     filings_start = facts_start - timedelta(days=INPUT_MARGIN_DAYS)
     max_age = 3600.0 if args.refresh else None
     tickers = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
-    print(f"Receipts ingest: {len(tickers)} companies, last {args.quarters} quarters + {YOY_QUARTERS} for YoY; "
+    print(f"NoCap ingest: {len(tickers)} companies, last {args.quarters} quarters + {YOY_QUARTERS} for YoY; "
           f"facts ending since {facts_start}, filings since {filings_start} -> {args.db}")
 
     edgar = Edgar(offline=args.offline, max_live_requests=args.max_requests)

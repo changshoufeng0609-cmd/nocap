@@ -30,7 +30,7 @@ export function SiteFooter() {
             </>
           ) : null}
           .
-          {MOCK ? " Mock mode: replaying checks recorded from the Receipts CLI." : null}
+          {MOCK ? " Mock mode: replaying checks recorded from the NoCap CLI." : null}
         </p>
       </div>
     </footer>

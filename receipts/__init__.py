@@ -1,1 +1,1 @@
-"""Receipts: verify every financial number in a draft against SEC filings."""
+"""NoCap: verify every financial number in a draft against SEC filings."""

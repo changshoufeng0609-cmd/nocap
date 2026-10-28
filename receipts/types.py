@@ -1,4 +1,4 @@
-"""Shared contracts for Receipts. Every module exchanges these types.
+"""Shared contracts for NoCap. Every module exchanges these types.
 
 The LLM proposes and code decides. Claims come from the model, Facts come from SEC filings, and
 Verdicts are computed only by deterministic code. Do not change this file casually: four modules

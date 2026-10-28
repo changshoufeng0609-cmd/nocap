@@ -63,7 +63,7 @@ def render(path_label: str, text: str, res: Any, *, inferred: bool) -> str:
     w: list[str] = []
     ctx = res.context or "none"
     asof = fmt_ts(res.as_of) if res.as_of else "latest filings"
-    w.append(f"Receipts · {path_label}")
+    w.append(f"NoCap · {path_label}")
     w.append(f"context: {ctx}{' (inferred)' if inferred and res.context else ''} · as of: {asof}")
     w.append("─" * 78)
     w.append(annotate(text, res.results).rstrip())
@@ -106,7 +106,7 @@ def to_json(path_label: str, res: Any) -> str:
 
 def _parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="python -m receipts",
-                                description="Receipts: verify every financial number in a draft against SEC filings.")
+                                description="NoCap: verify every financial number in a draft against SEC filings.")
     sub = p.add_subparsers(dest="command", required=True)
     c = sub.add_parser("check", help="extract the draft's numeric claims and verify each against SEC filings")
     c.add_argument("draft", help="text file with the draft, or - for stdin")

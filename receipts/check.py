@@ -64,7 +64,7 @@ def check_detailed(text: str, *, as_of: Any = None, context: Optional[str] = Non
         except Exception as e:  # one bad claim must not sink the whole draft
             log.exception("verify failed for %s", claim.id)
             verdict = Verdict(claim_id=claim.id, status="unverifiable", reason="no_evidence", as_of=as_of_dt,
-                              explanation=f"Receipts hit an internal error ({type(e).__name__}) checking this claim.")
+                              explanation=f"NoCap hit an internal error ({type(e).__name__}) checking this claim.")
         results.append((claim, verdict))
     return CheckResult(results, ctx, as_of_dt, list(extraction.warnings), extraction)
 
