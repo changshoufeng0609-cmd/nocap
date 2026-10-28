@@ -85,7 +85,18 @@ export interface CostReport {
   model_calls?: number;
 }
 
+/** Digit-based candidates linked to extracted claims, independent of their verdicts. */
+export interface NumericCoverage {
+  version: 1;
+  candidate_count: number;
+  covered_count: number;
+  excluded_count: number;
+  /** Python Unicode code-point offsets in the exact checked draft. */
+  uncovered: { start: number; end: number; text: string }[];
+}
+
 export interface DoneEvent extends CostReport {
+  coverage?: NumericCoverage;
   counts: Record<Status, number>;
   latency_s: number;
   cost_usd: number;
@@ -119,6 +130,8 @@ export interface FixChange {
 }
 
 export interface FixResult extends CostReport {
+  original_coverage?: NumericCoverage;
+  coverage?: NumericCoverage;
   original_text: string;
   rewritten_text: string;
   /** Corrected means every original wrong claim was repaired; ? claims can remain. */

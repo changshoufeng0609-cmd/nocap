@@ -16,6 +16,7 @@ from typing import Any, Optional
 
 from receipts import extract as _extract
 from receipts import verify as _verify
+from receipts.coverage import numeric_coverage
 from receipts.types import Claim, EvidenceStore, Verdict
 
 log = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class CheckResult:
     as_of: Optional[datetime]
     warnings: list[str] = field(default_factory=list)
     extraction: Optional[_extract.ExtractResult] = None
+    coverage: Optional[dict[str, Any]] = None
 
 
 def check_detailed(text: str, *, as_of: Any = None, context: Optional[str] = None,
@@ -66,7 +68,8 @@ def check_detailed(text: str, *, as_of: Any = None, context: Optional[str] = Non
             verdict = Verdict(claim_id=claim.id, status="unverifiable", reason="no_evidence", as_of=as_of_dt,
                               explanation=f"NoCap hit an internal error ({type(e).__name__}) checking this claim.")
         results.append((claim, verdict))
-    return CheckResult(results, ctx, as_of_dt, list(extraction.warnings), extraction)
+    return CheckResult(results, ctx, as_of_dt, list(extraction.warnings), extraction,
+                       numeric_coverage(text, extraction.claims))
 
 
 def check(text: str, *, as_of: Any = None, context: Optional[str] = None,

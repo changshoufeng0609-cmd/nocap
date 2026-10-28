@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { StatusChip, StatusGlyph } from "@/components/status";
 import { ReceiptCalculation } from "@/components/receipt-calculation";
+import { NumberCoverage } from "@/components/number-coverage";
 import { Button } from "@/components/ui/button";
 import { useFix } from "@/hooks/use-fix";
 import { byDocumentOrder, DISPLAY_STATUSES, STATUS_META, displayCounts, displayStatus } from "@/lib/claims";
@@ -89,7 +90,7 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
     ? "No safe corrections were applied."
     : result.status === "partial"
       ? `${changed} ${changed === 1 ? "correction" : "corrections"} verified; some red flags still need review.`
-      : `${changed} ${changed === 1 ? "correction" : "corrections"} verified. Original red flags resolved.`;
+      : `${changed} ${changed === 1 ? "correction" : "corrections"} verified. Extracted red flags resolved.`;
 
   async function copy(citations: boolean) {
     try {
@@ -112,6 +113,12 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
           {" "}{formatLatency(result.latency_s)} · {result.cost_is_estimate ? "estimated " : ""}{formatCost(result.cost_usd)}
         </p>
       </div>
+
+      <NumberCoverage coverage={result.coverage} text={result.rewritten_text} label={changed ? "Revised draft number coverage" : "Original draft number coverage"} />
+      {changed ? <details className="border-b border-border">
+        <summary className="cursor-pointer px-4 py-3 text-xs text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring sm:px-6">Compare original draft coverage</summary>
+        <NumberCoverage coverage={result.original_coverage} text={result.original_text} label="Original draft number coverage" />
+      </details> : null}
 
       {changed ? (
         <>

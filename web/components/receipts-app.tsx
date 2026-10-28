@@ -11,6 +11,7 @@ import { HighlightedDraft } from "@/components/highlighted-draft";
 import { HowItWorks } from "@/components/how-it-works";
 import { ReceiptDetail } from "@/components/receipt-detail";
 import { SummaryStrip } from "@/components/summary-strip";
+import { NumberCoverage } from "@/components/number-coverage";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
@@ -109,7 +110,7 @@ export function ReceiptsApp() {
     },
     onDone: (_done, { claims, verdicts }) => {
       if (!claims) {
-        toast("No financial figures found in this draft.", {
+        toast("No claims were extracted from this draft.", {
           description: "NoCap checks numbers such as revenue, EPS, margins, growth and guidance.",
         });
       }
@@ -372,7 +373,7 @@ export function ReceiptsApp() {
           <p className="text-sm text-muted-foreground">
             {state.phase === "error"
               ? "No claims were checked."
-              : "No financial figures found. NoCap checks numbers such as revenue, EPS, margins, growth and guidance."}
+              : "No claims were extracted. Review the number coverage above for candidates that were not checked."}
           </p>
         )}
       </div>
@@ -414,6 +415,7 @@ export function ReceiptsApp() {
             </div>
 
             {showResults && !(state.phase === "error" && !claims.length) ? <SummaryStrip state={state} /> : null}
+            {showResults && state.phase === "done" && state.request ? <NumberCoverage coverage={state.done?.coverage} text={state.request.text} /> : null}
 
             {state.phase === "error" && state.error ? (
               <Alert className="rounded-none border-x-0 border-t-0 bg-bad-tint/50 px-4 py-3.5 sm:px-6">

@@ -20,6 +20,7 @@ from typing import Any, Callable, Iterator, Optional, Sequence
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract, periods, verify
+from receipts.coverage import numeric_coverage
 from receipts.types import Claim, EvidenceStore, Verdict
 
 MODEL = "muse-wonder-1.0"
@@ -164,7 +165,9 @@ def _check(text: str, *, context: str, as_of: Any, store: EvidenceStore, stats: 
         if received != 1:
             raise IncompleteExtraction("Not every passage could be checked. Your original draft is unchanged.")
     ranges = [value_range(text, c) for c in claims]
-    if any(r is None for r in ranges) or extract.uncovered_numbers(text, [r for r in ranges if r is not None]):
+    if (any(r is None for r in ranges)
+            or extract.uncovered_numbers(text, [r for r in ranges if r is not None])
+            or numeric_coverage(text, claims)["uncovered"]):
         raise IncompleteExtraction("Not every figure could be located safely. Your original draft is unchanged.")
     return [(c, verify.verify(c, store, as_of=as_of, context=context)) for c in claims]
 
@@ -292,6 +295,8 @@ def _result(text: str, rewritten: str, original: list[tuple[Claim, Verdict]], re
             "changes": changes, "remaining": remaining,
             "results": [{"claim": c.model_dump(mode="json"), "verdict": v.model_dump(mode="json")}
                         for c, v in results], "counts": counts,
+            "original_coverage": numeric_coverage(text, [c for c, _ in original]),
+            "coverage": numeric_coverage(rewritten, [c for c, _ in results]),
             **_billing(stats), "latency_s": round(time.monotonic() - started, 2),
             "model": MODEL, "extraction_model": extract.active_backend().model}
 

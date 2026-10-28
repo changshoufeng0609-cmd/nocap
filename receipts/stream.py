@@ -29,6 +29,7 @@ from pydantic import ValidationError
 
 from receipts import extract as _extract
 from receipts import verify as _verify
+from receipts.coverage import numeric_coverage, validate_coverage
 from receipts.types import Claim, EvidenceStore, Verdict
 
 log = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ STATUSES = ("verified", "wrong", "unverifiable", "approximate")
 CACHE_VERSION = 1
 KEEPALIVE = ": keep-alive\n\n"  # an SSE comment; EventSource-style parsers ignore it
 # The modules whose code decides what a check returns. A stream recorded under other code is not replayed.
-RESULT_MODULES = ("types.py", "extract.py", "periods.py", "verify.py", "store.py", "stream.py")
+RESULT_MODULES = ("types.py", "extract.py", "coverage.py", "periods.py", "verify.py", "store.py", "stream.py")
 
 Event = tuple[str, dict[str, Any]]
 
@@ -152,6 +153,9 @@ def valid_events(raw: Any) -> Optional[list[Event]]:
                 Claim.model_validate(data["claim"])
             elif name == "verdict":
                 Verdict.model_validate(data["verdict"])
+            elif name == "done" and "coverage" in data:
+                if not validate_coverage(data["coverage"]):
+                    return None
             elif name not in ("meta", "done"):
                 return None
             events.append((name, data))
@@ -287,6 +291,7 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
     yield emit("meta", {"draft_hash": draft_hash, "cached": False, "passages": stats.passages, "as_of": as_of})
     ctx = _extract.infer_context(text) if context is None else (context.strip() or None)
     admission_rejected = False
+    extracted_claims: list[Claim] = []
     try:
         results = _extract.iter_extract(text, ctx if ctx is not None else "",
                                         usage_callback=account, before_model_call=before_model_call, **extract_kwargs)
@@ -300,6 +305,7 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
                                 res.call.get("status"))
                     continue
                 for claim in res.claims:
+                    extracted_claims.append(claim)
                     yield emit("claim", {"claim": claim.model_dump(mode="json")})
                 for claim in res.claims:
                     verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash)
@@ -326,4 +332,5 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
         return
     stats.complete = True
     yield emit("done", {"counts": dict(stats.counts), "latency_s": round(time.monotonic() - t0, 2),
-                        "cost_usd": round(stats.cost_usd, 6), "model": model_name()})
+                        "cost_usd": round(stats.cost_usd, 6), "model": model_name(),
+                        "coverage": numeric_coverage(text, extracted_claims)})

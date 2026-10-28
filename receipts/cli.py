@@ -81,6 +81,14 @@ def render(path_label: str, text: str, res: Any, *, inferred: bool) -> str:
     w.append("─" * 78)
     w.append(f"{counts['verified']} ✓ verified · {counts['wrong']} ✗ wrong · {counts['unverifiable']} ? unverifiable"
              f" · {counts['approximate']} ≈ approximate")
+    coverage = getattr(res, "coverage", None)
+    if coverage is not None:
+        w.append(f"number coverage: {coverage['covered_count']}/{coverage['candidate_count']} digit-based "
+                 "candidates linked to extracted claims (not a correctness verdict)")
+        for candidate in coverage["uncovered"]:
+            w.append(f"Not checked: {candidate['text']!r} at offset {candidate['start']}")
+    else:
+        w.append("number coverage: unavailable")
     ex = res.extraction
     if ex is not None:
         w.append(f"extraction: {len(ex.calls)} passage call(s), {ex.cached_calls} cached, ${ex.cost_usd:.4f}, "
@@ -98,6 +106,7 @@ def to_json(path_label: str, res: Any) -> str:
         "as_of": res.as_of.isoformat() if res.as_of else None,
         "results": [{"claim": c.model_dump(mode="json"), "verdict": v.model_dump(mode="json")} for c, v in res.results],
         "warnings": res.warnings,
+        "coverage": getattr(res, "coverage", None),
         "extraction": None if ex is None else {"calls": len(ex.calls), "cached_calls": ex.cached_calls,
                                                "cost_usd": ex.cost_usd, "wall_s": ex.wall_s},
     }

@@ -13,7 +13,8 @@
     "test:fix": "node scripts/check-fix-client.mjs",
     "test:presentation": "node scripts/check-presentation.mjs",
     "test:slide": "node scripts/check-slide-client.mjs",
-    "test:cost": "node scripts/check-cost-client.mjs"
+    "test:cost": "node scripts/check-cost-client.mjs",
+    "test:coverage": "node scripts/check-coverage-client.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

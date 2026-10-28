@@ -1,4 +1,5 @@
 import { readSSE } from "./sse";
+import { parseCoverage } from "./coverage";
 import type { CheckRequest, Claim, DoneEvent, ErrorEvent, Example, FixRequest, FixResult, FixStage, Health, MetaEvent, Verdict } from "./types";
 
 /** NEXT_PUBLIC_RECEIPTS_MOCK=1 replays web/fixtures from Next.js route handlers under /mock-api. */
@@ -168,7 +169,7 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
         }
         case "done":
           finished = true;
-          if (validCost(d)) h.onDone(d as unknown as DoneEvent);
+          if (validCost(d)) h.onDone({ ...d, coverage: parseCoverage(d.coverage, req.text) } as unknown as DoneEvent);
           else h.onError({ message: "The check returned invalid cost information.", retryable: true });
           break;
         case "error":
@@ -264,7 +265,9 @@ export async function streamFix(req: FixRequest, h: FixHandlers, signal: AbortSi
           fail({ message: "The correction response did not match this draft. Please try again.", retryable: true });
         } else {
           finished = true;
-          h.onResult({ ...data, changes: [...data.changes].sort((a, b) => a.start - b.start) });
+          h.onResult({ ...data, changes: [...data.changes].sort((a, b) => a.start - b.start),
+            original_coverage: parseCoverage(data.original_coverage, data.original_text),
+            coverage: parseCoverage(data.coverage, data.rewritten_text) });
         }
       } else if (msg.event === "error") {
         fail({ message: typeof d.message === "string" && d.message ? d.message : "The correction could not be completed.", retryable: d.retryable === true, ...costFields(d) });
