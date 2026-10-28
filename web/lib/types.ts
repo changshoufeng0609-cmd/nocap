@@ -143,6 +143,40 @@ export interface Health {
   facts: number;
 }
 
+export type SlideBox = [number, number, number, number];
+export type SlideStage = "segmenting" | "reading" | "verifying";
+export interface SlideRequest {
+  image_data_url: string;
+  context: string | null;
+  as_of: string | null;
+}
+export interface SlideMeta {
+  models: string[];
+  image: { width: number; height: number };
+  cached: false;
+  as_of: string | null;
+}
+export interface SlideRegion {
+  id: string;
+  label: string;
+  box: SlideBox;
+  source: "sam" | "spark";
+}
+export interface SlideClaim extends Claim {
+  region_id: string;
+  box: SlideBox;
+  reading: "printed" | "axis_estimate";
+}
+export interface SlideDone {
+  counts: Record<Status, number>;
+  claims: number;
+  model_calls: number;
+  latency_s: number;
+  cost_usd: number;
+  cost_is_estimate: boolean;
+  warnings: string[];
+}
+
 export const STATUSES: Status[] = ["verified", "wrong", "unverifiable", "approximate"];
 
 /** Same limit as the API: longer drafts are rejected. */

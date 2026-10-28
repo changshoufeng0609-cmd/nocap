@@ -2,6 +2,7 @@
 
     POST /api/check     server-sent events: meta, claim..., verdict..., then done (or error)
     POST /api/fix       constrained Wonder corrections, followed by deterministic re-verification
+    POST /api/slide     SAM regions and Spark vision readings, verified against SEC evidence
     GET  /api/examples  demo drafts, pre-cached so the demo never waits on the model
     GET  /api/health    data snapshot date, companies and fact count
 
@@ -373,7 +374,8 @@ def _configure_logging() -> None:
 
 def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                client_factory: Optional[Callable[[], Any]] = None,
-               wonder_client_factory: Optional[Callable[[], Any]] = None) -> FastAPI:
+               wonder_client_factory: Optional[Callable[[], Any]] = None,
+               slide_client_factory: Optional[Callable[[], Any]] = None) -> FastAPI:
     """The API. Tests pass their own settings, a store and a client factory; the module-level app reads the env."""
     settings = settings or Settings.from_env()
     _configure_logging()
@@ -389,7 +391,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                          settings.api_cache_dir / "_spend.json" if settings.api_cache_dir else None)
     make_client = client_factory or (lambda: _extract.make_client(timeout=settings.model_timeout_s))
     lock = threading.Lock()
-    shared: dict[str, Any] = {"store": store, "client": None, "wonder_client": None}
+    shared: dict[str, Any] = {"store": store, "client": None, "wonder_client": None, "slide_client": None}
 
     def get_store() -> Any:
         with lock:
@@ -413,6 +415,14 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                     _extract.make_client(timeout=settings.model_timeout_s,
                                          backend=_extract.make_backend("meta", model="muse-wonder-1.0")))
             return shared["wonder_client"]
+
+    def get_slide_client() -> Any:
+        with lock:
+            if shared["slide_client"] is None:
+                shared["slide_client"] = (slide_client_factory() if slide_client_factory else
+                    _extract.make_client(timeout=settings.model_timeout_s,
+                                         backend=_extract.make_backend("meta", model="muse-spark-1.3")))
+            return shared["slide_client"]
 
     app.state.settings, app.state.limiter, app.state.ledger, app.state.cache = settings, limiter, ledger, cache
 
@@ -552,6 +562,54 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                      stats.model_calls, time.monotonic() - started, stats.cost_usd)
 
         return sse_response(_from_thread(events, finish_fix, settings.keepalive_s))
+
+    @app.post("/api/slide")
+    async def slide(request: Request) -> StreamingResponse:
+        from receipts import slides
+
+        started = time.monotonic()
+        body = bytearray()
+        try:
+            # Bound the incoming stream before retaining the entire JSON/base64 request.
+            async for chunk in request.stream():
+                if len(body) + len(chunk) > slides.MAX_BODY_BYTES:
+                    return error_response("The upload is too large. Use a PNG or JPEG of at most 2 MiB.", False)
+                body.extend(chunk)
+            req = slides.SlideBody.model_validate_json(bytes(body))
+        except (ValidationError, ValueError):
+            return error_response("Send a PNG or JPEG in image_data_url, with optional context and as_of only.", False)
+        try:
+            as_of = _stream.canonical_as_of(req.as_of)
+        except ValueError:
+            return error_response("as_of must be an ISO 8601 time, for example 2026-10-28T00:00:00Z.", False)
+        context = _stream.normalize_context(req.context)
+        if context is not None and len(context) > MAX_CONTEXT_CHARS:
+            return error_response("Context must be one short line of 300 characters or fewer.", False)
+        try:
+            image = await asyncio.to_thread(slides.decode_image, req.image_data_url)
+        except slides.SlideError as exc:
+            return error_response(str(exc), False)
+        try:
+            evidence_store = get_store()
+        except Exception as exc:
+            log.error("slide store unavailable error=%s", type(exc).__name__)
+            return error_response("The evidence database isn't available on this server.", False)
+        if limiter.acquire(client_ip(request)) is not None:
+            return error_response("Too many live checks from your network. Try again in a few minutes.", True)
+        token = ledger.reserve(slides.RESERVE_USD)
+        if token is None:
+            return error_response("Receipts has reached today's budget for slide checks. Text examples still work.", False)
+        stats = slides.SlideStats()
+        events = slides.slide_events(image, store=evidence_store, context=context, as_of=as_of, stats=stats,
+                                     client_factory=get_slide_client, timeout_s=settings.model_timeout_s,
+                                     deadline=started + settings.check_deadline_s)
+
+        def finish_slide() -> None:
+            ledger.settle(token, stats.cost_usd)
+            log.info("slide complete=%s calls=%d latency=%.2fs cost=$%.4f estimated_calls=%d", stats.complete,
+                     stats.model_calls, time.monotonic() - started, stats.cost_usd, stats.estimated_calls)
+
+        return sse_response(_from_thread(events, finish_slide, settings.keepalive_s))
 
     @app.get("/api/examples")
     def examples() -> list[dict[str, Any]]:
