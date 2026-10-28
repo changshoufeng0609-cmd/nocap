@@ -13,6 +13,7 @@ Nothing here logs draft text: log lines carry the draft hash, claim ids and erro
 from __future__ import annotations
 
 import functools
+import contextlib
 import hashlib
 import json
 import logging
@@ -22,7 +23,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Iterator, Optional, Sequence
+from typing import Any, Callable, Iterable, Iterator, Optional, Sequence
 
 from pydantic import ValidationError
 
@@ -225,6 +226,7 @@ class CheckStats:
     passages: int = 0
     passages_failed: int = 0
     model_calls: int = 0
+    estimated_calls: int = 0
     counts: dict[str, int] = field(default_factory=lambda: dict.fromkeys(STATUSES, 0))
     events: list[Event] = field(default_factory=list)  # every event sent, in order, for the cache
     error: Optional[str] = None     # short internal reason when the stream ended with an error event
@@ -232,6 +234,10 @@ class CheckStats:
     @property
     def claims(self) -> int:
         return sum(self.counts.values())
+
+    @property
+    def cost_is_estimate(self) -> bool:
+        return bool(self.estimated_calls)
 
 
 def verdict_for(claim: Claim, store: EvidenceStore, as_of: Optional[datetime], context: Optional[str],
@@ -247,6 +253,7 @@ def verdict_for(claim: Claim, store: EvidenceStore, as_of: Optional[datetime], c
 
 def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: Optional[str],
                  store: EvidenceStore, stats: Optional[CheckStats] = None, started: Optional[float] = None,
+                 before_model_call: Optional[Callable[[float], None]] = None,
                  **extract_kwargs: Any) -> Iterator[Event]:
     """One live check as (event, data) pairs in contract order.
 
@@ -260,27 +267,44 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
     as_of_dt = _verify.to_utc(as_of)
 
     def emit(name: str, data: dict[str, Any]) -> Event:
+        if name in ("done", "error"):
+            data = {**data, "cost_usd": round(stats.cost_usd, 6),
+                    "cost_is_estimate": stats.cost_is_estimate, "model_calls": stats.model_calls}
         stats.events.append((name, data))
         return name, data
+
+    accounted: set[int] = set()
+
+    def account(passage: int, record: dict[str, Any]) -> None:
+        if passage in accounted:
+            return
+        accounted.add(passage)
+        stats.cost_usd += record.get("cost_usd") or 0.0
+        stats.model_calls += record.get("model_calls", int(not record.get("cached", False)))
+        stats.estimated_calls += record.get("estimated_calls", int(bool(record.get("cost_is_estimate"))))
 
     stats.passages = len(_extract.split_passages(text))
     yield emit("meta", {"draft_hash": draft_hash, "cached": False, "passages": stats.passages, "as_of": as_of})
     ctx = _extract.infer_context(text) if context is None else (context.strip() or None)
+    admission_rejected = False
     try:
-        for res in _extract.iter_extract(text, ctx if ctx is not None else "", **extract_kwargs):
-            stats.cost_usd += res.cost_usd
-            stats.model_calls += not res.call.get("cached")
-            if not res.ok:
-                stats.passages_failed += 1
-                log.warning("passage failed draft=%s passage=%d status=%s", draft_hash[:12], res.passage,
-                            res.call.get("status"))
-                continue
-            for claim in res.claims:
-                yield emit("claim", {"claim": claim.model_dump(mode="json")})
-            for claim in res.claims:
-                verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash)
-                stats.counts[verdict.status] += 1
-                yield emit("verdict", {"claim_id": claim.id, "verdict": verdict.model_dump(mode="json")})
+        results = _extract.iter_extract(text, ctx if ctx is not None else "",
+                                        usage_callback=account, before_model_call=before_model_call, **extract_kwargs)
+        with contextlib.closing(results) if hasattr(results, "close") else contextlib.nullcontext(results):
+            for res in results:
+                account(res.passage, res.call)
+                if not res.ok:
+                    stats.passages_failed += 1
+                    admission_rejected |= res.call.get("status") == "admission_rejected"
+                    log.warning("passage failed draft=%s passage=%d status=%s", draft_hash[:12], res.passage,
+                                res.call.get("status"))
+                    continue
+                for claim in res.claims:
+                    yield emit("claim", {"claim": claim.model_dump(mode="json")})
+                for claim in res.claims:
+                    verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash)
+                    stats.counts[verdict.status] += 1
+                    yield emit("verdict", {"claim_id": claim.id, "verdict": verdict.model_dump(mode="json")})
     except _extract.ExtractionError:
         stats.error = "no_api_key"
         yield emit("error", {"message": MSG_NO_MODEL, "retryable": False})
@@ -291,10 +315,13 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
         yield emit("error", {"message": MSG_INTERNAL, "retryable": True})
         return
     if stats.passages_failed:
-        stats.error = "passages_failed"
+        stats.error = "admission_rejected" if admission_rejected else "passages_failed"
         n, m = stats.passages_failed, stats.passages
-        yield emit("error", {"message": f"The model didn't answer for {n} of {m} passage{'s' if m != 1 else ''}, so "
-                                        f"{'their' if n != 1 else 'its'} numbers weren't checked. Please try again.",
+        message = ("The check could not finish because a model call was blocked by the spending guard. "
+                   "Please try again later." if admission_rejected else
+                   f"The model didn't answer for {n} of {m} passage{'s' if m != 1 else ''}, so "
+                   f"{'their' if n != 1 else 'its'} numbers weren't checked. Please try again.")
+        yield emit("error", {"message": message,
                              "retryable": True})
         return
     stats.complete = True

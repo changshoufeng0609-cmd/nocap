@@ -5,6 +5,20 @@ import type { CheckRequest, Claim, DoneEvent, ErrorEvent, Example, FixRequest, F
 export const MOCK = process.env.NEXT_PUBLIC_RECEIPTS_MOCK === "1";
 export const API_BASE = MOCK ? "/mock-api" : "/api";
 
+/** Accept accounting only as a complete validated tuple. Missing usage is not zero. */
+export function costFields(data: Record<string, unknown>) {
+  if (typeof data.cost_usd !== "number" || !Number.isFinite(data.cost_usd) || data.cost_usd < 0 ||
+      typeof data.cost_is_estimate !== "boolean" || !Number.isSafeInteger(data.model_calls) ||
+      (data.model_calls as number) < 0) return {};
+  return { cost_usd: data.cost_usd, cost_is_estimate: data.cost_is_estimate, model_calls: data.model_calls as number };
+}
+
+function validCost(data: { cost_usd?: unknown; cost_is_estimate?: unknown; model_calls?: unknown }): boolean {
+  return typeof data.cost_usd === "number" && Number.isFinite(data.cost_usd) && data.cost_usd >= 0 &&
+    (data.cost_is_estimate === undefined || typeof data.cost_is_estimate === "boolean") &&
+    (data.model_calls === undefined || (Number.isSafeInteger(data.model_calls) && (data.model_calls as number) >= 0));
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -154,13 +168,15 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
         }
         case "done":
           finished = true;
-          h.onDone(d as unknown as DoneEvent);
+          if (validCost(d)) h.onDone(d as unknown as DoneEvent);
+          else h.onError({ message: "The check returned invalid cost information.", retryable: true });
           break;
         case "error":
           finished = true;
           h.onError({
             message: typeof d.message === "string" && d.message ? d.message : "The check failed.",
             retryable: d.retryable === true,
+            ...costFields(d),
           });
           break;
       }
@@ -194,7 +210,7 @@ function isFixResult(value: unknown): value is FixResult {
     Array.isArray(r.results) && r.results.every((x) => !!x && !!x.claim && !!x.verdict && Array.isArray(x.verdict.evidence)) &&
     !!r.counts && ["verified", "wrong", "unverifiable", "approximate"].every((s) =>
       Number.isFinite(r.counts[s as keyof typeof r.counts])) &&
-    Number.isFinite(r.cost_usd) && Number.isFinite(r.latency_s))) return false;
+    validCost(r) && Number.isFinite(r.latency_s))) return false;
 
   // The comparison and citation export must reproduce the exact server-verified text.
   const chars = Array.from(r.original_text);
@@ -251,7 +267,7 @@ export async function streamFix(req: FixRequest, h: FixHandlers, signal: AbortSi
           h.onResult({ ...data, changes: [...data.changes].sort((a, b) => a.start - b.start) });
         }
       } else if (msg.event === "error") {
-        fail({ message: typeof d.message === "string" && d.message ? d.message : "The correction could not be completed.", retryable: d.retryable === true });
+        fail({ message: typeof d.message === "string" && d.message ? d.message : "The correction could not be completed.", retryable: d.retryable === true, ...costFields(d) });
       }
       if (finished) return;
     }

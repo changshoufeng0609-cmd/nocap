@@ -1,4 +1,9 @@
-import type { Claim, Fact, Scale, Unit } from "./types";
+import type { Claim, CostReport, Fact, Scale, Unit } from "./types";
+
+export function formatErrorCost(report: CostReport): string {
+  if (report.cost_usd === undefined) return "Model cost unavailable.";
+  return `${report.cost_is_estimate ? "Estimated model cost" : "Model cost"}: ${formatCost(report.cost_usd)}.`;
+}
 
 const SCALE_FACTOR: Record<Scale, number> = { units: 1, thousands: 1e3, millions: 1e6, billions: 1e9 };
 

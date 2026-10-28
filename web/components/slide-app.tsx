@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useSlide } from "@/hooks/use-slide";
 import { fetchHealth, MOCK } from "@/lib/api";
 import { DISPLAY_STATUSES, STATUS_META, displayCounts, displayStatus } from "@/lib/claims";
-import { formatCost, formatLatency, formatUtcMinutes, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
+import { formatErrorCost, formatCost, formatLatency, formatUtcMinutes, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
 import { MAX_SLIDE_BYTES, slideDataUrl, validateSlideImage } from "@/lib/slide-image";
 import type { SlideClaim, SlideStage } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -157,7 +157,7 @@ export function SlideApp() {
           </div>
 
           {running ? <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm" role="status"><Loader2Icon className="size-4 animate-spin" aria-hidden />{STAGES[state.stage]}<Button variant="ghost" size="sm" className="ml-auto" onClick={invalidate}>Cancel</Button></div> : null}
-          {state.error ? <div role="alert" className="space-y-2 border-b border-border bg-bad-tint/40 p-4 text-sm"><p className="font-medium text-bad">{state.error.message}</p><p className="text-muted-foreground">{state.claims.length ? "The check is incomplete. Any readings below are partial results." : "No complete slide check is available."}</p>{state.error.retryable ? <Button variant="outline" size="sm" onClick={check}>Retry slide check</Button> : null}</div> : null}
+          {state.error ? <div role="alert" className="space-y-2 border-b border-border bg-bad-tint/40 p-4 text-sm"><p className="font-medium text-bad">{state.error.message}</p><p className="text-xs text-muted-foreground">{formatErrorCost(state.error)}</p><p className="text-muted-foreground">{state.claims.length ? "The check is incomplete. Any readings below are partial results." : "No complete slide check is available."}</p>{state.error.retryable ? <Button variant="outline" size="sm" onClick={check}>Retry slide check</Button> : null}</div> : null}
           {state.done ? (
             <div className="space-y-2 border-b border-border px-4 py-3" role="status">
               <p className="text-sm font-medium">{state.claims.length ? `${state.claims.length} extracted readings checked` : "No financial readings found"}</p>

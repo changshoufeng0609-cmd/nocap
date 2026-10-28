@@ -38,6 +38,7 @@ import os
 import random
 import re
 import tempfile
+import threading
 import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -79,6 +80,21 @@ MAX_RETRY_SLEEP_S = 60.0
 
 class ExtractionError(RuntimeError):
     """Extraction could not run at all (no API key, or every passage call failed)."""
+
+    def __init__(self, message: str, *, calls: Sequence[dict[str, Any]] = ()):
+        super().__init__(message)
+        self.calls = list(calls)
+        self.cost_usd = sum(c.get("cost_usd") or 0.0 for c in calls)
+        self.model_calls = sum(c.get("model_calls", 0) for c in calls)
+        self.estimated_calls = sum(c.get("estimated_calls", 0) for c in calls)
+        self.cost_is_estimate = bool(self.estimated_calls)
+
+
+class ModelCallRejected(RuntimeError):
+    """A safe admission failure: no SDK request is started and no retry is made."""
+
+    def __init__(self, message: str = "A model call was blocked by the spending guard. Please try again later."):
+        super().__init__(message)
 
 
 # ---------------------------------------------------------------------------
@@ -647,6 +663,8 @@ def call_with_retry(fn: Callable[[], Any], *, sleep: Callable[[float], None]) ->
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
             return _CallOutcome(True, fn(), attempt, time.monotonic() - t0)
+        except ModelCallRejected as error:
+            err = {"kind": "admission_rejected", "status": None, "message": str(error)}
         except openai.APIStatusError as e:
             body = e.body if isinstance(e.body, dict) else {}
             err = {"kind": "http_error", "status": e.status_code, "code": getattr(e, "code", None),
@@ -670,20 +688,27 @@ def call_with_retry(fn: Callable[[], Any], *, sleep: Callable[[float], None]) ->
 
 
 def _usage(resp: Any) -> Optional[dict[str, int]]:
+    """Only complete, nonnegative integer token counts can replace a cost estimate."""
     u = getattr(resp, "usage", None)
     if u is None:
         return None
-    if getattr(u, "input_tokens", None) is None and getattr(u, "prompt_tokens", None) is not None:  # Chat Completions
-        ptd, ctd = getattr(u, "prompt_tokens_details", None), getattr(u, "completion_tokens_details", None)
-        return {"input_tokens": int(u.prompt_tokens or 0),
-                "cached_tokens": int(getattr(ptd, "cached_tokens", 0) or 0),
-                "output_tokens": int(getattr(u, "completion_tokens", 0) or 0),
-                "reasoning_tokens": int(getattr(ctd, "reasoning_tokens", 0) or 0)}
-    itd, otd = getattr(u, "input_tokens_details", None), getattr(u, "output_tokens_details", None)
-    return {"input_tokens": int(u.input_tokens or 0),
-            "cached_tokens": int(getattr(itd, "cached_tokens", 0) or 0),
-            "output_tokens": int(u.output_tokens or 0),
-            "reasoning_tokens": int(getattr(otd, "reasoning_tokens", 0) or 0)}
+
+    def value(obj: Any, key: str, default: Any = None) -> Any:
+        return obj.get(key, default) if isinstance(obj, Mapping) else getattr(obj, key, default)
+
+    chat = value(u, "input_tokens") is None and value(u, "prompt_tokens") is not None
+    input_key, output_key = ("prompt_tokens", "completion_tokens") if chat else ("input_tokens", "output_tokens")
+    itd, otd = value(u, input_key + "_details"), value(u, output_key + "_details")
+    counts = {"input_tokens": value(u, input_key), "output_tokens": value(u, output_key),
+              "cached_tokens": value(itd, "cached_tokens", 0),
+              "reasoning_tokens": value(otd, "reasoning_tokens", 0)}
+    # Counts beyond a signed 64-bit integer cannot be a real bounded model call;
+    # rejecting them also avoids overflow when token counts are priced downstream.
+    if any(type(n) is not int or not 0 <= n <= 2 ** 63 - 1 for n in counts.values()):
+        return None
+    if counts["cached_tokens"] > counts["input_tokens"] or counts["reasoning_tokens"] > counts["output_tokens"]:
+        return None
+    return counts
 
 
 def cost_usd(usage: Optional[dict[str, int]], prices: Optional[Mapping[str, float]] = None) -> float:
@@ -694,6 +719,76 @@ def cost_usd(usage: Optional[dict[str, int]], prices: Optional[Mapping[str, floa
     cached = min(usage["cached_tokens"], usage["input_tokens"])
     return ((usage["input_tokens"] - cached) * p["input"] + cached * p["cached_input"]
             + usage["output_tokens"] * p["output"]) / 1e6
+
+
+def estimate_request_cost(request: Mapping[str, Any], backend: Backend) -> float:
+    """Conservative admission charge for unknown usage, not a provider billing guarantee.
+
+    UTF-8 request bytes plus framing padding deliberately overcount text input tokens;
+    output uses the request's full limit and no cached-input discount. The floor also
+    keeps unknown compute-billed usage from becoming a false zero-dollar measurement.
+    """
+    input_bound = len(json.dumps(request, ensure_ascii=False).encode("utf-8")) + 1024
+    output_bound = request.get("max_output_tokens", request.get("max_tokens", MAX_OUTPUT_TOKENS))
+    estimate = cost_usd({"input_tokens": input_bound, "cached_tokens": 0,
+                         "output_tokens": int(output_bound), "reasoning_tokens": 0}, backend.prices)
+    floor = 0.15 if backend.model == "muse-wonder-1.0" else 0.05
+    return max(floor, math.ceil(estimate * 1e6) / 1e6)
+
+
+class _RequestStopped(Exception):
+    """No SDK call was started because its accounting window is closed."""
+
+
+class RequestUsage:
+    """Track every HTTP attempt, including retries and schema fallback, exactly once.
+
+    finish() freezes a settlement snapshot. A late response cannot replace an estimate
+    already charged or start another paid attempt; this intentionally retains the
+    conservative charge instead of making an unobserved asynchronous adjustment.
+    before_call is a fast in-memory guard; it must not perform network work or
+    re-enter this meter. Rejection happens before the attempt is recorded.
+    """
+
+    def __init__(self, backend: Backend, *, deadline: Optional[float] = None,
+                 before_call: Optional[Callable[[float], None]] = None):
+        self.backend, self.deadline = backend, deadline
+        self.before_call = before_call
+        self._lock = threading.Lock()
+        self._entries: list[tuple[float, bool]] = []
+        self._finished = False
+
+    def call(self, fn: Callable[[], Any], request: Mapping[str, Any]) -> Any:
+        estimate = estimate_request_cost(request, self.backend)
+        with self._lock:
+            if self._finished or (self.deadline is not None and time.monotonic() >= self.deadline):
+                raise _RequestStopped()
+            # This is a fast, in-memory admission hook. Holding the meter lock
+            # makes admission and recording atomic with deadline settlement.
+            if self.before_call is not None:
+                self.before_call(estimate)
+            if self.deadline is not None and time.monotonic() >= self.deadline:
+                raise _RequestStopped()
+            index = len(self._entries)
+            self._entries.append((estimate, True))
+        response = fn()
+        usage = _usage(response)
+        token_priced = not self.backend.self_hosted and any(p > 0 for p in self.backend.prices.values())
+        if usage is not None and token_priced:
+            actual = cost_usd(usage, self.backend.prices)
+            if math.isfinite(actual) and actual >= 0:
+                with self._lock:
+                    if not self._finished:
+                        self._entries[index] = (actual, False)
+        return response
+
+    def finish(self) -> dict[str, Any]:
+        with self._lock:
+            self._finished = True
+            estimated = sum(unknown for _, unknown in self._entries)
+            return {"cost_usd": sum(amount for amount, _ in self._entries),
+                    "model_calls": len(self._entries), "estimated_calls": estimated,
+                    "cost_is_estimate": bool(estimated)}
 
 
 def validate_output(output_text: str) -> tuple[str, Optional[ModelResponse], Optional[str]]:
@@ -820,20 +915,26 @@ def _unsupported_response_format(error: openai.BadRequestError) -> bool:
     return identifies_format and unsupported
 
 
-def send_request(client: Any, request: dict[str, Any], backend: Backend, **kwargs: Any) -> Any:
+def send_request(client: Any, request: dict[str, Any], backend: Backend, *,
+                 usage: Optional[RequestUsage] = None, **kwargs: Any) -> Any:
     """One model call. Meta Model API: client.responses.create(**request), exactly as before. Chat backends: Chat
     Completions; an explicit unsupported response_format error is retried once without it (the schema remains in
     the system message). Other 400s, including malformed schemas and context overflow, are not retried."""
+    def create(body: dict[str, Any]) -> Any:
+        endpoint = client.responses if backend.protocol == "responses" else client.chat.completions
+        fn = lambda: endpoint.create(**body, **kwargs)
+        return fn() if usage is None else usage.call(fn, body)
+
     if backend.protocol == "responses":
-        return client.responses.create(**request, **kwargs)
+        return create(request)
     try:
-        return _chat_result(client.chat.completions.create(**request, **kwargs))
+        return _chat_result(create(request))
     except openai.BadRequestError as error:
         if "response_format" not in request or not _unsupported_response_format(error):
             raise
         log.warning("%s rejected response_format; retrying once with the schema in the prompt only", backend.name)
         plain = {k: v for k, v in request.items() if k != "response_format"}
-        return _chat_result(client.chat.completions.create(**plain, **kwargs), structured_fallback=True)
+        return _chat_result(create(plain), structured_fallback=True)
 
 
 def _chat_details(resp: Any) -> dict[str, Any]:
@@ -1121,26 +1222,46 @@ def extract_detailed(text: str, context: Optional[str] = None, *, client: Option
     if misses:
         if client is None:
             client = make_client(backend=b)
+        meters = {i: RequestUsage(b) for i in misses}
 
         def work(i: int) -> tuple[int, dict[str, Any], Optional[ModelResponse]]:
-            out = call_with_retry(lambda: send_request(client, requests[i], b), sleep=sleep)
-            rec: dict[str, Any] = {"cached": False, "attempts": out.attempts, "latency_s": round(out.latency_s, 2)}
-            if not out.ok:
-                rec.update(status=out.error["kind"], error=out.error)
-                return i, rec, None
-            fields, model_resp, output_text = _read_response(out.response, b)
-            rec.update(fields)
-            if model_resp is not None:
-                cache.put(keys[i], _cache_record(keys[i], b, effort, out.response, fields["usage"], output_text,
-                                                 out.latency_s))
+            usage, rec, model_resp = meters[i], calls[i], None
+            rec["cached"] = False
+            try:
+                out = call_with_retry(lambda: send_request(client, requests[i], b, usage=usage), sleep=sleep)
+                rec.update(attempts=out.attempts, latency_s=round(out.latency_s, 2))
+                if not out.ok:
+                    rec.update(status=out.error["kind"], error=out.error)
+                else:
+                    fields, model_resp, output_text = _read_response(out.response, b)
+                    rec.update(fields)
+                    if model_resp is not None:
+                        cache.put(keys[i], _cache_record(keys[i], b, effort, out.response, fields["usage"], output_text,
+                                                        out.latency_s))
+            except ExtractionError:
+                # Internal configuration/offline guards are safe, actionable errors.
+                # Preserve their diagnostic while finally retains any earlier costs.
+                raise
+            except Exception as error:
+                model_resp = None
+                rec.update(status="internal_error", error={"kind": "internal_error", "message": type(error).__name__})
+            finally:
+                rec.update(usage.finish())
             return i, rec, model_resp
 
         workers = max(1, min(concurrency, len(misses)))
-        if workers == 1:
-            results = [work(i) for i in misses]
-        else:
-            with ThreadPoolExecutor(max_workers=workers) as pool:
-                results = list(pool.map(work, misses))
+        try:
+            if workers == 1:
+                results = [work(i) for i in misses]
+            else:
+                with ThreadPoolExecutor(max_workers=workers) as pool:
+                    results = list(pool.map(work, misses))
+        except Exception as error:
+            for i in misses:
+                calls[i].update(meters[i].finish())
+            message = (str(error) if isinstance(error, ExtractionError)
+                       else f"extraction could not finish ({type(error).__name__})")
+            raise ExtractionError(message, calls=calls) from None
         for i, rec, model_resp in results:
             calls[i].update(rec)
             parsed[i] = model_resp
@@ -1151,11 +1272,14 @@ def extract_detailed(text: str, context: Optional[str] = None, *, client: Option
         detail = c.get("error", {}).get("message") or c.get("problem") or c.get("status")
         warnings.append(f"passage {c['passage']} (offset {c['start']}) was not extracted: {c.get('status')}: {detail}")
     if failed and len(failed) == len(passages):
-        raise ExtractionError("every passage call failed; first error: " + warnings[0])
+        raise ExtractionError("every passage call failed; first error: " + warnings[0], calls=calls)
 
     per_passage = [(s, passage, p.claims) for (s, passage), p in zip(passages, parsed) if p is not None]
-    claims, ranges = build_claims(per_passage, warnings)
-    uncovered = uncovered_numbers(text, ranges)
+    try:
+        claims, ranges = build_claims(per_passage, warnings)
+        uncovered = uncovered_numbers(text, ranges)
+    except Exception as error:
+        raise ExtractionError(f"extraction could not be interpreted ({type(error).__name__})", calls=calls) from None
     warnings.extend(f"no claim covers the number {t['text']!r} at offset {t['start']}" for t in uncovered)
     return ExtractResult(claims, context, warnings, calls, uncovered, round(time.monotonic() - t0, 2), b.model, b.name)
 
@@ -1215,10 +1339,19 @@ def call_with_deadline(fn: Callable[[], Any], *, sleep: Callable[[float], None],
     err: Optional[dict[str, Any]] = None
     attempt = 0
     while attempt < attempts:
+        if deadline is not None and time.monotonic() >= deadline:
+            err = {"kind": "deadline", "status": None, "message": "the check ran out of time"}
+            break
         attempt += 1
         wait: Optional[float] = None
         try:
             return _CallOutcome(True, fn(), attempt, time.monotonic() - t0)
+        except ModelCallRejected as error:
+            err = {"kind": "admission_rejected", "status": None, "message": str(error)}
+            break
+        except _RequestStopped:
+            err = {"kind": "deadline", "status": None, "message": "the check ran out of time"}
+            break
         except openai.APIStatusError as e:
             body = e.body if isinstance(e.body, dict) else {}
             err = {"kind": "http_error", "status": e.status_code, "code": getattr(e, "code", None),
@@ -1261,6 +1394,24 @@ def request_keys(text: str, context: Optional[str] = None, *, effort: str = EFFO
     return _requests_for(text, context, effort, max_output_tokens, backend)[2]
 
 
+def extraction_estimate(text: str, context: Optional[str] = None, *,
+                        max_attempts: int = INTERACTIVE_ATTEMPTS, effort: str = EFFORT,
+                        max_output_tokens: int = MAX_OUTPUT_TOKENS,
+                        backend: Optional[Backend] = None) -> float:
+    """Reserve for every passage and allowed HTTP attempt, without relying on cache state.
+
+    A chat response-format fallback is another HTTP request. Estimating both with
+    the original body is conservative because the fallback only removes a field.
+    This remains an estimated admission guard, not a provider billing limit.
+    """
+    b = backend or active_backend()
+    requests = _requests_for(text, context, effort, max_output_tokens, b)[1]
+    estimate = sum(estimate_request_cost(request, b) * max(1, max_attempts) *
+                   (2 if b.protocol == "chat" and "response_format" in request else 1)
+                   for request in requests)
+    return math.ceil(estimate * 1e6) / 1e6
+
+
 def _first_hit(caches: Sequence[_Cache], key: str,
                backend: Optional[Backend] = None) -> Optional[tuple[dict[str, Any], ModelResponse]]:
     b = backend or BACKENDS["meta"]
@@ -1290,7 +1441,9 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
                  max_output_tokens: int = MAX_OUTPUT_TOKENS, timeout_s: float = INTERACTIVE_TIMEOUT_S,
                  max_attempts: int = INTERACTIVE_ATTEMPTS, deadline: Optional[float] = None,
                  sleep: Callable[[float], None] = time.sleep,
-                 backend: Optional[Backend] = None) -> Iterator[PassageResult]:
+                 backend: Optional[Backend] = None,
+                 usage_callback: Optional[Callable[[int, dict[str, Any]], None]] = None,
+                 before_model_call: Optional[Callable[[float], None]] = None) -> Iterator[PassageResult]:
     """extract_detailed() as a stream: one PassageResult per passage, yielded as soon as that passage is done.
 
     Cached passages come first, in document order (cache_dir, then the read-only extra_cache_dirs), then live calls
@@ -1344,13 +1497,25 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
     if client is None:
         client = make_client(timeout=timeout_s, backend=b)
 
+    meters = {i: RequestUsage(b, deadline=deadline, before_call=before_model_call) for i in misses}
+    accounted: set[int] = set()
+
+    def account(i: int) -> dict[str, Any]:
+        record = meters[i].finish()
+        if i not in accounted:
+            accounted.add(i)
+            if usage_callback is not None:
+                usage_callback(i + 1, record)
+        return record
+
     def attempt_timeout() -> float:
         if deadline is None:
             return timeout_s
-        return max(1.0, min(timeout_s, deadline - time.monotonic()))
+        return max(0.001, min(timeout_s, deadline - time.monotonic()))
 
     def work(i: int) -> tuple[int, dict[str, Any], Optional[ModelResponse]]:
-        out = call_with_deadline(lambda: send_request(client, requests[i], b, timeout=attempt_timeout()),
+        out = call_with_deadline(lambda: send_request(client, requests[i], b, usage=meters[i],
+                                                     timeout=attempt_timeout()),
                                  sleep=sleep, max_attempts=max_attempts, deadline=deadline)
         rec: dict[str, Any] = {"cached": False, "attempts": out.attempts, "latency_s": round(out.latency_s, 2)}
         if not out.ok:
@@ -1364,9 +1529,9 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
         return i, rec, model_resp
 
     pool = ThreadPoolExecutor(max_workers=max(1, min(concurrency, len(misses))))
-    futures = {pool.submit(work, i): i for i in misses}
     finished: set[int] = set()
     try:
+        futures = {pool.submit(work, i): i for i in misses}
         remaining = None if deadline is None else max(0.0, deadline - time.monotonic())
         try:
             for fut in as_completed(futures, timeout=remaining):
@@ -1377,12 +1542,19 @@ def iter_extract(text: str, context: Optional[str] = None, *, client: Optional[o
                 except Exception as e:  # a bug in one passage's handling must not sink the others
                     rec, model_resp = {"cached": False, "status": "internal_error",
                                        "error": {"kind": "internal_error", "message": type(e).__name__}}, None
+                rec.update(account(i))
                 yield result(i, rec, model_resp)
         except FuturesTimeout:
+            # Seal every meter before yielding: a slow consumer must not leave the
+            # other passages free to start paid retries after settlement.
+            pending_usage = {i: account(i) for i in misses if i not in finished}
             for i in misses:
                 if i not in finished:
                     finished.add(i)
                     yield result(i, {"cached": False, "status": "deadline",
-                                     "error": {"kind": "deadline", "message": "the check ran out of time"}}, None)
+                                     "error": {"kind": "deadline", "message": "the check ran out of time"},
+                                     **pending_usage[i]}, None)
     finally:
+        for i in misses:
+            account(i)
         pool.shutdown(wait=False, cancel_futures=True)

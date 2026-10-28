@@ -8,6 +8,7 @@ claim or a changed interpretation retracts the proposal rather than making an er
 from __future__ import annotations
 
 import json
+import contextlib
 import math
 import re
 import time
@@ -46,6 +47,22 @@ class RewriteStats:
     cost_usd: float = 0.0
     model_calls: int = 0
     complete: bool = False
+    estimated_calls: int = 0
+
+    @property
+    def cost_is_estimate(self) -> bool:
+        return bool(self.estimated_calls)
+
+
+def _account(stats: RewriteStats, record: dict[str, Any]) -> None:
+    stats.cost_usd += record.get("cost_usd") or 0.0
+    stats.model_calls += record.get("model_calls", int(not record.get("cached", False)))
+    stats.estimated_calls += record.get("estimated_calls", int(bool(record.get("cost_is_estimate"))))
+
+
+def _billing(stats: RewriteStats) -> dict[str, Any]:
+    return {"cost_usd": round(stats.cost_usd, 6), "cost_is_estimate": stats.cost_is_estimate,
+            "model_calls": stats.model_calls}
 
 
 class RewriteError(Exception):
@@ -101,11 +118,13 @@ def _time_left(deadline: Optional[float], timeout_s: float) -> float:
 
 def _check(text: str, *, context: str, as_of: Any, store: EvidenceStore, stats: RewriteStats,
            client_factory: Callable[[], Any], cache_dir: Optional[Path], extra_cache_dirs: Sequence[Path],
-           use_cache: bool, timeout_s: float, deadline: Optional[float]) -> list[tuple[Claim, Verdict]]:
-    """Sequential, bounded calls retain usage even on failure; no orphan executor work at a deadline.
+           use_cache: bool, timeout_s: float, deadline: Optional[float],
+           before_model_call: Optional[Callable[[float], None]] = None) -> list[tuple[Claim, Verdict]]:
+    """Sequential calls retain known or conservatively estimated usage on failure.
 
     Cache requests are identical to ordinary extraction. No retries are made during correction:
-    each passage consumes at most one paid response, and the next checks the remaining deadline.
+    each passage makes one extraction attempt (chat format fallback is separately metered).
+    The same deadline also prevents a fallback or queued attempt from starting too late.
     """
     claims: list[Claim] = []
     backend = replace(extract.active_backend(), min_timeout_s=0.0)
@@ -115,23 +134,33 @@ def _check(text: str, *, context: str, as_of: Any, store: EvidenceStore, stats: 
         calls = extract.passages_to_call(passage, context, cache_dirs=dirs, backend=backend) if use_cache else 1
         client = client_factory() if calls else None
         received = 0
-        for item in extract.iter_extract(
+        accounted = False
+
+        def account(_passage: int, record: dict[str, Any]) -> None:
+            nonlocal accounted
+            if not accounted:
+                accounted = True
+                _account(stats, record)
+
+        with contextlib.closing(extract.iter_extract(
             passage, context, client=client, cache_dir=cache_dir, extra_cache_dirs=extra_cache_dirs,
             use_cache=use_cache, concurrency=1, max_attempts=1, timeout_s=remaining,
-            deadline=None, backend=backend,
-        ):
-            received += 1
-            stats.cost_usd += item.cost_usd
-            stats.model_calls += int(not item.call.get("cached", False))
-            if (not item.ok or item.call.get("claims_rejected") or
-                    item.call.get("response_status") not in (None, "completed") or
-                    any(w.startswith(("dropped ", "the quote ")) for w in item.warnings)):
-                raise IncompleteExtraction("Not every figure could be extracted safely. Your original draft is unchanged.")
-            for claim in item.claims:
-                claims.append(claim.model_copy(update={
-                    "id": f"c{len(claims) + 1}",
-                    "span_start": base + claim.span_start, "span_end": base + claim.span_end,
-                }))
+            deadline=deadline, backend=backend, usage_callback=account, before_model_call=before_model_call,
+        )) as results:
+            for item in results:
+                received += 1
+                account(item.passage, item.call)
+                if item.call.get("status") == "admission_rejected":
+                    raise RewriteError("A model call was blocked by the spending guard. Your original draft is unchanged.")
+                if (not item.ok or item.call.get("claims_rejected") or
+                        item.call.get("response_status") not in (None, "completed") or
+                        any(w.startswith(("dropped ", "the quote ")) for w in item.warnings)):
+                    raise IncompleteExtraction("Not every figure could be extracted safely. Your original draft is unchanged.")
+                for claim in item.claims:
+                    claims.append(claim.model_copy(update={
+                        "id": f"c{len(claims) + 1}",
+                        "span_start": base + claim.span_start, "span_end": base + claim.span_end,
+                    }))
         if received != 1:
             raise IncompleteExtraction("Not every passage could be checked. Your original draft is unchanged.")
     ranges = [value_range(text, c) for c in claims]
@@ -263,7 +292,7 @@ def _result(text: str, rewritten: str, original: list[tuple[Claim, Verdict]], re
             "changes": changes, "remaining": remaining,
             "results": [{"claim": c.model_dump(mode="json"), "verdict": v.model_dump(mode="json")}
                         for c, v in results], "counts": counts,
-            "cost_usd": round(stats.cost_usd, 6), "latency_s": round(time.monotonic() - started, 2),
+            **_billing(stats), "latency_s": round(time.monotonic() - started, 2),
             "model": MODEL, "extraction_model": extract.active_backend().model}
 
 
@@ -272,7 +301,8 @@ def fix_events(text: str, *, store: EvidenceStore, as_of: Any = None, context: O
                wonder_client_factory: Optional[Callable[[], Any]] = None,
                cache_dir: Optional[Path] = extract.CACHE_DIR, extra_cache_dirs: Sequence[Path] = (),
                use_cache: bool = True, timeout_s: float = 30.0, max_attempts: int = 1,
-               deadline: Optional[float] = None) -> Iterator[Event]:
+               deadline: Optional[float] = None,
+               before_model_call: Optional[Callable[[float], None]] = None) -> Iterator[Event]:
     """Check → Wonder numeric proposals → deterministic guards → full recheck, as SSE-ready events.
 
     max_attempts is accepted alongside the check API settings; correction deliberately makes only
@@ -287,7 +317,7 @@ def fix_events(text: str, *, store: EvidenceStore, as_of: Any = None, context: O
     wonder = wonder_client_factory or (lambda: extract.make_client(timeout=timeout_s, backend=WONDER))
     check_options = dict(context=ctx, as_of=as_of, store=store, stats=stats, client_factory=extraction,
                          cache_dir=cache_dir, extra_cache_dirs=extra_cache_dirs, use_cache=use_cache,
-                         timeout_s=timeout_s, deadline=deadline)
+                         timeout_s=timeout_s, deadline=deadline, before_model_call=before_model_call)
     try:
         yield "progress", {"stage": "checking"}
         original = _check(text, **check_options)
@@ -307,9 +337,11 @@ def fix_events(text: str, *, store: EvidenceStore, as_of: Any = None, context: O
         yield "progress", {"stage": "rewriting"}
         client = wonder()
         remaining = _time_left(deadline, timeout_s)
-        stats.model_calls += 1
-        response = client.responses.create(**request, timeout=remaining)
-        stats.cost_usd += extract.cost_usd(extract._usage(response), WONDER.prices)
+        usage = extract.RequestUsage(WONDER, deadline=deadline, before_call=before_model_call)
+        try:
+            response = extract.send_request(client, request, WONDER, usage=usage, timeout=remaining)
+        finally:
+            _account(stats, usage.finish())
         if getattr(response, "status", None) != "completed":
             raise RewriteError("Wonder did not finish the correction. Your original draft is unchanged.")
         try:
@@ -359,11 +391,11 @@ def fix_events(text: str, *, store: EvidenceStore, as_of: Any = None, context: O
                                     "or losing a figure. The original draft was kept.")
             return
         yield "result", _result(text, rewritten, original, rechecked, changes, stats, started)
-    except RewriteError as error:
-        yield "error", {"message": str(error), "retryable": True}
+    except (RewriteError, extract.ModelCallRejected) as error:
+        yield "error", {"message": str(error), "retryable": True, **_billing(stats)}
     except extract.ExtractionError:
         yield "error", {"message": "The model API needed for this correction is not configured. "
-                                    "Your original draft is unchanged.", "retryable": False}
+                                    "Your original draft is unchanged.", "retryable": False, **_billing(stats)}
     except Exception:
         yield "error", {"message": "The correction could not be completed. Your original draft is unchanged.",
-                        "retryable": True}
+                        "retryable": True, **_billing(stats)}

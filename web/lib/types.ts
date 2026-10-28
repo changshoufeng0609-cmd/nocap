@@ -79,14 +79,20 @@ export interface MetaEvent {
   as_of: string | null;
 }
 
-export interface DoneEvent {
+export interface CostReport {
+  cost_usd?: number;
+  cost_is_estimate?: boolean;
+  model_calls?: number;
+}
+
+export interface DoneEvent extends CostReport {
   counts: Record<Status, number>;
   latency_s: number;
   cost_usd: number;
   model: string;
 }
 
-export interface ErrorEvent {
+export interface ErrorEvent extends CostReport {
   message: string;
   retryable: boolean;
 }
@@ -112,7 +118,7 @@ export interface FixChange {
   evidence: Fact[];
 }
 
-export interface FixResult {
+export interface FixResult extends CostReport {
   original_text: string;
   rewritten_text: string;
   /** Corrected means every original wrong claim was repaired; ? claims can remain. */

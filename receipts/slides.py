@@ -15,7 +15,7 @@ import re
 import time
 import warnings
 from dataclasses import dataclass
-from typing import Any, Callable, Iterator, Literal, Optional
+from typing import Any, Callable, Iterator, Literal, Mapping, Optional
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -85,6 +85,26 @@ class SlideStats:
     model_calls: int = 0
     complete: bool = False
     estimated_calls: int = 0
+
+    @property
+    def cost_is_estimate(self) -> bool:
+        return bool(self.estimated_calls)
+
+
+def _billing(stats: SlideStats) -> dict[str, Any]:
+    return {"cost_usd": round(stats.cost_usd, 6), "cost_is_estimate": stats.cost_is_estimate,
+            "model_calls": stats.model_calls}
+
+
+def _admit_call(before_model_call: Optional[Callable[[float], None]], estimate_usd: float) -> None:
+    """Check the persisted operation allowance before recording or dispatching an attempt."""
+    if before_model_call is not None:
+        try:
+            before_model_call(estimate_usd)
+        except extract.ModelCallRejected:
+            raise
+        except Exception:
+            raise extract.ModelCallRejected() from None
 
 
 def decode_image(data_url: str) -> SlideImage:
@@ -193,8 +213,10 @@ def _remaining(deadline: Optional[float], timeout_s: float) -> float:
     return remaining
 
 
-def _sam(client: Any, image: SlideImage, concept: str, stats: SlideStats, *, timeout_s: float) -> list[Box]:
+def _sam(client: Any, image: SlideImage, concept: str, stats: SlideStats, *, timeout_s: float,
+         before_model_call: Optional[Callable[[float], None]] = None) -> list[Box]:
     stop_at = time.monotonic() + timeout_s
+    _admit_call(before_model_call, SAM_PRICE_USD)
     stats.model_calls += 1
     # Retain the one-image estimate if the stream breaks before usage arrives.
     stats.cost_usd += SAM_PRICE_USD
@@ -208,8 +230,25 @@ def _sam(client: Any, image: SlideImage, concept: str, stats: SlideStats, *, tim
                 {"type": "input_text", "text": concept}, {"type": "input_image", "image_url": image.data_url}]}],
         )
         chunks: list[str] = []
-        size, complete = 0, False
+        size = 0
         for event in stream:
+            if event.type in ("response.completed", "response.failed", "response.incomplete"):
+                response = event.response
+                usage = getattr(response, "usage", None)
+                images = (usage.get("images_processed") if isinstance(usage, Mapping)
+                          else getattr(usage, "images_processed", None))
+                # A terminal response can report billable work even when it failed or
+                # arrived late. Only a complete, valid count replaces the estimate.
+                if type(images) is int and 0 <= images <= 2 ** 63 - 1:
+                    stats.cost_usd += images * SAM_PRICE_USD - SAM_PRICE_USD
+                    stats.estimated_calls -= 1
+                if time.monotonic() > stop_at:
+                    raise SlideError("Segmentation ran out of time.")
+                if event.type != "response.completed" or getattr(response, "status", None) != "completed":
+                    raise SlideError("Segmentation did not finish.")
+                # Stop at the first terminal event. Reading another terminal would
+                # reconcile the same call twice; reading its tail can also block.
+                return sam_boxes("".join(chunks), image)
             if time.monotonic() > stop_at:
                 raise SlideError("Segmentation ran out of time.")
             if event.type == "response.output_text.delta":
@@ -218,21 +257,9 @@ def _sam(client: Any, image: SlideImage, concept: str, stats: SlideStats, *, tim
                 if size > 1_000_000:
                     raise SlideError("Segmentation returned too much detail.")
                 chunks.append(delta)
-            elif event.type in ("response.completed", "response.failed", "response.incomplete"):
-                response = event.response
-                usage = getattr(response, "usage", None)
-                images = getattr(usage, "images_processed", None)
-                if isinstance(images, (int, float)) and math.isfinite(images) and images >= 0:
-                    stats.cost_usd += images * SAM_PRICE_USD - SAM_PRICE_USD
-                    stats.estimated_calls -= 1
-                complete = event.type == "response.completed" and getattr(response, "status", "completed") == "completed"
-                if not complete:
-                    raise SlideError("Segmentation did not finish.")
             elif event.type == "error":
                 raise SlideError("Segmentation is unavailable.")
-        if not complete:
-            raise SlideError("Segmentation ended before completion.")
-        return sam_boxes("".join(chunks), image)
+        raise SlideError("Segmentation ended before completion.")
     except SlideError:
         raise
     except Exception:
@@ -350,7 +377,8 @@ def reading_verdict(claim: Claim, reading: SlideReading, store: EvidenceStore, *
 
 def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[str] = None, as_of: Any = None,
                  stats: Optional[SlideStats] = None, client_factory: Optional[Callable[[], Any]] = None,
-                 timeout_s: float = 30, deadline: Optional[float] = None) -> Iterator[Event]:
+                 timeout_s: float = 30, deadline: Optional[float] = None,
+                 before_model_call: Optional[Callable[[float], None]] = None) -> Iterator[Event]:
     stats = stats if stats is not None else SlideStats()
     started, context = time.monotonic(), (context or "").strip()
     notes = ["Vision can misread labels or omit figures. Confirm the highlighted readings against the image; "
@@ -365,7 +393,8 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
         # Keep two segmentation calls. Spark grounding also handles line charts and other misses.
         for concept in SAM_CONCEPTS:
             try:
-                boxes = _sam(client, image, concept, stats, timeout_s=_remaining(deadline, min(15, timeout_s)))
+                boxes = _sam(client, image, concept, stats, timeout_s=_remaining(deadline, min(15, timeout_s)),
+                             before_model_call=before_model_call)
             except SlideError:
                 notes.append(f"SAM could not complete {concept} detection; Spark grounding is used where needed.")
                 continue
@@ -378,14 +407,17 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
         yield "progress", {"stage": "reading"}
         request = vision_request(image, regions, context)
         remaining = _remaining(deadline, timeout_s)
+        _admit_call(before_model_call, SPARK_UNKNOWN_USAGE_USD)
         stats.model_calls += 1
         stats.cost_usd += SPARK_UNKNOWN_USAGE_USD
         stats.estimated_calls += 1
         response = client.responses.create(**request, timeout=remaining)
         usage = extract._usage(response)
         if usage is not None:
-            stats.cost_usd += extract.cost_usd(usage, META.prices) - SPARK_UNKNOWN_USAGE_USD
-            stats.estimated_calls -= 1
+            actual = extract.cost_usd(usage, META.prices)
+            if math.isfinite(actual) and actual >= 0:
+                stats.cost_usd += actual - SPARK_UNKNOWN_USAGE_USD
+                stats.estimated_calls -= 1
         if getattr(response, "status", None) != "completed":
             raise SlideError("The image reading did not finish. Try a crop containing one chart or table.")
         if len(response.output_text or "") > 100_000:
@@ -435,14 +467,16 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
         if not prepared:
             notes.append("No legible financial figures were found. Try a clearer crop or paste the text instead.")
         stats.complete = True
-        yield "done", {"counts": counts, "claims": next_id - 1, "model_calls": stats.model_calls,
-                       "latency_s": round(time.monotonic() - started, 2), "cost_usd": round(stats.cost_usd, 6),
-                       "cost_is_estimate": bool(stats.estimated_calls), "warnings": notes}
+        yield "done", {"counts": counts, "claims": next_id - 1, **_billing(stats),
+                       "latency_s": round(time.monotonic() - started, 2), "warnings": notes}
+    except extract.ModelCallRejected:
+        yield "error", {"message": "The slide check was stopped by the spending guard. Please try again later.",
+                        "retryable": False, **_billing(stats)}
     except extract.ExtractionError:
         yield "error", {"message": "Slide checks require the server's Meta API key. Text examples still work.",
-                        "retryable": False}
+                        "retryable": False, **_billing(stats)}
     except SlideError as exc:
-        yield "error", {"message": str(exc), "retryable": True}
+        yield "error", {"message": str(exc), "retryable": True, **_billing(stats)}
     except Exception:
         yield "error", {"message": "The slide could not be checked. Try a clearer crop or try again later.",
-                        "retryable": True}
+                        "retryable": True, **_billing(stats)}

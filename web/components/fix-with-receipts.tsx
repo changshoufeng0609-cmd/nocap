@@ -9,7 +9,7 @@ import { ReceiptCalculation } from "@/components/receipt-calculation";
 import { Button } from "@/components/ui/button";
 import { useFix } from "@/hooks/use-fix";
 import { byDocumentOrder, DISPLAY_STATUSES, STATUS_META, displayCounts, displayStatus } from "@/lib/claims";
-import { formatCost, formatFiscalPeriod, formatLatency, formatPeriodRange, formatUtc, formatUtcMinutes, formatValue } from "@/lib/format";
+import { formatErrorCost, formatCost, formatFiscalPeriod, formatLatency, formatPeriodRange, formatUtc, formatUtcMinutes, formatValue } from "@/lib/format";
 import { type Fact, type FixRequest, type FixResult, type FixStage } from "@/lib/types";
 
 const STAGES: Record<FixStage, string> = {
@@ -109,7 +109,7 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
         </ul>
         <p className="text-xs text-muted-foreground">
           As of {request.as_of ? formatUtcMinutes(request.as_of) : "the latest filings"}. Unverifiable claims remain unconfirmed.
-          {" "}{formatLatency(result.latency_s)} · {formatCost(result.cost_usd)}
+          {" "}{formatLatency(result.latency_s)} · {result.cost_is_estimate ? "estimated " : ""}{formatCost(result.cost_usd)}
         </p>
       </div>
 
@@ -203,6 +203,7 @@ export function FixWithReceipts({ request }: { request: FixRequest }) {
       {state.phase === "error" ? (
         <div className="border-t border-border bg-bad-tint/30 px-4 py-4 sm:px-6" role="alert">
           <p className="text-sm font-medium">{state.error.message}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{formatErrorCost(state.error)}</p>
           <p className="mt-1 text-xs text-muted-foreground">Your original draft and check results are still available above.</p>
           {state.error.retryable ? <Button size="sm" variant="outline" className="mt-3" onClick={() => start(request)}>Retry corrections</Button> : null}
         </div>

@@ -53,9 +53,9 @@ export function SummaryStrip({ state }: { state: CheckState }) {
         {done ? (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {meta?.cached ? (
-              <span className="tabular-nums">$0 this replay · original run: {formatLatency(done.latency_s)} / {formatCost(done.cost_usd)}</span>
+              <span className="tabular-nums">$0 this replay · original run: {formatLatency(done.latency_s)} / {done.cost_is_estimate ? "estimated " : ""}{formatCost(done.cost_usd)}</span>
             ) : (
-              <span className="tabular-nums">{formatLatency(done.latency_s)} · {formatCost(done.cost_usd)}</span>
+              <span className="tabular-nums">{formatLatency(done.latency_s)} · {done.cost_is_estimate ? "estimated " : ""}{formatCost(done.cost_usd)}</span>
             )}
             <span aria-hidden>·</span>
             <span className="font-mono">{done.model}</span>

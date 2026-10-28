@@ -20,7 +20,7 @@ import { useCheck } from "@/hooks/use-check";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { fetchExamples, fetchHealth } from "@/lib/api";
 import { STATUS_META, displayCounts, displayStatus, reasonText } from "@/lib/claims";
-import { fromUtcInputValue, toUtcInputValue } from "@/lib/format";
+import { formatErrorCost, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
 import { MAX_DRAFT_CHARS, type CheckRequest, type Example } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -420,6 +420,7 @@ export function ReceiptsApp() {
                 <TriangleAlertIcon className="text-bad" />
                 <AlertTitle className="text-bad">{state.error.message}</AlertTitle>
                 <AlertDescription className="text-foreground/80 [&_p:not(:last-child)]:mb-0">
+                  <p>{formatErrorCost(state.error)}</p>
                   <p>
                     {state.error.retryable ? "Try again in a moment. Meanwhile," : "Live checks are paused, but"} the
                     examples are pre-checked and still work:

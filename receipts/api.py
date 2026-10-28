@@ -9,8 +9,8 @@
 Local:   uvicorn receipts.api:app --port 8000
 Vercel:  the Python service's entrypoint (vercel.json: services.api.entrypoint = "receipts.api:app")
 
-Guards on live checks: drafts of at most 6,000 characters, a per-IP rate limit, a daily model-spend cap
-(RECEIPTS_DAILY_BUDGET_USD, default $5, measured from token usage), per-call timeouts with one retry, and an overall
+Guards on live checks: drafts of at most 6,000 characters, a per-IP rate limit, a durable estimated daily admission
+budget (RECEIPTS_DAILY_BUDGET_USD, default $5), per-call timeouts with one retry, and an overall
 deadline. A replay from the cache, or a draft whose passages are all in the model-response cache, costs nothing, so
 it skips the rate limit and the budget. Every failure reaches the client as an `error` event. Logs carry draft
 hashes, never draft text, keys or client IPs.
@@ -20,6 +20,10 @@ RECEIPTS_DAILY_BUDGET_USD, RECEIPTS_RATE_LIMIT_CHECKS and RECEIPTS_RATE_LIMIT_WI
 RECEIPTS_API_CACHE_DIR, RECEIPTS_SPARK_CACHE_DIR, RECEIPTS_NO_CACHE=1 (measure uncached latency),
 RECEIPTS_CORS_ORIGINS (comma-separated, for a frontend that calls the API cross-origin). MODEL_API_KEY is read by
 receipts.extract.
+
+On Vercel, a shared PostgreSQL budget is required by default. Configure RECEIPTS_SPEND_DATABASE_URL after
+approved schema initialization; cached examples work without it. See docs/spend-protection.md for deployment
+steps, conservative unknown-usage settlement and the distinction from a provider-enforced billing ceiling.
 """
 from __future__ import annotations
 
@@ -35,7 +39,7 @@ import tempfile
 import threading
 import time
 from collections import OrderedDict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, AsyncIterator, Callable, Iterable, Iterator, Mapping, Optional, Sequence
@@ -48,6 +52,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from receipts import extract as _extract
 from receipts import stream as _stream
 from receipts.stream import Event
+from receipts.spend import BudgetUnavailable, LocalLedger, PostgresLedger, Reservation
 
 log = logging.getLogger(__name__)
 
@@ -103,6 +108,9 @@ class Settings:
     est_cost_per_call_usd: float = 0.01                # reserved per model call; Spike B measured about $0.0045
     use_caches: bool = True
     cors_origins: tuple[str, ...] = ()
+    spend_database_url: Optional[str] = field(default=None, repr=False)
+    spend_namespace: str = "nocap"
+    require_shared_budget: bool = False
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] = os.environ) -> "Settings":
@@ -127,6 +135,10 @@ class Settings:
             rate_limit_window_s=max(1.0, _num(env, "RECEIPTS_RATE_LIMIT_WINDOW_S", 600.0)),
             use_caches=(env.get("RECEIPTS_NO_CACHE") or "").strip().lower() not in ("1", "true", "yes"),
             cors_origins=origins,
+            spend_database_url=(env.get("RECEIPTS_SPEND_DATABASE_URL") or "").strip() or None,
+            spend_namespace=(env.get("RECEIPTS_SPEND_NAMESPACE") or "nocap").strip(),
+            require_shared_budget=(env.get("RECEIPTS_REQUIRE_SHARED_BUDGET", "1" if on_vercel else "0")
+                                   .strip().lower() not in ("0", "false", "no")),
         )
 
 
@@ -164,62 +176,77 @@ class RateLimiter:
             return None
 
 
-class SpendLedger:
-    """Per-process daily admission guard using observed usage priced by receipts.extract.cost_usd.
+# Preserve the old import name for callers; the implementation is now transactional.
+SpendLedger = LocalLedger
 
-    Live operations reserve an estimate before starting and settle reported usage afterward. Actual costs can
-    exceed reservations, and failed or late text/Fix responses can leave usage unknown. Best-effort JSON
-    persistence does not share totals across Vercel instances. This is not a provider-enforced spending cap.
-    """
 
-    def __init__(self, cap_usd: float, path: Optional[Path] = None, *,
-                 today: Callable[[], str] = lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d")):
-        self.cap_usd, self.path, self._today = max(0.0, cap_usd), path, today
+class UnavailableLedger:
+    """A missing or broken shared ledger never falls back to an instance-local budget."""
+
+    def reserve(self, estimate_usd: float) -> None:
+        raise BudgetUnavailable()
+
+    def settle(self, token: Reservation, actual_usd: float, *, uncertain: bool = False) -> None:
+        raise BudgetUnavailable()
+
+
+class OperationBudget:
+    """Authorize SDK attempts only within an already persisted request reservation."""
+
+    def __init__(self, ledger: Any, token: Optional[Reservation], reserved_usd: float):
+        self.ledger, self.token, self.reserved_usd = ledger, token, reserved_usd
         self._lock = threading.Lock()
-        self._reserved: dict[int, float] = {}
-        self._next = 0
-        self._day, self._spent = self._load()
+        self._admitted = 0.0
+        self.started_calls = 0
+        self._closed = False
 
-    def _load(self) -> tuple[str, float]:
-        day = self._today()
-        if self.path is not None:
-            try:
-                rec = json.loads(self.path.read_text(encoding="utf-8"))
-                if rec.get("day") == day:
-                    return day, max(0.0, float(rec.get("spent_usd", 0.0)))
-            except (OSError, ValueError, TypeError, AttributeError):
-                pass
-        return day, 0.0
-
-    def _roll(self) -> None:
-        day = self._today()
-        if day != self._day:
-            self._day, self._spent = day, 0.0
-
-    def spent_today(self) -> float:
+    def before_call(self, estimate_usd: float) -> None:
         with self._lock:
-            self._roll()
-            return self._spent
+            if (self._closed or self.token is None or not math.isfinite(estimate_usd) or estimate_usd <= 0
+                    or self._admitted + estimate_usd > self.reserved_usd + 1e-9):
+                raise _extract.ModelCallRejected()
+            self._admitted += estimate_usd
+            self.started_calls += 1
 
-    def reserve(self, estimate_usd: float) -> Optional[int]:
-        """A reservation token, or None when the estimate doesn't fit in what is left of today's cap."""
+    def finish(self, stats: Any) -> None:
         with self._lock:
-            self._roll()
-            if self._spent + sum(self._reserved.values()) + estimate_usd > self.cap_usd + 1e-12:
-                return None
-            self._next += 1
-            self._reserved[self._next] = estimate_usd
-            return self._next
+            self._closed = True
+        if self.token is None:
+            return
+        self.synchronize(stats)
+        self.ledger.settle(self.token, stats.cost_usd, uncertain=stats.cost_is_estimate)
 
-    def settle(self, token: Optional[int], actual_usd: float) -> None:
-        with self._lock:
-            if token is not None:
-                self._reserved.pop(token, None)
-            self._roll()
-            self._spent += max(0.0, actual_usd)
-            day, spent = self._day, self._spent
-        if self.path is not None:
-            _stream.write_json_atomic(self.path, {"day": day, "spent_usd": round(spent, 6)})
+    def synchronize(self, stats: Any) -> None:
+        # A last-resort worker exception may bypass an extractor's usage callback.
+        # Never publish zero cost or refund an attempt admitted before that failure.
+        if self.started_calls > stats.model_calls:
+            stats.cost_usd = max(stats.cost_usd, self.reserved_usd)
+            stats.estimated_calls += self.started_calls - stats.model_calls
+            stats.model_calls = self.started_calls
+
+
+def _ledger(settings: Settings) -> Any:
+    try:
+        if settings.spend_database_url:
+            return PostgresLedger(settings.daily_budget_usd, settings.spend_database_url,
+                                  namespace=settings.spend_namespace)
+        if settings.require_shared_budget:
+            return UnavailableLedger()
+        return LocalLedger(settings.daily_budget_usd,
+                           settings.api_cache_dir / "_spend.sqlite3" if settings.api_cache_dir else None,
+                           namespace=settings.spend_namespace,
+                           legacy_path=settings.api_cache_dir / "_spend.json" if settings.api_cache_dir else None)
+    except BudgetUnavailable:
+        log.error("budget storage unavailable; live operations disabled")
+        return UnavailableLedger()
+
+
+def _reserve(ledger: Any, amount: float) -> Optional[Reservation]:
+    try:
+        return ledger.reserve(amount)
+    except BudgetUnavailable:
+        raise Rejected("budget_unavailable", "Live checks are paused because the spending ledger is unavailable. "
+                       "The cached examples still work.", True) from None
 
 
 def client_ip(request: Request) -> str:
@@ -318,14 +345,27 @@ async def _from_events(events: Iterable[Event]) -> AsyncIterator[str]:
 
 
 def error_response(message: str, retryable: bool) -> StreamingResponse:
-    return sse_response(_from_events([("error", {"message": message, "retryable": retryable})]))
+    return sse_response(_from_events([("error", {"message": message, "retryable": retryable,
+        "cost_usd": 0.0, "cost_is_estimate": False, "model_calls": 0})]))
 
 
-async def _from_thread(events: Iterator[Event], on_finish: Callable[[], None], keepalive_s: float) -> AsyncIterator[str]:
+async def _from_thread(events: Iterator[Event], on_finish: Callable[[], None], keepalive_s: float,
+                       stats: Any = None, budget: Optional[OperationBudget] = None) -> AsyncIterator[str]:
     """Run the check in a worker thread and relay its events as they come, with an SSE comment every keepalive_s of
     silence. The check runs to completion (and on_finish records it) even if the client goes away."""
     loop = asyncio.get_running_loop()
     queue: asyncio.Queue[Optional[str]] = asyncio.Queue()
+
+    def billing() -> dict[str, Any]:
+        if stats is None:
+            return {}
+        if budget is not None:
+            budget.synchronize(stats)
+        return {"cost_usd": round(stats.cost_usd, 6), "cost_is_estimate": stats.cost_is_estimate,
+                "model_calls": stats.model_calls}
+
+    def failure() -> str:
+        return _stream.sse("error", {"message": _stream.MSG_INTERNAL, "retryable": True, **billing()})
 
     def put(item: Optional[str]) -> None:
         try:
@@ -334,20 +374,47 @@ async def _from_thread(events: Iterator[Event], on_finish: Callable[[], None], k
             pass
 
     def produce() -> None:
+        closed = False
+
+        def close_events() -> None:
+            nonlocal closed
+            if closed:
+                return
+            closed = True
+            try:
+                if hasattr(events, "close"):
+                    events.close()
+            except Exception as exc:
+                log.error("closing a check failed error=%s", type(exc).__name__)
+
         try:
             for name, data in events:
+                if name in ("done", "result", "error"):
+                    data = {**data, **billing()}
                 put(_stream.sse(name, data))
         except Exception as e:  # check_events ends with its own error event; this is the last resort
             log.error("stream failed error=%s", type(e).__name__)
-            put(_stream.sse("error", {"message": _stream.MSG_INTERNAL, "retryable": True}))
+            close_events()
+            put(failure())
         finally:
+            close_events()
             try:
                 on_finish()
             except Exception as e:
                 log.error("finishing a check failed error=%s", type(e).__name__)
             put(None)
 
-    threading.Thread(target=produce, name="receipts-check", daemon=True).start()
+    try:
+        threading.Thread(target=produce, name="receipts-check", daemon=True).start()
+    except Exception as exc:
+        # No provider work started. Release the unused reservation exactly once.
+        log.error("worker start failed error=%s", type(exc).__name__)
+        try:
+            on_finish()
+        except Exception as finish_exc:
+            log.error("finishing a check failed error=%s", type(finish_exc).__name__)
+        yield failure()
+        return
     while True:
         try:
             item = await asyncio.wait_for(queue.get(), timeout=keepalive_s)
@@ -388,8 +455,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
     cache = _stream.EventCache(settings.api_cache_dir if settings.use_caches else None,
                                settings.prebaked_dirs if settings.use_caches else ())
     limiter = RateLimiter(settings.rate_limit_checks, settings.rate_limit_window_s)
-    ledger = SpendLedger(settings.daily_budget_usd,
-                         settings.api_cache_dir / "_spend.json" if settings.api_cache_dir else None)
+    ledger = _ledger(settings)
     make_client = client_factory or (lambda: _extract.make_client(timeout=settings.model_timeout_s))
     lock = threading.Lock()
     shared: dict[str, Any] = {"store": store, "client": None, "wonder_client": None, "slide_client": None}
@@ -482,7 +548,8 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         except _extract.ExtractionError:
             log.error("check %s rejected reason=model_configuration", tag)
             return error_response(_stream.MSG_NO_MODEL, False)
-        token: Optional[int] = None
+        token: Optional[Reservation] = None
+        estimate = 0.0
         client = None
         if calls:
             wait = limiter.acquire(client_ip(request))
@@ -496,35 +563,39 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             except _extract.ExtractionError:
                 log.error("check %s rejected reason=no_api_key", tag)
                 return error_response(_stream.MSG_NO_MODEL, False)
-            token = ledger.reserve(calls * settings.est_cost_per_call_usd)
+            try:
+                estimate = max(calls * settings.est_cost_per_call_usd,
+                               _extract.extraction_estimate(text, ctx or "", max_attempts=settings.model_attempts))
+                token = _reserve(ledger, estimate)
+            except Rejected as r:
+                return error_response(r.message, r.retryable)
             if token is None:
-                log.warning("check %s rejected reason=daily_budget spent=$%.4f cap=$%.2f", tag,
-                            ledger.spent_today(), settings.daily_budget_usd)
+                log.warning("check %s rejected reason=daily_budget", tag)
                 return error_response("NoCap has reached today's budget for live checks. The examples still "
                                       "work, and live checks resume tomorrow (UTC).", False)
 
+        budget = OperationBudget(ledger, token, estimate)
         stats = _stream.CheckStats()
         events = _stream.check_events(
             text, draft_hash=key, as_of=as_of, context=context, store=store, stats=stats, started=started,
             client=client, cache_dir=settings.spark_cache_dir if settings.use_caches else None,
             extra_cache_dirs=settings.spark_read_dirs, use_cache=settings.use_caches,
             timeout_s=settings.model_timeout_s, max_attempts=settings.model_attempts,
-            deadline=started + settings.check_deadline_s)
+            deadline=started + settings.check_deadline_s, before_model_call=budget.before_call)
 
         def finish() -> None:
-            if token is not None or stats.cost_usd:
-                ledger.settle(token, stats.cost_usd)
+            budget.finish(stats)
             stored = bool(stats.complete and settings.use_caches and cache.put(key, fingerprint, stats.events))
             log.info("check %s cached=false passages=%d calls=%d claims=%d wrong=%d unverifiable=%d latency=%.2fs "
                      "cost=$%.4f stored=%s%s", tag, stats.passages, stats.model_calls, stats.claims,
                      stats.counts["wrong"], stats.counts["unverifiable"], time.monotonic() - started,
                      stats.cost_usd, stored, f" error={stats.error}" if stats.error else "")
 
-        return sse_response(_from_thread(events, finish, settings.keepalive_s))
+        return sse_response(_from_thread(events, finish, settings.keepalive_s, stats, budget))
 
     @app.post("/api/fix")
     async def fix(request: Request) -> StreamingResponse:
-        from receipts.rewrite import RewriteStats, fix_events
+        from receipts.rewrite import RewriteStats, fix_events, WONDER, MAX_REQUEST_BYTES, MAX_OUTPUT_TOKENS
 
         started = time.monotonic()
         try:
@@ -543,26 +614,36 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             return error_response("Too many live checks or fixes from your network. Try again in a few minutes.", True)
         # The original and revised draft can both need extraction. Wonder has a separate, larger allowance;
         # cached extraction saves actual spend, but never bypasses a fix request's admission guard.
-        estimate = max(0.35, 0.15 + 2 * len(_extract.split_passages(text)) *
-                       max(0.05, settings.est_cost_per_call_usd))
-        token = ledger.reserve(estimate)
+        ctx = _extract.infer_context(text) if context is None else context
+        wonder_bound = max(0.15, _extract.cost_usd(
+            {"input_tokens": MAX_REQUEST_BYTES + 1024, "cached_tokens": 0,
+             "output_tokens": MAX_OUTPUT_TOKENS, "reasoning_tokens": 0}, WONDER.prices))
+        # Reserve both extraction passes, Wonder's bounded request and extra input room
+        # for numeric edits. The SDK hook denies any attempt beyond this reservation.
+        try:
+            estimate = 2 * _extract.extraction_estimate(text, ctx or "", max_attempts=1) + wonder_bound + 0.05
+            token = _reserve(ledger, estimate)
+        except (Rejected, _extract.ExtractionError) as exc:
+            return error_response(exc.message if isinstance(exc, Rejected) else _stream.MSG_NO_MODEL, False)
         if token is None:
             return error_response("NoCap has reached today's budget for fixes. Checks of the examples still work.",
                                   False)
+        budget = OperationBudget(ledger, token, estimate)
         stats = RewriteStats()
         events = fix_events(
             text, as_of=as_of, context=context, store=evidence_store, stats=stats,
             extract_client_factory=get_client, wonder_client_factory=get_wonder_client,
             cache_dir=settings.spark_cache_dir, extra_cache_dirs=settings.spark_read_dirs,
             use_cache=settings.use_caches, timeout_s=settings.model_timeout_s,
-            max_attempts=settings.model_attempts, deadline=started + settings.check_deadline_s)
+            max_attempts=settings.model_attempts, deadline=started + settings.check_deadline_s,
+            before_model_call=budget.before_call)
 
         def finish_fix() -> None:
-            ledger.settle(token, stats.cost_usd)
+            budget.finish(stats)
             log.info("fix draft=%s complete=%s calls=%d latency=%.2fs cost=$%.4f", key[:12], stats.complete,
                      stats.model_calls, time.monotonic() - started, stats.cost_usd)
 
-        return sse_response(_from_thread(events, finish_fix, settings.keepalive_s))
+        return sse_response(_from_thread(events, finish_fix, settings.keepalive_s, stats, budget))
 
     @app.post("/api/slide")
     async def slide(request: Request) -> StreamingResponse:
@@ -597,20 +678,24 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             return error_response("The evidence database isn't available on this server.", False)
         if limiter.acquire(client_ip(request)) is not None:
             return error_response("Too many live checks from your network. Try again in a few minutes.", True)
-        token = ledger.reserve(slides.RESERVE_USD)
+        try:
+            token = _reserve(ledger, slides.RESERVE_USD)
+        except Rejected as r:
+            return error_response(r.message, r.retryable)
         if token is None:
             return error_response("NoCap has reached today's budget for slide checks. Text examples still work.", False)
+        budget = OperationBudget(ledger, token, slides.RESERVE_USD)
         stats = slides.SlideStats()
         events = slides.slide_events(image, store=evidence_store, context=context, as_of=as_of, stats=stats,
                                      client_factory=get_slide_client, timeout_s=settings.model_timeout_s,
-                                     deadline=started + settings.check_deadline_s)
+                                     deadline=started + settings.check_deadline_s, before_model_call=budget.before_call)
 
         def finish_slide() -> None:
-            ledger.settle(token, stats.cost_usd)
+            budget.finish(stats)
             log.info("slide complete=%s calls=%d latency=%.2fs cost=$%.4f estimated_calls=%d", stats.complete,
                      stats.model_calls, time.monotonic() - started, stats.cost_usd, stats.estimated_calls)
 
-        return sse_response(_from_thread(events, finish_slide, settings.keepalive_s))
+        return sse_response(_from_thread(events, finish_slide, settings.keepalive_s, stats, budget))
 
     @app.get("/api/examples")
     def examples() -> list[dict[str, Any]]:

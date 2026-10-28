@@ -1,4 +1,4 @@
-import { API_BASE } from "./api";
+import { API_BASE, costFields } from "./api";
 import { readSSE } from "./sse";
 import { STATUSES, type ErrorEvent, type Fact, type SlideBox, type SlideClaim, type SlideDone, type SlideMeta, type SlideRegion, type SlideRequest, type SlideStage, type Verdict } from "./types";
 
@@ -54,8 +54,8 @@ function isVerdict(x: unknown): x is Verdict {
 /** Strict terminal accounting prevents a partial stream or unsafe axis verdict from looking complete. */
 export async function streamSlide(request: SlideRequest, handlers: SlideHandlers, signal: AbortSignal): Promise<void> {
   let finished = false;
-  const fail = (message: string, retryable = true) => {
-    if (!signal.aborted && !finished) { finished = true; handlers.onError({ message, retryable }); }
+  const fail = (message: string, retryable = true, accounting: Partial<ErrorEvent> = {}) => {
+    if (!signal.aborted && !finished) { finished = true; handlers.onError({ message, retryable, ...accounting }); }
   };
   const invalid = () => fail("The slide response could not be verified safely. Please try again with a clearer image.");
   try {
@@ -80,7 +80,7 @@ export async function streamSlide(request: SlideRequest, handlers: SlideHandlers
       try { data = JSON.parse(message.data); } catch { invalid(); return; }
       if (!object(data)) { invalid(); return; }
       if (message.event === "error") {
-        fail(text(data.message, 1000) && data.message ? data.message : "The slide check could not be completed.", data.retryable === true);
+        fail(text(data.message, 1000) && data.message ? data.message : "The slide check could not be completed.", data.retryable === true, costFields(data));
         return;
       }
       if (message.event === "meta") {
