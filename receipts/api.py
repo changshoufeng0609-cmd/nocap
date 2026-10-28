@@ -165,11 +165,12 @@ class RateLimiter:
 
 
 class SpendLedger:
-    """Model spend per UTC day, from token usage converted to USD (receipts.extract.cost_usd), against a daily cap.
+    """Per-process daily admission guard using observed usage priced by receipts.extract.cost_usd.
 
-    A live check reserves its estimated cost before it starts and settles its actual cost when it ends, so checks
-    running at the same time can't overshoot the cap together. The total persists best-effort in a JSON file. The
-    ledger is per process (per Vercel instance); the model provider's own spend limit is the hard backstop."""
+    Live operations reserve an estimate before starting and settle reported usage afterward. Actual costs can
+    exceed reservations, and failed or late text/Fix responses can leave usage unknown. Best-effort JSON
+    persistence does not share totals across Vercel instances. This is not a provider-enforced spending cap.
+    """
 
     def __init__(self, cap_usd: float, path: Optional[Path] = None, *,
                  today: Callable[[], str] = lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d")):
