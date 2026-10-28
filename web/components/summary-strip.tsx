@@ -5,21 +5,15 @@ import { DatabaseZapIcon } from "lucide-react";
 import { StatusGlyph } from "@/components/status";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CheckState } from "@/hooks/use-check";
-import { STATUS_META } from "@/lib/claims";
+import { DISPLAY_STATUSES, STATUS_META, displayCounts } from "@/lib/claims";
 import { formatCost, formatLatency, formatUtcMinutes } from "@/lib/format";
-import { STATUSES, type Status } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /** ✓ ✗ ? ≈ counts, then latency, cost, model and the cached badge once the check is done. */
 export function SummaryStrip({ state }: { state: CheckState }) {
   const { phase, claims, verdicts, done, meta, request } = state;
   const resolved = claims.filter((c) => verdicts[c.id]).length;
-  const counts: Record<Status, number> =
-    done?.counts ??
-    STATUSES.reduce(
-      (acc, s) => ({ ...acc, [s]: claims.filter((c) => verdicts[c.id]?.status === s).length }),
-      {} as Record<Status, number>,
-    );
+  const counts = displayCounts(Object.values(verdicts));
   const asOf = meta?.as_of ?? request?.as_of ?? null;
   const streaming = phase === "streaming";
   const progress = claims.length ? resolved / claims.length : 0;
@@ -34,7 +28,7 @@ export function SummaryStrip({ state }: { state: CheckState }) {
   return (
     <section aria-label="Check summary" className="relative border-b border-border px-4 py-3.5 sm:px-6">
       <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5" aria-label="Verdict counts">
-        {STATUSES.map((s) => (
+        {DISPLAY_STATUSES.filter((s) => s !== "look_ahead" || counts[s] > 0).map((s) => (
           <li key={s} className="flex items-center gap-1.5 text-sm">
             <StatusGlyph
               status={s}
@@ -58,9 +52,11 @@ export function SummaryStrip({ state }: { state: CheckState }) {
         </p>
         {done ? (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="tabular-nums">{formatLatency(done.latency_s)}</span>
-            <span aria-hidden>·</span>
-            <span className="tabular-nums">{formatCost(done.cost_usd)}</span>
+            {meta?.cached ? (
+              <span className="tabular-nums">$0 this replay · original run: {formatLatency(done.latency_s)} / {formatCost(done.cost_usd)}</span>
+            ) : (
+              <span className="tabular-nums">{formatLatency(done.latency_s)} · {formatCost(done.cost_usd)}</span>
+            )}
             <span aria-hidden>·</span>
             <span className="font-mono">{done.model}</span>
             {meta?.cached ? (
@@ -75,7 +71,7 @@ export function SummaryStrip({ state }: { state: CheckState }) {
                   </span>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-60 text-pretty">
-                  Served from the result cache: the model wasn&apos;t called again for this draft.
+                  Served from the result cache with no new model charge. The original run&apos;s time and cost are shown for reference, not this replay&apos;s latency.
                 </TooltipContent>
               </Tooltip>
             ) : null}

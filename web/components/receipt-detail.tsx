@@ -4,6 +4,7 @@ import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, ClockAlertIcon, Exter
 import type { Ref } from "react";
 
 import { PendingDots, StatusChip } from "@/components/status";
+import { ReceiptCalculation } from "@/components/receipt-calculation";
 import { Button } from "@/components/ui/button";
 import { SOURCE_LABEL, displayStatus, filedValue, firstPublic, reasonText, valueIsWrong } from "@/lib/claims";
 import {
@@ -93,10 +94,10 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
       </header>
 
       {lookAhead && publicAt ? (
-        <div className="flex gap-3 rounded-lg border border-bad-line/40 bg-bad-tint px-3.5 py-3 text-sm">
-          <ClockAlertIcon className="mt-0.5 size-4 shrink-0 text-bad" aria-hidden />
+        <div className="flex gap-3 rounded-lg border border-time-line/40 bg-time-tint px-3.5 py-3 text-sm">
+          <ClockAlertIcon className="mt-0.5 size-4 shrink-0 text-time" aria-hidden />
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-bad">Not public until {formatUtc(publicAt)}</p>
+            <p className="font-semibold text-time">Not public until {formatUtc(publicAt)}</p>
             {effectiveAsOf ? (
               <p className="text-foreground/80">
                 Checked as of {formatUtc(effectiveAsOf)}
@@ -129,12 +130,14 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
             ) : filed ? (
               formatValue(filed.value, filed.unit)
             ) : (
-              <span className="text-base text-muted-foreground">No filed figure</span>
+              <span className="text-base text-muted-foreground">{verdict.evidence.length && verdict.status !== "unverifiable" ? "See cited figures" : "No filed figure"}</span>
             )}
           </dd>
           {filed?.note ? <dd className="font-mono text-[0.7rem] text-muted-foreground">{filed.note}</dd> : null}
         </div>
       </dl>
+
+      {verdict ? <ReceiptCalculation claim={claim} verdict={verdict} /> : null}
 
       {verdict ? (
         <figure className="flex flex-col gap-1.5">
@@ -159,7 +162,7 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
           {verdict.evidence.length ? (
             <ul className="flex flex-col gap-3">
               {verdict.evidence.map((f, i) => (
-                <FactReceipt key={`${f.accession}-${f.metric}-${f.period_end}-${i}`} fact={f} asOf={effectiveAsOf} />
+                <FactReceipt key={`${f.accession}-${f.metric}-${f.period_end}-${i}`} fact={f} asOf={effectiveAsOf} index={i + 1} />
               ))}
             </ul>
           ) : (
@@ -205,7 +208,7 @@ function Row({ label, children, className }: { label: string; children: React.Re
   );
 }
 
-function FactReceipt({ fact, asOf }: { fact: Fact; asOf: string | null | undefined }) {
+function FactReceipt({ fact, asOf, index }: { fact: Fact; asOf: string | null | undefined; index: number }) {
   const afterAsOf = !!asOf && Date.parse(fact.accepted_at) > Date.parse(asOf);
   const period = formatFiscalPeriod(fact);
   return (
@@ -215,7 +218,7 @@ function FactReceipt({ fact, asOf }: { fact: Fact; asOf: string | null | undefin
           <span className="rounded-md bg-foreground px-1.5 py-0.5 font-mono text-[0.7rem] font-semibold text-background">
             {fact.form}
           </span>
-          <span className="font-medium">{SOURCE_LABEL[fact.source] ?? fact.source}</span>
+          <span className="font-medium">{SOURCE_LABEL[fact.source] ?? fact.source} · {index}</span>
           {fact.basis === "non-GAAP" ? (
             <span className="rounded-md border border-border px-1.5 py-0.5 text-[0.7rem] text-muted-foreground">
               non-GAAP
@@ -235,7 +238,7 @@ function FactReceipt({ fact, asOf }: { fact: Fact; asOf: string | null | undefin
         <Row label="Accepted" className="font-mono">
           {formatUtc(fact.accepted_at)}
           {afterAsOf ? (
-            <span className="ml-2 rounded bg-bad-tint px-1 py-px font-sans text-[0.68rem] font-semibold text-bad">
+            <span className="ml-2 rounded bg-time-tint px-1 py-px font-sans text-[0.68rem] font-semibold text-time">
               after as-of
             </span>
           ) : null}

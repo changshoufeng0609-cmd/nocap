@@ -45,6 +45,9 @@
   --color-approx-line: var(--approx-line);
   --color-pending: var(--pending);
   --color-pending-tint: var(--pending-tint);
+  --color-time: var(--time);
+  --color-time-tint: var(--time-tint);
+  --color-time-line: var(--time-line);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -91,6 +94,9 @@
   --pending: oklch(0.55 0.01 60);
   --pending-tint: oklch(0.93 0.005 70);
   --pending-shine: oklch(0.985 0.003 85);
+  --time: oklch(0.45 0.13 255);
+  --time-tint: oklch(0.95 0.025 255);
+  --time-line: oklch(0.64 0.13 255);
 }
 
 .dark {
@@ -113,6 +119,9 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 16%);
   --ring: oklch(0.72 0.12 255);
+  --time: oklch(0.8 0.1 255);
+  --time-tint: oklch(0.32 0.06 255 / 0.55);
+  --time-line: oklch(0.7 0.12 255);
 
   --ok: oklch(0.82 0.13 152);
   --ok-tint: oklch(0.33 0.06 152 / 0.55);
@@ -201,6 +210,11 @@
   --line: var(--bad-line);
   --tint: var(--bad-tint);
   --ink: var(--bad);
+}
+.claim-span[data-status="look_ahead"] {
+  --line: var(--time-line);
+  --tint: var(--time-tint);
+  --ink: var(--time);
 }
 .claim-span[data-status="unverifiable"] {
   --line: var(--unk-line);
@@ -292,6 +306,11 @@
 .claim-mark[data-status="wrong"] {
   color: #fff;
   background: var(--bad-solid);
+}
+.claim-mark[data-status="look_ahead"] {
+  color: var(--time);
+  background: var(--time-tint);
+  border-color: color-mix(in oklch, var(--time-line) 60%, transparent);
 }
 .claim-mark[data-status="unverifiable"] {
   color: var(--unk);

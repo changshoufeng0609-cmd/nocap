@@ -30,7 +30,7 @@ export function markLabel(claim: Claim, verdict: Verdict | undefined): string {
   if (!verdict) return `${claim.value_text}, ${claim.metric_text}: checking.`;
   const fix = correction(claim, verdict);
   const filed = fix && verdict.reason !== "look_ahead" ? ` Filed figure: ${fix}.` : "";
-  return `${claim.value_text}, ${claim.metric_text}: ${STATUS_META[verdict.status].label}. ${reasonText(verdict.reason)}.${filed}`;
+  return `${claim.value_text}, ${claim.metric_text}: ${STATUS_META[displayStatus(verdict)].label}. ${reasonText(verdict.reason)}.${filed}`;
 }
 
 /** The submitted draft with every claim underlined in place and a verdict mark after its number. */

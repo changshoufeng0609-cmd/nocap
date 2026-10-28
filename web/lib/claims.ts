@@ -1,13 +1,18 @@
 import { formatValue, inClaimTermsToFull } from "./format";
+import { receiptCalculation } from "./calculations";
 import type { Claim, Fact, ReasonCode, Status, Unit, Verdict } from "./types";
 
-export type DisplayStatus = Status | "pending";
+export type ResolvedDisplayStatus = Status | "look_ahead";
+export type DisplayStatus = ResolvedDisplayStatus | "pending";
+export const DISPLAY_STATUSES: ResolvedDisplayStatus[] = ["verified", "wrong", "look_ahead", "unverifiable", "approximate"];
 
-export const STATUS_META: Record<Status, { glyph: string; label: string; legend: string }> = {
+export const STATUS_META: Record<DisplayStatus, { glyph: string; label: string; legend: string }> = {
   verified: { glyph: "✓", label: "Verified", legend: "Matches the filing" },
-  wrong: { glyph: "✗", label: "Wrong", legend: "Value, period, scale, basis, company, or timing is off" },
+  wrong: { glyph: "✗", label: "Wrong", legend: "Value, period, scale, basis, or company is off" },
+  look_ahead: { glyph: "◷", label: "Not public yet", legend: "Filed after the selected as-of time" },
   unverifiable: { glyph: "?", label: "Unverifiable", legend: "Guidance, or no filed figure to compare" },
   approximate: { glyph: "≈", label: "Approximate", legend: "An estimate within tolerance" },
+  pending: { glyph: "…", label: "Checking", legend: "Waiting for the verifier" },
 };
 
 /** Reason codes in plain words (receipts/types.py ReasonCode). */
@@ -29,10 +34,17 @@ export function reasonText(reason: string): string {
   return REASON_TEXT[reason as ReasonCode] ?? reason.replace(/_/g, " ");
 }
 
-const SEVERITY: Record<DisplayStatus, number> = { verified: 1, unverifiable: 2, approximate: 3, pending: 4, wrong: 5 };
+const SEVERITY: Record<DisplayStatus, number> = { verified: 1, unverifiable: 2, approximate: 3, pending: 4, look_ahead: 5, wrong: 6 };
 
 export function displayStatus(verdict: Verdict | undefined): DisplayStatus {
-  return verdict ? verdict.status : "pending";
+  return verdict ? verdict.reason === "look_ahead" ? "look_ahead" : verdict.status : "pending";
+}
+
+/** Presentation only: API status and evaluation counts keep their original meaning. */
+export function displayCounts(verdicts: Iterable<Verdict>): Record<ResolvedDisplayStatus, number> {
+  const counts: Record<ResolvedDisplayStatus, number> = { verified: 0, wrong: 0, look_ahead: 0, unverifiable: 0, approximate: 0 };
+  for (const verdict of verdicts) counts[verdict.reason === "look_ahead" ? "look_ahead" : verdict.status] += 1;
+  return counts;
 }
 
 export function worst(statuses: DisplayStatus[]): DisplayStatus {
@@ -44,9 +56,6 @@ export const SOURCE_LABEL: Record<Fact["source"], string> = {
   press_release: "Press release",
   derived: "Derived",
 };
-
-/** Recomputed percentages use one decimal, like the verifier's explanations (19.8%). */
-const round1 = (x: number) => Math.round(x * 10) / 10;
 
 export interface FiledValue {
   value: number;
@@ -70,33 +79,8 @@ export function filedValue(claim: Claim, verdict: Verdict): FiledValue | null {
   const direct = ev.find((f) => f.unit === claim.unit && f.metric === claim.metric) ?? ev.find((f) => f.unit === claim.unit);
   if (direct) return { value: direct.value, unit: direct.unit };
   if (claim.unit !== "%") return null;
-  const usd = ev.filter((f) => f.unit === "USD");
-  if (claim.metric === "gross_margin") {
-    const gp = usd.find((f) => f.metric === "gross_profit");
-    const rev = gp && usd.find((f) => f.metric === "revenue" && f.period_end === gp.period_end);
-    if (gp && rev && rev.value) {
-      return { value: round1((gp.value / rev.value) * 100), unit: "%", note: `${formatValue(gp.value, "USD")} / ${formatValue(rev.value, "USD")}` };
-    }
-    return null;
-  }
-  // Growth: the latest receipt against the one a quarter (QoQ) or a year (YoY) earlier.
-  const target = claim.comparison === "YoY" ? 364 : claim.comparison === "QoQ" || claim.comparison === "sequential" ? 91 : null;
-  if (target === null) return null;
-  const same = usd.filter((f) => f.metric === usd[0]?.metric);
-  if (same.length < 2) return null;
-  const day = (s: string) => Date.parse(`${s.slice(0, 10)}T00:00:00Z`) / 86_400_000;
-  const current = same.reduce((a, b) => (day(b.period_end) > day(a.period_end) ? b : a));
-  const prior = same
-    .filter((f) => day(f.period_end) < day(current.period_end))
-    .map((f) => ({ f, off: Math.abs(day(current.period_end) - day(f.period_end) - target) }))
-    .filter((x) => x.off <= 20)
-    .sort((a, b) => a.off - b.off)[0]?.f;
-  if (!prior?.value) return null;
-  return {
-    value: round1((current.value / prior.value - 1) * 100),
-    unit: "%",
-    note: `${formatValue(current.value, "USD")} vs ${formatValue(prior.value, "USD")}`,
-  };
+  const calculation = receiptCalculation(claim, verdict);
+  return calculation ? { value: calculation.value, unit: "%" } : null;
 }
 
 /** Short inline correction for a wrong claim: "$81.273B", or "not public yet" for look-ahead. */

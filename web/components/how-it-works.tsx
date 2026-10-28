@@ -1,6 +1,5 @@
 import { StatusGlyph } from "@/components/status";
-import { STATUS_META } from "@/lib/claims";
-import { STATUSES } from "@/lib/types";
+import { DISPLAY_STATUSES, STATUS_META } from "@/lib/claims";
 
 const STEPS = [
   {
@@ -37,7 +36,7 @@ export function HowItWorks() {
       <div>
         <h3 className="text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">Verdicts</h3>
         <ul className="mt-3 flex flex-col gap-2.5">
-          {STATUSES.map((s) => (
+          {DISPLAY_STATUSES.map((s) => (
             <li key={s} className="flex items-start gap-2.5 text-sm">
               <StatusGlyph status={s} size="sm" className="mt-px" />
               <span>

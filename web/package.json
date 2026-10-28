@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:fix": "node scripts/check-fix-client.mjs"
+    "test:fix": "node scripts/check-fix-client.mjs",
+    "test:presentation": "node scripts/check-presentation.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

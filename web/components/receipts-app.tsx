@@ -18,8 +18,8 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { Textarea } from "@/components/ui/textarea";
 import { useCheck } from "@/hooks/use-check";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { fetchExamples } from "@/lib/api";
-import { STATUS_META, reasonText } from "@/lib/claims";
+import { fetchExamples, fetchHealth } from "@/lib/api";
+import { STATUS_META, displayCounts, displayStatus, reasonText } from "@/lib/claims";
 import { fromUtcInputValue, toUtcInputValue } from "@/lib/format";
 import { MAX_DRAFT_CHARS, type CheckRequest, type Example } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -66,6 +66,7 @@ function isEditable(t: EventTarget | null): boolean {
 export function ReceiptsApp() {
   const [examples, setExamples] = useState<Example[] | null>(null);
   const [examplesError, setExamplesError] = useState<string | null>(null);
+  const [companies, setCompanies] = useState<string[] | null>(null);
   const [draft, setDraft] = useState("");
   const [exampleId, setExampleId] = useState<string | null>(null);
   const [asOf, setAsOf] = useState<AsOfState>({ mode: "now" });
@@ -106,15 +107,15 @@ export function ReceiptsApp() {
       });
       setAnnouncement(`The check failed. ${error.message}`);
     },
-    onDone: (done, { claims }) => {
+    onDone: (_done, { claims, verdicts }) => {
       if (!claims) {
         toast("No financial figures found in this draft.", {
           description: "Receipts checks numbers such as revenue, EPS, margins, growth and guidance.",
         });
       }
-      const c = done.counts;
+      const c = displayCounts(verdicts);
       setAnnouncement(
-        `Check complete. ${c.verified} verified, ${c.wrong} wrong, ${c.unverifiable} unverifiable, ${c.approximate} approximate.`,
+        `Check complete. ${c.verified} verified, ${c.wrong} wrong, ${c.look_ahead} not public yet, ${c.unverifiable} unverifiable, ${c.approximate} approximate.`,
       );
     },
   });
@@ -163,6 +164,9 @@ export function ReceiptsApp() {
   // Examples: load once; pre-fill the first one unless the user has already typed.
   useEffect(() => {
     const ac = new AbortController();
+    void fetchHealth(ac.signal).then((health) => {
+      if (!ac.signal.aborted && health) setCompanies(health.companies);
+    });
     fetchExamples(ac.signal)
       .then((list) => {
         setExamples(list);
@@ -222,7 +226,7 @@ export function ReceiptsApp() {
       if (claim) {
         setAnnouncement(
           v
-            ? `Receipt for ${claim.value_text}: ${STATUS_META[v.status].label}. ${reasonText(v.reason)}.`
+            ? `Receipt for ${claim.value_text}: ${STATUS_META[displayStatus(v)].label}. ${reasonText(v.reason)}.`
             : `Receipt for ${claim.value_text}: still checking.`,
         );
       }
@@ -382,6 +386,9 @@ export function ReceiptsApp() {
       </p>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-10">
         <section aria-label="Draft" className="min-w-0">
+          <p id="draft-coverage" className="mb-3 text-xs leading-relaxed text-muted-foreground">
+            {companies?.length ? <>Coverage: <span className="font-medium text-foreground/80">{companies.join(", ")}</span>. Other companies receive an unverifiable verdict.</> : "Coverage is limited to the companies in the evidence snapshot. Unsupported figures remain unverifiable."}
+          </p>
           <div
             className={cn(
               "overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_3px_rgb(0_0_0/0.04)] transition-shadow",
@@ -455,6 +462,7 @@ export function ReceiptsApp() {
                   }}
                   placeholder="Paste a draft with financial figures: an earnings story, a research note, or an AI-written summary."
                   spellCheck
+                  aria-describedby="draft-coverage"
                   aria-invalid={over || undefined}
                   className="proof max-h-[65vh] min-h-60 resize-none overflow-y-auto rounded-none border-0 px-4 py-5 shadow-none focus-visible:ring-0 sm:px-6 sm:py-6 dark:bg-transparent"
                 />

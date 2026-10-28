@@ -5,11 +5,12 @@ import { Fragment, useId, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { StatusChip, StatusGlyph } from "@/components/status";
+import { ReceiptCalculation } from "@/components/receipt-calculation";
 import { Button } from "@/components/ui/button";
 import { useFix } from "@/hooks/use-fix";
-import { byDocumentOrder, STATUS_META } from "@/lib/claims";
+import { byDocumentOrder, DISPLAY_STATUSES, STATUS_META, displayCounts, displayStatus } from "@/lib/claims";
 import { formatCost, formatFiscalPeriod, formatLatency, formatPeriodRange, formatUtc, formatUtcMinutes, formatValue } from "@/lib/format";
-import { STATUSES, type Fact, type FixRequest, type FixResult, type FixStage } from "@/lib/types";
+import { type Fact, type FixRequest, type FixResult, type FixStage } from "@/lib/types";
 
 const STAGES: Record<FixStage, string> = {
   checking: "Checking the original against the filings…",
@@ -24,12 +25,12 @@ function sourceUrl(raw: string): string | undefined {
   } catch { return undefined; }
 }
 
-function FilingReceipt({ fact }: { fact: Fact }) {
+function FilingReceipt({ fact, index }: { fact: Fact; index?: number }) {
   const href = sourceUrl(fact.url);
   return (
     <li className="min-w-0 rounded-lg border border-border bg-background p-3 text-xs leading-relaxed">
       <p className="font-medium text-foreground">
-        {fact.ticker} · {fact.form} · {formatFiscalPeriod(fact) ?? formatPeriodRange(fact)} · {fact.basis}
+        {index ? `Receipt ${index} · ` : ""}{fact.ticker} · {fact.form} · {formatFiscalPeriod(fact) ?? formatPeriodRange(fact)} · {fact.basis}
       </p>
       <p className="mt-1">{formatValue(fact.value, fact.unit)} · {fact.metric.replace(/_/g, " ")}</p>
       {fact.locator ? <blockquote className="mt-2 border-l-2 border-border pl-2 break-words text-muted-foreground">{fact.locator}</blockquote> : null}
@@ -83,6 +84,7 @@ function withReceipts(result: FixResult): string {
 function Revision({ result, request, prefix }: { result: FixResult; request: FixRequest; prefix: string }) {
   const claims = [...result.results].sort((a, b) => byDocumentOrder(a.claim, b.claim));
   const changed = result.changes.length;
+  const counts = displayCounts(result.results.map(({ verdict }) => verdict));
   const summary = result.status === "unchanged"
     ? "No safe corrections were applied."
     : result.status === "partial"
@@ -103,7 +105,7 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
       <div className="space-y-3 px-4 py-4 sm:px-6">
         <p className="font-medium" role="status">{summary}</p>
         <ul className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Re-check verdict counts">
-          {STATUSES.map((status) => <li key={status} className="flex items-center gap-1.5 text-sm"><StatusGlyph status={status} size="sm" /><span className="font-semibold tabular-nums">{result.counts[status]}</span><span className="text-muted-foreground">{STATUS_META[status].label.toLowerCase()}</span></li>)}
+          {DISPLAY_STATUSES.filter((status) => status !== "look_ahead" || counts[status] > 0).map((status) => <li key={status} className="flex items-center gap-1.5 text-sm"><StatusGlyph status={status} size="sm" /><span className="font-semibold tabular-nums">{counts[status]}</span><span className="text-muted-foreground">{STATUS_META[status].label.toLowerCase()}</span></li>)}
         </ul>
         <p className="text-xs text-muted-foreground">
           As of {request.as_of ? formatUtcMinutes(request.as_of) : "the latest filings"}. Unverifiable claims remain unconfirmed.
@@ -165,10 +167,11 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
           {claims.map(({ claim, verdict }) => (
             <details key={claim.id} className="py-3" open={verdict.status === "wrong" || verdict.status === "unverifiable"}>
               <summary className="cursor-pointer rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
-                <span className="ml-1 inline-flex max-w-[95%] flex-wrap items-center gap-2 align-middle"><StatusChip status={verdict.status} /><span className="font-medium">{claim.value_text}</span><span className="text-muted-foreground">{claim.metric_text}{claim.basis ? ` · ${claim.basis}` : ""}</span></span>
+                <span className="ml-1 inline-flex max-w-[95%] flex-wrap items-center gap-2 align-middle"><StatusChip status={displayStatus(verdict)} /><span className="font-medium">{claim.value_text}</span><span className="text-muted-foreground">{claim.metric_text}{claim.basis ? ` · ${claim.basis}` : ""}</span></span>
               </summary>
               <p className="mt-3 text-sm leading-relaxed">{verdict.explanation}</p>
-              {verdict.evidence.length ? <ul className="mt-3 grid gap-2 sm:grid-cols-2">{verdict.evidence.map((fact, i) => <FilingReceipt key={`${fact.accession}-${i}`} fact={fact} />)}</ul> : null}
+              <div className="mt-3"><ReceiptCalculation claim={claim} verdict={verdict} /></div>
+              {verdict.evidence.length ? <ul className="mt-3 grid gap-2 sm:grid-cols-2">{verdict.evidence.map((fact, i) => <FilingReceipt key={`${fact.accession}-${i}`} fact={fact} index={i + 1} />)}</ul> : null}
             </details>
           ))}
         </div>

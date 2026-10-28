@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 const GLYPH: Record<DisplayStatus, string> = {
   verified: "bg-ok-tint text-ok border border-ok-line/50",
   wrong: "bg-bad-solid text-white border border-transparent",
+  look_ahead: "bg-time-tint text-time border border-time-line/60",
   unverifiable: "bg-card text-unk border border-dashed border-unk-line",
   approximate: "bg-approx-tint text-approx border border-approx-line/60",
   pending: "bg-pending-tint text-pending border border-transparent",
@@ -12,6 +13,7 @@ const GLYPH: Record<DisplayStatus, string> = {
 const CHIP: Record<DisplayStatus, string> = {
   verified: "bg-ok-tint text-ok",
   wrong: "bg-bad-tint text-bad",
+  look_ahead: "bg-time-tint text-time",
   unverifiable: "bg-unk-tint text-unk",
   approximate: "bg-approx-tint text-approx",
   pending: "bg-pending-tint text-pending",
