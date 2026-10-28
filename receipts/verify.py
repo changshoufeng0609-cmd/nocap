@@ -39,6 +39,7 @@ Rules (docs/adr-001-architecture.md, .claude/reference/project.md):
 from __future__ import annotations
 
 import logging
+import math
 import re
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -219,7 +220,13 @@ def claimed_value(claim: Claim, *, change: Optional[bool] = None) -> float:
 
 
 def within(a: float, b: float, tol: float) -> bool:
-    return abs(a - b) <= tol + 1e-9 * max(1.0, abs(a), abs(b))
+    # IEEE infinity must not satisfy an infinite relative allowance (inf <= inf).
+    # Preserve the existing finite-number tolerance, but fail closed on overflow.
+    if not all(math.isfinite(v) for v in (a, b, tol)):
+        return False
+    difference = abs(a - b)
+    allowance = tol + 1e-9 * max(1.0, abs(a), abs(b))
+    return math.isfinite(difference) and math.isfinite(allowance) and difference <= allowance
 
 
 def to_claim_units(value: float, claim: Claim) -> float:
@@ -531,7 +538,10 @@ class Obs:
 def _half_unit(f: Fact) -> float:
     """Half the last reported digit of a fact, in its own units (XBRL decimals, or the press-release cell's)."""
     if f.decimals is not None:
-        return 0.5 * 10.0 ** -f.decimals
+        try:
+            return 0.5 * 10.0 ** -f.decimals
+        except OverflowError:
+            return math.inf  # the observation is excluded before it can influence a verdict
     return {"USD/share": 0.005, "%": 0.05}.get(f.unit, 0.5)
 
 
@@ -652,6 +662,8 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
     def plain(status: str, reason: str, explanation: str) -> Verdict:
         return Verdict(claim_id=claim.id, status=status, reason=reason, explanation=explanation, as_of=as_of_dt)
 
+    if not math.isfinite(claim.value):
+        return plain("unverifiable", "ambiguous", "This figure is not a finite number and cannot be checked.")
     if claim.forward_looking or claim.metric == "guidance_tolerance":
         return plain("unverifiable", "forward_looking",
                      "This is guidance about a future period, so no filing can confirm it yet.")
@@ -735,6 +747,7 @@ class _Check:
         self.claimed = claimed_value(claim, change=self.growth_base is not None)
         self.tol = tolerance(claim)
         self._facts: dict[tuple[Any, ...], list[Fact]] = {}
+        self.invalid_numeric_evidence = False
         self.hedge = hedge_of(claim)
         self.superseded: list[tuple[Obs, Obs, int]] = []  # (pre-split version, the version that replaced it, ratio)
 
@@ -821,6 +834,9 @@ class _Check:
                     continue
             elif _fact_kind(f) != want:
                 continue
+            if not math.isfinite(f.value) or not math.isfinite(_half_unit(f)):
+                self.invalid_numeric_evidence = True
+                continue
             out.append(Obs(float(f.value), (f,)))
         if metric in PER_SHARE_METRICS and len(out) > 1:
             out = self._split_consistent(out)
@@ -903,12 +919,16 @@ class _Check:
         if rp is None or rp.period_end is None:
             return []
         if self.growth_base:
-            return self.growth(cik, cal, rp, comparison or self.c.comparison, basis, self.segment)
-        if self.metric == "gross_margin":
-            return self.margin(cik, rp, basis)
-        if self.derived == "operating_margin":
-            return self.operating_margin(cik, rp, basis)
-        return self.level(cik, self.metric, rp, basis, self.segment)
+            observations = self.growth(cik, cal, rp, comparison or self.c.comparison, basis, self.segment)
+        elif self.metric == "gross_margin":
+            observations = self.margin(cik, rp, basis)
+        elif self.derived == "operating_margin":
+            observations = self.operating_margin(cik, rp, basis)
+        else:
+            observations = self.level(cik, self.metric, rp, basis, self.segment)
+        finite = [o for o in observations if math.isfinite(o.value) and math.isfinite(o.err)]
+        self.invalid_numeric_evidence |= len(finite) != len(observations)
+        return finite
 
     def matches(self, obs: Iterable[Obs], claimed: Optional[float] = None, tol: Optional[float] = None) -> list[Obs]:
         claimed = self.claimed if claimed is None else claimed
@@ -992,6 +1012,9 @@ class _Check:
     # -- the rules -------------------------------------------------------------
     def run(self) -> Verdict:
         c = self.c
+        if not math.isfinite(self.claimed) or not math.isfinite(self.tol):
+            return self.verdict("unverifiable", "ambiguous",
+                                "This figure exceeds the supported numeric range after applying its units or precision.")
         if not self._unit_fits():
             return self.verdict("unverifiable", "no_evidence",
                                 f"Receipts checks {self.mlabel(False)} in {_unit_words(self.metric)}, and this figure "
@@ -1051,6 +1074,9 @@ class _Check:
                             evidence=[f for o in hits for f in o.facts])
 
     def _no_evidence(self, rp: ResolvedPeriod) -> Verdict:
+        if self.invalid_numeric_evidence:
+            return self.verdict("unverifiable", "no_evidence",
+                                "The available filing figures could not be compared as finite numbers.")
         if rp.period_end is None:
             text = f"No {self.company} filing covers {self.plabel(rp)} yet"
         elif self.basis == "non-GAAP":
