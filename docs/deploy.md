@@ -2,6 +2,46 @@
 
 ## Current deployment state
 
+[NoCap](https://receipts-nocap.vercel.app), the [2:45 demo](https://receipts-nocap.vercel.app/demo)
+and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public.
+The [current acceptance record](public-release-update-2026-10-29.json) binds the source, deployment,
+real browser checks, file hashes and the retained harness failures.
+
+| Setting | Current state |
+|---|---|
+| Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
+| Production deployment | `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji`, READY, 44.173-second build |
+| Deployed public source | `04ecc91bf9ee2362471359ba44d026775c82f8b7` |
+| Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
+| Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
+| Live access | Paused. Saved examples, recorded demo and benchmark inspection are available. |
+| Shared admission | Existing free Neon primary, namespace `nocap`, $1 per UTC admission day; no configuration or allowance reset in this release |
+| Model-quality evidence | [One-time held-out results](../eval/heldout_results.md) and [separate four-model Q&A](../eval/qa_results.md) |
+| Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
+
+The base release `de534ca` / `dpl_CNhaupwwUJDBGcvsDxhpD6ML7UCe` passed six saved-example
+checks, two zero-call Check/Ask pause responses, SEC receipt inspection, unavailable Private/whole-filing
+states, media checks and the 200-record benchmark on desktop and 390px mobile. R4's five desktop POST
+responses were preserved after a harness JSON-unwrapping error; R6 submitted only the three mobile
+saved examples. R5 failed at sandboxed Chrome startup and made no new requests. No product HTTP,
+console or page error occurred in the accepted runs.
+
+The final deployment changes only the optional-caption default, footer wording and release provenance.
+The verifier, snapshot, media and benchmark data are byte-identical to the base deployment. A separate
+GET/HEAD-only follow-up passed eight checks across both viewports: initial native captions disabled,
+muted playback starts, duration metadata 165 seconds, 18 optional English cues load, complete MP4/VTT
+fetches match their exact hashes, 50 questions / four models / 200 records match local JSON, and no
+horizontal page overflow. Four video GETs were cancelled during pause/navigation; complete subsequent
+fetches passed. No POST was permitted in this follow-up.
+
+These checks verify playback start, metadata, files and sampled frames, not full-video human listening
+or editorial approval. Public acceptance added **0 model calls / $0 provider usage**. The local integrated
+suite passed **1,246 Python tests**, **144 frontend checks**, typecheck and lint; the final Vercel production
+build passed. Known batch model/GPU usage is **$3.30454604**, subject to delayed provider metering.
+Whole-filing live validation still needs a real SEC contact; formal submission remains unsubmitted.
+
+## Historical first public release
+
 The owner authorized the integrated public release. The [public source repository](https://github.com/changshoufeng0609-cmd/nocap)
 and [licensed demo download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4)
 were verified through anonymous HTTP. Production URLs are [NoCap](https://receipts-nocap.vercel.app)

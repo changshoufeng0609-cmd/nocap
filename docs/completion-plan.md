@@ -10,8 +10,8 @@ controls the current allocation and completion status; earlier checkpoints below
 
 The operation-led replacement is now a local **165-second continuous browser recording** with 18 English
 caption cues. Actual Private browser/HTTP/Modal acceptance and all **200 four-model Q&A calls** are complete.
-J2 fixes passed final integrated regression; the authorized one-time held-out run is complete. The current public
-host still has the earlier video until the new deployment is accepted. Keep the form unsubmitted.
+J2 fixes passed final integrated regression; the authorized one-time held-out run is complete. The new public
+165-second video and benchmark page passed anonymous desktop/mobile acceptance and a GET-only caption follow-up. Keep the form unsubmitted.
 See [remaining work](remaining-work.md) for the precise distinction between completed artifacts and open dependencies.
 
 | Item | Current evidence / remaining acceptance |
@@ -27,7 +27,7 @@ See [remaining work](remaining-work.md) for the precise distinction between comp
 | Vercel MCP | Completed: `list_teams` returns the authorized project team. |
 | Submission form | Project copy, final links, Meta/partner feedback and the sole-contributor roster are filled. Optional X link is empty. Final material-use consent remains unchecked; not submitted. |
 | Public repository | [Public main](https://github.com/changshoufeng0609-cmd/nocap) verified by anonymous HTTP; initial commit `7856fe65536597b13a96723f54b83b1bc8187df0` has no parent. Original incremental history remains private. |
-| Public product / video | [Product](https://receipts-nocap.vercel.app) and [demo player](https://receipts-nocap.vercel.app/demo) passed anonymous desktop/mobile acceptance on deployment `dpl_7cezqJ72iLy18RW2GVTY8VMSCnNk`: six saved-example replays, two paused-request responses, video with 29 captions and matching MP4/VTT downloads. Live requests remain paused pending operating policy. [Release evidence](public-release-2026-10-29.json). |
+| Public product / video | [Product](https://receipts-nocap.vercel.app), [165-second demo](https://receipts-nocap.vercel.app/demo) and [benchmark](https://receipts-nocap.vercel.app/benchmarks) passed anonymous desktop/mobile acceptance. Final deployment `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji`; 18 optional cues, exact media hashes, 200 records. Live requests stay paused. [Current evidence](public-release-update-2026-10-29.json). |
 | Real user study | Materials exist; participant contacts requested, zero sessions recorded. |
 | Human gold review | Provisional labels require a human reviewer; agent reviews do not satisfy this item. |
 | X / team roster | Owner confirmed sole contributor: SHOU-FENG CHANG (`Robert_Chang`). X account remains unknown. |

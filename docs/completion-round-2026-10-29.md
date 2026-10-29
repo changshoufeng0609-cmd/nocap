@@ -49,18 +49,19 @@ rendering and Kokoro narration remain local/$0. The batch total authorization is
 
 ## Completion evidence
 
-- **1 — Demo:** local 165-second continuous walkthrough, 18 English cues, 20-second GIF complete;
-  replacement public playback is pending. [Artifact and provenance](demo/README.md).
+- **1 — Demo complete:** 165-second continuous walkthrough, 18 English cues, 20-second GIF;
+  new public desktop/mobile playback start, caption defaults and media hashes passed. [Artifact and provenance](demo/README.md).
 - **3 — Whole filing:** implementation is ready; real SEC contact remains required for acquisition/live validation.
 - **4 — Private:** actual browser/HTTP/Modal validation passed; 1 verified / 1 wrong, no mock/fallback,
   zero application cache, clearing and mode-switch checks passed. [Evidence](private-http-live-validation-2026-10-29.json).
 - **5 — Q&A:** 200/200 planned model calls complete. Original parser records and post-run metadata
   sensitivity are separate; all 200 records replay exactly from a public frozen source bundle.
-  [Methods](../eval/qa_methods.md); benchmark deployment still pending.
+  [Methods](../eval/qa_methods.md); public desktop/mobile explorer and download acceptance passed.
 - **6 — Reviews/history:** both J2 bugs closed, 98 targeted cases passed; full Python 1,246 passed,
   frontend 144 checks, and dev results preserved. J2 local score 80.5/100.
   [65 reconstructed source-history commits](source-history.md) published and anonymously verified.
-  J3 final score awaits the new public-release evidence.
+  [J3 final review](j3-review-2026-10-29.md) and the [new public acceptance](public-release-update-2026-10-29.json)
+  complete this selected release gate. Reviews remain AI-assisted and unofficial.
 - **8 — Held-out complete:** all 126 frozen files at `61e1055` remained unchanged. v0: 44/48 errors
   caught, 42/48 correct reasons, 1/47 original-item false alarms, 22/110 true claims unverifiable.
   Trap: 20/20 caught, 18/20 reasons, 0/52 true-figure false alarms, 3/52 unverifiable.

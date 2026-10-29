@@ -7,5 +7,7 @@
   "public_history": "Clean main release updates; filtered source-only reconstructed development history is published separately on source-history. Private original history remains unchanged.",
   "public_video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
   "export_file_count": 549,
-  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable."
+  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable.",
+  "documentation_followup_private_commit": "d2296df7946b48d426dcef5941cc5a160914aee7",
+  "source_archive_scope": "Deployed source archive; subsequent documentation and acceptance updates are identified separately and do not change runtime code, media, benchmark data or frozen evidence."
 }

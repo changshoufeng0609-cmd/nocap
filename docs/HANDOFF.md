@@ -28,7 +28,12 @@ fixed (`df76e67`), independently rechecked, with 1,246 Python tests / 144 fronte
 dev results. Source-only development history is public on `source-history` (65 reconstructed commits).
 The 126-file held-out freeze is `61e1055`; its one-time evaluation completed unchanged: v0 44/48 caught,
 1/47 original-item false alarms; trap 20/20 caught, 0/52 true-figure false alarms. No rerun/tuning,
-117 new calls/$0.49834625. New production media/benchmark acceptance and J3 final score follow. Whole-filing acquisition still requires a real
+117 new calls/$0.49834625. New production media/benchmark acceptance and J3 final review are complete.
+Final public deployment `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` serves public source `04ecc91`;
+R4/R6 validated six saved checks, two zero-call pause responses and receipts; final GET-only checks
+verified 165-second playback start, 18 optional cues, no duplicate default captions and 200 benchmark records.
+[Current release evidence](public-release-update-2026-10-29.json). Known batch usage is $3.30454604.
+Selected items 1/4/5/6/8 are complete; item 3 still requires the real SEC contact. Whole-filing acquisition still requires a real
 SEC contact. The older public/runtime/media facts below describe the previous release checkpoint.
 
 

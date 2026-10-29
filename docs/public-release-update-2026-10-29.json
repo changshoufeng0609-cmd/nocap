@@ -1,0 +1,498 @@
+{
+  "date": "2026-10-29",
+  "status": "passed",
+  "public_repository": "https://github.com/changshoufeng0609-cmd/nocap",
+  "public_product": "https://receipts-nocap.vercel.app",
+  "public_demo": "https://receipts-nocap.vercel.app/demo",
+  "public_benchmarks": "https://receipts-nocap.vercel.app/benchmarks",
+  "deployment_id": "dpl_34X9vCXnCGf3SHSYTvs1uQezGKji",
+  "deployed_public_commit": "04ecc91bf9ee2362471359ba44d026775c82f8b7",
+  "build_seconds": 44.173,
+  "core_acceptance_deployment": "dpl_CNhaupwwUJDBGcvsDxhpD6ML7UCe",
+  "core_acceptance_public_commit": "de534caf62dc3a34447fe5901a3a91e284331f5b",
+  "followup_diff": [
+    "web/app/demo/page.tsx",
+    "web/components/site-footer.tsx",
+    "docs/release-provenance.json"
+  ],
+  "followup_scope": "Only optional native-caption default and footer copy changed; runtime verifier, evidence, media and benchmark data unchanged. R4/R6 core acceptance plus GET-only final follow-up.",
+  "deployment_protection": {
+    "mode": "prod_deployment_urls_and_all_previews",
+    "production_domain_public": true,
+    "generated_deployment_anonymous_head": 302
+  },
+  "health": [
+    {
+      "device": "desktop",
+      "body": {
+        "ok": true,
+        "data_snapshot": "2026-10-29",
+        "companies": [
+          "AAPL",
+          "AMD",
+          "AMZN",
+          "BAC",
+          "GOOGL",
+          "JPM",
+          "META",
+          "MSFT",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ],
+        "facts": 11554,
+        "live_requests_paused": true
+      }
+    },
+    {
+      "device": "mobile",
+      "body": {
+        "ok": true,
+        "data_snapshot": "2026-10-29",
+        "companies": [
+          "AAPL",
+          "AMD",
+          "AMZN",
+          "BAC",
+          "GOOGL",
+          "JPM",
+          "META",
+          "MSFT",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ],
+        "facts": 11554,
+        "live_requests_paused": true
+      }
+    }
+  ],
+  "operating_policy": {
+    "live_requests_enabled": false,
+    "saved_examples_available": true,
+    "existing_shared_neon_configuration_changed": false,
+    "new_paid_judge_operation_authorized": false
+  },
+  "anonymous_browser": {
+    "fresh_contexts": true,
+    "authentication_supplied": false,
+    "mock_responses": false,
+    "cached_checks": 6,
+    "pause_probes": 2,
+    "total_posts": 8,
+    "r6_new_posts": 3,
+    "layout_states": 22,
+    "checks": [
+      "desktop: anonymous homepage and pause banner; health has 11 companies / 11,554 facts",
+      "desktop: real draft annotation opens receipt with accession, acceptance time and SEC source links",
+      "desktop: nvda-ai-story completed cached replay, expected counts, 10/10 coverage, no page overflow",
+      "desktop: meta-ai-story completed cached replay, expected counts, 8/8 coverage, no page overflow",
+      "desktop: q2-roundup-look-ahead completed cached replay, expected counts, 9/9 coverage, no page overflow",
+      "check: well-formed uncached request rejected by pause with zero model calls and zero cost",
+      "ask: well-formed uncached request rejected by pause with zero model calls and zero cost",
+      "desktop: Ask evidence options load and the empty complete-filing list is disclosed; quote search stays disabled",
+      "desktop: real Private status unavailable; no submit; disabled with nonempty input and cleared on unmount",
+      "Public MP4 and English captions downloaded through browser links; both hashes match the final media assets",
+      "desktop: demo plays, duration 165 seconds, 18 English caption cues, no page overflow",
+      "desktop: anonymous homepage and pause banner; health has 11 companies / 11,554 facts",
+      "desktop: Ask evidence options load and the empty complete-filing list is disclosed; quote search stays disabled",
+      "desktop: real Private status unavailable; no submit; disabled with nonempty input and cleared on unmount",
+      "Public MP4 and English captions downloaded through browser links; both hashes match the final media assets",
+      "desktop: demo plays, duration 165 seconds, 18 English caption cues, no page overflow",
+      "desktop: benchmark expands a source-backed question and downloads all 200 matching model records",
+      "mobile: anonymous homepage and pause banner; health has 11 companies / 11,554 facts",
+      "mobile: real draft annotation opens receipt with accession, acceptance time and SEC source links",
+      "mobile: nvda-ai-story completed cached replay, expected counts, 10/10 coverage, no page overflow",
+      "mobile: meta-ai-story completed cached replay, expected counts, 8/8 coverage, no page overflow",
+      "mobile: q2-roundup-look-ahead completed cached replay, expected counts, 9/9 coverage, no page overflow",
+      "mobile: Ask evidence options load and the empty complete-filing list is disclosed; quote search stays disabled",
+      "mobile: real Private status unavailable; no submit; disabled with nonempty input and cleared on unmount",
+      "mobile: demo plays, duration 165 seconds, 18 English caption cues, no page overflow",
+      "mobile: benchmark expands a source-backed question and downloads all 200 matching model records"
+    ],
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "blocked_requests": [],
+    "provider_calls": 0,
+    "provider_spend_usd": 0
+  },
+  "media_followup": {
+    "checks": [
+      "desktop: paused health, 11 companies / 11,554 facts",
+      "desktop: native captions disabled, muted playback starts, 18 optional English cues",
+      "desktop: browser-fetched MP4 and VTT exact hashes",
+      "desktop: 50 benchmark questions, four models / 200 records match local JSON",
+      "mobile: paused health, 11 companies / 11,554 facts",
+      "mobile: native captions disabled, muted playback starts, 18 optional English cues",
+      "mobile: browser-fetched MP4 and VTT exact hashes",
+      "mobile: 50 benchmark questions, four models / 200 records match local JSON"
+    ],
+    "layout_states": 6,
+    "post_requests": 0,
+    "media": {
+      "desktop": {
+        "initial_tracks": [
+          {
+            "mode": "disabled",
+            "language": "en",
+            "label": "English"
+          }
+        ],
+        "default_attribute_absent": true,
+        "playback_started": {
+          "duration": 165,
+          "currentTime": 1.018765,
+          "paused": false,
+          "muted": true,
+          "tracks": [
+            {
+              "mode": "disabled",
+              "language": "en"
+            }
+          ]
+        },
+        "optional_english_cues": [
+          {
+            "start": 0,
+            "end": 8,
+            "text": "Here's an NVIDIA earnings draft. Two figures look plausible. Let's check them before publishing."
+          },
+          {
+            "start": 8,
+            "end": 18,
+            "text": "Muse Spark extracts the claims. Code checks the SEC evidence. Seven pass, two are wrong, and two remain unverifiable."
+          },
+          {
+            "start": 18,
+            "end": 27,
+            "text": "Click eighteen percent. The draft says year over year, but eighteen percent is quarter-over-quarter growth."
+          },
+          {
+            "start": 27,
+            "end": 35,
+            "text": "The receipt calculates the year-over-year change: about one hundred and six percent. We can inspect both filed values."
+          },
+          {
+            "start": 35,
+            "end": 42,
+            "text": "Now click earnings per share. The draft labels two dollars and twenty-two cents as GAAP."
+          },
+          {
+            "start": 42,
+            "end": 50,
+            "text": "That is the adjusted figure. The GAAP receipt says two dollars and forty-six cents, with the filing attached."
+          },
+          {
+            "start": 50,
+            "end": 59,
+            "text": "Let's fix both. Muse Wonder proposes numeric edits; code constrains them and verifies the revised draft again."
+          },
+          {
+            "start": 59,
+            "end": 66,
+            "text": "The original stays on the left. The rechecked version shows exactly which numbers changed."
+          },
+          {
+            "start": 66,
+            "end": 78,
+            "text": "Each correction keeps its receipt. This is a recorded successful response, replayed through the actual interface, not a live speed test."
+          },
+          {
+            "start": 78,
+            "end": 88,
+            "text": "All eleven claims are checked again. The two errors are resolved. Guidance still has question marks; a forecast is not a filed fact."
+          },
+          {
+            "start": 88,
+            "end": 94,
+            "text": "Copy the revised draft with its correction receipts."
+          },
+          {
+            "start": 94,
+            "end": 104,
+            "text": "A correct number can still arrive too late. Here is a roundup checked as of July twenty-ninth, sixteen hundred UTC."
+          },
+          {
+            "start": 104,
+            "end": 110,
+            "text": "Microsoft's filing arrived later. These claims are marked not public yet."
+          },
+          {
+            "start": 110,
+            "end": 121,
+            "text": "Switch to Now and check again. Those two numbers become verifiable. The cutoff follows EDGAR acceptance time."
+          },
+          {
+            "start": 121,
+            "end": 133,
+            "text": "The same workflow handles a slide. Upload this seeded earnings table and select Check slide. SAM proposes regions; Spark reads the figures."
+          },
+          {
+            "start": 133,
+            "end": 147,
+            "text": "Click a numbered reading to open its receipt. Both planted errors are caught. Here Spark supplied the region after SAM found none. The image is a claim, not evidence."
+          },
+          {
+            "start": 147,
+            "end": 157,
+            "text": "Ask for one figure. Spark proposes the lookup; code builds a verified answer. Inspect its SEC footnotes."
+          },
+          {
+            "start": 157,
+            "end": 165,
+            "text": "NoCap: eleven companies, SEC receipts. Built during this hackathon by Robert Chang. Explore the saved examples."
+          }
+        ],
+        "final_modes": [
+          "disabled"
+        ]
+      },
+      "mobile": {
+        "initial_tracks": [
+          {
+            "mode": "disabled",
+            "language": "en",
+            "label": "English"
+          }
+        ],
+        "default_attribute_absent": true,
+        "playback_started": {
+          "duration": 165,
+          "currentTime": 1.013085,
+          "paused": false,
+          "muted": true,
+          "tracks": [
+            {
+              "mode": "disabled",
+              "language": "en"
+            }
+          ]
+        },
+        "optional_english_cues": [
+          {
+            "start": 0,
+            "end": 8,
+            "text": "Here's an NVIDIA earnings draft. Two figures look plausible. Let's check them before publishing."
+          },
+          {
+            "start": 8,
+            "end": 18,
+            "text": "Muse Spark extracts the claims. Code checks the SEC evidence. Seven pass, two are wrong, and two remain unverifiable."
+          },
+          {
+            "start": 18,
+            "end": 27,
+            "text": "Click eighteen percent. The draft says year over year, but eighteen percent is quarter-over-quarter growth."
+          },
+          {
+            "start": 27,
+            "end": 35,
+            "text": "The receipt calculates the year-over-year change: about one hundred and six percent. We can inspect both filed values."
+          },
+          {
+            "start": 35,
+            "end": 42,
+            "text": "Now click earnings per share. The draft labels two dollars and twenty-two cents as GAAP."
+          },
+          {
+            "start": 42,
+            "end": 50,
+            "text": "That is the adjusted figure. The GAAP receipt says two dollars and forty-six cents, with the filing attached."
+          },
+          {
+            "start": 50,
+            "end": 59,
+            "text": "Let's fix both. Muse Wonder proposes numeric edits; code constrains them and verifies the revised draft again."
+          },
+          {
+            "start": 59,
+            "end": 66,
+            "text": "The original stays on the left. The rechecked version shows exactly which numbers changed."
+          },
+          {
+            "start": 66,
+            "end": 78,
+            "text": "Each correction keeps its receipt. This is a recorded successful response, replayed through the actual interface, not a live speed test."
+          },
+          {
+            "start": 78,
+            "end": 88,
+            "text": "All eleven claims are checked again. The two errors are resolved. Guidance still has question marks; a forecast is not a filed fact."
+          },
+          {
+            "start": 88,
+            "end": 94,
+            "text": "Copy the revised draft with its correction receipts."
+          },
+          {
+            "start": 94,
+            "end": 104,
+            "text": "A correct number can still arrive too late. Here is a roundup checked as of July twenty-ninth, sixteen hundred UTC."
+          },
+          {
+            "start": 104,
+            "end": 110,
+            "text": "Microsoft's filing arrived later. These claims are marked not public yet."
+          },
+          {
+            "start": 110,
+            "end": 121,
+            "text": "Switch to Now and check again. Those two numbers become verifiable. The cutoff follows EDGAR acceptance time."
+          },
+          {
+            "start": 121,
+            "end": 133,
+            "text": "The same workflow handles a slide. Upload this seeded earnings table and select Check slide. SAM proposes regions; Spark reads the figures."
+          },
+          {
+            "start": 133,
+            "end": 147,
+            "text": "Click a numbered reading to open its receipt. Both planted errors are caught. Here Spark supplied the region after SAM found none. The image is a claim, not evidence."
+          },
+          {
+            "start": 147,
+            "end": 157,
+            "text": "Ask for one figure. Spark proposes the lookup; code builds a verified answer. Inspect its SEC footnotes."
+          },
+          {
+            "start": 157,
+            "end": 165,
+            "text": "NoCap: eleven companies, SEC receipts. Built during this hackathon by Robert Chang. Explore the saved examples."
+          }
+        ],
+        "final_modes": [
+          "disabled"
+        ]
+      }
+    },
+    "downloads": [
+      {
+        "device": "desktop",
+        "name": "receipts-demo.mp4",
+        "status": 200,
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.mp4",
+        "bytes": 12443559,
+        "sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b"
+      },
+      {
+        "device": "desktop",
+        "name": "receipts-demo.en.vtt",
+        "status": 200,
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.en.vtt",
+        "bytes": 2555,
+        "sha256": "7ddeb84e533a9570852435e16f8ac0debe9d96bdecdde0fe13e4c3420ca3ecca"
+      },
+      {
+        "device": "mobile",
+        "name": "receipts-demo.mp4",
+        "status": 200,
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.mp4",
+        "bytes": 12443559,
+        "sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b"
+      },
+      {
+        "device": "mobile",
+        "name": "receipts-demo.en.vtt",
+        "status": 200,
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.en.vtt",
+        "bytes": 2555,
+        "sha256": "7ddeb84e533a9570852435e16f8ac0debe9d96bdecdde0fe13e4c3420ca3ecca"
+      }
+    ],
+    "benchmarks": {
+      "desktop": {
+        "status": 200,
+        "url": "https://receipts-nocap.vercel.app/benchmarks/records",
+        "bytes": 314122,
+        "sha256": "7af60b7222d49afc8b68080723f9d46e9d3b10a25cadcf87e278380a06023e44",
+        "questions": 50,
+        "models": 4,
+        "recorded_calls": 200,
+        "local_json_equal": true
+      },
+      "mobile": {
+        "status": 200,
+        "url": "https://receipts-nocap.vercel.app/benchmarks/records",
+        "bytes": 314122,
+        "sha256": "7af60b7222d49afc8b68080723f9d46e9d3b10a25cadcf87e278380a06023e44",
+        "questions": 50,
+        "models": 4,
+        "recorded_calls": 200,
+        "local_json_equal": true
+      }
+    },
+    "page_errors": [],
+    "console_errors": [],
+    "console_warnings": [],
+    "http_errors": [],
+    "blocked_requests": [],
+    "request_failures": [
+      {
+        "method": "GET",
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.mp4",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "method": "GET",
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.mp4",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "method": "GET",
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.mp4",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "method": "GET",
+        "url": "https://receipts-nocap.vercel.app/demo/receipts-demo.mp4",
+        "failure": "net::ERR_ABORTED"
+      }
+    ],
+    "request_failure_scope": "Four video GET cancellations during pause/navigation; playback started and subsequent complete fetches matched exact MP4 hashes on both viewports.",
+    "provider_calls": 0,
+    "provider_spend_usd": 0
+  },
+  "source_history": {
+    "branch": "source-history",
+    "head": "adaf6ba849b561e07a22367815a35a00a69f7296",
+    "reconstructed_commits": 65,
+    "source_files": 104,
+    "anonymous_head_verified": true
+  },
+  "model_quality": "See eval/heldout_results.md and eval/qa_results.md. UI/media acceptance is not a model-quality benchmark.",
+  "limitations": [
+    "Playback start, duration, cue bounds, files and sampled frames checked; no claim of human full-video listening/editorial approval.",
+    "Whole-filing live validation still needs a valid declared SEC contact.",
+    "Private mode is unavailable in the public paused deployment; its separate real HTTP/Modal check used a bounded stopped app.",
+    "Formal hackathon submission and consent remain unsubmitted."
+  ],
+  "artifacts": {
+    "data/eval_runs/public-release-update-20261029-r4/result.json": {
+      "sha256": "00da80c937ea5611b927b57351da4e64862b8ac4ceb9b66eb703d3a03e1cff07",
+      "availability": "Local ignored browser artifacts; committed summary contains scope and observations."
+    },
+    "data/eval_runs/public-release-update-20261029-r5/startup-failure.json": {
+      "sha256": "cb654bbad2e67d030ccc308360a6655b8edaa9af2c3ba9036c351b95d97d85aa",
+      "availability": "Local ignored browser artifacts; committed summary contains scope and observations."
+    },
+    "data/eval_runs/public-release-update-20261029-r6/result.json": {
+      "sha256": "eb44814f7391175a41539b41aa336195241d08bf52d59142f5a485dd9bd076aa",
+      "availability": "Local ignored browser artifacts; committed summary contains scope and observations."
+    },
+    "data/eval_runs/public-media-followup-R1/result.json": {
+      "sha256": "a2c03f69c91e835f77b7a026c89b983ffcca73aab89f7aad6b930cc971d5ac56",
+      "availability": "Local ignored browser artifacts; committed summary contains scope and observations."
+    }
+  },
+  "failed_attempts": [
+    {
+      "directory": "data/eval_runs/public-release-update-20261029-r4",
+      "reason": "Harness KeyError on already-unwrapped benchmark JSON after all five desktop POST checks passed; evidence retained and reused."
+    },
+    {
+      "directory": "data/eval_runs/public-release-update-20261029-r5",
+      "reason": "Chrome launch terminated under sandbox before new requests. Original initialized state and startup-failure supplement retained."
+    }
+  ]
+}
