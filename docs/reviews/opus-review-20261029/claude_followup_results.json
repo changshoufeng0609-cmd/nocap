@@ -1,0 +1,2176 @@
+{
+  "review_date": "2026-10-29",
+  "source_report": "docs/reviews/opus-review-20261029/claude-report.md",
+  "scope": "Offline cross-validation of Claude findings 1, 3 and 4; synthetic model proposals using the committed snapshot, with no held-out inputs or product changes.",
+  "provider_calls": 0,
+  "sec_calls": 0,
+  "cost_usd": 0,
+  "model_premises": {
+    "1": "A level claim has comparison=none and retains the comparison phrase between the metric and amount in its quote. Full-source and minimal metric-to-value quotes are tested; a number-only quote is a control.",
+    "3": "The model incorrectly proposes comparison=none despite explicit source YoY/QoQ wording. This proposed-field error is hypothetical, not measured from live outputs. Controls use the correct typed comparison.",
+    "4": "The model proposes a current-period revenue level. 'Up to ... from ...' has a growth-endpoint reading; an unverifiable result is accepted because an upper-bound reading may also be possible. Both full and number-only quotes are tested."
+  },
+  "reviewer_severity": {
+    "1": "P1",
+    "3": "P1",
+    "4": "P2"
+  },
+  "no_p0_escalation": true,
+  "source_sha256": {
+    "docs/reviews/opus-review-20261029/claude_followup_probe.py": "6c4a28bf2b453b9e335a26fee94eb19c8b65c68987e9ccced8478c51a81dd390",
+    "receipts/extract.py": "7f6b2ee065517439ae60227b9e4c330c4b5b45f9c4869570b8dfc72ef010ce6e",
+    "receipts/verify.py": "f79ce7586e1da29c5120e78668f6828c1f7c3d0877d09b43fd3d75fdb6327bb4",
+    "receipts/periods.py": "74a7db335722b28c6d515f15771764c68eafb713ab5a06eaa0ea6393c5dedf82",
+    "receipts/store.py": "3f621e7643eb501122efbe60ec0d31748127560a918cd761451119a172d6ae8a",
+    "receipts/types.py": "59957d8aac829d4f521ba037af3fdb694cbdbd5c4094acbf87ecbda4a5d80b0e",
+    "data/snapshot/facts.sqlite": "ee1cb5a313cadfac9a8d36c6dbb2832996fbd91b823a045e62e5280418df0b53",
+    "data/snapshot/pr_facts/NVDA/0001045810-24-000315.jsonl": "a5334a5ba881db5fb0e48b2073fb81e11e3775b5c9094cc1b31b21f7bc62cdb3",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000021.jsonl": "2f420bd7eae898a3dfe695432e51d5a6e64f7cc518879826499c879b8aa83188",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000115.jsonl": "d5b788031950c16463d95b097c7c3db5bdd1e248aa0d2aa3488584d3a6c424db",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000207.jsonl": "4bdc9a62a7a1075ba04084eeed55329c5d209ee7ac2a2bea568d52fb0eefa2e0",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000228.jsonl": "0f27613021b1970a651f70999f55e24a036af7207e54713f62ca57d6ab9095e2",
+    "data/snapshot/pr_facts/NVDA/0001045810-26-000019.jsonl": "791bdd438e0d80b14c56f094eef668ca67bb7224b00f375222e5f42a944bde6b",
+    "data/snapshot/pr_facts/NVDA/0001045810-26-000051.jsonl": "4b18b0ba3f45d2e2f0276898bcbeb0426cae66d200dad170b3d714b2561b2b7a",
+    "data/snapshot/pr_facts/NVDA/0001045810-26-000073.jsonl": "3ded5fce43de1410164e96889e7db8306ef6cce37ceeae672e7490f5e8feaef3"
+  },
+  "summary": {
+    "cases": 12,
+    "issues_reproduced": 7,
+    "control_cases": 5,
+    "all_controls_meet_expectation": true
+  },
+  "cases": [
+    {
+      "case_id": "C1_wire_yoy_full_source",
+      "claude_finding": 1,
+      "control": false,
+      "source_text": "NVIDIA's revenue rose 106% from a year earlier to $46.7 billion in the second quarter of fiscal 2027.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$46.7 billion",
+        "value": 46.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA's revenue rose 106% from a year earlier to $46.7 billion in the second quarter of fiscal 2027."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$46.7 billion",
+        "value": 46.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA's revenue rose 106% from a year earlier to $46.7 billion in the second quarter of fiscal 2027.",
+        "span_start": 0,
+        "span_end": 101
+      },
+      "located_value_ranges": [
+        [
+          50,
+          63
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue was $46.743 billion for Q2 FY2026 (quarter ended Jul 27, 2025), the comparison period the sentence cites.",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000207",
+            "accepted_at": "2025-08-27T20:22:14Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000207/q2fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-25-000209",
+            "accepted_at": "2025-08-27T20:52:07Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000209/nvda-20250727.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000228",
+            "accepted_at": "2025-11-19T21:20:44Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000228/q3fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000207"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000209"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000228"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The endpoint amount belongs to the current quarter; the comparison phrase qualifies the preceding growth percentage, not that amount."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C1_wire_yoy_minimal_metric_value",
+      "claude_finding": 1,
+      "control": false,
+      "source_text": "NVIDIA's revenue rose 106% from a year earlier to $46.7 billion in the second quarter of fiscal 2027.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$46.7 billion",
+        "value": 46.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "revenue rose 106% from a year earlier to $46.7 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$46.7 billion",
+        "value": 46.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "revenue rose 106% from a year earlier to $46.7 billion",
+        "span_start": 9,
+        "span_end": 63
+      },
+      "located_value_ranges": [
+        [
+          50,
+          63
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue was $46.743 billion for Q2 FY2026 (quarter ended Jul 27, 2025), the comparison period the sentence cites.",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000207",
+            "accepted_at": "2025-08-27T20:22:14Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000207/q2fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-25-000209",
+            "accepted_at": "2025-08-27T20:52:07Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000209/nvda-20250727.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000228",
+            "accepted_at": "2025-11-19T21:20:44Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000228/q3fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000207"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000209"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000228"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The endpoint amount belongs to the current quarter; the comparison phrase qualifies the preceding growth percentage, not that amount."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C1_wire_qoq_full_source",
+      "claude_finding": 1,
+      "control": false,
+      "source_text": "NVIDIA's revenue rose 18% from the previous quarter to $81.6 billion in the second quarter of fiscal 2027.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$81.6 billion",
+        "value": 81.6,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA's revenue rose 18% from the previous quarter to $81.6 billion in the second quarter of fiscal 2027."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$81.6 billion",
+        "value": 81.6,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA's revenue rose 18% from the previous quarter to $81.6 billion in the second quarter of fiscal 2027.",
+        "span_start": 0,
+        "span_end": 106
+      },
+      "located_value_ranges": [
+        [
+          55,
+          68
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue was $81.615 billion for Q1 FY2027 (quarter ended Apr 26, 2026), the comparison period the sentence cites.",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000051",
+            "accepted_at": "2026-05-20T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+            "locator": "Revenue | $81,615",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000052",
+            "accepted_at": "2026-05-20T20:35:52Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $81,615",
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000051"
+        },
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000052"
+        },
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000073"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The endpoint amount belongs to the current quarter; the comparison phrase qualifies the preceding growth percentage, not that amount."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C1_number_only_quote_control",
+      "claude_finding": 1,
+      "control": true,
+      "source_text": "NVIDIA's revenue rose 106% from a year earlier to $46.7 billion in the second quarter of fiscal 2027.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$46.7 billion",
+        "value": 46.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$46.7 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$46.7 billion",
+        "value": 46.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$46.7 billion",
+        "span_start": 50,
+        "span_end": 63
+      },
+      "located_value_ranges": [
+        [
+          50,
+          63
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "period_mismatch",
+        "explanation": "$46.7 billion is NVIDIA's revenue for Q2 FY2026 (quarter ended Jul 27, 2025); for Q2 FY2027 (quarter ended Jul 26, 2026) it was $96.221 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-25-000209",
+            "accepted_at": "2025-08-27T20:52:07Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000209/nvda-20250727.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000209"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The endpoint amount belongs to the current quarter; the comparison phrase qualifies the preceding growth percentage, not that amount."
+      },
+      "meets_expectation": true,
+      "issue_reproduced": false
+    },
+    {
+      "case_id": "C3_YoY_proposed_none",
+      "claude_finding": 3,
+      "control": false,
+      "source_text": "Revenue rose 18% year over year.",
+      "model_proposal": {
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "18%",
+        "value": 18.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 18% year over year."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "18%",
+        "value": 18.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 18% year over year.",
+        "span_start": 0,
+        "span_end": 32
+      },
+      "located_value_ranges": [
+        [
+          13,
+          16
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue grew 17.9% quarter over quarter in Q2 FY2027 (quarter ended Jul 26, 2026).",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000051",
+            "accepted_at": "2026-05-20T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+            "locator": "Revenue | $81,615",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000052",
+            "accepted_at": "2026-05-20T20:35:52Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $96,221",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $81,615",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000051"
+        },
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000052"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The explicit source comparison must constrain the result; matching the other comparison is insufficient."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C3_YoY_proposed_YoY",
+      "claude_finding": 3,
+      "control": true,
+      "source_text": "Revenue rose 18% year over year.",
+      "model_proposal": {
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "18%",
+        "value": 18.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "YoY",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 18% year over year."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "18%",
+        "value": 18.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "YoY",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 18% year over year.",
+        "span_start": 0,
+        "span_end": 32
+      },
+      "located_value_ranges": [
+        [
+          13,
+          16
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "period_mismatch",
+        "explanation": "18% is NVIDIA's quarter over quarter revenue growth; year over year it was 105.9% in Q2 FY2027 (quarter ended Jul 26, 2026).",
+        "expected_value": 105.8511435,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000207",
+            "accepted_at": "2025-08-27T20:22:14Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000207/q2fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000051",
+            "accepted_at": "2026-05-20T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+            "locator": "Revenue | $81,615",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000207"
+        },
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000051"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The explicit source comparison must constrain the result; matching the other comparison is insufficient."
+      },
+      "meets_expectation": true,
+      "issue_reproduced": false
+    },
+    {
+      "case_id": "C3_QoQ_proposed_none",
+      "claude_finding": 3,
+      "control": false,
+      "source_text": "Revenue rose 106% sequentially.",
+      "model_proposal": {
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "106%",
+        "value": 106.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 106% sequentially."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "106%",
+        "value": 106.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 106% sequentially.",
+        "span_start": 0,
+        "span_end": 31
+      },
+      "located_value_ranges": [
+        [
+          13,
+          17
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue grew 105.9% year over year in Q2 FY2027 (quarter ended Jul 26, 2026).",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000207",
+            "accepted_at": "2025-08-27T20:22:14Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000207/q2fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-25-000209",
+            "accepted_at": "2025-08-27T20:52:07Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000209/nvda-20250727.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000228",
+            "accepted_at": "2025-11-19T21:20:44Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000228/q3fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $96,221",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000207"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000209"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000228"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-26-000075"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The explicit source comparison must constrain the result; matching the other comparison is insufficient."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C3_QoQ_proposed_QoQ",
+      "claude_finding": 3,
+      "control": true,
+      "source_text": "Revenue rose 106% sequentially.",
+      "model_proposal": {
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "106%",
+        "value": 106.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "QoQ",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 106% sequentially."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue_growth",
+        "metric_text": "revenue growth",
+        "value_text": "106%",
+        "value": 106.0,
+        "unit": "%",
+        "scale": "units",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "QoQ",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "Revenue rose 106% sequentially.",
+        "span_start": 0,
+        "span_end": 31
+      },
+      "located_value_ranges": [
+        [
+          13,
+          17
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "period_mismatch",
+        "explanation": "106% is NVIDIA's year over year revenue growth; quarter over quarter it was 17.9% in Q2 FY2027 (quarter ended Jul 26, 2026).",
+        "expected_value": 17.89622006,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 46743000000.0,
+            "unit": "USD",
+            "period_start": "2025-04-28",
+            "period_end": "2025-07-27",
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-25-000207",
+            "accepted_at": "2025-08-27T20:22:14Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000207/q2fy26pr.htm",
+            "locator": "Revenue | $46,743",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 81615000000.0,
+            "unit": "USD",
+            "period_start": "2026-01-26",
+            "period_end": "2026-04-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q1",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000051",
+            "accepted_at": "2026-05-20T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+            "locator": "Revenue | $81,615",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 46743000000.0,
+          "unit": "USD",
+          "fiscal_year": 2026,
+          "fiscal_period": "Q2",
+          "period_start": "2025-04-28",
+          "period_end": "2025-07-27",
+          "accession": "0001045810-25-000207"
+        },
+        {
+          "metric": "revenue",
+          "value": 81615000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q1",
+          "period_start": "2026-01-26",
+          "period_end": "2026-04-26",
+          "accession": "0001045810-26-000051"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "wrong",
+          "unverifiable"
+        ],
+        "preferred_reason": "period_mismatch",
+        "explanation": "The explicit source comparison must constrain the result; matching the other comparison is insufficient."
+      },
+      "meets_expectation": true,
+      "issue_reproduced": false
+    },
+    {
+      "case_id": "C4_up_to_full_source",
+      "claude_finding": 4,
+      "control": false,
+      "source_text": "NVIDIA Q2 FY2027 revenue was up to $96.2 billion from $46.7 billion a year earlier.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was up to $96.2 billion from $46.7 billion a year earlier."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was up to $96.2 billion from $46.7 billion a year earlier.",
+        "span_start": 0,
+        "span_end": 83
+      },
+      "located_value_ranges": [
+        [
+          35,
+          48
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": {
+        "kind": "upper",
+        "inclusive": true
+      },
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not at most $96.2 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "verified",
+          "approximate",
+          "unverifiable"
+        ],
+        "explanation": "In the growth-to reading, 96.2B correctly rounds 96.221B. The phrase 'up to' can also denote an upper bound; ambiguity may yield ?, but should not force a wrong verdict. This is a linguistic expectation, not an independent human label."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C4_up_to_number_only",
+      "claude_finding": 4,
+      "control": false,
+      "source_text": "NVIDIA Q2 FY2027 revenue was up to $96.2 billion from $46.7 billion a year earlier.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$96.2 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "up to $96.2 billion",
+        "span_start": 29,
+        "span_end": 48
+      },
+      "located_value_ranges": [
+        [
+          35,
+          48
+        ]
+      ],
+      "warnings": [
+        "restored the source bound or hedge before the number at offset 35"
+      ],
+      "hedge_of": {
+        "kind": "upper",
+        "inclusive": true
+      },
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not at most $96.2 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "verified",
+          "approximate",
+          "unverifiable"
+        ],
+        "explanation": "In the growth-to reading, 96.2B correctly rounds 96.221B. The phrase 'up to' can also denote an upper bound; ambiguity may yield ?, but should not force a wrong verdict. This is a linguistic expectation, not an independent human label."
+      },
+      "meets_expectation": false,
+      "issue_reproduced": true
+    },
+    {
+      "case_id": "C4_rose_to_full_source",
+      "claude_finding": 4,
+      "control": true,
+      "source_text": "NVIDIA Q2 FY2027 revenue rose to $96.2 billion from $46.7 billion a year earlier.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue rose to $96.2 billion from $46.7 billion a year earlier."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue rose to $96.2 billion from $46.7 billion a year earlier.",
+        "span_start": 0,
+        "span_end": 81
+      },
+      "located_value_ranges": [
+        [
+          33,
+          46
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026).",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $96,221",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "verified",
+          "approximate",
+          "unverifiable"
+        ],
+        "explanation": "In the growth-to reading, 96.2B correctly rounds 96.221B. The phrase 'up to' can also denote an upper bound; ambiguity may yield ?, but should not force a wrong verdict. This is a linguistic expectation, not an independent human label."
+      },
+      "meets_expectation": true,
+      "issue_reproduced": false
+    },
+    {
+      "case_id": "C4_rose_to_number_only",
+      "claude_finding": 4,
+      "control": true,
+      "source_text": "NVIDIA Q2 FY2027 revenue rose to $96.2 billion from $46.7 billion a year earlier.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$96.2 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$96.2 billion",
+        "span_start": 33,
+        "span_end": 46
+      },
+      "located_value_ranges": [
+        [
+          33,
+          46
+        ]
+      ],
+      "warnings": [],
+      "hedge_of": null,
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "verified",
+        "reason": "match",
+        "explanation": "Matches NVIDIA's 10-Q: revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026).",
+        "expected_value": null,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": null,
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "press_release",
+            "derived_from": [],
+            "form": "8-K",
+            "accession": "0001045810-26-000073",
+            "accepted_at": "2026-08-26T20:21:19Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+            "locator": "Revenue | $96,221",
+            "decimals": -6
+          },
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000073"
+        },
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "allowed_statuses": [
+          "verified",
+          "approximate",
+          "unverifiable"
+        ],
+        "explanation": "In the growth-to reading, 96.2B correctly rounds 96.221B. The phrase 'up to' can also denote an upper bound; ambiguity may yield ?, but should not force a wrong verdict. This is a linguistic expectation, not an independent human label."
+      },
+      "meets_expectation": true,
+      "issue_reproduced": false
+    }
+  ]
+}

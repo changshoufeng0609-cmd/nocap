@@ -188,8 +188,8 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
 }
 
 /** Parent keys this section to one finished check and unmounts it as soon as the draft or cutoff changes. */
-export function FixWithReceipts({ request }: { request: FixRequest }) {
-  const { state, start } = useFix();
+export function FixWithReceipts({ request, active = true, livePaused = false }: { request: FixRequest; active?: boolean; livePaused?: boolean }) {
+  const { state, start } = useFix(active && !livePaused);
   const prefix = useId();
   const running = state.phase === "running";
   return (
@@ -200,19 +200,20 @@ export function FixWithReceipts({ request }: { request: FixRequest }) {
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">Muse Wonder proposes corrections to wrong numbers. Every change must pass the verifier, then the revised draft is checked again.</p>
         </div>
         {state.phase === "idle" || running ? (
-          <Button onClick={() => start(request)} disabled={running} className="shrink-0">
+          <Button onClick={() => start(request)} disabled={running || !active || livePaused} aria-describedby={livePaused ? `${prefix}-paused` : undefined} className="shrink-0">
             {running ? <Loader2Icon className="animate-spin" aria-hidden /> : <WandSparklesIcon aria-hidden />}
             {running ? "Verifying corrections…" : "Fix with receipts"}
           </Button>
         ) : null}
       </div>
+      {livePaused ? <p id={`${prefix}-paused`} className="border-t border-border px-4 py-4 text-sm text-muted-foreground sm:px-6">Fix requires live model requests, which are currently paused. Your saved check and receipts remain available. <a className="underline underline-offset-4" href="/demo">Watch the disclosed recorded Fix flow</a>.</p> : null}
       {running ? <p className="border-t border-border px-4 py-4 text-sm text-muted-foreground sm:px-6" role="status">{STAGES[state.stage]}</p> : null}
       {state.phase === "error" ? (
         <div className="border-t border-border bg-bad-tint/30 px-4 py-4 sm:px-6" role="alert">
           <p className="text-sm font-medium">{state.error.message}</p>
           <p className="mt-1 text-xs text-muted-foreground">{formatErrorCost(state.error)}</p>
           <p className="mt-1 text-xs text-muted-foreground">Your original draft and check results are still available above.</p>
-          {state.error.retryable ? <Button size="sm" variant="outline" className="mt-3" onClick={() => start(request)}>Retry corrections</Button> : null}
+          {state.error.retryable ? <Button size="sm" variant="outline" className="mt-3" disabled={!active || livePaused} aria-describedby={livePaused ? `${prefix}-paused` : undefined} onClick={() => start(request)}>Retry corrections</Button> : null}
         </div>
       ) : null}
       {state.phase === "done" ? <Revision result={state.result} request={request} prefix={prefix} /> : null}

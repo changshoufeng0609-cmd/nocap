@@ -26,7 +26,8 @@ class GroundingBody(AskBody):
 def create_router(*, settings: Any, get_store: Callable[[], Any], get_client: Callable[[], Any],
                   limiter: Any, ledger: Any, filing_directory: Optional[Path] = None) -> APIRouter:
     # Import only at installation time: api.py has defined these helpers before calling create_router.
-    from receipts.api import OperationBudget, Rejected, _from_events, _from_thread, _reserve, client_ip, sse_response
+    from receipts.api import (OperationBudget, Rejected, _from_events, _from_thread,
+                              _require_live, _reserve_async, client_ip, sse_response)
 
     router = APIRouter()
     texts = grounding.FilingTexts(filing_directory or settings.data_dir / "filing_texts")
@@ -73,6 +74,7 @@ def create_router(*, settings: Any, get_store: Callable[[], Any], get_client: Ca
         started = time.monotonic()
         try:
             req = await parse(request, GroundingBody if is_grounding else AskBody)
+            _require_live(settings)
             store = get_store()
             if is_grounding:
                 filing, text = await asyncio.to_thread(texts.load, req.filing_id, as_of=req.as_of)
@@ -81,13 +83,15 @@ def create_router(*, settings: Any, get_store: Callable[[], Any], get_client: Ca
                 proposal = ask.build_request(req.question, available_companies=ask.companies(store))
         except ask.AskError as exc:
             return reject(str(exc))
+        except Rejected as exc:
+            return reject(exc.message, exc.retryable)
         except Exception:
             return reject("The local evidence needed for this question is unavailable.")
-        if limiter.acquire(client_ip(request)) is not None:
+        if limiter.acquire(client_ip(request, settings)) is not None:
             return reject("Too many live requests from your network. Try again in a few minutes.", True)
         estimate = extract.estimate_request_cost(proposal, ask.SPARK)
         try:
-            token = _reserve(ledger, estimate)
+            token = await _reserve_async(ledger, estimate)
         except Rejected as exc:
             return reject(exc.message, exc.retryable)
         if token is None:

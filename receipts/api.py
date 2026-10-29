@@ -18,6 +18,9 @@ hashes, never draft text, keys or client IPs.
 Environment (all optional): RECEIPTS_DATA_DIR (default data/, or data/snapshot when data/facts.sqlite is absent),
 RECEIPTS_DAILY_BUDGET_USD, RECEIPTS_RATE_LIMIT_CHECKS and RECEIPTS_RATE_LIMIT_WINDOW_S (10 per 600 s),
 RECEIPTS_API_CACHE_DIR, RECEIPTS_SPARK_CACHE_DIR, RECEIPTS_NO_CACHE=1 (measure uncached latency),
+RECEIPTS_PERSIST_DRAFT_CACHES (only true enables ordinary draft persistence; default false on Vercel,
+true locally; disabled persistence reads only committed snapshot caches),
+RECEIPTS_TRUSTED_PROXY_CIDRS (comma-separated trusted socket-peer networks for appended X-Forwarded-For),
 RECEIPTS_LIVE_REQUESTS_ENABLED (when set, only true enables live requests), RECEIPTS_LIVE_UNTIL
 (optional UTC ISO deadline; invalid values pause live requests without changing the spend ledger),
 RECEIPTS_CORS_ORIGINS (comma-separated, for a frontend that calls the API cross-origin). MODEL_API_KEY is read by
@@ -31,6 +34,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import ipaddress
 import json
 import logging
 import math
@@ -93,7 +97,7 @@ def default_data_dir(env: Mapping[str, str]) -> Path:
 @dataclass(frozen=True)
 class Settings:
     data_dir: Path
-    api_cache_dir: Optional[Path]                      # writable: recorded streams and the spend ledger
+    api_cache_dir: Optional[Path]                      # writable recorded streams; local ledger default location
     prebaked_dirs: tuple[Path, ...] = ()               # read-only recorded streams (the snapshot)
     spark_cache_dir: Optional[Path] = None             # writable model-response cache
     spark_read_dirs: tuple[Path, ...] = ()             # read-only model-response caches (the snapshot)
@@ -115,6 +119,9 @@ class Settings:
     require_shared_budget: bool = False
     live_requests_enabled: bool = True
     live_until: Optional[datetime] = None
+    trusted_proxy_cidrs: tuple[str, ...] = ()         # only socket peers in these networks may supply XFF
+    vercel_proxy: bool = False                       # platform-owned runtime, never inferred from headers
+    local_ledger_dir: Optional[Path] = None           # retain accounting when draft persistence is disabled
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] = os.environ) -> "Settings":
@@ -126,6 +133,16 @@ class Settings:
                      else tmp / "api_cache" if on_vercel else REPO_ROOT / "data" / "api_cache")
         spark_cache = (_path(env["RECEIPTS_SPARK_CACHE_DIR"]) if (env.get("RECEIPTS_SPARK_CACHE_DIR") or "").strip()
                        else tmp / "spark" if on_vercel else _extract.CACHE_DIR)
+        persist_drafts = env.get("RECEIPTS_PERSIST_DRAFT_CACHES", "false" if on_vercel else "true").strip().lower() == "true"
+        cache_sources = [data_dir, snapshot] if persist_drafts else [snapshot]
+        trusted_proxies = tuple(part.strip() for part in
+                                env.get("RECEIPTS_TRUSTED_PROXY_CIDRS", "").split(",") if part.strip())
+        try:
+            trusted_proxies = tuple(str(ipaddress.ip_network(part, strict=False)) for part in trusted_proxies)
+        except ValueError:
+            # A malformed trust configuration cannot broaden the forwarding boundary.
+            trusted_proxies = ()
+            log.warning("invalid RECEIPTS_TRUSTED_PROXY_CIDRS; forwarded client identities disabled")
         origins = tuple(o.strip() for o in (env.get("RECEIPTS_CORS_ORIGINS") or "").split(",") if o.strip())
         live_enabled = ("RECEIPTS_LIVE_REQUESTS_ENABLED" not in env
                         or env["RECEIPTS_LIVE_REQUESTS_ENABLED"].strip().lower() == "true")
@@ -141,10 +158,10 @@ class Settings:
                 live_enabled = False
         return cls(
             data_dir=data_dir,
-            api_cache_dir=api_cache,
-            prebaked_dirs=tuple(dict.fromkeys([data_dir / "api_cache", snapshot / "api_cache"])),
-            spark_cache_dir=spark_cache,
-            spark_read_dirs=tuple(dict.fromkeys([data_dir / "spark_cache", snapshot / "spark_cache"])),
+            api_cache_dir=api_cache if persist_drafts else None,
+            prebaked_dirs=tuple(dict.fromkeys(d / "api_cache" for d in cache_sources)),
+            spark_cache_dir=spark_cache if persist_drafts else None,
+            spark_read_dirs=tuple(dict.fromkeys(d / "spark_cache" for d in cache_sources)),
             examples_paths=tuple(dict.fromkeys([data_dir / "examples.json", REPO_ROOT / "examples" / "examples.json"])),
             daily_budget_usd=max(0.0, _num(env, "RECEIPTS_DAILY_BUDGET_USD", 5.0)),
             rate_limit_checks=int(_num(env, "RECEIPTS_RATE_LIMIT_CHECKS", 10)),
@@ -157,6 +174,9 @@ class Settings:
                                    .strip().lower() not in ("0", "false", "no")),
             live_requests_enabled=live_enabled,
             live_until=live_until,
+            trusted_proxy_cidrs=trusted_proxies,
+            vercel_proxy=on_vercel,
+            local_ledger_dir=api_cache if not persist_drafts else None,
         )
 
 
@@ -296,10 +316,11 @@ def _spend_ledger(settings: Settings) -> Any:
                                   namespace=settings.spend_namespace)
         if settings.require_shared_budget:
             return UnavailableLedger()
+        ledger_dir = settings.local_ledger_dir or settings.api_cache_dir
         return LocalLedger(settings.daily_budget_usd,
-                           settings.api_cache_dir / "_spend.sqlite3" if settings.api_cache_dir else None,
+                           ledger_dir / "_spend.sqlite3" if ledger_dir else None,
                            namespace=settings.spend_namespace,
-                           legacy_path=settings.api_cache_dir / "_spend.json" if settings.api_cache_dir else None)
+                           legacy_path=ledger_dir / "_spend.json" if ledger_dir else None)
     except BudgetUnavailable:
         log.error("budget storage unavailable; live operations disabled")
         return UnavailableLedger()
@@ -320,13 +341,62 @@ def _reserve(ledger: Any, amount: float) -> Optional[Reservation]:
                        "The cached examples still work.", True) from None
 
 
-def client_ip(request: Request) -> str:
-    """The caller's IP: Vercel sets x-real-ip and x-forwarded-for; locally it's the socket peer or the dev proxy."""
-    for header in ("x-real-ip", "x-forwarded-for"):
-        value = request.headers.get(header)
-        if value and value.split(",")[0].strip():
-            return value.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+async def _reserve_async(ledger: Any, amount: float) -> Optional[Reservation]:
+    """Run transactional admission outside ASGI's event loop.
+
+    Cancellation cannot stop a commit already running in the thread. In that case
+    no provider is dispatched and a possibly committed precharge remains pending,
+    just as after a process crash; never guess that the transaction was rolled back.
+    """
+    return await asyncio.to_thread(_reserve, ledger, amount)
+
+
+def _require_live(settings: Settings) -> None:
+    """Reject a paused operation before consuming its per-client allowance."""
+    if _live_requests_paused(settings):
+        raise Rejected("live_paused", LIVE_PAUSED_MESSAGE, False)
+
+
+def client_ip(request: Request, settings: Optional[Settings] = None) -> str:
+    """Trust only an explicit proxy boundary; direct requests use the socket peer.
+
+    Other ASGI deployments must also disable automatic proxy-header rewriting, or
+    restrict the server's own forwarded-allow-ips to the same trusted proxies.
+    """
+    peer = request.client.host if request.client else "unknown"
+    if settings is None:
+        return peer
+    if settings.vercel_proxy:
+        # Vercel overwrites this platform header, unlike a generic user header.
+        # Never fall back to X-Real-IP or XFF if it is missing, repeated or malformed.
+        values = request.headers.getlist("x-vercel-forwarded-for")
+        if len(values) != 1:
+            return peer
+        try:
+            return str(ipaddress.ip_address(values[0].strip()))
+        except ValueError:
+            return peer
+    def address(value: str) -> Any:
+        ip = ipaddress.ip_address(value.strip())
+        # A dual-stack listener reports IPv4 peers as ::ffff:a.b.c.d.
+        return ip.ipv4_mapped or ip if ip.version == 6 else ip
+
+    try:
+        networks = tuple(ipaddress.ip_network(cidr, strict=False) for cidr in settings.trusted_proxy_cidrs)
+        current = address(peer)
+        if not any(current in network for network in networks):
+            return peer
+        # A trusted proxy must append the connection it actually received. Walk
+        # backwards and stop at the first untrusted hop, ignoring spoofed prefixes.
+        # Repeated header lines form one list in order; a proxy may append its own line.
+        forwarded = ",".join(request.headers.getlist("x-forwarded-for"))
+        for part in reversed(forwarded.split(",")):
+            if not any(current in network for network in networks):
+                break
+            current = address(part)
+        return str(current)
+    except ValueError:
+        return peer
 
 
 # ---------------------------------------------------------------------------
@@ -481,7 +551,10 @@ async def _from_thread(events: Iterator[Event], on_finish: Callable[[], None], k
         # No provider work started. Release the unused reservation exactly once.
         log.error("worker start failed error=%s", type(exc).__name__)
         try:
-            on_finish()
+            try:
+                await asyncio.to_thread(on_finish)
+            except RuntimeError:
+                on_finish()  # no thread can start at all: settle inline rather than leave it pending
         except Exception as finish_exc:
             log.error("finishing a check failed error=%s", type(finish_exc).__name__)
         yield failure()
@@ -566,11 +639,13 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
 
     async def parse(request: Request, body_type: type[BaseModel] = CheckBody
                     ) -> tuple[str, Optional[str], Optional[str], Optional[str]]:
-        body = await request.body()
-        if len(body) > settings.max_body_bytes:
-            raise Rejected("body_too_large", "The request is too large.", False)
+        body = bytearray()
+        async for chunk in request.stream():
+            if len(body) + len(chunk) > settings.max_body_bytes:
+                raise Rejected("body_too_large", "The request is too large.", False)
+            body.extend(chunk)
         try:
-            req = body_type.model_validate_json(body)
+            req = body_type.model_validate_json(bytes(body))
         except ValidationError:
             raise Rejected("bad_request", "The request must be JSON with the draft in a text field.", False)
         text = req.text
@@ -623,7 +698,11 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         estimate = 0.0
         client = None
         if calls:
-            wait = limiter.acquire(client_ip(request))
+            try:
+                _require_live(settings)
+            except Rejected as r:
+                return error_response(r.message, r.retryable)
+            wait = limiter.acquire(client_ip(request, settings))
             if wait is not None:
                 minutes = max(1, math.ceil(wait / 60))
                 log.info("check %s rejected reason=rate_limit", tag)
@@ -641,7 +720,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             try:
                 estimate = max(calls * settings.est_cost_per_call_usd,
                                _extract.extraction_estimate(text, ctx or "", max_attempts=settings.model_attempts))
-                token = _reserve(ledger, estimate)
+                token = await _reserve_async(ledger, estimate)
             except Rejected as r:
                 return error_response(r.message, r.retryable)
             if token is None:
@@ -678,13 +757,17 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         except Rejected as r:
             log.info("fix rejected reason=%s", r.reason)
             return error_response(r.message, r.retryable)
+        try:
+            _require_live(settings)
+        except Rejected as r:
+            return error_response(r.message, r.retryable)
         key = _stream.draft_key(text, as_of, context)
         try:
             evidence_store = get_store()
         except Exception as e:
             log.error("fix draft=%s store unavailable error=%s", key[:12], type(e).__name__)
             return error_response("The evidence database isn't available on this server.", False)
-        wait = limiter.acquire(client_ip(request))
+        wait = limiter.acquire(client_ip(request, settings))
         if wait is not None:
             return error_response("Too many live checks or fixes from your network. Try again in a few minutes.", True)
         # The original and revised draft can both need extraction. Wonder has a separate, larger allowance;
@@ -697,7 +780,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         # for numeric edits. The SDK hook denies any attempt beyond this reservation.
         try:
             estimate = 2 * _extract.extraction_estimate(text, ctx or "", max_attempts=1) + wonder_bound + 0.05
-            token = _reserve(ledger, estimate)
+            token = await _reserve_async(ledger, estimate)
         except (Rejected, _extract.ExtractionError) as exc:
             return error_response(exc.message if isinstance(exc, Rejected) else _stream.MSG_NO_MODEL, False)
         if token is None:
@@ -743,6 +826,10 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         if context is not None and len(context) > MAX_CONTEXT_CHARS:
             return error_response("Context must be one short line of 300 characters or fewer.", False)
         try:
+            _require_live(settings)
+        except Rejected as r:
+            return error_response(r.message, r.retryable)
+        try:
             image = await asyncio.to_thread(slides.decode_image, req.image_data_url)
         except slides.SlideError as exc:
             return error_response(str(exc), False)
@@ -751,10 +838,10 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         except Exception as exc:
             log.error("slide store unavailable error=%s", type(exc).__name__)
             return error_response("The evidence database isn't available on this server.", False)
-        if limiter.acquire(client_ip(request)) is not None:
+        if limiter.acquire(client_ip(request, settings)) is not None:
             return error_response("Too many live checks from your network. Try again in a few minutes.", True)
         try:
-            token = _reserve(ledger, slides.RESERVE_USD)
+            token = await _reserve_async(ledger, slides.RESERVE_USD)
         except Rejected as r:
             return error_response(r.message, r.retryable)
         if token is None:
@@ -779,12 +866,15 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
     @app.get("/api/health")
     def health() -> JSONResponse:
         paused = _live_requests_paused(settings)
+        cache_policy = ("disabled" if not settings.use_caches else
+                        "persistent" if settings.api_cache_dir or settings.spark_cache_dir else "snapshot_only")
         try:
-            return JSONResponse({**data_info(settings.data_dir), "live_requests_paused": paused})
+            return JSONResponse({**data_info(settings.data_dir), "live_requests_paused": paused,
+                                 "draft_cache_policy": cache_policy})
         except Exception as e:
             log.error("health check failed error=%s", type(e).__name__)
             return JSONResponse({"ok": False, "data_snapshot": None, "companies": [], "facts": 0,
-                                 "live_requests_paused": paused}, status_code=503)
+                                 "live_requests_paused": paused, "draft_cache_policy": cache_policy}, status_code=503)
 
     from receipts.ask_api import create_router as create_ask_router
     from receipts.private import create_private_router

@@ -22,10 +22,11 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { fetchExamples, fetchHealth } from "@/lib/api";
 import { STATUS_META, displayCounts, displayStatus, reasonText } from "@/lib/claims";
 import { formatErrorCost, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
-import { MAX_DRAFT_CHARS, type CheckRequest, type Example } from "@/lib/types";
+import { MAX_DRAFT_CHARS, type CheckRequest, type Example, type Health } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const PANEL_ID = "receipt-panel";
+const DRAFT_TOAST = "draft-check";
 const TITLE_ID = "receipt-title";
 
 // The current UTC minute for the as-of picker. Read only in the browser: under Cache Components the
@@ -64,7 +65,11 @@ function isEditable(t: EventTarget | null): boolean {
   return el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName) || el.getAttribute("role") === "combobox";
 }
 
-export function ReceiptsApp() {
+export function ReceiptsApp({ active = true, livePaused = false, draftCachePolicy }: {
+  active?: boolean;
+  livePaused?: boolean;
+  draftCachePolicy?: Health["draft_cache_policy"];
+}) {
   const [examples, setExamples] = useState<Example[] | null>(null);
   const [examplesError, setExamplesError] = useState<string | null>(null);
   const [companies, setCompanies] = useState<string[] | null>(null);
@@ -90,6 +95,7 @@ export function ReceiptsApp() {
   const sheetReturn = useRef<{ kind: "mark" | "list"; id: string | null }>({ kind: "mark", id: null });
   const sheetOpen = useRef(false);
   const userSelected = useRef(false);
+  const autoOpenedRun = useRef(-1);
   const examplesRef = useRef<Example[] | null>(null);
   const runExampleRef = useRef<(ex: Example) => void>(() => {});
 
@@ -97,6 +103,7 @@ export function ReceiptsApp() {
     onError: (error, request) => {
       const list = examplesRef.current ?? [];
       toast.error(error.message, {
+        id: DRAFT_TOAST,
         description: error.retryable
           ? "Try again, or run one of the pre-checked examples."
           : "The examples are pre-checked and still work.",
@@ -111,6 +118,7 @@ export function ReceiptsApp() {
     onDone: (_done, { claims, verdicts }) => {
       if (!claims) {
         toast("No claims were extracted from this draft.", {
+          id: DRAFT_TOAST,
           description: "NoCap checks numbers such as revenue, EPS, margins, growth and guidance.",
         });
       }
@@ -119,7 +127,7 @@ export function ReceiptsApp() {
         `Check complete. ${c.verified} verified, ${c.wrong} wrong, ${c.look_ahead} not public yet, ${c.unverifiable} unverifiable, ${c.approximate} approximate.`,
       );
     },
-  });
+  }, active);
 
   const activeExample = useMemo(
     () => examples?.find((e) => e.id === exampleId && e.text === draft) ?? null,
@@ -140,21 +148,23 @@ export function ReceiptsApp() {
 
   const run = useCallback(
     (request: CheckRequest) => {
+      if (!active) return;
       userSelected.current = false;
       setSelectedId(null);
       setView("results");
       setAnnouncement("Checking the draft.");
       start(request);
     },
-    [start],
+    [active, start],
   );
 
   const runExample = useCallback(
     (ex: Example) => {
+      if (!active) return;
       loadExample(ex);
       run({ text: ex.text, as_of: ex.as_of, context: ex.context, example_id: ex.id });
     },
-    [loadExample, run],
+    [active, loadExample, run],
   );
 
   useEffect(() => {
@@ -170,6 +180,7 @@ export function ReceiptsApp() {
     });
     fetchExamples(ac.signal)
       .then((list) => {
+        if (ac.signal.aborted) return;
         setExamples(list);
         if (list.length && !touched.current) loadExample(list[0]);
       })
@@ -185,7 +196,7 @@ export function ReceiptsApp() {
   const streaming = state.phase === "streaming";
 
   const submit = () => {
-    if (streaming) return;
+    if (!active || streaming) return;
     if (!draft.trim()) {
       toast("Paste a draft or load an example first.");
       return;
@@ -260,12 +271,18 @@ export function ReceiptsApp() {
     requestAnimationFrame(() => document.getElementById("draft")?.focus());
   };
 
+  // Toast actions from a hidden Draft would do nothing, so they close with the mode.
+  useEffect(() => {
+    if (!active) toast.dismiss(DRAFT_TOAST);
+  }, [active]);
+
   // Keyboard: ⌘/Ctrl+Enter checks; with a receipt open, ← → step through claims and Esc closes it.
   const keyRef = useRef({ submit, step, backToList, selected: !!selectedClaim, isDesktop });
   useEffect(() => {
     keyRef.current = { submit, step, backToList, selected: !!selectedClaim, isDesktop };
   });
   useEffect(() => {
+    if (!active) return;
     // Capture phase, so ⌘↵ on a focused control (the example picker opens on Enter) only submits.
     const onSubmitKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -293,21 +310,25 @@ export function ReceiptsApp() {
       window.removeEventListener("keydown", onSubmitKey, { capture: true });
       window.removeEventListener("keydown", onKey);
     };
-  }, []);
+  }, [active]);
 
   // When the check finishes on a wide screen, open the first red flag's receipt.
   useEffect(() => {
-    if (state.phase !== "done" || !isDesktop || userSelected.current) return;
+    if (!active || state.phase !== "done" || !isDesktop || userSelected.current) return;
+    if (autoOpenedRun.current === state.run) return; // returning to Draft never reopens a closed receipt
     const first = state.claims.find((c) => state.verdicts[c.id]?.status === "wrong");
     if (!first) return;
+    const run = state.run;
     const t = setTimeout(() => {
+      autoOpenedRun.current = run;
       if (!userSelected.current) setSelectedId((cur) => cur ?? first.id);
     }, 700);
     return () => clearTimeout(t);
-  }, [state.phase, state.run, state.claims, state.verdicts, isDesktop]);
+  }, [active, state.phase, state.run, state.claims, state.verdicts, isDesktop]);
 
   // Focus follows the panel: into the receipt title when opened from the list, back to the list item on return.
   useEffect(() => {
+    if (!active) return;
     const target = pendingFocus.current;
     if (!target) return;
     pendingFocus.current = null;
@@ -315,11 +336,11 @@ export function ReceiptsApp() {
     else if (target.startsWith("list:")) {
       document.querySelector<HTMLElement>(`[data-list-id="${target.slice(5)}"]`)?.focus();
     }
-  }, [selectedId]);
+  }, [active, selectedId]);
 
   // Keep the selected claim's mark on screen while stepping through receipts.
   useEffect(() => {
-    if (!selectedId || !isDesktop) return;
+    if (!active || !selectedId || !isDesktop) return;
     const el = document.querySelector<HTMLElement>(`[data-mark-id="${selectedId}"]`);
     if (!el) return;
     const r = el.getBoundingClientRect();
@@ -327,7 +348,7 @@ export function ReceiptsApp() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
     }
-  }, [selectedId, isDesktop]);
+  }, [active, selectedId, isDesktop]);
 
   const checkedAsOf = state.meta?.as_of ?? state.request?.as_of ?? null;
   const receipt = selectedClaim ? (
@@ -373,6 +394,8 @@ export function ReceiptsApp() {
           <p className="text-sm text-muted-foreground">
             {state.phase === "error"
               ? "No claims were checked."
+              : state.phase === "idle" && state.request
+                ? "The check was interrupted. Run Check again to complete it."
               : "No claims were extracted. Review the number coverage above for candidates that were not checked."}
           </p>
         )}
@@ -465,7 +488,7 @@ export function ReceiptsApp() {
                   }}
                   placeholder="Paste a draft with financial figures: an earnings story, a research note, or an AI-written summary."
                   spellCheck
-                  aria-describedby="draft-coverage"
+                  aria-describedby="draft-coverage draft-data-handling"
                   aria-invalid={over || undefined}
                   className="proof max-h-[65vh] min-h-60 resize-none overflow-y-auto rounded-none border-0 px-4 py-5 shadow-none focus-visible:ring-0 sm:px-6 sm:py-6 dark:bg-transparent"
                 />
@@ -507,6 +530,18 @@ export function ReceiptsApp() {
               </div>
             </div>
           </div>
+          <details id="draft-data-handling" className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            <summary className="cursor-pointer font-medium underline underline-offset-4">How Draft handles your text</summary>
+            <p className="mt-2">Check and Fix send your text to the NoCap server and, when a model request is needed, its configured model provider. Hosting and provider retention policies apply; this is not a zero-retention guarantee.</p>
+            <p className="mt-2">{draftCachePolicy === "snapshot_only"
+              ? "This server reads bundled saved examples and does not read or write ordinary Draft/Fix application disk caches. This does not delete older caches."
+              : draftCachePolicy === "disabled"
+                ? "Application response caching is disabled on this server. This does not delete older caches."
+                : draftCachePolicy === "persistent"
+                  ? "This server may retain draft fragments and model responses in application disk caches without an automatic expiry."
+                  : "This server has not reported its application-cache policy. Draft fragments and model responses may be retained by the operator."}</p>
+            <p className="mt-2">Draft text, cutoff and completed results stay in this page&apos;s memory when you switch modes and clear on reload. Leaving Draft cancels delivery of pending checks or corrections; work already dispatched may still incur a charge. Private has a separate policy and clears when you leave it.</p>
+          </details>
         </section>
 
         <aside
@@ -519,10 +554,10 @@ export function ReceiptsApp() {
       </div>
 
       {showResults && state.phase === "done" && state.done && state.done.counts.wrong > 0 && state.request ? (
-        <FixWithReceipts key={state.run} request={state.request} />
+        <FixWithReceipts key={state.run} request={state.request} active={active} livePaused={livePaused} />
       ) : null}
 
-      <Sheet open={!isDesktop && !!receipt} onOpenChange={(open) => !open && setSelectedId(null)}>
+      <Sheet open={active && !isDesktop && !!receipt} onOpenChange={(open) => !open && active && setSelectedId(null)}>
         <SheetContent
           id={PANEL_ID}
           side="bottom"
@@ -536,7 +571,7 @@ export function ReceiptsApp() {
             e.preventDefault();
             sheetOpen.current = false;
             const { kind, id } = sheetReturn.current;
-            if (id) document.querySelector<HTMLElement>(`[data-${kind}-id="${id}"]`)?.focus();
+            if (active && id) document.querySelector<HTMLElement>(`[data-${kind}-id="${id}"]`)?.focus();
           }}
           className="max-h-[88dvh] gap-0 overflow-y-auto rounded-t-2xl px-4 pt-3 pb-8"
         >

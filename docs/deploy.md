@@ -40,6 +40,16 @@ suite passed **1,246 Python tests**, **144 frontend checks**, typecheck and lint
 build passed. Known batch model/GPU usage is **$3.30454604**, subject to delayed provider metering.
 Whole-filing live validation still needs a real SEC contact; formal submission remains unsubmitted.
 
+## Runtime review follow-up (source changes, not yet deployed)
+
+The runtime safeguards described below have offline regression coverage in the current source. They
+are not claims about the public deployment recorded above. Check/Fix now stop reading request chunks
+at the body limit; all six paid routes offload synchronous ledger admission; paused requests consume
+no per-client rate allowance. Vercel defaults to committed snapshot caches only, with the active
+policy disclosed by `/api/health`. The source also defines an explicit forwarded-IP trust boundary.
+See [draft retention](#draft-cache-policy-and-retention) and [proxy configuration](#trusted-proxy-boundary).
+No deployment, cloud configuration change or historical cache deletion was performed for these fixes.
+
 ## Historical first public release
 
 The owner authorized the integrated public release. The [public source repository](https://github.com/changshoufeng0609-cmd/nocap)
@@ -259,8 +269,10 @@ How it fits together:
   automatically.
 - **Data directory.** `RECEIPTS_DATA_DIR` defaults to `data/` when `data/facts.sqlite` exists, else `data/snapshot/`.
   On Vercel only the snapshot is uploaded, so the snapshot is picked without any setting.
-- **Evidence is read-only at runtime.** The snapshot SQLite is opened read-only. Writable response caches use
-  `/tmp/receipts` on Vercel and are instance-local. The separate local ledger uses transactional `_spend.sqlite3`
+- **Evidence is read-only at runtime.** The snapshot SQLite is opened read-only. The current source defaults to
+  no ordinary draft response-cache reads or writes on Vercel; committed snapshot caches remain readable.
+  Explicitly enabling draft persistence uses instance-local `/tmp/receipts` paths unless overridden.
+  The separate local ledger uses transactional `_spend.sqlite3`
   with one-time `_spend.json` migration; a file under `/tmp` remains ephemeral and cannot share an allowance
   across instances. Current Vercel source requires `RECEIPTS_SPEND_DATABASE_URL` by default; unavailable shared
   storage disables paid operations while cached examples continue. Runtime never creates PostgreSQL tables.
@@ -308,6 +320,10 @@ project. Confirm Services, Node 24.x, the repository root, and All Deployments p
 
    `RECEIPTS_DATA_DIR=data/snapshot` is optional because the uploaded snapshot is selected automatically. The
    default text backend remains Meta; slides and Fix with receipts also require the Meta key.
+
+   Keep `RECEIPTS_PERSIST_DRAFT_CACHES` unset or `false` for the default Vercel snapshot-only policy.
+   Supplying cache-directory overrides alone does not enable persistence. Review the health policy
+   and [proxy boundary](#trusted-proxy-boundary) when validating an authorized new deployment.
 
    **The shared database and private Preview setup are approved and complete.** Preserve
    [the existing shared configuration](spend-protection.md#approved-cloud-setup): the private
@@ -359,7 +375,7 @@ and frontend in separate terminals, both starting at the repository root.
 Terminal 1 — API:
 
 ```bash
-.venv/bin/uvicorn receipts.api:app --port 8000 --reload  # API on http://localhost:8000 (docs: /api/docs)
+.venv/bin/uvicorn receipts.api:app --port 8000 --reload --no-proxy-headers  # API on http://localhost:8000 (docs: /api/docs)
 ```
 
 Terminal 2 — frontend (Node.js 20.9+ and npm required):
@@ -378,21 +394,83 @@ CLI's model-response cache in `data/cache/spark/`, so drafts already checked wit
 go to `data/api_cache/` (gitignored), alongside the local `_spend.sqlite3` ledger. A valid old `_spend.json`
 total is imported once; malformed legacy data disables paid work rather than resetting the total. Outside
 Vercel, local SQLite is the default unless shared storage is configured or explicitly required.
+Ordinary local caches have no application TTL. Set `RECEIPTS_PERSIST_DRAFT_CACHES=false` to read only
+the committed snapshot caches while retaining the existing local spend ledger. API settings are read
+from the process environment at startup: export them before starting Uvicorn, or add `--env-file .env`
+to load an existing local file. Merely adding an API setting to `.env` is insufficient; the extractor's
+later credential loading does not rebuild the API settings. The tracked template is [`env.example`](../env.example).
 
 As an alternative, `vercel dev -L`, run from the repo root, starts both services the way Vercel will.
 
-To measure real, uncached latency, run `RECEIPTS_NO_CACHE=1 .venv/bin/uvicorn receipts.api:app --port 8000`. Every
+To measure real, uncached latency, run `RECEIPTS_NO_CACHE=1 .venv/bin/uvicorn receipts.api:app --port 8000 --no-proxy-headers`. Every
 check then calls the model.
+
+## Draft cache policy and retention
+
+`RECEIPTS_PERSIST_DRAFT_CACHES` defaults to `false` when the process runs on Vercel and `true` locally.
+When explicitly set, only `true` (case-insensitive, surrounding whitespace ignored) enables persistence.
+Restart the local API or use an authorized new deployment after changing settings.
+
+| Configuration | Ordinary Check/Fix response caches | Saved examples |
+|---|---|---|
+| Persistence disabled, including the Vercel default | No reads from ordinary draft caches and no new extraction/event-cache writes. Directory overrides do not opt in. | Read only `data/snapshot/api_cache` and `data/snapshot/spark_cache`, regardless of a custom evidence data directory. |
+| Persistence enabled, including the local default | Read/write the configured API and Spark cache paths; default local paths are `data/api_cache` and `data/cache/spark`. Vercel opt-in defaults to `/tmp/receipts/api_cache` and `/tmp/receipts/spark`. | Snapshot and configured data-directory caches remain available. |
+| `RECEIPTS_NO_CACHE=1` | No response-cache reads or writes, even when persistence is enabled. | No cache replay; model admission is required. |
+
+Persistent extraction and event caches can contain draft fragments and model output. They have no
+application TTL and remain until the operator removes them or the host removes the storage. Disabling
+persistence stops using ordinary caches; it does not erase historical files or establish their host
+retention. This change does not inspect or delete historical ordinary draft caches.
+
+The response-cache policy does not reset accounting. Local `_spend.sqlite3` and its one-time legacy
+`_spend.json` migration keep the same directory selected by `RECEIPTS_API_CACHE_DIR` (or its previous
+default), even when response-cache writes are disabled. Shared PostgreSQL keeps its existing database,
+namespace and stored charges. Ledger records contain operation IDs and amounts, not draft content.
+
+`GET /api/health` reports `draft_cache_policy`: `snapshot_only`, `persistent`, or `disabled`.
+These describe application response-cache behavior, including when health returns HTTP 503 for unavailable
+evidence. The browser shows the policy before submission. This does not promise offline processing or
+control the API host's, inference provider's or operator-managed Modal service's retention. Private mode
+keeps its separate [no-response-cache boundary](private-mode.md).
+
+## Trusted proxy boundary
+
+Direct requests use the ASGI socket peer for rate limiting. Ordinary `X-Real-IP` and
+`X-Forwarded-For` headers do not establish a trusted caller by themselves.
+
+On the Vercel runtime, the application accepts only a single valid IP in `x-vercel-forwarded-for`.
+Vercel documents its platform forwarding headers and overwrite protection in the
+[request-header reference](https://vercel.com/docs/headers/request-headers). Missing, malformed or
+multi-value platform headers, including a repeated header line, fall back to the socket peer; there is
+no fallback to client-supplied `X-Real-IP` or ordinary `X-Forwarded-For`. Vercel's reference does not
+explicitly state that a client-supplied `x-vercel-forwarded-for` is removed; this was not probed on a
+deployment. The `VERCEL` process environment selects this platform boundary;
+do not set it on an independently exposed server to pretend that Vercel is authenticating requests.
+
+For another reverse proxy, explicitly set `RECEIPTS_TRUSTED_PROXY_CIDRS` to comma-separated IPv4/IPv6
+networks for the proxy socket peers, for example `127.0.0.1/32,::1/128` only when those local proxies are
+trusted. They must append the connection they actually received to `X-Forwarded-For`. The application
+joins repeated `X-Forwarded-For` lines in order (a proxy may add its own line), walks the chain from right
+to left and stops at the first untrusted hop, ignoring spoofed prefixes. IPv4-mapped IPv6 peers such as
+`::ffff:127.0.0.1` match their IPv4 networks. An invalid CIDR configuration disables this forwarding trust;
+malformed addresses fall back to the peer. IPv6 clients are limited per address, not per /64 prefix.
+
+The ASGI server must preserve the real socket peer for the application to apply that rule. The local
+command uses Uvicorn `--no-proxy-headers`. If server-level proxy handling is used instead, restrict its
+`--forwarded-allow-ips` to the same trusted boundary; never use unrestricted `*` for an exposed server.
+Once an upstream server has replaced `scope.client` using untrusted input, the application cannot recover
+the original connection. With the default local Next.js proxy and no explicit trust, local requests
+share that proxy's allowance. Client IPs are not logged; rate limits remain per process/instance.
 
 ## Guards
 
 | Guard | Setting | Behavior |
 |---|---|---|
-| Text request limits | `/api/check` and `/api/fix`: 6,000 characters, 64 KiB body | Invalid requests receive a terminal `error` event without a model call. |
+| Text request limits | `/api/check` and `/api/fix`: 6,000 characters, 64 KiB body | Read chunks only while the accumulated body fits; reject before retaining the crossing chunk or consuming the remainder. Invalid requests receive a terminal `error` event without a model call. |
 | Image request limits | `/api/slide`: 3 MiB JSON body; 2 MiB PNG/JPEG | Images must be single-frame, 32–4,096 pixels per side, and at most 8 megapixels. Pillow checks dimensions before decoding, applies orientation, strips metadata, and reduces the longest side to 2,048 pixels. Images are not stored. |
-| Per-instance per-IP rate limit | Preview: 10 live operations per 600 seconds | Check, Fix and slide share the limiter within one instance. Rejection sends a retryable `error`. The client IP comes from Vercel's forwarded headers and is not logged. |
+| Per-instance per-IP rate limit | Preview: 10 live operations per 600 seconds | Check, Fix, Slide, Ask, whole-filing quotation and Private share one limiter. Paused requests consume no allowance. Rejection sends a retryable `error`; identity follows the trusted proxy boundary above. |
 | Durable estimated spend admission | Chosen Preview budget: $1 per UTC admission day; code default: $5 | Precharge planned attempts before work; check every SDK dispatch against that reservation. Text estimates use request size plus the output ceiling, with a $0.05 floor ($0.15 for Wonder); Fix covers both extraction passes and Wonder. Unknown usage retains at least the reservation; actual costs above it increase the debit. See [full semantics](spend-protection.md). |
-| Ledger storage | SQLite locally; shared PostgreSQL required by default on Vercel | Processes sharing a SQLite file coordinate transactionally. PostgreSQL locks each namespace/day row across instances. Missing driver/database, invalid configuration or failed transactions reject paid work without local fallback. Crashes retain pending precharges. |
+| Ledger storage | SQLite locally; shared PostgreSQL required by default on Vercel | Processes sharing a SQLite file coordinate transactionally. PostgreSQL locks each namespace/day row across instances. Admission runs in a worker thread so database waits do not block the ASGI event loop. Missing driver/database, invalid configuration or failed transactions reject paid work without local fallback. Crashes retain pending precharges. |
 | Check model calls | Default Meta: 30 s per HTTP attempt, at most one retry | Only eligible rate-limit/server/connection failures retry. The operation has a 100 s deadline. |
 | Fix and slide model calls | No automatic Wonder/slide retry | Each SDK attempt is accounted, including extraction format fallback. Wonder/Spark use the remaining operation time and configured per-call timeout. SAM receives at most a 15 s per-call timeout; this is not a strict wall-clock bound. A slide makes at most two SAM calls and one Spark call. |
 | Logs | Counts, timing, usage and safe error metadata | No draft text, image content, keys, raw provider errors, or client IPs. |
@@ -400,6 +478,9 @@ check then calls the model.
 Only text checks served entirely from the recorded-check or model-response cache skip the rate and spend admission
 guards. Fix and slide always use admission guards. A cache miss discovered after preflight cannot dispatch an
 unreserved model request. Reservations are estimates, not a guarantee that provider charges cannot exceed them.
+If a request is cancelled while database admission is running, its thread may still commit. No provider
+work is dispatched by that cancelled route, and a committed or ambiguous precharge is conservatively
+retained as pending; cancellation never assumes a rollback or automatically refunds it.
 Shared PostgreSQL covers instances using the same database and namespace; local files do not. The 100 s deadline
 and stream closure stop further dispatch, while an in-flight synchronous HTTP call still relies on its transport
 timeout. Late text responses cannot refund frozen accounting or start a new retry. Unknown charges, UTC
@@ -419,7 +500,7 @@ its claim/verdict stream and ends with `done` or `error`.
   - `error` ends the stream; no `done` follows it.
   - A request rejected up front (bad input, length, rate limit, budget, no model key) gets a single `error` event and
     no `meta`.
-  - Application-level responses from the three streaming POST routes use HTTP 200 with `text/event-stream`.
+  - Application-level responses from the six streaming POST routes use HTTP 200 with `text/event-stream`.
     `/api/health` returns JSON and can return 503; Vercel Authentication or platform limits can reject a request
     before it reaches the application and return a different status or content type.
   - Current application errors include available `cost_usd`, `cost_is_estimate`, and `model_calls`. An upfront
@@ -500,7 +581,8 @@ It does not reset budgets or substitute a new ledger. Cached examples and the de
 - `/api/health` exposes `live_requests_paused`. A false value means the policy permits live work; it does not
   guarantee model credentials, the ledger or the private GPU endpoint are available.
 - Check, Fix, Slide, Ask, whole-filing quotation and Private share this policy. Static examples and recorded
-  Check or extraction-cache replays remain usable while paused.
+  Check or extraction-cache replays remain usable while paused. The current source rejects paused
+  operations before per-client rate admission, as well as before ledger admission and provider dispatch.
 
 The production frontend displays an explicit pause notice from health. No paid plan, extra database, new
 namespace or billing-cap claim is introduced. Production access checks and the final public URL are recorded

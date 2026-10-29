@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,22 +59,25 @@ export function AsOfPicker({
 }) {
   const isNow = asOf.mode === "now";
   const iso = asOf.mode === "custom" ? fromUtcInputValue(asOf.value) : null;
+  // Draft stays mounted beside Slide, so each picker needs its own label and hint ids.
+  const inputId = `${useId()}as-of`;
+  const hintId = `${inputId}-hint`;
   return (
     <div className="flex min-w-0 flex-col gap-1.5 sm:w-[19rem] sm:flex-none">
       <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor="as-of" className={CONTROL_LABEL}>
+        <Label htmlFor={inputId} className={CONTROL_LABEL}>
           Check as of — time travel
         </Label>
         <span className="font-mono text-[0.68rem] text-muted-foreground">UTC</span>
       </div>
       <div className="flex gap-1.5">
         <input
-          id="as-of"
+          id={inputId}
           type="datetime-local"
           step={60}
           value={isNow ? nowValue : asOf.value}
           onChange={(e) => onChange({ mode: "custom", value: e.target.value })}
-          aria-describedby="as-of-hint"
+          aria-describedby={hintId}
           className={cn(
             "h-9 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 font-mono text-[0.8rem] tabular-nums transition-colors outline-none",
             "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30",
@@ -89,7 +94,7 @@ export function AsOfPicker({
           Now
         </Button>
       </div>
-      <p id="as-of-hint" className={cn("text-xs", isNow ? "text-muted-foreground" : "text-foreground/80")}>
+      <p id={hintId} className={cn("text-xs", isNow ? "text-muted-foreground" : "text-foreground/80")}>
         {isNow
           ? "Now: checks against the latest filings"
           : iso

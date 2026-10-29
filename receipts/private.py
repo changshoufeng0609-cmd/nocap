@@ -5,6 +5,8 @@ browser, API host and operator's Modal deployment necessarily handle the draft.
 """
 from __future__ import annotations
 
+import asyncio
+import logging
 import time
 import re
 from typing import Any, Callable, Iterator, Mapping, Optional
@@ -16,6 +18,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract, stream
+
+log = logging.getLogger(__name__)
 
 PRIVATE_HEADERS = {"Cache-Control": "no-store, no-transform", "Pragma": "no-cache",
                    "X-Accel-Buffering": "no", "Referrer-Policy": "no-referrer"}
@@ -110,7 +114,8 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
                           backend_factory: Callable[[], extract.Backend] = configured_private_backend,
                           client_factory: Optional[Callable[[extract.Backend], Any]] = None) -> APIRouter:
     """Mount once inside create_app, using its existing shared ledger and rate limiter."""
-    from receipts.api import OperationBudget, Rejected, _from_events, _from_thread, _reserve, client_ip
+    from receipts.api import (OperationBudget, Rejected, _from_events, _from_thread,
+                              _require_live, _reserve_async, client_ip)
 
     router = APIRouter()
 
@@ -134,9 +139,9 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
         started = time.monotonic()
         body = bytearray()
         async for chunk in request.stream():
-            body.extend(chunk)
-            if len(body) > settings.max_body_bytes:
+            if len(body) + len(chunk) > settings.max_body_bytes:
                 return fail("The private request is too large.")
+            body.extend(chunk)
         try:
             req = PrivateBody.model_validate_json(bytes(body))
             if not req.text.strip() or len(req.text) > settings.max_chars:
@@ -147,16 +152,20 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
         except (ValidationError, ValueError):
             return fail("Use text, optional context and an ISO 8601 as-of time only.")
         try:
+            _require_live(settings)
+        except Rejected as exc:
+            return fail(exc.message, exc.retryable)
+        try:
             backend = backend_factory()
         except Exception:
             return fail("Private mode is unavailable. No draft was sent to a model.")
-        if limiter.acquire(client_ip(request)) is not None:
+        if limiter.acquire(client_ip(request, settings)) is not None:
             return fail("Too many live checks. Wait before trying private mode again.", True)
         context = stream.normalize_context(req.context)
         try:
             store = get_store()
             estimate = extract.extraction_estimate(req.text, context, backend=backend, max_attempts=1)
-            token = _reserve(ledger, estimate)
+            token = await _reserve_async(ledger, estimate)
         except Rejected as exc:
             return fail(exc.message, exc.retryable)
         except Exception:
@@ -169,7 +178,10 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
             client = (client_factory(backend) if client_factory else
                       make_private_client(backend, timeout=settings.model_timeout_s))
         except Exception:
-            budget.finish(stats)
+            try:
+                await asyncio.to_thread(budget.finish, stats)
+            except Exception as exc:  # the reservation stays pending: fail closed, but answer the request
+                log.error("private settlement failed error=%s", type(exc).__name__)
             return fail("Private mode could not connect to its configured backend. No fallback was used.")
         events = private_events(req.text, backend=backend, client=client, store=store, stats=stats,
             context=context, as_of=as_of, timeout_s=settings.model_timeout_s,

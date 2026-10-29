@@ -1,0 +1,41 @@
+{
+  "probe": "Check error-body cancellation",
+  "recorded_at": "2026-10-29T13:52:29.477Z",
+  "source_sha256": {
+    "web/lib/api.ts": "2d3f49df7e9d7b55b7ffa7d8240e3f7ad9ba92c300c2217ed55e4946c1421e33",
+    "web/lib/sse.ts": "53976085c6c2ba47745bfb1eba37916edf7cf98bd4789acb42615de5c90d541d",
+    "web/hooks/use-check.ts": "6b9ccb93c7026b9e7cd88ec4be70673f87658eae7dbdf38427eaf975dda3f0c4"
+  },
+  "scope": {
+    "actual_typescript_client": "web/lib/api.ts::streamCheck",
+    "in_memory_compilation": true,
+    "synthetic_fetch_calls": 1,
+    "network_calls": 0,
+    "model_calls": 0,
+    "sec_calls": 0,
+    "new_provider_spend_usd": 0,
+    "browser_used": false,
+    "heldout_used": false,
+    "credential_files_read": false
+  },
+  "steps": [
+    "Return synthetic HTTP 503 with an unresolved JSON response body.",
+    "Allow streamCheck to start awaiting error-body parsing.",
+    "Abort the request and reject its body with AbortError.",
+    "Wait for streamCheck completion and record callbacks."
+  ],
+  "expected_callbacks_after_abort": 0,
+  "observed_callbacks_after_abort": 1,
+  "events": [
+    {
+      "type": "error",
+      "signal_aborted": true,
+      "data": {
+        "message": "The NoCap API isn't responding.",
+        "retryable": true
+      }
+    }
+  ],
+  "finding_reproduced": true,
+  "evidence_limit": "This reproduces the client callback race offline. React UI consequences follow from static hook/component inspection; no browser acceptance was run."
+}

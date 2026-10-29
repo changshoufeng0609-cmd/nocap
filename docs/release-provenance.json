@@ -1,13 +1,11 @@
 {
-  "exported_on": "2026-10-29",
+  "exported_on": "2026-10-30",
   "development_began": "2026-10-27",
-  "source_private_commit": "b83d0f82bf3837f653b569e89617f14fb2faf41f",
+  "source_private_commit": "04e5450a37e9f3f68cf68b90d0efbf6e6f619876",
   "source_private_branch": "wip/day3-handoff",
-  "source_archive_sha256": "789bc36b86272f5bdeda258fa6486debd002fd1535f3caae8afc2a5b3a82d55d",
+  "source_archive_sha256": "7369d0f5ca6a67462cc723ed1650ed7a2b2c0c3fa96a93956c19822bc58b81d2",
   "public_history": "Clean main release updates; filtered source-only reconstructed development history is published separately on source-history. Private original history remains unchanged.",
   "public_video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
-  "export_file_count": 549,
-  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable.",
-  "documentation_followup_private_commit": "d2296df7946b48d426dcef5941cc5a160914aee7",
-  "source_archive_scope": "Deployed source archive; subsequent documentation and acceptance updates are identified separately and do not change runtime code, media, benchmark data or frozen evidence."
+  "export_file_count": 577,
+  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable."
 }

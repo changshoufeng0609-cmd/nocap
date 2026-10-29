@@ -59,8 +59,9 @@ export default function BenchmarksPage() {
 
       <section aria-labelledby="answer-results" className="space-y-4">
         <div className="max-w-4xl space-y-2">
-          <h2 id="answer-results" className="font-serif text-2xl font-semibold">Financial answers after metadata normalization</h2>
+          <h2 id="answer-results" className="font-serif text-2xl font-semibold">Post-hoc metadata sensitivity · small accepted samples</h2>
           <p className="text-sm leading-relaxed text-muted-foreground">After the run, we found that exact labels such as <code className="rounded bg-muted px-1">USD millions</code> were rejected where the gate expected <code className="rounded bg-muted px-1">USD</code>. The sensitivity analysis below accepts a small, independently reviewed set of unambiguous aliases. It preserves every number and response. This parser change was made <strong className="text-foreground">after observing outputs</strong>; the original contract results are retained below.</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">The pre-registered exact contract accepted <strong className="text-foreground">0/50 answers for each model</strong>. The post-hoc counts below are a separate diagnostic; small accepted samples do not establish general precision.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {benchmark.runs.map(run => {
@@ -68,10 +69,11 @@ export default function BenchmarksPage() {
             return <article key={run.target} className="min-w-0 rounded-xl border border-border bg-card p-5">
               <h3 className="font-serif text-xl font-semibold">{run.label}</h3>
               <p className="mt-1 text-xs text-muted-foreground">{run.hosting} · {run.calls}/{run.planned} calls recorded</p>
+              <p className="mt-2 text-xs font-medium text-muted-foreground">Post-hoc sensitivity · not the original contract</p>
               {score ? <>
                 <dl className="mt-5 grid grid-cols-2 gap-4 border-b border-border pb-4">
                   <div><dt className="text-xs text-muted-foreground">Raw answers correct</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{score.correct}<span className="text-sm font-normal text-muted-foreground"> / {score.planned}</span></dd></div>
-                  <div><dt className="text-xs text-muted-foreground">Verified-answer precision</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{percent(score.verified_precision)}</dd><p className="text-xs text-muted-foreground">{score.verified_correct}/{score.verified_accepted} accepted answers correct</p></div>
+                  <div><dt className="text-xs text-muted-foreground">Accepted answers correct</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{score.verified_accepted ? <>{score.verified_correct}<span className="text-sm font-normal text-muted-foreground"> / {score.verified_accepted}</span></> : "N/A"}</dd><p className="text-xs text-muted-foreground">{score.verified_accepted ? `${percent(score.verified_precision)} precision in this small sample` : "0 accepted answers · precision N/A"}</p></div>
                   <div><dt className="text-xs text-muted-foreground">Verified-answer coverage</dt><dd className="mt-1 font-medium tabular-nums">{score.verified_accepted}/{score.planned} · {percent(score.verified_coverage)}</dd></div>
                   <div><dt className="text-xs text-muted-foreground">Incorrect answers passed</dt><dd className="mt-1 font-medium tabular-nums">{score.unsafe_passed}</dd></div>
                 </dl>

@@ -99,6 +99,18 @@ _LOSS_RE = re.compile(r"\bloss(?:es)?\b")
 _YEAR_AGO_RE = re.compile(r"\ba\s+year\s+(?:ago|earlier|before)\b|\byear[\s-]+(?:ago|earlier)\b|\bprior[\s-]+year\b"
                           r"|\blast\s+year\b|\bprevious\s+year\b")
 _PRIOR_Q_RE = re.compile(r"\b(?:previous|prior|preceding|last)\s+quarter\b|\bsequential(?:ly)?\b")
+# After a period label, wording that makes the label the subject of the next amount.
+_INTRODUCES_AMOUNT_RE = re.compile(r"[\s)]*(?::|=|(?:\s*\w+){0,2}\s+(?:was|were|is|are|stood|totaled|totalled"
+                                   r"|reached|came\s+in)\b)")
+# A named quarter of an earlier year is a period, not a year-over-year comparison:
+# "from the fourth quarter of last year" can be the previous quarter.
+_NAMED_QUARTER_RE = re.compile(r"\b(?:first|second|third|fourth|1st|2nd|3rd|4th|q[1-4])[\s-]+(?:fiscal[\s-]+)?"
+                               r"quarter\s+of\s+(?:the\s+)?(?:last|prior|previous|preceding)\s+(?:fiscal\s+)?year\b"
+                               r"|\bq[1-4]\s+(?:of\s+)?(?:last|prior|previous)\s+year\b", re.I)
+_GROWTH_COMPARISONS = (
+    ("YoY", re.compile(r"\byear[\s-]+over[\s-]+year\b|\byoy\b|\by/y\b|" + _YEAR_AGO_RE.pattern, re.I)),
+    ("QoQ", re.compile(r"\bquarter[\s-]+over[\s-]+quarter\b|\bqoq\b|\bq/q\b|" + _PRIOR_Q_RE.pattern, re.I)),
+)
 _NUM_RE = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?")
 # Words that put a whole statement on a non-GAAP basis ("On a non-GAAP basis, gross margin was 56%, ...").
 _NON_GAAP_WORDS_RE = re.compile(r"\b(?:non[\s-]?gaap|adjusted|managed|fte|fully[\s-]taxable[\s-]equivalent|underlying"
@@ -109,7 +121,7 @@ _NON_GAAP_WORDS_RE = re.compile(r"\b(?:non[\s-]?gaap|adjusted|managed|fte|fully[
 _CURRENCY_NEUTRAL_RE = re.compile(r"constant[\s-]currenc(?:y|ies)|currency[\s-]neutral|\bex[\s-]?fx\b"
                                   r"|\b(?:fx|f/x)[\s-]?neutral|\bon\s+an?\s+(?:fx|f/x|foreign[\s-]exchange)\b"
                                   r"|excluding\s+(?:the\s+)?(?:impact\s+of\s+)?foreign[\s-]exchange", re.I)
-_FIGURE_RE = re.compile(r"[+−-]?\$?\s?\(?\d[\d,]*(?:\.\d+)?\)?\s?(?:%|percent\b|percentage\s+points?\b|basis\s+points?\b"
+_FIGURE_RE = re.compile(r"[+−-]?(?:US\$|USD\s*|\$)?\s?\(?\d[\d,]*(?:\.\d+)?\)?\s?(?:%|percent\b|percentage\s+points?\b|basis\s+points?\b"
                         r"|(?:trillion|billion|million|thousand)\b|[BMK]\b)?", re.I)
 # A percent change: the wording says the figure moved, or names its comparison base.
 _CHANGE_RE = re.compile(r"\b(?:increas\w*|decreas\w*|grew|grow\w*|rose|rise|rising|up|down|fell|fall\w*|declin\w*"
@@ -300,6 +312,61 @@ def _value_pos(claim: Claim) -> Optional[int]:
     return i
 
 
+def _value_comparison_context(claim: Claim) -> Optional[tuple[str, str]]:
+    """Comparison wording attached to this unique value, excluding other amounts.
+
+    A suffix between two figures belongs to the first unless a new clause
+    introduces the second. In particular, "106% from a year ago to $46.7B"
+    cannot lend "a year ago" to the endpoint amount.
+    """
+    pos = _value_pos(claim)
+    if pos is None:
+        return None
+    span = claim.span_text
+    figures = list(_FIGURE_RE.finditer(_without_period_phrases(span)))
+    previous = [hit for hit in figures if hit.end() <= pos]
+    end = pos + len(claim.value_text)
+    following = [hit for hit in figures if hit.start() >= end]
+    before = span[previous[-1].end() if previous else 0:pos]
+    after = span[end:following[0].start() if following else len(span)]
+    boundary = r"[;!?]|\.(?!\d)|\b(?:and|while|whereas|but|or)\b"
+    pieces = re.split(boundary, before, flags=re.I)
+    # Without a clause boundary, text after the preceding amount describes
+    # that amount, not this one. Prefix comparisons remain valid when this is
+    # the clause's first figure ("year-over-year revenue growth of 106%").
+    before = pieces[-1] if not previous or len(pieces) > 1 else ""
+    after = re.split(boundary, after, maxsplit=1, flags=re.I)[0]
+    return before, after
+
+
+def _source_growth_comparisons(claim: Claim) -> set[str]:
+    local = _value_comparison_context(claim)
+    if local is None:
+        return set()
+    # Wording after a comma describes something else: "rose 18% from the first quarter, a slower pace
+    # than last year" compares the pace, not this figure.
+    before, after = local[0], local[1].split(",", 1)[0]
+    parts = [_NAMED_QUARTER_RE.sub(lambda hit: " " * len(hit.group()), part) for part in (before, after)]
+    return {comparison for comparison, pattern in _GROWTH_COMPARISONS
+            if any(pattern.search(part) for part in parts)}
+
+
+def _ambiguous_growth_endpoint(claim: Claim) -> bool:
+    """"Up to X from Y" can describe growth to X or a maximum of X."""
+    pos = _value_pos(claim)
+    if pos is None:
+        return False
+    number = re.search(r"\d", claim.value_text)
+    lead = claim.value_text[:number.start()] if number else ""
+    before = strip_bound_currency_prefix(claim.span_text[:pos] + lead)
+    if not re.search(r"\bup\s+to$", before, re.I):
+        return False
+    after = claim.span_text[pos + len(claim.value_text):]
+    clause = re.split(r"[;!?]|\.(?!\d)", after, maxsplit=1)[0]
+    return bool(re.match(r"\s*,?\s*(?:from|compared\s+(?:with|to)|versus|vs\.?)(?!\w)", clause, re.I)
+                and _FIGURE_RE.search(clause))
+
+
 def currency_neutral(claim: Claim) -> bool:
     """True when constant-currency / FX-neutral wording qualifies this claim's own number: it is in metric_text, or
     in the span next to this number rather than another one ("up 18% (up 17% in constant currency)" qualifies
@@ -385,8 +452,8 @@ _FRAME_WORDS = frozenset(
     "increase increases increased increasing decrease decreases decreased decreasing grew grow grows growing growth "
     "rose rise rises rising up down fell fall falls falling decline declines declined declining jumped jump climbed "
     "higher lower expanded expansion change changed year over quarter yoy qoq y/y q/q sequential sequentially from "
-    "ago prior previous last compared versus vs vs. by to at was were is are has have had a an the of for in on its basis "
-    "their our record reported posted delivered".split())
+    "ago earlier before prior previous last compared versus vs vs. by to at was were is are has have had a an the of for in on its basis "
+    "their our record reported posted delivered that which period periods".split())
 
 
 def _leftover_words(text: str, phrase: tuple[int, int], company: set[str], qualifier: Optional[str]) -> list[str]:
@@ -455,7 +522,7 @@ def _level_metric_phrases(metric: str, text: str, segment: Optional[str] = None)
     return sorted(chosen)
 
 
-def _local_level_description(claim: Claim) -> Optional[str]:
+def _local_level_description(claim: Claim, *, growth: bool = False) -> Optional[str]:
     """Recover modifiers attached to the metric nearest this claim's own number.
 
     Stop the left context after a prior figure or sentence, and require no other
@@ -471,27 +538,65 @@ def _local_level_description(claim: Claim) -> Optional[str]:
     if not phrases:
         return None
     start, end = phrases[-1]
-    if _FIGURE_RE.search(_without_period_phrases(before[end:])):
+    intervening = list(_FIGURE_RE.finditer(_without_period_phrases(before[end:])))
+    if len(intervening) > (1 if growth else 0):
         return None  # e.g. revenue rose 24%, or 23% FX-neutral, to $119.8B
-    boundaries = [hit.end() for hit in re.finditer(r"[;.!?]", before[:start])]
+    boundaries = sentence_breaks(before[:start])
+    boundaries += [hit.end() for hit in re.finditer(r",\s*(?:and|but|while|whereas|as)\b", before[:start])]
     boundaries += [hit.end() for hit in _FIGURE_RE.finditer(_without_period_phrases(before[:start]))]
     left = max(boundaries, default=0)
     description = before[left:]
+    if growth:
+        # "Revenue excluding China was $96B, up 106%" carries the same
+        # qualified subject through its level amount. Blank just that amount,
+        # not digits inside a label such as "Q1".
+        description = re.sub(rf"(?<![A-Za-z]){_FIGURE_RE.pattern}", " ", _without_period_phrases(description),
+                             flags=re.I)
     # Bounds and signs constrain the number rather than changing the metric.
-    description = re.sub(r"\s*(?:\$|USD)\s*$", "", description, flags=re.I)
+    description = strip_bound_currency_prefix(description)
     description = re.sub(r"\b(?:negative|minus)\s*$", "", description, flags=re.I)
     for _kind, _inclusive, pattern in _HEDGES:
         if hit := re.search(pattern.pattern, description, re.I):
             description = description[:hit.start()]
             break
-    # A directly trailing qualifier belongs to this number; a new clause does
-    # not ("$59.7B, and European revenue was ..."). Period wording is harmless.
-    tail = claim.span_text[pos + len(claim.value_text):]
-    if re.match(r"^[\s,()]*\b(?:excluding|before|after|from|for|in|attributable|available|applicable)\b", tail, re.I):
-        tail = re.split(r"[;.!?]|\b(?:and|while|whereas|but|with)\b", tail, maxsplit=1, flags=re.I)[0]
-        if not _FIGURE_RE.search(_without_period_phrases(tail)):
-            description += " " + tail
+    if tail := _trailing_qualifier(claim):
+        description += " " + tail
     return description
+
+
+def _trailing_qualifier(claim: Claim) -> str:
+    """Wording directly after this claim's own number that qualifies it, or "".
+
+    A directly trailing qualifier belongs to this number; a new clause does
+    not ("$59.7B, and European revenue was ..."). Period wording is harmless.
+    """
+    pos = _value_pos(claim)
+    if pos is None:
+        return ""
+    tail = claim.span_text[pos + len(claim.value_text):]
+    comparison = "|".join(f"(?:{pattern.pattern})" for _, pattern in _GROWTH_COMPARISONS)
+    if not re.match(rf"^[\s,()]*(?:(?:{comparison})[\s,()]*)?\b(?:excluding|before|after|from|for|in|attributable"
+                    r"|available|applicable)\b", tail, re.I):
+        return ""
+    tail = re.split(r"[;.!?]|\b(?:and|while|whereas|but|with)\b", tail, maxsplit=1, flags=re.I)[0]
+    return "" if _FIGURE_RE.search(_without_period_phrases(tail)) else tail
+
+
+_NOT_SENTENCE_END = frozenset("inc corp co ltd plc llc no vs approx est jan feb mar apr jun jul aug sep sept oct "
+                              "nov dec".split())
+
+
+def sentence_breaks(text: str) -> list[int]:
+    """Offsets just after sentence or clause punctuation. "U.S.", "Inc." and initials are not breaks;
+    "$5.2B." is. Shared with extraction's source-context recovery."""
+    out = [m.end() for m in re.finditer(r"[;!?\n]", text)]
+    for m in re.finditer(r"\.(?=\s|$)", text):
+        word = re.search(r"(\S?)([A-Za-z][A-Za-z.]*)$", text[:m.start()])
+        if word and ("." in word.group(2) or word.group(2).casefold() in _NOT_SENTENCE_END
+                     or (len(word.group(2)) == 1 and not word.group(1).isdigit())):
+            continue
+        out.append(m.end())
+    return sorted(out)
 
 
 def _without_period_phrases(text: str) -> str:
@@ -511,7 +616,7 @@ def _level_sentence_framing(text: str, phrase: tuple[int, int]) -> str:
     blank = lambda hit: " " * len(hit.group(0))
     prefix, suffix = text[:phrase[0]], text[phrase[1]:]
     prefix = re.sub(r"^[\s,]*(?:with|where|while|whereas|but)\b", blank, prefix, flags=re.I)
-    prefix = re.sub(r"\b(?:now\s+)?(?:report(?:s|ed|ing)?|generat(?:es|ed|ing)|produc(?:es|ed|ing))\b",
+    prefix = re.sub(r"\b(?:now\s+)?(?:report(?:s|ed|ing)?|generat(?:es|ed|ing)|produc(?:es|ed|ing)|post(?:s|ed|ing))\b",
                     blank, prefix, flags=re.I)
     # Focusing on this one metric ("R&D alone came to ...") does not
     # redefine it; a retained region/exclusion still goes through the guard.
@@ -524,7 +629,7 @@ def _level_sentence_framing(text: str, phrase: tuple[int, int]) -> str:
     return prefix + text[phrase[0]:phrase[1]] + suffix
 
 
-def _level_reading(claim: Claim, company: set[str], segment: Optional[str]) -> Optional[Reading]:
+def _level_reading(claim: Claim, company: set[str], segment: Optional[str], *, growth: bool = False) -> Optional[Reading]:
     """Bind a canonical level metric to its description, just as for 'other'.
 
     Inspect metric_text and its value-bound phrase, not the entire sentence:
@@ -532,12 +637,15 @@ def _level_reading(claim: Claim, company: set[str], segment: Optional[str]) -> O
     naming a segment is retained in the Reading, never compared with the total.
     """
     descriptions = [claim.metric_text or ""]
-    if local := _local_level_description(claim):
+    local = _local_level_description(claim, growth=growth)
+    if local:
         descriptions.append(local)
     for index, text in enumerate(descriptions):
         text = re.sub(r"(?:'s|’s)\b", "", text)
         text = _without_period_phrases(text)
         phrases = _level_metric_phrases(claim.metric, text, segment)
+        if growth and index == 0 and not phrases:
+            continue  # a change's own wording ("increase", "segment grew") need not name its base again
         if len(phrases) != 1 or _TO_COMMON_RE.search(text):
             return None
         phrase = phrases[0]
@@ -547,7 +655,25 @@ def _level_reading(claim: Claim, company: set[str], segment: Optional[str]) -> O
         rest = text[:phrase[0]] + text[phrase[1]:]
         if leftover or any(char.isalpha() and not char.isascii() for char in rest):
             return None
+    # A number-first quote still owns a qualification right after its number ("grew 32% excluding
+    # acquisitions"); the metric's own wording there ("$28 billion in operating cash flow") is not one.
+    if not local and (tail := _trailing_qualifier(claim)):
+        tail = _without_period_phrases(re.sub(r"(?:'s|’s)\b", "", tail))
+        phrases = _level_metric_phrases(claim.metric, tail, segment)
+        if len(phrases) > 1 or _leftover_words(tail, phrases[0] if phrases else (0, 0), company, segment):
+            return None
     return Reading(claim.metric, None, segment, _eps_alternatives(claim.metric, claim))
+
+
+def _growth_reading(claim: Claim, base: str, company: set[str], segment: Optional[str]) -> Optional[Reading]:
+    """A change inherits its base metric's scope, including source-local exclusions."""
+    level = claim.model_copy(update={"metric": base})
+    checked = _level_reading(level, company, segment, growth=True)
+    if checked is None:
+        return None
+    metric = "revenue_growth" if base in ("revenue", "segment_revenue") else base
+    return Reading(metric, "revenue" if metric == "revenue_growth" else base, checked.segment,
+                   checked.alternatives)
 
 
 def _is_change(claim: Claim) -> bool:
@@ -556,6 +682,8 @@ def _is_change(claim: Claim) -> bool:
     if claim.comparison in ("YoY", "QoQ", "sequential"):
         return True
     if _CHANGE_RE.search(claim.metric_text or ""):
+        return True
+    if _source_growth_comparisons(claim):
         return True
     pos = _value_pos(claim)
     span = claim.span_text or ""
@@ -580,20 +708,12 @@ def interpret(claim: Claim) -> Optional[Reading]:
     company = _company_words(claim)
     seg = (claim.segment or "").strip() or None
     if m == "revenue_growth":
-        return Reading("revenue_growth", "revenue", seg)
+        # A named segment's own wording ("Gaming business revenue") is segment revenue wording.
+        return _growth_reading(claim, "segment_revenue" if seg else "revenue", company, seg)
     if m in GROWTH_BASES and unit == "%":
         if _MARGIN_RE.search(claim.metric_text or "") or not _is_change(claim):
             return Reading(m, None, seg)  # a level metric written in percent: the unit check says "?"
-        if _TO_COMMON_RE.search(claim.metric_text or ""):
-            return None
-        if m in ("revenue", "segment_revenue"):
-            return Reading("revenue_growth", "revenue", seg)
-        hit = _metric_phrases(claim.metric_text)
-        if hit and seg is None:
-            seg = _qualifier_before(claim.metric_text, hit[0][1], company)
-        if hit and seg is None and _leftover_words(claim.metric_text, hit[0][1:], company, None):
-            return Reading(m, None, seg)  # more wording than the metric: never the company total ("?")
-        return Reading(m, m, seg)
+        return _growth_reading(claim, m, company, seg)
     if m != "other":
         return _level_reading(claim, company, seg)
     mt = claim.metric_text or ""
@@ -626,7 +746,10 @@ def interpret(claim: Claim) -> Optional[Reading]:
     else:
         return None
     if unit == "%":
-        return Reading(base, base, seg) if _is_change(claim) else None
+        if not _is_change(claim):
+            return None
+        typed = claim if phrases else claim.model_copy(update={"metric_text": base.replace("_", " ")})
+        return _growth_reading(typed, base, company, seg)
     if base in PER_SHARE_METRICS and unit in ("USD/share", "USD"):
         return Reading(base, None, seg, _eps_alternatives(base, claim))
     if base in USD_METRICS and unit == "USD":
@@ -703,22 +826,100 @@ class Hedge:
                                                                                "approximately")
 
 
+def strip_bound_currency_prefix(prefix: str) -> str:
+    """Remove supported USD formatting immediately before a numeric token.
+
+    Shared with extraction's source-bound recovery. Currency spellings are
+    complete tokens: an unsupported currency or a word ending in "us" stays.
+    """
+    return re.sub(r"(?:\s|[$+−(\-]|(?<!\w)(?:US\s*\$|U\.S\.\s*\$|USD))+$", "", prefix, flags=re.I)
+
+
 def hedge_of(claim: Claim) -> Optional[Hedge]:
     """The hedge or bound word right before the claim's number (or leading its value_text: 'over $28 billion')."""
     span, vt = claim.span_text or "", claim.value_text or ""
     i = span.find(vt) if vt else -1
-    lead = re.match(r"[^\d$€£¥+\-−(]*", vt).group(0)
-    text = " ".join(f"{span[:i] if i >= 0 else ''} {lead}".lower().split())[-40:]
+    number = re.search(r"\d", vt)
+    lead = vt[:number.start()] if number else vt
+    text = " ".join(f"{span[:i] if i >= 0 else ''}{lead}".lower().split())[-80:]
     # Extraction may leave the currency sign in span_text while value_text starts at the digit.
     # It is formatting around the same amount, not a word separating the bound from its number.
-    text = re.sub(r"[\s$€£¥+\-−(]+$", "", text)
+    text = strip_bound_currency_prefix(text)
     for kind, inclusive, rx in _HEDGES:
         if rx.search(text):
             return Hedge(kind, inclusive)
     return None
 
 
-SPLIT_RATIOS = (2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 30, 40, 50, 100)
+def _comparison_period_after(claim: Claim) -> tuple[bool, bool]:
+    """A year-ago / prior-quarter label directly after this amount ('$46.7 billion a year ago')."""
+    local = _value_comparison_context(claim)
+    if local is None:
+        return False, False
+    # An intervening "up from", "to", or another amount does not belong to this amount.
+    after = re.sub(r"^[\s,()]*(?:(?:in|for|during)\s+)?(?:the\s+)?", "", local[1].lower())
+    year_ago, prior_quarter = _YEAR_AGO_RE.match(after), _PRIOR_Q_RE.match(after)
+    label = year_ago or prior_quarter
+    # "..., a year ago it was $30B", "(a year ago: $30B)" and "prior-year revenue was $30B" label the next one.
+    if label and _INTRODUCES_AMOUNT_RE.match(after, label.end()):
+        return False, False
+    return bool(year_ago), bool(prior_quarter)
+
+
+@dataclass(frozen=True)
+class SpanTerms:
+    """What a check takes from span_text and metric_text, beyond the claim's typed fields."""
+
+    growth_base: Optional[str]
+    comparison: str               # source YoY/QoQ wording bound to this value overrides the proposal
+    comparison_ambiguous: bool
+    derived: Optional[str]
+    alternatives: tuple[str, ...]
+    segment: Optional[str]
+    metric: str
+    basis: Optional[str]
+    negative: bool                # "fell 5%", "a net loss of $1.2 billion", "negative $2.12 billion"
+    hedge: Optional[Hedge]
+    endpoint_ambiguous: bool      # "up to X from Y"
+    comparison_period: tuple[bool, bool]  # a level amount labelled a year ago / the prior quarter
+
+
+def span_terms(claim: Claim, r: Reading) -> SpanTerms:
+    growth_base = r.growth_base
+    source_comparisons = _source_growth_comparisons(claim) if growth_base else set()
+    ambiguous = len(source_comparisons) > 1 or bool(
+        growth_base and _value_pos(claim) is None
+        and any(pattern.search(claim.span_text) for _, pattern in _GROWTH_COMPARISONS))
+    comparison = next(iter(source_comparisons)) if len(source_comparisons) == 1 else claim.comparison
+    segment = r.segment
+    if segment is None and r.metric in ("revenue", "revenue_growth"):
+        segment = implied_segment(claim)  # never check a segment figure against the consolidated total
+    metric = "segment_revenue" if r.metric == "revenue" and segment else r.metric
+    # The basis the draft states. With none stated, non-GAAP wording ("adjusted", "managed", "FTE") or a
+    # non-GAAP-only measure still means press-release evidence only, and a GAAP mismatch is never "✗".
+    non_gaap_words = _NON_GAAP_WORDS_RE.search(f"{claim.metric_text} {claim.span_text}")
+    basis = claim.basis or ("non-GAAP" if metric in NON_GAAP_BY_NATURE or non_gaap_words else None)
+    return SpanTerms(
+        growth_base, comparison, ambiguous, r.derived, r.alternatives, segment, metric, basis,
+        claimed_value(claim, change=growth_base is not None) < 0, hedge_of(claim), _ambiguous_growth_endpoint(claim),
+        _comparison_period_after(claim) if claim.comparison == "none" and not growth_base else (False, False))
+
+
+def span_reading(claim: Claim) -> tuple[Any, ...]:
+    """Everything a verdict can take from span_text, as one comparable value.
+
+    Extraction restores source wording a model quote left out, and keeps the
+    shorter quote only when both give this same value, so the verdict cannot
+    depend on which one is shown. Every span_text rule in this module must be
+    reflected here: interpret(), currency_neutral() and span_terms().
+    """
+    if not math.isfinite(claim.value) or claim.forward_looking or claim.metric == "guidance_tolerance":
+        return ("not_read",)
+    reading = interpret(claim)
+    return reading, currency_neutral(claim), span_terms(claim, reading or Reading(claim.metric, None, None))
+
+
+SPLIT_RATIOS =(2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 30, 40, 50, 100)
 
 
 def split_ratio(a: Fact, b: Fact) -> Optional[int]:
@@ -875,23 +1076,21 @@ class _Check:
         self.co_s = possessive(self.company)
         self.cal = periods.calendar(store, self.cik)
         r = reading or interpret(claim) or Reading(claim.metric, None, None)
-        self.growth_base = r.growth_base      # a percent change of this metric, or None for a level figure
-        self.derived = r.derived
-        self.alternatives = r.alternatives
-        self.segment = r.segment
-        if self.segment is None and r.metric in ("revenue", "revenue_growth"):
-            self.segment = implied_segment(claim)  # never check a segment figure against the consolidated total
-        self.metric = "segment_revenue" if r.metric == "revenue" and self.segment else r.metric
-        # The basis the draft states. With none stated, non-GAAP wording ("adjusted", "managed", "FTE") or a
-        # non-GAAP-only measure still means press-release evidence only, and a GAAP mismatch is never "✗".
+        terms = span_terms(claim, r)
+        self.growth_base = terms.growth_base  # a percent change of this metric, or None for a level figure
+        self.comparison_ambiguous = terms.comparison_ambiguous
+        self.comparison = terms.comparison
+        self.derived = terms.derived
+        self.alternatives = terms.alternatives
+        self.segment = terms.segment
+        self.metric = terms.metric
         self.basis_stated = claim.basis is not None
-        non_gaap_words = _NON_GAAP_WORDS_RE.search(f"{claim.metric_text} {claim.span_text}")
-        self.basis = claim.basis or ("non-GAAP" if self.metric in NON_GAAP_BY_NATURE or non_gaap_words else None)
+        self.basis = terms.basis
         self.claimed = claimed_value(claim, change=self.growth_base is not None)
         self.tol = tolerance(claim)
         self._facts: dict[tuple[Any, ...], list[Fact]] = {}
         self.invalid_numeric_evidence = False
-        self.hedge = hedge_of(claim)
+        self.hedge = terms.hedge
         self.superseded: list[tuple[Obs, Obs, int]] = []  # (pre-split version, the version that replaced it, ratio)
 
     # -- verdicts ------------------------------------------------------------
@@ -934,7 +1133,7 @@ class _Check:
                   cal: Optional[list[CalEntry]] = None) -> str:
         if self.growth_base:
             verb = "grew" if o.value >= 0 else "fell"
-            return f"{self.subject()} {verb} {self.fmt(abs(o.value))} {_cmp_words(comparison or self.c.comparison)} " \
+            return f"{self.subject()} {verb} {self.fmt(abs(o.value))} {_cmp_words(comparison or self.comparison)} " \
                    f"in {self.plabel(rp, cal)}"
         return f"{self.mlabel()} was {self.fmt(o.value)} for {self.plabel(rp, cal)}"
 
@@ -1062,7 +1261,7 @@ class _Check:
         if rp is None or rp.period_end is None:
             return []
         if self.growth_base:
-            observations = self.growth(cik, cal, rp, comparison or self.c.comparison, basis, self.segment)
+            observations = self.growth(cik, cal, rp, comparison or self.comparison, basis, self.segment)
         elif self.metric == "gross_margin":
             observations = self.margin(cik, rp, basis)
         elif self.derived == "operating_margin":
@@ -1155,6 +1354,14 @@ class _Check:
     # -- the rules -------------------------------------------------------------
     def run(self) -> Verdict:
         c = self.c
+        if self.comparison_ambiguous:
+            return self.verdict("unverifiable", "ambiguous",
+                                "The source does not bind this percentage to one clear year-over-year or "
+                                "quarter-over-quarter comparison.")
+        if _ambiguous_growth_endpoint(c):
+            return self.verdict("unverifiable", "ambiguous",
+                                "'Up to' followed by a starting amount can mean a growth endpoint or an upper "
+                                "bound, so this figure needs clearer wording.")
         if not math.isfinite(self.claimed) or not math.isfinite(self.tol):
             return self.verdict("unverifiable", "ambiguous",
                                 "This figure exceeds the supported numeric range after applying its units or precision.")
@@ -1171,7 +1378,7 @@ class _Check:
             said = c.period_text.strip() or "no period"
             return self.verdict("unverifiable", "ambiguous",
                                 f"Couldn't tell which {self.company} fiscal period \"{said}\" refers to.")
-        if self.growth_base and (c.comparison == "none" or rp.fiscal_period == "FY"):
+        if self.growth_base and (self.comparison == "none" or rp.fiscal_period == "FY"):
             return self._growth_unstated(rp)
         obs_all = self.observe(rp)
         if not obs_all:
@@ -1379,11 +1586,11 @@ class _Check:
         """'up from $46.7 billion a year ago': a level figure for the comparison period the sentence names."""
         if self.c.comparison != "none" or self.growth_base:
             return None
-        words = self.c.span_text.lower()
+        year_ago, prior_quarter = _comparison_period_after(self.c)
         shifted = []
-        if _YEAR_AGO_RE.search(words):
+        if year_ago:
             shifted.append(periods.shift(rp, self.cal, years=-1))
-        if _PRIOR_Q_RE.search(words):
+        if prior_quarter:
             shifted.append(periods.shift(rp, self.cal, quarters=-1))
         for srp in shifted:
             hits = [o for o in self.accepts(self.observe(srp)) if self.public(o)]
@@ -1418,12 +1625,12 @@ class _Check:
     def _diag_period(self, rp: ResolvedPeriod, actual: Obs) -> Optional[Verdict]:
         c = self.c
         if self.growth_base:
-            other = "YoY" if c.comparison in ("QoQ", "sequential") else "QoQ"
+            other = "YoY" if self.comparison in ("QoQ", "sequential") else "QoQ"
             hits = [o for o in self.matches(self.observe(rp, comparison=other)) if self.public(o)]
             if hits:
                 return self.wrong("period_mismatch", actual,
                                   f"{c.value_text} is {self.co_s} {_cmp_words(other)} {self.mlabel()}; "
-                                  f"{_cmp_words(c.comparison)} it was {self.fmt(actual.value)} in {self.plabel(rp)}.",
+                                  f"{_cmp_words(self.comparison)} it was {self.fmt(actual.value)} in {self.plabel(rp)}.",
                                   extra=_best_obs(hits).facts)
         if relative_tolerance(c) > PEER_MATCH_MAX_REL_TOL:
             return None  # "3%" matches some quarter's change by chance; only a precise figure names its period

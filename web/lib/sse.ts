@@ -86,17 +86,20 @@ export async function* readSSE(body: ReadableStream<Uint8Array>, signal?: AbortS
   };
   signal?.addEventListener("abort", onAbort, { once: true });
   try {
+    if (signal?.aborted) return;
     while (true) {
       const { value, done } = await reader.read();
+      if (signal?.aborted) return;
       if (done) {
         finished = true;
         parser.push(decoder.decode());
         parser.end();
-        while (queue.length) yield queue.shift()!;
+        while (queue.length && !signal?.aborted) yield queue.shift()!;
         return;
       }
       parser.push(decoder.decode(value, { stream: true }));
-      while (queue.length) yield queue.shift()!;
+      while (queue.length && !signal?.aborted) yield queue.shift()!;
+      if (signal?.aborted) return;
     }
   } finally {
     signal?.removeEventListener("abort", onAbort);

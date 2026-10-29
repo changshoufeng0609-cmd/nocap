@@ -42,7 +42,11 @@ const initial: CheckState = {
 
 function reducer(state: CheckState, a: Action): CheckState {
   if (a.type === "start") return { ...initial, phase: "streaming", run: a.run, request: a.request };
-  if (a.type === "cancel") return state.phase === "streaming" ? { ...state, phase: "idle" } : state;
+  // An interrupted check keeps only claims that already have verdicts: none can stay "Checking".
+  if (a.type === "cancel")
+    return state.phase === "streaming"
+      ? { ...state, phase: "idle", claims: state.claims.filter((c) => c.id in state.verdicts) }
+      : state;
   if (a.run !== state.run) return state; // an event from a superseded run
   switch (a.type) {
     case "meta":
@@ -65,41 +69,49 @@ interface Callbacks {
   onError?: (error: ErrorEvent, request: CheckRequest) => void;
 }
 
-export function useCheck(callbacks: Callbacks = {}) {
+export function useCheck(callbacks: Callbacks = {}, enabled = true) {
   const [state, dispatch] = useReducer(reducer, initial);
   const abortRef = useRef<AbortController | null>(null);
   const runRef = useRef(0);
-  const claimCount = useRef(0);
+  const enabledRef = useRef(enabled);
   const cb = useRef(callbacks);
   useEffect(() => {
     cb.current = callbacks;
   });
 
   const start = useCallback((request: CheckRequest) => {
+    if (!enabledRef.current) return;
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
     const run = ++runRef.current;
+    const active = () => enabledRef.current && !ac.signal.aborted && abortRef.current === ac && runRef.current === run;
+    const receivedClaims = new Set<string>();
     const receivedVerdicts = new Map<string, Verdict>();
-    claimCount.current = 0;
     dispatch({ type: "start", run, request });
     void streamCheck(
       request,
       {
-        onMeta: (meta) => dispatch({ type: "meta", run, meta }),
+        onMeta: (meta) => { if (active()) dispatch({ type: "meta", run, meta }); },
         onClaim: (claim) => {
-          claimCount.current += 1;
+          if (!active()) return;
+          receivedClaims.add(claim.id);
           dispatch({ type: "claim", run, claim });
         },
         onVerdict: (claimId, verdict) => {
+          if (!active()) return;
           receivedVerdicts.set(claimId, verdict);
           dispatch({ type: "verdict", run, claimId, verdict });
         },
         onDone: (done) => {
+          if (!active()) return;
+          abortRef.current = null;
           dispatch({ type: "done", run, done });
-          cb.current.onDone?.(done, { claims: claimCount.current, verdicts: [...receivedVerdicts.values()] });
+          cb.current.onDone?.(done, { claims: receivedClaims.size, verdicts: [...receivedVerdicts.values()] });
         },
         onError: (error) => {
+          if (!active()) return;
+          abortRef.current = null;
           dispatch({ type: "error", run, error });
           cb.current.onError?.(error, request);
         },
@@ -109,11 +121,19 @@ export function useCheck(callbacks: Callbacks = {}) {
   }, []);
 
   const cancel = useCallback(() => {
+    ++runRef.current;
     abortRef.current?.abort();
+    abortRef.current = null;
     dispatch({ type: "cancel" });
   }, []);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(() => {
+    enabledRef.current = enabled;
+    return () => {
+      enabledRef.current = false;
+      cancel();
+    };
+  }, [enabled, cancel]);
 
   return { state, start, cancel };
 }

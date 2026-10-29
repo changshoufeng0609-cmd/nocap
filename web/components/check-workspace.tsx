@@ -9,6 +9,7 @@ import { AskWorkspace } from "@/components/ask-workspace";
 import { PrivateCheck } from "@/components/private-check";
 import { cn } from "@/lib/utils";
 import { fetchHealth } from "@/lib/api";
+import type { Health } from "@/lib/types";
 
 const MODES = ["draft", "slide", "ask", "private"] as const;
 const LABELS = { draft: "Draft", slide: "Slide", ask: "Ask", private: "Private" };
@@ -17,10 +18,14 @@ const ICONS = { draft: FileTextIcon, slide: FileImageIcon, ask: MessageSquareTex
 export function CheckWorkspace() {
   const [mode, setMode] = useState<(typeof MODES)[number]>("draft");
   const [livePaused, setLivePaused] = useState(false);
+  const [draftCachePolicy, setDraftCachePolicy] = useState<Health["draft_cache_policy"]>();
   useEffect(() => {
     const controller = new AbortController();
     void fetchHealth(controller.signal).then((health) => {
-      if (!controller.signal.aborted) setLivePaused(health?.live_requests_paused === true);
+      if (!controller.signal.aborted) {
+        setLivePaused(health?.live_requests_paused === true);
+        setDraftCachePolicy(health?.draft_cache_policy);
+      }
     });
     return () => controller.abort();
   }, []);
@@ -48,7 +53,11 @@ export function CheckWorkspace() {
         </div></div>
       </div>
       <div id="check-workspace-panel" role="tabpanel" aria-labelledby={`mode-${mode}`} className="flex flex-1 flex-col">
-        {mode === "draft" ? <ReceiptsApp /> : mode === "slide" ? <SlideApp /> : mode === "ask" ? <AskWorkspace /> : <PrivateCheck />}
+        {/* Keep ordinary work only in this page's memory; Private still clears on unmount. */}
+        <div hidden={mode !== "draft"} className={mode === "draft" ? "flex flex-1 flex-col" : undefined}>
+          <ReceiptsApp active={mode === "draft"} livePaused={livePaused} draftCachePolicy={draftCachePolicy} />
+        </div>
+        {mode === "slide" ? <SlideApp /> : mode === "ask" ? <AskWorkspace /> : mode === "private" ? <PrivateCheck /> : null}
       </div>
     </>
   );

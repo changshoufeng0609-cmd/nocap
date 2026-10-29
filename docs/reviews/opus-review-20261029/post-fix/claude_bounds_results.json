@@ -1,0 +1,1509 @@
+{
+  "review_date": "2026-10-29",
+  "candidate_origin": "Claude CLI independent review; separately reproduced by the correctness reviewer",
+  "scope": "Synthetic proposal boundary probes; no held-out inputs and no product changes.",
+  "provider_calls": 0,
+  "sec_calls": 0,
+  "cost_usd": 0,
+  "live_model_frequency_measured": false,
+  "finding": {
+    "severity": "P1",
+    "confirmed": true,
+    "title": "US$ currency spelling prevents recognition and source recovery of strict numeric bounds",
+    "locations": [
+      "receipts/verify.py:706",
+      "receipts/verify.py:714",
+      "receipts/extract.py:1060"
+    ],
+    "mechanism": "hedge_of leaves US before the dollar sign; its final currency/sign trim does not remove US. The same source prefix prevents _source_bound_span from finding an adjacent operator. Equality matching then replaces the strict source bound.",
+    "qualification": "The suggested > US$97B revenue case stays wrong because the equality mismatch exceeds tolerance. Exact-boundary and rounded-threshold cases demonstrate actual false Verified, not merely a weaker explanation.",
+    "suggested_fix": "Normalize supported full currency tokens consistently for source anchoring and hedge recognition; preserve strict/inclusive bounds separately from value equality tolerance."
+  },
+  "source_sha256": {
+    "docs/reviews/opus-review-20261029/claude_bounds_probe.py": "152d2c78a459de90d503b680e7f9b63e935c42123265aff6c61fbc47feb07d66",
+    "receipts/extract.py": "0886d904427f912f7a3abecf4c6eabdd58d7e789f4479dff1987f1877ac94039",
+    "receipts/verify.py": "d99989a947cb7b3e24fa2c08815760b5e3db338521ec6b528480007fb279bf36",
+    "receipts/periods.py": "74a7db335722b28c6d515f15771764c68eafb713ab5a06eaa0ea6393c5dedf82",
+    "receipts/store.py": "3f621e7643eb501122efbe60ec0d31748127560a918cd761451119a172d6ae8a",
+    "receipts/types.py": "59957d8aac829d4f521ba037af3fdb694cbdbd5c4094acbf87ecbda4a5d80b0e",
+    "data/snapshot/facts.sqlite": "ee1cb5a313cadfac9a8d36c6dbb2832996fbd91b823a045e62e5280418df0b53",
+    "data/snapshot/pr_facts/NVDA/0001045810-24-000315.jsonl": "a5334a5ba881db5fb0e48b2073fb81e11e3775b5c9094cc1b31b21f7bc62cdb3",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000021.jsonl": "2f420bd7eae898a3dfe695432e51d5a6e64f7cc518879826499c879b8aa83188",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000115.jsonl": "d5b788031950c16463d95b097c7c3db5bdd1e248aa0d2aa3488584d3a6c424db",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000207.jsonl": "4bdc9a62a7a1075ba04084eeed55329c5d209ee7ac2a2bea568d52fb0eefa2e0",
+    "data/snapshot/pr_facts/NVDA/0001045810-25-000228.jsonl": "0f27613021b1970a651f70999f55e24a036af7207e54713f62ca57d6ab9095e2",
+    "data/snapshot/pr_facts/NVDA/0001045810-26-000019.jsonl": "791bdd438e0d80b14c56f094eef668ca67bb7224b00f375222e5f42a944bde6b",
+    "data/snapshot/pr_facts/NVDA/0001045810-26-000051.jsonl": "4b18b0ba3f45d2e2f0276898bcbeb0426cae66d200dad170b3d714b2561b2b7a",
+    "data/snapshot/pr_facts/NVDA/0001045810-26-000073.jsonl": "3ded5fce43de1410164e96889e7db8306ef6cce37ceeae672e7490f5e8feaef3"
+  },
+  "summary": {
+    "cases": 12,
+    "paired_scenarios": 6,
+    "false_verified_us_dollar_cases": 0,
+    "us_dollar_cases_wrong_despite_ignored_bound": 0,
+    "dollar_control_cases": 6,
+    "all_dollar_controls_correct": true
+  },
+  "cases": [
+    {
+      "case_id": "full_exact_lower_bound_us_dollar",
+      "pair_id": "full_exact_lower_bound",
+      "currency_spelling": "US$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 revenue was more than US$96.221 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than US$96.221 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than US$96.221 billion.",
+        "span_start": 0,
+        "span_end": 57
+      },
+      "located_value_ranges": [
+        [
+          39,
+          56
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 57,
+        "output_start": 0,
+        "output_end": 57,
+        "output_text": "NVIDIA Q2 FY2027 revenue was more than US$96.221 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than US$96.221 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 96221000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_exact_lower_bound_dollar_control",
+      "pair_id": "full_exact_lower_bound",
+      "currency_spelling": "$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 revenue was more than $96.221 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than $96.221 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than $96.221 billion.",
+        "span_start": 0,
+        "span_end": 55
+      },
+      "located_value_ranges": [
+        [
+          39,
+          54
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 55,
+        "output_start": 0,
+        "output_end": 55,
+        "output_text": "NVIDIA Q2 FY2027 revenue was more than $96.221 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than $96.221 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 96221000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_far_lower_bound_us_dollar",
+      "pair_id": "full_far_lower_bound",
+      "currency_spelling": "US$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 revenue was more than US$97 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$97 billion",
+        "value": 97.0,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than US$97 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$97 billion",
+        "value": 97.0,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than US$97 billion.",
+        "span_start": 0,
+        "span_end": 53
+      },
+      "located_value_ranges": [
+        [
+          39,
+          52
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 53,
+        "output_start": 0,
+        "output_end": 53,
+        "output_text": "NVIDIA Q2 FY2027 revenue was more than US$97 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than US$97 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 97000000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_far_lower_bound_dollar_control",
+      "pair_id": "full_far_lower_bound",
+      "currency_spelling": "$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 revenue was more than $97 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$97 billion",
+        "value": 97.0,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than $97 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$97 billion",
+        "value": 97.0,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was more than $97 billion.",
+        "span_start": 0,
+        "span_end": 51
+      },
+      "located_value_ranges": [
+        [
+          39,
+          50
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 51,
+        "output_start": 0,
+        "output_end": 51,
+        "output_text": "NVIDIA Q2 FY2027 revenue was more than $97 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than $97 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 97000000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_rounded_upper_bound_us_dollar",
+      "pair_id": "full_rounded_upper_bound",
+      "currency_spelling": "US$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 revenue was less than US$96.2 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was less than US$96.2 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was less than US$96.2 billion.",
+        "span_start": 0,
+        "span_end": 55
+      },
+      "located_value_ranges": [
+        [
+          39,
+          54
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 55,
+        "output_start": 0,
+        "output_end": 55,
+        "output_text": "NVIDIA Q2 FY2027 revenue was less than US$96.2 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "upper",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not less than US$96.2 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "less than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 96200000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_rounded_upper_bound_dollar_control",
+      "pair_id": "full_rounded_upper_bound",
+      "currency_spelling": "$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 revenue was less than $96.2 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was less than $96.2 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.2 billion",
+        "value": 96.2,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 revenue was less than $96.2 billion.",
+        "span_start": 0,
+        "span_end": 53
+      },
+      "located_value_ranges": [
+        [
+          39,
+          52
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 53,
+        "output_start": 0,
+        "output_end": 53,
+        "output_text": "NVIDIA Q2 FY2027 revenue was less than $96.2 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "upper",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not less than $96.2 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "less than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 96200000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_rounded_lower_bound_us_dollar",
+      "pair_id": "full_rounded_lower_bound",
+      "currency_spelling": "US$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 net income was more than US$59.7 billion.",
+      "model_proposal": {
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "US$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 net income was more than US$59.7 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "US$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 net income was more than US$59.7 billion.",
+        "span_start": 0,
+        "span_end": 58
+      },
+      "located_value_ranges": [
+        [
+          42,
+          57
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 58,
+        "output_start": 0,
+        "output_end": 58,
+        "output_text": "NVIDIA Q2 FY2027 net income was more than US$59.7 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that GAAP net income was $59.688 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than US$59.7 billion.",
+        "expected_value": 59.688,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "net_income",
+            "concept": "us-gaap:NetIncomeLoss",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 59688000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "net_income",
+          "value": 59688000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 59688000000,
+        "threshold_usd": 59700000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "full_rounded_lower_bound_dollar_control",
+      "pair_id": "full_rounded_lower_bound",
+      "currency_spelling": "$",
+      "quote_mode": "full_source",
+      "source_text": "NVIDIA Q2 FY2027 net income was more than $59.7 billion.",
+      "model_proposal": {
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 net income was more than $59.7 billion."
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "NVIDIA Q2 FY2027 net income was more than $59.7 billion.",
+        "span_start": 0,
+        "span_end": 56
+      },
+      "located_value_ranges": [
+        [
+          42,
+          55
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 0,
+        "input_end": 56,
+        "output_start": 0,
+        "output_end": 56,
+        "output_text": "NVIDIA Q2 FY2027 net income was more than $59.7 billion.",
+        "extended_left": false
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that GAAP net income was $59.688 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than $59.7 billion.",
+        "expected_value": 59.688,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "net_income",
+            "concept": "us-gaap:NetIncomeLoss",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 59688000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "net_income",
+          "value": 59688000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 59688000000,
+        "threshold_usd": 59700000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "number_only_exact_lower_bound_us_dollar",
+      "pair_id": "number_only_exact_lower_bound",
+      "currency_spelling": "US$",
+      "quote_mode": "number_only",
+      "source_text": "NVIDIA Q2 FY2027 revenue was more than US$96.221 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "US$96.221 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "US$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "more than US$96.221 billion",
+        "span_start": 29,
+        "span_end": 56
+      },
+      "located_value_ranges": [
+        [
+          39,
+          56
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 39,
+        "input_end": 56,
+        "output_start": 29,
+        "output_end": 56,
+        "output_text": "more than US$96.221 billion",
+        "extended_left": true
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [
+        "restored the source bound or hedge before the number at offset 39"
+      ],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than US$96.221 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 96221000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "number_only_exact_lower_bound_dollar_control",
+      "pair_id": "number_only_exact_lower_bound",
+      "currency_spelling": "$",
+      "quote_mode": "number_only",
+      "source_text": "NVIDIA Q2 FY2027 revenue was more than $96.221 billion.",
+      "model_proposal": {
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$96.221 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "revenue",
+        "metric_text": "revenue",
+        "value_text": "$96.221 billion",
+        "value": 96.221,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "more than $96.221 billion",
+        "span_start": 29,
+        "span_end": 54
+      },
+      "located_value_ranges": [
+        [
+          39,
+          54
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 39,
+        "input_end": 54,
+        "output_start": 29,
+        "output_end": 54,
+        "output_text": "more than $96.221 billion",
+        "extended_left": true
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [
+        "restored the source bound or hedge before the number at offset 39"
+      ],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than $96.221 billion.",
+        "expected_value": 96.221,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "revenue",
+            "concept": "us-gaap:Revenues",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 96221000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "revenue",
+          "value": 96221000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 96221000000,
+        "threshold_usd": 96221000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "number_only_rounded_lower_bound_us_dollar",
+      "pair_id": "number_only_rounded_lower_bound",
+      "currency_spelling": "US$",
+      "quote_mode": "number_only",
+      "source_text": "NVIDIA Q2 FY2027 net income was more than US$59.7 billion.",
+      "model_proposal": {
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "US$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "US$59.7 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "US$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "more than US$59.7 billion",
+        "span_start": 32,
+        "span_end": 57
+      },
+      "located_value_ranges": [
+        [
+          42,
+          57
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 42,
+        "input_end": 57,
+        "output_start": 32,
+        "output_end": 57,
+        "output_text": "more than US$59.7 billion",
+        "extended_left": true
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [
+        "restored the source bound or hedge before the number at offset 42"
+      ],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that GAAP net income was $59.688 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than US$59.7 billion.",
+        "expected_value": 59.688,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "net_income",
+            "concept": "us-gaap:NetIncomeLoss",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 59688000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "net_income",
+          "value": 59688000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 59688000000,
+        "threshold_usd": 59700000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    },
+    {
+      "case_id": "number_only_rounded_lower_bound_dollar_control",
+      "pair_id": "number_only_rounded_lower_bound",
+      "currency_spelling": "$",
+      "quote_mode": "number_only",
+      "source_text": "NVIDIA Q2 FY2027 net income was more than $59.7 billion.",
+      "model_proposal": {
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "bases": [
+          "GAAP"
+        ],
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "$59.7 billion"
+      },
+      "actual_claim": {
+        "id": "c1",
+        "metric": "net_income",
+        "metric_text": "net income",
+        "value_text": "$59.7 billion",
+        "value": 59.7,
+        "unit": "USD",
+        "scale": "billions",
+        "period_text": "Q2 FY2027",
+        "period_type": "quarter",
+        "comparison": "none",
+        "basis": "GAAP",
+        "forward_looking": false,
+        "entity": "NVIDIA",
+        "segment": null,
+        "span_text": "more than $59.7 billion",
+        "span_start": 32,
+        "span_end": 55
+      },
+      "located_value_ranges": [
+        [
+          42,
+          55
+        ]
+      ],
+      "source_bound_span": {
+        "input_start": 42,
+        "input_end": 55,
+        "output_start": 32,
+        "output_end": 55,
+        "output_text": "more than $59.7 billion",
+        "extended_left": true
+      },
+      "hedge_of": {
+        "kind": "lower",
+        "inclusive": false
+      },
+      "warnings": [
+        "restored the source bound or hedge before the number at offset 42"
+      ],
+      "actual_verdict": {
+        "claim_id": "c1",
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "explanation": "NVIDIA's 10-Q reports that GAAP net income was $59.688 billion for Q2 FY2027 (quarter ended Jul 26, 2026), which is not more than $59.7 billion.",
+        "expected_value": 59.688,
+        "evidence": [
+          {
+            "cik": 1045810,
+            "ticker": "NVDA",
+            "metric": "net_income",
+            "concept": "us-gaap:NetIncomeLoss",
+            "basis": "GAAP",
+            "segment": null,
+            "value": 59688000000.0,
+            "unit": "USD",
+            "period_start": "2026-04-27",
+            "period_end": "2026-07-26",
+            "fiscal_year": 2027,
+            "fiscal_period": "Q2",
+            "source": "xbrl",
+            "derived_from": [],
+            "form": "10-Q",
+            "accession": "0001045810-26-000075",
+            "accepted_at": "2026-08-26T20:36:00Z",
+            "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+            "locator": null,
+            "decimals": -6
+          }
+        ],
+        "as_of": null
+      },
+      "evidence_periods": [
+        {
+          "metric": "net_income",
+          "value": 59688000000.0,
+          "unit": "USD",
+          "fiscal_year": 2027,
+          "fiscal_period": "Q2",
+          "period_start": "2026-04-27",
+          "period_end": "2026-07-26",
+          "accession": "0001045810-26-000075"
+        }
+      ],
+      "expectation": {
+        "status": "wrong",
+        "reason": "value_mismatch",
+        "source_predicate_true": false,
+        "operator": "more than",
+        "strict": true,
+        "filed_value_usd": 59688000000,
+        "threshold_usd": 59700000000.0,
+        "explanation": "A strict source bound must be enforced without the equality rounding tolerance."
+      },
+      "false_verified": false,
+      "bound_recognized": true,
+      "status_correct": true,
+      "impact": "bound_correctly_enforced"
+    }
+  ]
+}

@@ -132,15 +132,17 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
     if (!signal.aborted) h.onError({ message: "Couldn't reach the NoCap API.", retryable: true });
     return;
   }
+  if (signal.aborted) return;
   if (!res.ok || !res.body) {
-    if (!signal.aborted) h.onError(await errorFromResponse(res));
+    const error = await errorFromResponse(res);
+    if (!signal.aborted) h.onError(error);
     return;
   }
   const type = res.headers.get("content-type") ?? "";
   if (!type.includes("text/event-stream")) {
     if (!signal.aborted) {
       const message = await bodyMessage(res);
-      h.onError({ message: message || "The NoCap API sent an unexpected response.", retryable: true });
+      if (!signal.aborted) h.onError({ message: message || "The NoCap API sent an unexpected response.", retryable: true });
     }
     return;
   }
@@ -148,6 +150,7 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
   let finished = false;
   try {
     for await (const msg of readSSE(res.body, signal)) {
+      if (signal.aborted) return;
       let data: unknown;
       try {
         data = JSON.parse(msg.data);

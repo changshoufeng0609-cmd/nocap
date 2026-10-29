@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "executed_at_utc": "2026-10-29T13:52:29.401191+00:00",
+  "command": ".venv/bin/python docs/reviews/opus-review-20261029/runtime_probe.py",
+  "source": {
+    "path": "receipts/api.py",
+    "sha256": "cad5ff5b2d8e44d03594566d3d3fb46d0903b14bbe4f754030617677481cc10b",
+    "definition_lines": {
+      "RateLimiter": 166,
+      "_reserve": 315,
+      "client_ip": 323,
+      "Rejected": 403,
+      "parse": 567
+    },
+    "isolation": "Selected source AST definitions only; no application module imports.",
+    "only_ast_change": "parse body_type default changed from CheckBody to None; function body unchanged."
+  },
+  "probes": [
+    {
+      "id": "forwarded_ip_identity",
+      "reproduced": true,
+      "severity": "P2",
+      "code_reference": "receipts/api.py:323-328",
+      "observations": [
+        {
+          "socket_peer": "127.0.0.1:1234",
+          "x_real_ip": "198.51.100.1",
+          "selected_limiter_identity": "198.51.100.1",
+          "allowed": true
+        },
+        {
+          "socket_peer": "127.0.0.1:1234",
+          "x_real_ip": "198.51.100.1",
+          "selected_limiter_identity": "198.51.100.1",
+          "allowed": false
+        },
+        {
+          "socket_peer": "127.0.0.1:1234",
+          "x_real_ip": "198.51.100.2",
+          "selected_limiter_identity": "198.51.100.2",
+          "allowed": true
+        }
+      ],
+      "finding": "An unchanged socket peer gets a fresh per-IP allowance by changing x-real-ip.",
+      "scope": "Confirmed in the application helper and direct/untrusted-proxy scenario only.",
+      "vercel_exploitability": "UNTESTED: no real Vercel request was sent; edge header rewriting was not inspected.",
+      "daily_budget_bypass": false
+    },
+    {
+      "id": "body_limit_after_buffering",
+      "reproduced": true,
+      "severity": "P2",
+      "code_reference": "receipts/api.py:567-571; shared by /api/check and /api/fix",
+      "configured_limit_bytes": 65536,
+      "input_chunk_bytes": 65537,
+      "input_chunk_count": 3,
+      "chunks_read_before_rejection": 3,
+      "bytes_retained_before_rejection": 196611,
+      "rejection_reason": "body_too_large",
+      "finding": "The entire body is buffered before the configured body-size check rejects it.",
+      "scope": "Controlled in-process ASGI receive stream; no oversized live request was sent.",
+      "platform_limits": "Any Vercel or reverse-proxy request-size limit is outside this probe."
+    },
+    {
+      "id": "synchronous_admission_blocks_event_loop",
+      "reproduced": true,
+      "severity": "P2",
+      "code_references": [
+        "receipts/api.py:315-320,644,700,757",
+        "receipts/ask_api.py:90",
+        "receipts/private.py:159",
+        "receipts/spend.py:328-336"
+      ],
+      "controlled_stub_delay_ms": 200.0,
+      "other_coroutine_requested_delay_ms": 10.0,
+      "other_coroutine_observed_delay_ms": 205.138,
+      "finding": "Calling synchronous _reserve from the event loop delays unrelated coroutines.",
+      "measurement_scope": "CONTROLLED 200ms sleep stub, NOT real Neon/PostgreSQL latency.",
+      "actual_database_contacted": false,
+      "current_paused_behavior": "The configured live-paused wrapper rejects before database admission; this risk applies when live admission is enabled."
+    }
+  ],
+  "external_requests": 0,
+  "model_calls": 0,
+  "sec_requests": 0,
+  "gpu_calls": 0,
+  "cost_usd": 0,
+  "env_or_credentials_read": false,
+  "product_or_test_files_modified": false
+}

@@ -1,0 +1,65 @@
+{
+  "reviewed_commit": "d2296df7946b48d426dcef5941cc5a160914aee7",
+  "cli_version": "2.1.312",
+  "session_id": "ccb48b28-35d7-4919-97e9-923a7ee31b26",
+  "requested_model": "claude-opus-5-5",
+  "response_models": [
+    "claude-opus-5-5"
+  ],
+  "effort": "max",
+  "effort_confirmation": "CLI launch argument and visible banner: Opus 5.5 with max effort · Claude Max",
+  "permission_mode": "plan",
+  "tools_available": [
+    "Read",
+    "Grep",
+    "Glob"
+  ],
+  "claude_tool_names_used": [
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "report_timestamp": "2026-10-29T13:53:20.575Z",
+  "report_sha256": "13ab8b5af4198fca0e989ef6885d29c0cefbad76cbdab589d441204fa6779e17",
+  "ui_duration": "18m 55s",
+  "ui_cost_display_usd": 7.03,
+  "billing_scope": "Claude Max session UI cost display; not independently confirmed additional-usage billing or an invoice",
+  "nocap_provider_calls_from_review_probes": 0,
+  "nocap_provider_cost_usd": 0,
+  "model_substitution": false,
+  "product_changed": false,
+  "heldout_evaluation_rerun": false,
+  "frozen_files_verified": 126,
+  "frozen_files_changed": [],
+  "additional_reviewers": [
+    "Codex correctness specialist",
+    "Codex product/demo specialist",
+    "Codex runtime/privacy/cost specialist"
+  ],
+  "probe_execution_by": "Specialists and primary Codex reviewer; Claude performed static review only",
+  "probe_case_counts": {
+    "initial_correctness": 9,
+    "currency_bounds": 12,
+    "claude_followup": 12,
+    "runtime": 3,
+    "client_cancellation": 1
+  },
+  "final_new_p1_categories": 5,
+  "known_residual_correctness_limitation_categories": 1,
+  "report_corrections": "See README.md cross-check corrections; original Claude report is preserved rather than silently edited.",
+  "artifact_sha256": {
+    "README.md": "18bb9e41c902e721556e6040d2f4c004fd7bc8bdabf4d14798d3a47441e3cf61",
+    "claude-report.md": "13ab8b5af4198fca0e989ef6885d29c0cefbad76cbdab589d441204fa6779e17",
+    "claude_bounds_probe.py": "152d2c78a459de90d503b680e7f9b63e935c42123265aff6c61fbc47feb07d66",
+    "claude_bounds_results.json": "e680a057567b2fdff1075fedee0426bb2870e6398bf58be6a09b713733831f4c",
+    "claude_followup_probe.py": "6c4a28bf2b453b9e335a26fee94eb19c8b65c68987e9ccced8478c51a81dd390",
+    "claude_followup_results.json": "cfb706167684d245ab5624affdd5b888f5dfb5138b0dc3a392a87e706f5b2057",
+    "correctness_probe.py": "6ef1e9bde160aded0f65188868c9b8f99e2a0529effc5430692d76e9c2573748",
+    "correctness_results.json": "eae895aff3a010691930d3248010aaf99e85096a3e57b25f67039681d29649d2",
+    "product_notes.md": "b2d7e73088574546f315558cec8bdfe8c8dd3d50d2d07814093463c541766b53",
+    "product_probe.mjs": "7ecd0664a06548378a0c3e6e322adf34840d7ac26f7a603772cb69ab93b0b1da",
+    "product_results.json": "d3ab8d2358a49c1dd142fa24339186b0fbdb7c29e8d7efda457b5e3db7bb7760",
+    "runtime_probe.py": "a1fdccd4fd824f7064cc773b81f424d9e11574cab536c6d640954f85764bc7eb",
+    "runtime_results.json": "0a94b60b826e1d114c88f98c85b29c7cbb7a8e994af269f34b7cef9815122875"
+  }
+}

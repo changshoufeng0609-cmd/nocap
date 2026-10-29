@@ -1,0 +1,94 @@
+{
+  "purpose": "Post-fix rerun of the October 29 review probes; originals and their results untouched.",
+  "provider_calls": 0,
+  "sec_calls": 0,
+  "cost_usd": 0,
+  "current_source_sha256": {
+    "receipts/extract.py": "0886d904427f912f7a3abecf4c6eabdd58d7e789f4479dff1987f1877ac94039",
+    "receipts/verify.py": "d99989a947cb7b3e24fa2c08815760b5e3db338521ec6b528480007fb279bf36",
+    "receipts/api.py": "44ea62fdd51cfc7500603628222b1bfc13869ef115bd12df60420a7a6437c7b8",
+    "web/lib/api.ts": "ad46743bd514f8ce9f61cbed9bcbdb194abd71c77e720de6896f611c383ad12d",
+    "web/hooks/use-check.ts": "f40de3f707f3957b1b31f5f18961b8aed483f1583eea7de6e97087e0529f8060"
+  },
+  "runs": [
+    {
+      "probe": "correctness_probe.py",
+      "original_sha256": "6ef1e9bde160aded0f65188868c9b8f99e2a0529effc5430692d76e9c2573748",
+      "substitutions": [
+        [
+          "Path(__file__).resolve().parents[3]",
+          "Path('/Users/shou-fengchang/Desktop/Meta')"
+        ],
+        [
+          "Path(__file__).with_name(\"correctness_results.json\")",
+          "Path('/Users/shou-fengchang/Desktop/Meta/docs/reviews/opus-review-20261029/post-fix/correctness_results.json')"
+        ]
+      ],
+      "output": "correctness_results.json",
+      "status": "completed"
+    },
+    {
+      "probe": "claude_bounds_probe.py",
+      "original_sha256": "152d2c78a459de90d503b680e7f9b63e935c42123265aff6c61fbc47feb07d66",
+      "substitutions": [
+        [
+          "Path(__file__).resolve().parents[3]",
+          "Path('/Users/shou-fengchang/Desktop/Meta')"
+        ],
+        [
+          "Path(__file__).with_name(\"claude_bounds_results.json\")",
+          "Path('/Users/shou-fengchang/Desktop/Meta/docs/reviews/opus-review-20261029/post-fix/claude_bounds_results.json')"
+        ]
+      ],
+      "output": "claude_bounds_results.json",
+      "status": "completed"
+    },
+    {
+      "probe": "claude_followup_probe.py",
+      "original_sha256": "6c4a28bf2b453b9e335a26fee94eb19c8b65c68987e9ccced8478c51a81dd390",
+      "substitutions": [
+        [
+          "Path(__file__).resolve().parents[3]",
+          "Path('/Users/shou-fengchang/Desktop/Meta')"
+        ],
+        [
+          "Path(__file__).with_name(\"claude_followup_results.json\")",
+          "Path('/Users/shou-fengchang/Desktop/Meta/docs/reviews/opus-review-20261029/post-fix/claude_followup_results.json')"
+        ]
+      ],
+      "output": "claude_followup_results.json",
+      "status": "completed"
+    },
+    {
+      "probe": "runtime_probe.py",
+      "original_sha256": "a1fdccd4fd824f7064cc773b81f424d9e11574cab536c6d640954f85764bc7eb",
+      "substitutions": [
+        [
+          "Path(__file__).resolve().parents[3]",
+          "Path('/Users/shou-fengchang/Desktop/Meta')"
+        ],
+        [
+          "Path(__file__).with_name(\"runtime_results.json\")",
+          "Path('/Users/shou-fengchang/Desktop/Meta/docs/reviews/opus-review-20261029/post-fix/runtime_results.json')"
+        ]
+      ],
+      "output": "runtime_results.json",
+      "status": "failed",
+      "error": "AssertionError: [{'socket_peer': '127.0.0.1:1234', 'x_real_ip': '198.51.100.1', 'selected_limiter_identity': '127.0.0.1', 'allowed': True}, {'socket_peer': '127.0.0.1:1234', 'x_real_ip': '198.51.100.1', 'selected_limiter_identity': '127.0.0.1', 'allowed': False}, {'socket_peer': '127.0.0.1:1234', 'x_real_ip': '198.51.100.2', 'selected_limiter_identity': '127.0.0.1', 'allowed': False}]"
+    },
+    {
+      "probe": "product_probe.mjs",
+      "original_sha256": "7ecd0664a06548378a0c3e6e322adf34840d7ac26f7a603772cb69ab93b0b1da",
+      "substitutions": [
+        [
+          "const root = path.resolve(evidenceDir, \"../../..\");",
+          "const root = path.resolve(evidenceDir, \"../../../..\");"
+        ]
+      ],
+      "redirected_copy": "product_probe_redirected.mjs",
+      "output": "product_results.json",
+      "status": "completed",
+      "stderr_tail": ""
+    }
+  ]
+}

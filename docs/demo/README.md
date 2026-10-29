@@ -46,15 +46,20 @@ accuracy or correction-quality benchmark. No held-out result is embedded in the 
 
 ## Hosting boundary
 
-The established public player is [receipts-nocap.vercel.app/demo](https://receipts-nocap.vercel.app/demo).
-This commit prepares byte-identical MP4/VTT files in `web/public/demo/`; deployment
-and anonymous acceptance of this **new 165-second export** are separate steps.
-Do not describe the new media as deployed solely because these local copies match.
-Public live model requests remain paused; saved examples remain available.
+The public player is [receipts-nocap.vercel.app/demo](https://receipts-nocap.vercel.app/demo).
+This **165-second export** is deployed there. Production deployment
+`dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` serves public source `04ecc91` with
+byte-identical MP4/VTT copies from `web/public/demo/`. Anonymous desktop and mobile
+checks on October 29 started muted playback with a reported 165-second duration and
+18 optional English cues. The sidecar track is off by default because captions are
+burned in. The browser-fetched MP4 and VTT matched these files' hashes.
+See the [current release record](../public-release-update-2026-10-29.json).
+These are automated playback-start and download checks, not human viewing or
+listening approval. Public live model requests remain paused; saved examples remain available.
 
-The earlier public release passed anonymous playback-start and download checks
-for its **179.937663-second, 29-cue** version. Those observations are historical,
-not acceptance of this replacement. [Earlier release record](../public-release-2026-10-29.json).
+The earlier **179.937663-second, 29-cue** version passed the same kinds of checks
+in its own release. Those observations are historical and are not evidence about
+this export. [Earlier release record](../public-release-2026-10-29.json).
 The current source/download target is the [public repository](https://github.com/changshoufeng0609-cmd/nocap).
 
 ## Reproduce on the recording machine

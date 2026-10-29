@@ -29,6 +29,7 @@ is an ExtractionError, and its responses are cached under keys salted with the e
 """
 from __future__ import annotations
 
+import bisect
 import contextlib
 import hashlib
 import json
@@ -518,13 +519,39 @@ _MASKS = (  # spans whose numbers are not claims; anything inside them is report
 NUMBER_RE = re.compile(
     r"(?<![\w.,/:])(?<![A-Za-z]-)"  # not glued to a word, decimal, list, date, time, or "COVID-19"
     r"(?P<num>(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)"
-    r"(?:(?P<scale>\s?(?:trillion|billion|million|thousand)s?\b|(?:bn|mn|MM|B|M|K)(?![A-Za-z]))"
+    r"(?:(?P<scale>[\s-]?(?i:trillion|billion|million|thousand)s?\b|\s?(?:bln|mln)\b|(?:bn|mn|MM|B|M|K)(?![A-Za-z]))"
     r"|x(?![A-Za-z0-9])"  # multiples such as 1.2x
     r"|(?![A-Za-z0-9_]|[.,]\d|:\d|/\d|-[A-Za-z]))"  # not an ordinal, code, time, date or form id
 )
 _SCALE_WORDS = {"trillion": "trillions", "billion": "billions", "million": "millions", "thousand": "thousands",
                 "bn": "billions", "b": "billions", "mn": "millions", "mm": "millions", "m": "millions",
-                "k": "thousands"}
+                "k": "thousands", "bln": "billions", "mln": "millions"}
+
+# Currency written next to a number. "$", "US$" and "USD" are US dollars; anything else ("C$", "NT$", "€",
+# "EUR", "euros") is another currency, which the USD evidence store never converts (unit "other", so "?").
+_ISO_CURRENCIES = (r"USD|EUR|GBP|JPY|CNY|RMB|CAD|AUD|NZD|HKD|TWD|SGD|CHF|INR|KRW|BRL|MXN|SEK|NOK|DKK|ZAR")
+_CURRENCY = rf"(?:US\s?\$|U\.S\.\s?\$|Rs\.?|[A-Z]{{1,3}}\$|\$|[€£¥₹₩₽₺₪₫₱฿]|(?:{_ISO_CURRENCIES}))\s?"
+_USD_SPELLINGS = frozenset({"$", "US$", "USD", "USD$", "U.S.$"})
+
+
+def _attached_lead(gap: str) -> re.Pattern[str]:
+    """Sign, currency and accounting parenthesis directly before a number. gap: whitespace allowed after a sign."""
+    return re.compile(rf"(?:(?<=[\s(\[{{\"'“‘/:])|^)(?P<open>\()?(?P<sign>[-−–+])?{gap}(?P<currency>{_CURRENCY})?"
+                      rf"(?P<sign2>[-−+])?(?P<open2>\()?$")
+
+
+# In the source only an attached sign counts: "Revenue - $96.2 billion" is a dash, not a minus.
+_SOURCE_LEAD = _attached_lead("")
+_VALUE_LEAD = _attached_lead(r"\s*")
+_CURRENCY_WORDS = re.compile(
+    r"\s?(?:(?:Japanese|Chinese|South\s+Korean|Korean|Indian|Swiss|British|Brazilian|Russian|Turkish|South\s+African"
+    r"|Saudi|Thai|Malaysian|Indonesian|Philippine|Israeli|Swedish|Norwegian|Danish|Polish|Mexican|Argentine)\s+"
+    r"(?:yen|yuan|renminbi|won|rupees?|francs?|pounds?|reais|real|rubles?|lira|rand|riyals?|baht|ringgit|rupiah"
+    r"|pesos?|shekels?|kronor|kroner|krone|zloty)"
+    r"|euros?|yen|yuan|renminbi|pounds?\s+sterling|sterling|pounds?|rupees?|pesos?|reais|francs?|rubles?|roubles?"
+    r"|kronor|krona|kroner|krone|zloty|ringgit|baht|rupiah|riyals?|dirhams?|shekels?|liras?"
+    r"|(?:Canadian|Australian|Hong\s+Kong|New\s+Taiwan|NT|Singapore|New\s+Zealand|Mexican)\s+dollars?"
+    rf"|(?-i:{_ISO_CURRENCIES}))\b", re.I)
 
 
 def scan_numbers(text: str) -> list[dict[str, Any]]:
@@ -534,7 +561,7 @@ def scan_numbers(text: str) -> list[dict[str, Any]]:
     for m in NUMBER_RE.finditer(text):
         ns, ne = m.span("num")
         num = m.group("num")
-        scale_raw = (m.group("scale") or "").strip().lower()
+        scale_raw = (m.group("scale") or "").strip().lstrip("-").lower()
         scale = _SCALE_WORDS.get(scale_raw.rstrip("s") if len(scale_raw) > 2 else scale_raw)
         before, after = text[max(0, ns - 5):ns], text[m.end():m.end() + 24]
         cur = re.search(r"(?:US)?\$\s?\(?$|USD\s?\(?$", before)
@@ -564,11 +591,24 @@ def parse_value_text(value_text: str) -> dict[str, Any]:
         return out
     t = toks[0]
     prefix, suffix = value_text[:t["num_start"]], value_text[t["num_end"]:]
-    minus = re.search(r"[-−–]\s*(?:US)?\$?\s*$", prefix)
-    paren = re.search(r"\(\s*(?:US\$|\$)?\s*$|\$\s*\(\s*$", prefix) and ")" in suffix
+    lead = _VALUE_LEAD.search(prefix)
+    currency = (lead["currency"] if lead and lead["currency"] else None)
+    if currency is None and (word := _CURRENCY_WORDS.search(suffix)):
+        currency = word.group()
+    out["currency"] = _currency_code(currency)
+    minus = bool(lead) and (lead["sign2"] or lead["sign"] or "+") in ("-", "−", "–")
+    paren = bool(lead) and bool(lead["open"] or lead["open2"]) and ")" in suffix and t["kind"] in ("money", "number")
     number = float(t["num"].replace(",", ""))
     out.update(number=-number if (minus or paren) else number, scale=t["scale"], kind=t["kind"])
     return out
+
+
+def _currency_code(text: Optional[str]) -> Optional[str]:
+    """'USD' for US-dollar spellings, another code for any other currency, None when none is written."""
+    if not text:
+        return None
+    compact = re.sub(r"\s+", "", text)
+    return "USD" if compact in _USD_SPELLINGS else compact.upper()
 
 
 def _close(a: float, b: float) -> bool:
@@ -1047,7 +1087,7 @@ def _source_bound_span(passage: str, start: int, end: int, value_start: int,
     The verifier's vocabulary is reused so recovery and interpretation cannot drift;
     no sentence-wide inference or model-written qualifier is trusted here.
     """
-    from receipts.verify import _HEDGES
+    from receipts.verify import _HEDGES, strip_bound_currency_prefix
 
     # A shared quote may contain the same written value twice. The verifier finds
     # value_text in span_text, so exclude earlier occurrences of that same value.
@@ -1057,7 +1097,7 @@ def _source_bound_span(passage: str, start: int, end: int, value_start: int,
     tokens = scan_numbers(value_text)
     if len(tokens) == 1:
         number_start = value_start + tokens[0]["num_start"]
-        prefix = re.sub(r"[\s$€£¥+\-−(]+$", "", passage[:number_start])
+        prefix = strip_bound_currency_prefix(passage[:number_start])
         matches = [match for _, _, rx in _HEDGES if (match := re.search(rx.pattern, prefix, re.I))]
         if matches:
             # Long operators such as "no more than" take precedence over their
@@ -1066,43 +1106,321 @@ def _source_bound_span(passage: str, start: int, end: int, value_start: int,
     return start, end
 
 
+def _number_at(position: int, value_text: str, tokens: list[dict[str, Any]]) -> Optional[dict[str, Any]]:
+    """The source number token holding the one number of value_text placed at position, if any."""
+    proposed = scan_numbers(value_text)
+    if len(proposed) != 1:
+        return None
+    numeric = position + proposed[0]["num_start"]
+    return next((t for t in tokens if t["num_start"] <= numeric < t["num_end"]), None)
+
+
+def _place(passage: str, text: str, value_text: str, tokens: list[dict[str, Any]], read: set[int], cursor: int,
+           prev: Optional[tuple[int, int]]) -> Optional[tuple[int, int]]:
+    """(start of text, start of value_text) for one occurrence of a quote and its value, or None.
+
+    Prefer a value matching a whole source number (not "5%" inside "15%"), then a number no earlier claim
+    reads, then the previous claim's occurrence onward, then passage order. A repeated quote ('up 5%') or
+    a repeated cropped number therefore lands on its next occurrence instead of the first one again.
+    """
+    proposed = scan_numbers(value_text)
+    width = (proposed[0]["num_start"], proposed[0]["num_end"]) if len(proposed) == 1 else None
+    ranked = []
+    for o in _find_all(passage, text):
+        for i in _find_all(text, value_text):
+            p = o + i
+            token = _number_at(p, value_text, tokens)
+            whole = width is not None and token is not None and (token["num_start"], token["num_end"]) == (
+                p + width[0], p + width[1])
+            ranked.append(((not whole, token is not None and token["num_start"] in read, o < cursor,
+                            prev is not None and o == prev[0] and p < prev[1], o, i), (o, p)))
+    return min(ranked)[1] if ranked else None
+
+
+_MAX_LEAD = 16  # longest attached lead, e.g. "(-U.S. $"
+
+
+def _complete_source_value(passage: str, value_start: int, value_text: str,
+                           tokens: list[dict[str, Any]]) -> tuple[int, int]:
+    """Widen a proposed value to its complete source number: digits, scale, sign, currency, parentheses.
+
+    The passage is authoritative: "$96.221" inside "$96.221 million", "5%" inside "−5%" or "15%", and
+    "96.2 billion" after "€" are all read as written. A value is widened, never narrowed.
+    """
+    end = value_start + len(value_text)
+    token = _number_at(value_start, value_text, tokens)
+    if token is None:
+        return value_start, end
+    start, end = min(value_start, token["start"]), max(end, token["end"])
+    lead = _SOURCE_LEAD.search(passage, max(0, token["num_start"] - _MAX_LEAD), token["num_start"])
+    if lead and lead.group():
+        close = re.match(r"\s?\)", passage[end:])
+        # Parentheses negate an enclosed amount or plain figure, "($1.2 billion)" or "(1,234)"; in
+        # "rose $1.2 billion (5%)" they restate a percentage instead.
+        enclosed = bool((lead["open"] or lead["open2"]) and close and token["kind"] in ("money", "number")
+                        and token["ignored"] is None)
+        start = min(start, lead.end("open") if lead["open"] and not enclosed else lead.start())
+        if enclosed:
+            end += close.end()
+    if token["kind"] != "percent" and (word := _CURRENCY_WORDS.match(passage, end)):
+        end = word.end()
+    return start, end
+
+
+_CLAUSE_CUT = re.compile(r",\s*(?:and|but|while|whereas|with|as)\b|;|\n", re.I)
+_CLAUSE_PUNCT = re.compile(r"[,;]")
+# Words that end a metric's modifiers on the left: "reporting net income", "the European revenue".
+_MODIFIER_STOP = frozenset(
+    "of in for with at by to from on as and or but nor while whereas its their our his her the a an this that "
+    "these those which who whose whom reporting reported reports report delivered delivering delivers posted "
+    "posting posts generated generating generates recorded recording records produced producing produces said "
+    "says commented announced announcing had has have having saw sees see was were is are be been being "
+    "although though since after before because unless until if than so yet against despite amid versus vs "
+    "compared meanwhile however still also overall separately additionally finally notably importantly "
+    "similarly likewise instead nonetheless nevertheless moreover furthermore even only just then now will "
+    "would could should can may might must investors analysts".split())
+# When the quote already names its metric, only these can be missing in front of it: names, regions and
+# segments (capitalized), accounting bases and period labels. "although GAAP EPS" keeps "GAAP" only.
+_BASIS_MODIFIERS = frozenset("gaap non-gaap adjusted diluted basic total consolidated net gross operating organic "
+                             "reported quarterly annual fiscal full-year first-quarter second-quarter third-quarter "
+                             "fourth-quarter".split())
+_MAX_MODIFIERS = 6
+# A qualification put in front of its clause: "Excluding stock compensation, net income was ...".
+_FRONTED = re.compile(r"\s*(?:excluding|excl\.|ex-\w+|before|after|on|in|outside|within|across|net\s+of"
+                      r"|apart\s+from|aside\s+from|other\s+than)\b[^,;:]*,\s*", re.I)
+# After a number, only a qualification or a comparison can change how it is read.
+_QUALIFIER_LEAD = re.compile(r"\s*,?\s*(\()?\s*(?=(?:excluding|excl\.|ex-|before|after|from|for|in|on|at"
+                             r"|attributable|available|applicable|net\s+of|non-GAAP|GAAP|adjusted|constant|FX|F/X"
+                             r"|organic(?:ally)?|like-for-like)\b)", re.I)
+# ... and it ends with its clause, before another figure, a sign word the verifier reads across the whole
+# quote ("rose 5% from a year ago, down from 8%"), or an explanation ("as we deepened relationships").
+_TAIL_STOP = re.compile(
+    r"[,;:!?)\]\n—–―]|\.(?=\s|$)|\b(?:and|but|while|whereas|with|or|plus|nor)\b"
+    r"|\b(?:down|declin\w*|decreas\w*|fell|fall\w*|dropp?\w*|lower|shr[ai]nk\w*|shrunk|contract\w*|negative"
+    r"|minus|loss(?:es)?)\b"
+    r"|\b(?:as|because|since|driven|due|reflecting|reflects|led|thanks|primarily|mainly|largely|partly"
+    r"|partially|when|which|who|that|amid|despite|following|compared|versus|vs)\b", re.I)
+# Direction words attached to a number: "down 106%", "fell to $5 billion", "5% lower".
+_DIRECTION_BEFORE = re.compile(
+    r"\b(?:down|declin\w*|decreas\w*|fell|fall\w*|dropp\w*|drop|lower|shr[ai]nk\w*|shrunk|contract\w*|negative"
+    r"|minus|up|rose|ris\w*|increas\w*|grew|grow\w*|higher|jump\w*|climb\w*|surg\w*)(?:\s+(?:by|of|to))?\s+$", re.I)
+_DIRECTION_AFTER = re.compile(r"\s+(?:lower|down|less|smaller|weaker|higher|up|more|greater)\b", re.I)
+
+
+def _clause_window(breaks: list[int], position: int, length: int) -> tuple[int, int]:
+    """(start, end) of the sentence around position: sentence breaks bound every source-context search."""
+    i = bisect.bisect_right(breaks, position)
+    return (breaks[i - 1] if i else 0), (breaks[i] if i < len(breaks) else length)
+
+
+def _modifiers_start(passage: str, phrase_start: int, floor: int, *, strict: bool = False) -> int:
+    """Start of the words directly modifying a metric phrase ("NVIDIA Q2 European net income"), stopping at
+    punctuation, a verb or function word ("reporting net income"), the floor, or after a few words.
+    strict: only names, bases and period labels count (see _BASIS_MODIFIERS)."""
+    start, words = phrase_start, 0
+    while words < _MAX_MODIFIERS:
+        m = re.search(r"([\w&'’.-]+)(\s+)$", passage[floor:start])
+        word = m.group(1).casefold().rstrip(".").removesuffix("'s").removesuffix("’s") if m else ""
+        if not m or word in _MODIFIER_STOP:
+            break
+        if strict and not (m.group(1)[0].isupper() or word in _BASIS_MODIFIERS
+                           or re.fullmatch(r"(?:fy|q[1-4])?'?\d{0,4}", word)):
+            break
+        start, words = floor + m.start(1), words + 1
+    return start
+
+
+def _left_context(passage: str, quote: tuple[int, int], value_start: int, c: ModelClaim, unit: str,
+                  breaks: list[int]) -> Optional[int]:
+    """Where the metric wording and its modifiers begin, when the quote starts after them ("$59.7 billion"
+    or "net income was $59.7 billion" of "European net income was $59.7 billion"); else None.
+
+    Mirrors the verifier's local reading: not before the sentence, a clause break or an earlier figure,
+    except that a change reaches across one level amount to its subject ("Revenue excluding China was
+    $96B, up 106%"). A fronted qualification of the clause comes along ("Excluding stock compensation,
+    net income was ..."); narrative before the metric does not.
+    """
+    from receipts.verify import GROWTH_BASES, _level_metric_phrases, _without_period_phrases
+
+    if c.metric in ("other", "guidance_tolerance") or c.forward_looking:
+        return None
+    growth = c.metric == "revenue_growth" or (unit == "%" and c.metric in GROWTH_BASES)
+    metric = "revenue" if c.metric == "revenue_growth" else c.metric
+    floor = _clause_window(breaks, value_start, len(passage))[0]
+    figures = [floor + t["end"] for t in scan_numbers(_without_period_phrases(passage[floor:value_start]))
+               if t["ignored"] is None]
+    quoted = _level_metric_phrases(metric, passage[quote[0]:quote[1]], c.segment)
+    if quoted:
+        # The quote names its metric, so only that phrase's own modifiers can be missing.
+        phrase = quote[0] + quoted[0][0]
+        if phrase > value_start:
+            return None  # the metric follows the number: "$3.38 per diluted share"
+    else:
+        allowed = 1 if growth else 0
+        window = figures[-1 - allowed] if len(figures) > allowed else floor
+        phrases = _level_metric_phrases(metric, passage[window:value_start], c.segment)
+        if not phrases:
+            return None
+        phrase = window + phrases[-1][0]
+        if _CLAUSE_CUT.search(passage, window + phrases[-1][1], value_start):
+            return None  # "Markets revenue rose 25%, with Fixed Income up 21%": 21% has its own subject
+    left = max([floor, *(end for end in figures if end <= phrase)])
+    cuts = list(_CLAUSE_CUT.finditer(passage, left, phrase))
+    if cuts:
+        left = cuts[-1].end()
+    start = _modifiers_start(passage, phrase, left, strict=bool(quoted))
+    fronted = _FRONTED.match(passage, left, start)
+    if fronted and fronted.end() == start:
+        start = left + len(passage[left:start]) - len(passage[left:start].lstrip())
+    return start if start < quote[0] else None
+
+
+def _qualifier_end(tail: str, lead: re.Match[str], figures: list[dict[str, Any]]) -> Optional[int]:
+    """End of a qualification beginning at lead: its clause, a stop word or the next figure."""
+    stop = _TAIL_STOP.search(tail, lead.end())
+    end = min([len(tail), *([stop.start()] if stop else []), *(t["start"] for t in figures if t["start"] >= lead.end())])
+    if lead.group(1) and stop and stop.group() == ")" and stop.start() == end:
+        end = stop.end()  # close the parenthetical: "(non-GAAP)"
+    end = len(tail[:end].rstrip())
+    return end if tail[lead.end():end].strip() else None
+
+
+def _right_context(passage: str, value_end: int, breaks: list[int]) -> Optional[int]:
+    """Where a qualification or comparison directly after this number ends ('excluding stock compensation',
+    'a year ago', 'year over year excluding China', '(non-GAAP)'), or None when none follows."""
+    from receipts.verify import _GROWTH_COMPARISONS, _INTRODUCES_AMOUNT_RE, _without_period_phrases
+
+    tail = passage[value_end:_clause_window(breaks, value_end, len(passage))[1]]
+    figures = [t for t in scan_numbers(_without_period_phrases(tail)) if t["ignored"] is None]
+    endpoint = re.match(r"\s*,?\s*(?:from|compared\s+(?:with|to)|versus|vs\.?)\s+", tail, re.I)
+    if endpoint and figures and figures[0]["start"] == endpoint.end():
+        return value_end + figures[0]["end"]  # "up to $96.2B from $46.7B": the start decides what "up to" means
+    comparison = re.match(
+        r"\s*,?\s*(?:(?:from|over|than|in|for|during|since|versus|vs\.?|compared\s+(?:with|to))\s+)?(?:the\s+)?"
+        rf"(?:{'|'.join(f'(?:{p.pattern})' for _, p in _GROWTH_COMPARISONS)})", tail, re.I)
+    if comparison and _INTRODUCES_AMOUNT_RE.match(tail, comparison.end()):
+        return None  # ", a year ago it was $30B": the label belongs to the next amount
+    if comparison:
+        lead = _QUALIFIER_LEAD.match(tail, comparison.end())
+        qualified = _qualifier_end(tail, lead, figures) if lead else None
+        return value_end + (qualified or comparison.end())
+    lead = _QUALIFIER_LEAD.match(tail)
+    end = _qualifier_end(tail, lead, figures) if lead else None
+    return None if end is None else value_end + end
+
+
+def _direction_context(passage: str, value: tuple[int, int], breaks: list[int]) -> tuple[Optional[int], Optional[int]]:
+    """A direction word attached to the number: before it ("down 106%") or after it ("5% lower")."""
+    floor, ceiling = _clause_window(breaks, value[0], len(passage))
+    before = _DIRECTION_BEFORE.search(passage, floor, value[0])
+    after = _DIRECTION_AFTER.match(passage, value[1], ceiling)
+    return (before.start() if before else None), (after.end() if after else None)
+
+
+def _probe_claim(c: ModelClaim, normalized: tuple[float, str, str], passage: str,
+                 span: tuple[int, int]) -> types.Claim:
+    value, unit, scale = normalized
+    return types.Claim(id="probe", metric=c.metric, metric_text=c.metric_text, value_text=c.value_text,
+                       value=value, unit=unit, scale=scale, period_text=c.period_text, period_type=c.period_type,
+                       comparison=c.comparison, basis=(c.bases or [None])[0], forward_looking=c.forward_looking,
+                       entity=c.entity, segment=(c.segment or "").strip() or None,
+                       span_text=passage[span[0]:span[1]], span_start=span[0], span_end=span[1])
+
+
+def _restore_source_context(passage: str, span: tuple[int, int], value: tuple[int, int], c: ModelClaim,
+                            normalized: tuple[float, str, str], breaks: list[int]) -> tuple[int, int]:
+    """The shortest span the verifier reads exactly as it reads the number's whole local context.
+
+    A quote can stop short of words that change the claim: "$59.7 billion" of "net income excluding
+    stock compensation was $59.7 billion", or "106%" of "down 106%". The source wins then. When the
+    extra wording changes no reading (verify.span_reading), the model's quote is kept, so the verdict
+    is the same either way.
+    """
+    from receipts.verify import span_reading
+
+    down, lower = _direction_context(passage, value, breaks)
+    starts = {span[0], *(min(span[0], s) for s in (_left_context(passage, span, value[0], c, normalized[1], breaks),
+                                                   down) if s is not None)}
+    ends = {span[1], *(max(span[1], e) for e in (_right_context(passage, value[1], breaks), lower) if e is not None)}
+    count = passage[span[0]:span[1]].count(c.value_text)
+    # A restored span never repeats this value: the verifier must find it once.
+    candidates = [(a, b) for a in sorted(starts) for b in sorted(ends)
+                  if (a, b) == span or passage[a:b].count(c.value_text) <= count]
+    if len(candidates) == 1:
+        return span
+    readings: dict[tuple[int, int], Any] = {}
+
+    def reading(s: tuple[int, int]) -> Any:
+        if s not in readings:
+            readings[s] = span_reading(_probe_claim(c, normalized, passage, s))
+        return readings[s]
+
+    target = reading(max(candidates, key=lambda s: s[1] - s[0]))
+    return next(s for s in sorted(candidates, key=lambda s: (s[1] - s[0], s != span)) if reading(s) == target)
+
+
+def _without_later_repeat(passage: str, span: tuple[int, int], value_end: int, value_text: str,
+                          tokens: list[dict[str, Any]]) -> tuple[int, int]:
+    """End a quote before a later occurrence of the same value, so the verifier finds this value once."""
+    later = passage.find(value_text, value_end, span[1])
+    if later == -1:
+        return span
+    token = _number_at(later, value_text, tokens)
+    cut = min(later, token["start"]) if token else later
+    clause = max((m.start() for m in _CLAUSE_PUNCT.finditer(passage, value_end, cut)), default=cut)
+    return span[0], max(value_end, len(passage[:clause].rstrip()))
+
+
 def locate_claims(claims: list[ModelClaim], passage: str, base: int, warnings: list[str]) -> list[_Located]:
-    """Offsets from code. Each verbatim span_text is searched from the previous claim's span start, so a repeated
-    quote ('up 5%') lands on the next occurrence. A span that is not verbatim falls back to the value_text itself;
-    a value_text that is nowhere in the passage means an invented claim, which is dropped.
-    Adjacent bounds/hedges are recovered from the source around the located number,
-    including for a verbatim but number-only quote. Returned spans remain verbatim."""
+    """Offsets from code. Each verbatim span_text is located in passage order; a repeated quote ('up 5%') or
+    repeated number lands on its next occurrence (see _place). A span that is not verbatim falls back to the
+    value_text itself; a value_text that is nowhere in the passage means an invented claim, which is dropped.
+    The source then decides the number's complete text (sign, currency, scale), any adjacent bound or hedge,
+    and wording a quote omitted that changes the claim's reading. Returned spans remain verbatim."""
+    from receipts.verify import sentence_breaks
+
     out: list[_Located] = []
-    cursor, prev = 0, None  # prev = (local span start, local value end)
+    tokens = scan_numbers(passage)
+    breaks = sentence_breaks(passage)
+    read: set[int] = set()  # source numbers (token num_start) that earlier claims read
+    cursor, prev = 0, None  # prev = (local start of the previous claim's quote, local end of its value)
     for c in claims:
-        quote = c.span_text
-        occ = _find_all(passage, quote)
-        local = next((o for o in occ if o >= cursor), occ[0] if occ else None)
-        span_text = quote
-        if local is None or not c.value_text or c.value_text not in quote:
-            vocc = _find_all(passage, c.value_text)
-            if not vocc:
+        quote, proposed = c.span_text, c.value_text
+        found = (_place(passage, quote, proposed, tokens, read, cursor, prev)
+                 if quote and proposed and proposed in quote else None)
+        width = len(quote)
+        if found is None:
+            found = _place(passage, proposed, proposed, tokens, read, cursor, None) if proposed else None
+            if found is None:
                 why = ("only after whitespace or quote normalization" if quote and _loose(quote) in _loose(passage)
                        else "nowhere in the text")
-                warnings.append(f"dropped a claim the text does not support: {c.value_text!r} ({c.metric}) appears "
+                warnings.append(f"dropped a claim the text does not support: {proposed!r} ({c.metric}) appears "
                                 f"{why}")
                 continue
-            local = next((o for o in vocc if o >= cursor), vocc[0])
-            span_text = c.value_text
-            warnings.append(f"the quote for {c.value_text!r} was not verbatim; anchored on the number at offset "
-                            f"{base + local}")
-        k = -1
-        if prev and prev[0] == local:  # two claims in one span ("between 16.0% and 18.0%"): take the next value
-            k = span_text.find(c.value_text, prev[1] - local)
-        if k == -1:
-            k = span_text.find(c.value_text)
-        value_start = local + k
-        source_start, source_end = _source_bound_span(passage, local, local + len(span_text), value_start, c.value_text)
-        if source_start < local:
+            width = len(proposed)
+            warnings.append(f"the quote for {proposed!r} was not verbatim; anchored on the number at offset "
+                            f"{base + found[0]}")
+        local, proposed_start = found
+        value_start, value_end = _complete_source_value(passage, proposed_start, proposed, tokens)
+        if passage[value_start:value_end] != proposed:
+            warnings.append(f"restored the complete source number {passage[value_start:value_end]!r} "
+                            f"(proposed {proposed!r}) at offset {base + value_start}")
+            c = c.model_copy(update={"value_text": passage[value_start:value_end]})
+        quoted = (min(local, value_start), max(local + width, value_end))
+        span = _source_bound_span(passage, *quoted, value_start, c.value_text)
+        if span[0] < quoted[0]:
             warnings.append(f"restored the source bound or hedge before the number at offset {base + value_start}")
-        out.append(_Located(c, (base + source_start, base + source_end),
-                            (base + value_start, base + value_start + len(c.value_text)), passage[source_start:source_end]))
-        cursor, prev = local, (local, local + k + len(c.value_text))
+        span = _without_later_repeat(passage, span, value_end, c.value_text, tokens)
+        restored = _restore_source_context(passage, span, (value_start, value_end), c, normalize_value(c, []),
+                                           breaks)
+        if restored != span:
+            warnings.append(f"restored source wording around the number at offset {base + value_start} "
+                            f"that changes how it is read")
+        if token := _number_at(value_start, c.value_text, tokens):
+            read.add(token["num_start"])
+        out.append(_Located(c, (base + restored[0], base + restored[1]), (base + value_start, base + value_end),
+                            passage[restored[0]:restored[1]]))
+        cursor, prev = local, (local, proposed_start + len(proposed))
     return out
 
 
@@ -1129,6 +1447,8 @@ def normalize_value(c: ModelClaim, warnings: list[str]) -> tuple[float, str, str
             unit = "other"
         elif p["kind"] == "money" and unit not in ("USD", "USD/share"):
             unit = "USD"
+        if p.get("currency") not in (None, "USD"):
+            unit = "other"  # No implicit FX conversion to the USD evidence store.
     if c.metric in _PER_SHARE and unit == "USD" and scale == "units":
         unit = "USD/share"
     return value, unit, scale

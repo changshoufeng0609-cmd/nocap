@@ -16,7 +16,8 @@
     "test:cost": "node scripts/check-cost-client.mjs",
     "test:coverage": "node scripts/check-coverage-client.mjs",
     "test:private": "node scripts/check-private-client.mjs",
-    "test:ask": "node scripts/check-ask-client.mjs"
+    "test:ask": "node scripts/check-ask-client.mjs",
+    "test:lifecycle": "node scripts/check-request-lifecycle.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

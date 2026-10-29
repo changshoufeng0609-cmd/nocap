@@ -1,0 +1,32 @@
+{
+  "probe": "Check error-body cancellation",
+  "recorded_at": "2026-10-29T17:21:13.038Z",
+  "source_sha256": {
+    "web/lib/api.ts": "ad46743bd514f8ce9f61cbed9bcbdb194abd71c77e720de6896f611c383ad12d",
+    "web/lib/sse.ts": "b5b45d7d727fc8815eaff5150204aa28031745fc9adbce82e871e57be8999525",
+    "web/hooks/use-check.ts": "f40de3f707f3957b1b31f5f18961b8aed483f1583eea7de6e97087e0529f8060"
+  },
+  "scope": {
+    "actual_typescript_client": "web/lib/api.ts::streamCheck",
+    "in_memory_compilation": true,
+    "synthetic_fetch_calls": 1,
+    "network_calls": 0,
+    "model_calls": 0,
+    "sec_calls": 0,
+    "new_provider_spend_usd": 0,
+    "browser_used": false,
+    "heldout_used": false,
+    "credential_files_read": false
+  },
+  "steps": [
+    "Return synthetic HTTP 503 with an unresolved JSON response body.",
+    "Allow streamCheck to start awaiting error-body parsing.",
+    "Abort the request and reject its body with AbortError.",
+    "Wait for streamCheck completion and record callbacks."
+  ],
+  "expected_callbacks_after_abort": 0,
+  "observed_callbacks_after_abort": 0,
+  "events": [],
+  "finding_reproduced": false,
+  "evidence_limit": "This reproduces the client callback race offline. React UI consequences follow from static hook/component inspection; no browser acceptance was run."
+}

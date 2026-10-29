@@ -304,7 +304,8 @@ def test_rate_limit_is_per_ip_and_skips_cached_replays(tmp_path, fake):
     assert post(c, text="Revenue was $2 billion.")[-1][0] == "done"
     err = only_error(post(c, text="Revenue was $3 billion."))
     assert err["retryable"] is True and "Try again in 10 minutes" in err["message"]
-    assert post(c, text="Revenue was $3 billion.", ip="198.51.100.9")[-1][0] == "done"  # another network
+    other = TestClient(c.app, client=("198.51.100.9", 50000))
+    assert post(other, text="Revenue was $3 billion.")[-1][0] == "done"  # another socket peer
     replay = post(c, text="Revenue was $1 billion.")  # a cached replay costs nothing, so it isn't limited
     assert replay[0][1]["cached"] is True and replay[-1][0] == "done"
     assert len(fake.calls) == 3
@@ -435,7 +436,7 @@ def test_health_reports_snapshot_companies_and_facts(tmp_path):
     r = client(tmp_path).get("/api/health")
     assert r.status_code == 200
     assert r.json() == {"ok": True, "data_snapshot": "2026-10-27", "companies": ["EXCO", "ZZZ"], "facts": 4,
-                        "live_requests_paused": False}
+                        "live_requests_paused": False, "draft_cache_policy": "persistent"}
 
 
 def test_health_without_data_is_503(tmp_path):

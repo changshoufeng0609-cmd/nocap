@@ -78,7 +78,7 @@ class IncompleteExtraction(RewriteError):
 # In particular parse_value_text alone is insufficient: it also accepts a number inside prose.
 _NUMBER = r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
 _VALUE = re.compile(
-    rf"(?P<prefix>(?:[-−]\s*)?(?:(?:US)?\$\s*|USD\s+)?\(?\s*)"
+    rf"(?P<prefix>\(?\s*(?:[-−–+]\s*)?(?:(?:US)?\$\s*|USD\s+)?\(?\s*)"
     rf"(?P<number>{_NUMBER})"
     r"(?P<suffix>\s*(?:(?:thousand|million|billion)s?|bn|mn|MM|[BMK])?"
     r"(?:\s*(?:%|percent|per cent|per (?:diluted |basic )?share|/share))?\)?)"

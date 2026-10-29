@@ -172,6 +172,8 @@ def test_health_reports_policy_without_claiming_model_availability(tmp_path, mon
     monkeypatch.setattr(api, "data_info", lambda *_: info)
     app = api.create_app(settings(tmp_path, live_until=UNTIL), store=object(), client_factory=forbidden)
     c = TestClient(app)
-    assert c.get("/api/health").json() == {**info, "live_requests_paused": False}
+    assert c.get("/api/health").json() == {**info, "live_requests_paused": False,
+                                           "draft_cache_policy": "persistent"}
     now[0] = UNTIL
-    assert c.get("/api/health").json() == {**info, "live_requests_paused": True}
+    assert c.get("/api/health").json() == {**info, "live_requests_paused": True,
+                                           "draft_cache_policy": "persistent"}

@@ -25,6 +25,22 @@ Known batch model/GPU usage is **$3.30454604** against the authorized **$10** es
 is counted once; provider metering can lag. Public acceptance added zero provider calls/cost.
 [Allocation and reconciliation](completion-round-2026-10-29.md).
 
+## Newly identified review follow-up
+
+The owner's subsequent Claude Code Opus 5.5/max review and three specialist reviews
+are complete. [Cross-checked findings and reproduction artifacts](reviews/opus-review-20261029/README.md)
+identify five new P1 correctness categories: comparison-period attachment, `US$` bounds,
+source numeric-token normalization, growth qualifications and explicit YoY/QoQ binding.
+A number-only quote limitation was already known. Additional scoped findings cover
+draft preservation, cancellation, resource admission, availability messaging and retention.
+
+**Fixed in private source on 2026-10-30.** All sixteen findings are closed or documented in the
+[fix closure](reviews/opus-review-20261029/fix-closure.md), with dispositions for the follow-up
+review findings and the residual limitations. The guarded development replay equals the prior
+baseline, saved examples are unchanged and no provider call was made. The verifier changed after
+the frozen held-out run, so the historical held-out results describe source `61e1055`, not this
+version; they were not rerun. Public deployment of these fixes is recorded separately.
+
 ## Outside this selected round
 
 | Work | Remaining dependency |

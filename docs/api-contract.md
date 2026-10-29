@@ -2,11 +2,15 @@
 
 The frontend (`web/`) and the Python API (`receipts/api.py`) are built in parallel against this contract. Change it only through the main session.
 
-The hosted contract is deployed in authenticated Preview source `778d5f8`, with the fixed shared Neon primary
+This document describes the current source contract. Runtime review additions, including
+`draft_cache_policy`, have offline regression coverage but are not yet deployed or validated on Production.
+See [current deployment state](deploy.md#current-deployment-state) for the source actually hosted.
+
+Historical contract validation used authenticated Preview source `778d5f8`, with the fixed shared Neon primary
 ledger. Eight actual PostgreSQL checks and hosted missing-ledger/budget-rejection checks across deployments
 passed with no model calls. Paid live Check/Fix/Slide smoke results remain historical; they were not repeated
 on this build. See [spend protection](spend-protection.md) and [deployment state](deploy.md#current-deployment-state).
-The number-coverage fields below are included in this protected Preview. Missing-ledger and across-deployment retention evidence comes from the preceding `885a46f` release.
+The number-coverage fields below were included in that protected Preview. Missing-ledger and across-deployment retention evidence comes from the preceding `885a46f` release.
 
 ## POST /api/check
 **Request body (JSON):**
@@ -28,8 +32,15 @@ The number-coverage fields below are included in this protected Preview. Missing
 - **Status display:** ✓ verified, ✗ wrong, ? unverifiable, ≈ approximate.
 - **Reasons:** `verdict.reason` is one of the ReasonCode values in `receipts/types.py`.
 - **Explanation:** `verdict.explanation` is one plain English sentence the UI can show verbatim.
-- **Cache:** results are cached by `sha256(text + as_of + context)`. A cached response replays the same event sequence, with `cached: true`.
-- **Limits:** text of at most 6,000 characters, a per-instance per-IP rate limit, and durable estimated spend admission. SQLite coordinates processes sharing its file; optional PostgreSQL coordinates instances sharing the primary database and namespace. Vercel requires a shared ledger by default and rejects paid work when it is unavailable; cached examples remain usable. Unknown attempt usage retains conservative charges. These are admission controls, not a provider billing ceiling; see [spend protection](spend-protection.md).
+- **Cache:** enabled recorded caches use `sha256(text + as_of + context)`. A cached response replays the same event sequence, with `cached: true`. Vercel defaults to reading committed snapshot caches only; ordinary drafts create no new extraction/event-cache files. Local persistence remains enabled by default. See [retention policy](deploy.md#draft-cache-policy-and-retention).
+- **Limits:** text of at most 6,000 characters and a 64 KiB JSON body, a per-instance per-IP rate limit, and durable estimated spend admission. The body is read incrementally; the application rejects before retaining a chunk that exceeds the limit and stops consuming the remainder. SQLite coordinates processes sharing its file; optional PostgreSQL coordinates instances sharing the primary database and namespace. Vercel requires a shared ledger by default and rejects paid work when it is unavailable; cached examples remain usable. Unknown attempt usage retains conservative charges. These are admission controls, not a provider billing ceiling; see [spend protection](spend-protection.md).
+
+All six paid routes perform synchronous ledger admission in a worker thread. Cancellation while admission
+is running prevents model dispatch by that route but cannot stop a transaction already committing;
+any resulting pending precharge remains in the ledger rather than being speculatively refunded.
+Rate identity defaults to the socket peer. Vercel uses its validated platform-owned forwarding header;
+other proxies need explicitly trusted socket-peer CIDRs and correctly configured ASGI proxy handling.
+See the [trusted proxy boundary](deploy.md#trusted-proxy-boundary).
 
 ### Number coverage (text drafts)
 
@@ -109,7 +120,8 @@ Wonder proposes replacements for numeric fragments only. Code preserves the comp
 Fixes share the check rate limit and ledger. Before work, a durable reservation covers both extraction passes,
 the bounded Wonder request and additional room for numeric edits. Each SDK attempt must pass the reservation's
 dispatch gate. Unknown usage retains at least the reservation; known costs above it increase the debit.
-Original/revised extraction can reuse Spark caches; Wonder proposals and final fix results are not cached.
+Original/revised extraction follows the same cache policy as Check: Vercel defaults to committed snapshot
+reads only; persistent ordinary extraction caches require opt-in on Vercel. Wonder proposals and final fix results are not cached.
 A user retry can incur new charges. The extraction backend remains selectable; Wonder always uses Meta
 Standard mode and its own Meta client. See [spend protection](spend-protection.md) for estimates and settlement.
 
@@ -135,7 +147,34 @@ complete event schema, request limits, fallback behavior, accounting and retenti
 Returns `[{"id", "title", "description", "text", "as_of", "context"}]`. These drafts are pre-cached, so the demo never waits on the model.
 
 ## GET /api/health
-Returns `{"ok": true, "data_snapshot": "<date>", "companies": ["NVDA", ...], "facts": n}`.
+Returns:
+
+```text
+{
+  ok: boolean,
+  data_snapshot: string | null,
+  companies: string[],
+  facts: number,
+  live_requests_paused: boolean,
+  draft_cache_policy: "snapshot_only" | "persistent" | "disabled"
+}
+```
+
+Unavailable evidence returns HTTP 503 with `ok: false`, `data_snapshot: null`, an empty company list and
+zero facts. Both policy fields remain present. `live_requests_paused: false` means the operator permits
+live requests; it does not guarantee provider credentials, budget, database or GPU availability.
+
+| `draft_cache_policy` | Meaning |
+|---|---|
+| `snapshot_only` | Ordinary draft response caches are neither read nor written; committed snapshot caches remain usable. Default on Vercel. |
+| `persistent` | Ordinary extraction/event-cache persistence is configured. Stored fragments and model output have no application TTL. Default locally. |
+| `disabled` | All response-cache reads/writes are disabled by `RECEIPTS_NO_CACHE`; even saved examples require model admission. |
+
+`RECEIPTS_PERSIST_DRAFT_CACHES=false` selects snapshot-only behavior without changing the local ledger
+location or shared database/namespace. It does not clear existing cache files. Persistence opt-in and
+provider/host retention are explained in the [deployment policy](deploy.md#draft-cache-policy-and-retention).
+Clients should treat missing or unrecognized cache-policy values from older servers as unknown rather
+than promising that the server does not retain drafts.
 
 ## Receipt fields the UI shows (from Fact)
 - `form`, `accession`, `accepted_at` (shown in UTC)
@@ -155,6 +194,8 @@ bounded inputs, SSE terminal records, question binding, provenance and accountin
 Private extraction uses `GET /api/private/status` and `POST /api/private/check`; see
 [Private mode](private-mode.md) for its no-fallback/no-response-cache boundary and operational limits.
 
-Health additionally includes optional `live_requests_paused: boolean`. All six paid workflows respect the
-operator live-window policy documented in [deployment controls](deploy.md#public-release-controls-2026-10-29).
-A paused request is rejected with zero calls/cost before dispatch; cached examples remain available.
+All six paid workflows respect the operator live-window policy documented in
+[deployment controls](deploy.md#public-release-controls-2026-10-29).
+A paused request is rejected with zero calls/cost before rate-limit allowance is consumed, ledger admission
+or provider dispatch. Enabled cached examples remain available. Older servers can omit the health
+policy fields; clients must not infer availability or retention from missing fields.

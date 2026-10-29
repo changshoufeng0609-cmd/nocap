@@ -101,6 +101,8 @@ Fix with receipts requires a Meta `MODEL_API_KEY` for Wonder, including when ext
 
 The integrated October 29 core fixes passed **1,246 full-suite Python tests** and retained the **144 frontend checks**. [J2](docs/j2-review-2026-10-29.md) independently closed both semantic guard findings with 98 targeted tests and eight unchanged before/after probes. Development baselines and all three saved-example counts were preserved. Earlier 905/119 and 1,117-plus-two-targeted checkpoints remain historical. The owner-authorized **held-out evaluation is complete**, with no result-driven tuning. Current release steps are in the [round record](docs/completion-round-2026-10-29.md).
 
+An October 30 [review-fix round](docs/reviews/opus-review-20261029/fix-closure.md) then closed the sixteen findings of an independent October 29 review, including six verification-correctness findings. It passed **1,535 Python tests** and **165 frontend checks**, and its development replay matches the earlier baseline exactly, with no changed verdict among 693 claims. The held-out results below describe frozen source `61e1055`. They were not rerun for the later verifier.
+
 | Held-out measure | Seeded-error test: v0 + basis5 | Wonder trap test |
 |---|---:|---:|
 | Inputs | 97 items | 7 drafts |

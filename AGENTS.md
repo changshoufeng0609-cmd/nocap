@@ -11,7 +11,7 @@ Project instructions for coding agents such as Codex and Muse Code. Claude Code 
 |---|---|
 | Tests | `.venv/bin/python -m pytest -q tests/` (Python 3.12 venv in `.venv`) |
 | CLI | `.venv/bin/python -m receipts check examples/nvda_q2_fy2027.txt [--as-of 2026-08-26T20:00:00Z] [--json]` |
-| API | `.venv/bin/uvicorn receipts.api:app --port 8000` |
+| API | `.venv/bin/uvicorn receipts.api:app --port 8000 --no-proxy-headers` (the app reads the socket peer; see `docs/deploy.md` for trusted proxies) |
 | Web | `cd web && npm run dev -- --port 3100`, which proxies `/api` to port 8000. Mock mode, no backend needed: `npm run dev:mock` |
 | Eval | `.venv/bin/python eval/eval.py --split dev`. **Never run `--split test`**: the held-out split is for headline numbers, and only runs if the user asks. |
 | Snapshot | `.venv/bin/python scripts/build_snapshot.py`. Run it after changing evidence data or verifier code, then commit `data/snapshot/`. |

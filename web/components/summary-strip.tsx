@@ -22,6 +22,10 @@ export function SummaryStrip({ state }: { state: CheckState }) {
   if (streaming && !claims.length) status = "Reading the draft with Muse Spark…";
   else if (streaming) status = `Checking ${claims.length} ${claims.length === 1 ? "claim" : "claims"} against SEC filings… ${resolved} done`;
   else if (phase === "error") status = claims.length ? "Stopped before every claim was checked" : "The check didn't run";
+  else if (phase === "idle" && request)
+    status = claims.length
+      ? "Check interrupted. Run Check again to finish; claims checked so far are shown."
+      : "Check interrupted before any claim was checked. Run Check again.";
   else if (done && !claims.length) status = "No claims extracted";
   else status = `${claims.length} ${claims.length === 1 ? "claim" : "claims"} checked`;
 
