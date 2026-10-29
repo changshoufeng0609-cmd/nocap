@@ -375,6 +375,63 @@ def reading_verdict(claim: Claim, reading: SlideReading, store: EvidenceStore, *
     return verdict
 
 
+def _reconcile_readings(prepared: list[tuple]) -> tuple[list[tuple], dict[str, Any]]:
+    """Deduplicate the same visual label and withhold conflicting interpretations.
+
+    Coincident labels require mutual area coverage, not one box merely containing
+    the other. Equal numbers in different table cells remain separate readings.
+    This audits returned readings only; it cannot count numbers the model omitted.
+    """
+    # Build the graph from every original reading before removing duplicates.
+    # Otherwise removing a middle duplicate can hide a conflicting overlap chain.
+    parents = list(range(len(prepared)))
+
+    def root(index: int) -> int:
+        while parents[index] != index:
+            parents[index] = parents[parents[index]]
+            index = parents[index]
+        return index
+
+    signatures = []
+    for i, (_, _, reading, box, claims) in enumerate(prepared):
+        signatures.append((reading.reading, reading.metric_text, reading.span_text, reading.value_text, tuple(sorted(
+            (c.metric, c.value, c.unit, c.scale, c.period_text.casefold().strip(), c.period_type,
+             c.comparison, c.basis or "", c.forward_looking, c.entity.casefold().strip(),
+             (c.segment or "").casefold().strip()) for c in claims))))
+        for j in range(i):
+            other_box = prepared[j][3]
+            if min(_coverage(box, other_box), _coverage(other_box, box)) >= 0.85:
+                parents[root(i)] = root(j)
+    groups: dict[int, list[int]] = {}
+    for i in range(len(prepared)):
+        groups.setdefault(root(i), []).append(i)
+    kept: dict[int, tuple] = {}
+    conflicts = duplicates = 0
+    for indices in groups.values():
+        distinct: dict[tuple, list[int]] = {}
+        for i in indices:
+            distinct.setdefault(signatures[i], []).append(i)
+        conflicting = len(distinct) > 1
+        for equivalent in distinct.values():
+            i = equivalent[0]
+            region, rbox, reading, box, claims = prepared[i]
+            duplicates += len(equivalent) - 1
+            if conflicting or any(prepared[j][2].uncertain for j in equivalent):
+                reading = reading.model_copy(update={"uncertain": True})
+            conflicts += int(conflicting)
+            kept[i] = (region, rbox, reading, box, claims)
+    final = []
+    next_id = 1
+    for i in sorted(kept):
+        region, rbox, reading, box, claims = kept[i]
+        claims = [c.model_copy(update={"id": f"c{next_id + j}"}) for j, c in enumerate(claims)]
+        next_id += len(claims)
+        final.append((region, rbox, reading, box, claims))
+    return final, {"raw_readings": len(prepared), "unique_readings": len(final),
+                   "duplicates_removed": duplicates, "conflicting_readings": conflicts,
+                   "image_completeness_measured": False}
+
+
 def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[str] = None, as_of: Any = None,
                  stats: Optional[SlideStats] = None, client_factory: Optional[Callable[[], Any]] = None,
                  timeout_s: float = 30, deadline: Optional[float] = None,
@@ -382,7 +439,8 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
     stats = stats if stats is not None else SlideStats()
     started, context = time.monotonic(), (context or "").strip()
     notes = ["Vision can misread labels or omit figures. Confirm the highlighted readings against the image; "
-             "the uploaded image is not filing evidence."]
+             "the uploaded image is not filing evidence.",
+             "Slide-wide numeric completeness is not measured. Unmarked figures have not been checked."]
     try:
         client = (client_factory or (lambda: extract.make_client(timeout=timeout_s, backend=META)))()
         yield "meta", {"models": [SAM_MODEL, SPARK_MODEL], "image": {"width": image.width, "height": image.height},
@@ -444,6 +502,17 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
                 if next_id > 2 * MAX_CLAIMS + 1:
                     raise SlideError("This slide contains too many financial numbers. Try a smaller crop.")
                 prepared.append((region, rbox, reading, box, claims))
+        prepared, reading_audit = _reconcile_readings(prepared)
+        if reading_audit["duplicates_removed"]:
+            notes.append(f"Removed {reading_audit['duplicates_removed']} duplicate reading(s) of the same visual label.")
+        if reading_audit["conflicting_readings"]:
+            notes.append(f"{reading_audit['conflicting_readings']} readings disagree about overlapping labels; "
+                         "they remain unverifiable. Confirm the highlighted labels in a clearer crop.")
+        if reading_audit["raw_readings"] == MAX_CLAIMS:
+            notes.append("The 32-reading limit was reached. Crop dense charts or tables to check any other figures.")
+        empty_regions = sum(not region.claims for region in output.regions)
+        if empty_regions:
+            notes.append(f"{empty_regions} returned region(s) had no financial readings and have not been verified.")
         yield "progress", {"stage": "verifying"}
         counts = {status: 0 for status in STATUSES}
         assigned: dict[int, dict[str, Any]] = {}
@@ -467,8 +536,9 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
         if not prepared:
             notes.append("No legible financial figures were found. Try a clearer crop or paste the text instead.")
         stats.complete = True
-        yield "done", {"counts": counts, "claims": next_id - 1, **_billing(stats),
-                       "latency_s": round(time.monotonic() - started, 2), "warnings": notes}
+        yield "done", {"counts": counts, "claims": sum(counts.values()), **_billing(stats),
+                       "latency_s": round(time.monotonic() - started, 2), "warnings": notes,
+                       "reading_audit": reading_audit}
     except extract.ModelCallRejected:
         yield "error", {"message": "The slide check was stopped by the spending guard. Please try again later.",
                         "retryable": False, **_billing(stats)}
