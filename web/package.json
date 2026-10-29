@@ -14,7 +14,9 @@
     "test:presentation": "node scripts/check-presentation.mjs",
     "test:slide": "node scripts/check-slide-client.mjs",
     "test:cost": "node scripts/check-cost-client.mjs",
-    "test:coverage": "node scripts/check-coverage-client.mjs"
+    "test:coverage": "node scripts/check-coverage-client.mjs",
+    "test:private": "node scripts/check-private-client.mjs",
+    "test:ask": "node scripts/check-ask-client.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

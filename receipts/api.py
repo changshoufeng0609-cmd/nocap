@@ -709,6 +709,14 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             log.error("health check failed error=%s", type(e).__name__)
             return JSONResponse({"ok": False, "data_snapshot": None, "companies": [], "facts": 0}, status_code=503)
 
+    from receipts.ask_api import create_router as create_ask_router
+    from receipts.private import create_private_router
+
+    app.include_router(create_ask_router(settings=settings, get_store=get_store,
+                                        get_client=get_slide_client, limiter=limiter, ledger=ledger))
+    app.include_router(create_private_router(settings=settings, limiter=limiter,
+                                            ledger=ledger, get_store=get_store))
+
     return app
 
 
