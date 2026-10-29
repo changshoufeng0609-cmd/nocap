@@ -22,7 +22,7 @@ export function SiteFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-1.5 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-start sm:justify-between sm:gap-8 sm:px-6">
         <div className="space-y-1.5 sm:shrink-0">
           <p className="font-medium text-foreground/80">Research and fact-checking only. Not investment advice.</p>
-          <Link href="/demo" className="underline underline-offset-4">Watch the three-minute demo</Link>
+          <Link href="/demo" className="underline underline-offset-4">Watch the demo</Link>
         </div>
         <p className="text-pretty sm:text-right">
           Data: SEC EDGAR filings (XBRL financial data and 8-K earnings releases)

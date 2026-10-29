@@ -22,7 +22,7 @@ export default function DemoPage() {
         <figure className="space-y-3">
           <video controls playsInline preload="metadata" aria-label="NoCap product demonstration, 2 minutes 45 seconds" className="aspect-video w-full rounded-lg border border-border bg-black">
             <source src="/demo/receipts-demo.mp4" type="video/mp4" />
-            <track kind="captions" src="/demo/receipts-demo.en.vtt" srcLang="en" label="English" default />
+            <track kind="captions" src="/demo/receipts-demo.en.vtt" srcLang="en" label="English" />
             Your browser does not support embedded video. <a href="/demo/receipts-demo.mp4">Download the MP4</a>.
           </video>
           <figcaption className="text-sm leading-relaxed text-muted-foreground">
