@@ -36,8 +36,11 @@ if str(REPO) not in sys.path:
 from pydantic import ValidationError  # noqa: E402
 
 from receipts import api, extract, stream  # noqa: E402
+from receipts.edgar import Edgar  # noqa: E402
+from receipts.grounding import FilingTexts, normalize_filing_html  # noqa: E402
 from receipts.store import Store  # noqa: E402
 from receipts.types import Fact  # noqa: E402
+from receipts.verify import to_utc  # noqa: E402
 
 DATA = REPO / "data"
 OUT = DATA / "snapshot"
@@ -117,6 +120,32 @@ def read_json(path: Path) -> dict:
         return {}
 
 
+def copy_filing_texts(src: Path, dst: Path, evidence: Store, edgar: Edgar) -> tuple[str, int]:
+    """Bind every packaged quotation source to the filing store and original cached SEC bytes."""
+    texts = FilingTexts(src)
+    entries = texts.entries()
+    h = hashlib.sha256()
+    for entry in entries:
+        row, text = texts.load(entry["id"])
+        company = evidence.resolve_entity(row["ticker"])
+        if company is None or str(company[0]) != str(row["cik"]):
+            raise fail("filing-text company does not match the evidence store")
+        filings = [f for f in evidence.filings(company[0], (row["form"],))
+                   if f["accession"] == row["accession"]]
+        if len(filings) != 1 or filings[0]["url"] != row["url"] or (
+                to_utc(filings[0]["accepted_at"]) != to_utc(row["accepted_at"])):
+            raise fail("filing-text provenance or acceptance time differs from the evidence store")
+        source = edgar.get(row["url"])
+        if hashlib.sha256(source).hexdigest() != row.get("source_sha256") or normalize_filing_html(source) != text:
+            raise fail("filing text does not reproduce its original cached SEC document")
+        dst.mkdir(parents=True, exist_ok=True)
+        (dst / f"{row['sha256']}.txt").write_text(text, encoding="utf-8")
+        h.update(json.dumps(row, sort_keys=True, separators=(",", ":")).encode())
+    if entries:
+        stream.write_json_atomic(dst / "index.json", {"version": 1, "filings": entries})
+    return h.hexdigest() if entries else "", len(entries)
+
+
 def dir_bytes(path: Path) -> int:
     return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
 
@@ -183,7 +212,15 @@ def main(argv=None) -> int:
         copy_sqlite(DATA / "facts.sqlite", build / "facts.sqlite")
         db_digest, rows = sqlite_digest(build / "facts.sqlite")
         pr_digest, pr_facts, dropped = copy_pr_facts(DATA / "pr_facts", build / "pr_facts")
-        fingerprint = hashlib.sha256(f"{db_digest}|{pr_digest}".encode()).hexdigest()[:24]
+        evidence = Store(db_path=build / "facts.sqlite", pr_dir=build / "pr_facts")
+        edgar = Edgar(offline=True, max_live_requests=0)
+        try:
+            text_digest, text_count = copy_filing_texts(DATA / "filing_texts", build / "filing_texts", evidence, edgar)
+        finally:
+            evidence.close()
+            edgar.close()
+        material = f"{db_digest}|{pr_digest}" + (f"|{text_digest}" if text_count else "")
+        fingerprint = hashlib.sha256(material.encode()).hexdigest()[:24]
         previous = read_json(OUT / "manifest.json")
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         built_at = previous.get("built_at") if previous.get("fingerprint") == fingerprint else None
@@ -195,7 +232,7 @@ def main(argv=None) -> int:
             con.close()
         manifest = {"fingerprint": fingerprint, "built_at": built_at or now, "source_built_at": source_built,
                     "companies": companies, "facts": {"sqlite": rows.get("facts", 0), "press_release": pr_facts},
-                    "filings": rows.get("filings", 0)}
+                    "filings": rows.get("filings", 0), "filing_texts": text_count}
         stream.write_json_atomic(build / "manifest.json", manifest)  # the fingerprint the recordings are keyed to
         report = bake_examples(build, OUT, allow_model=not args.no_model)
         size = dir_bytes(build)
