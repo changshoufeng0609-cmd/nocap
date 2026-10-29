@@ -119,6 +119,7 @@ ALIASES: dict[str, list[str]] = {
     "BAC": ["Bank of America", "Bank of America Corporation", "BofA", "BoA", "BankAmerica"],
     "AMD": ["AMD", "Advanced Micro Devices", "Advanced Micro Devices, Inc."],
     "NFLX": ["Netflix", "Netflix, Inc."],
+    "TSLA": ["Tesla", "Tesla, Inc.", "Tesla Motors", "Tesla Motors, Inc."],
 }
 
 _SUFFIXES = {"inc", "incorporated", "corp", "corporation", "co", "company", "ltd", "limited", "plc",

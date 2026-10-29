@@ -39,7 +39,7 @@ from receipts.store import (DB_PATH, FACT_UNIT, METRIC_CONCEPTS, company_aliases
                             replace_company)
 from receipts.types import Fact
 
-DEFAULT_TICKERS = "NVDA,AAPL,MSFT,META,AMZN,GOOGL,JPM,BAC,AMD,NFLX"
+DEFAULT_TICKERS = "NVDA,AAPL,MSFT,META,AMZN,GOOGL,JPM,BAC,AMD,NFLX,TSLA"
 XBRL_FORMS = {"10-K", "10-Q", "10-K/A", "10-Q/A"}
 ANCHOR_FORMS = {"10-K", "10-Q"}
 STORED_FORMS = XBRL_FORMS | {"8-K", "8-K/A"}

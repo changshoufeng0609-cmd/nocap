@@ -1,0 +1,3 @@
+# Optional local MCP server; the hosted API does not need this dependency.
+-r requirements.txt
+mcp==2.3.0
