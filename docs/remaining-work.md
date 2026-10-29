@@ -39,7 +39,8 @@ draft preservation, cancellation, resource admission, availability messaging and
 review findings and the residual limitations. The guarded development replay equals the prior
 baseline, saved examples are unchanged and no provider call was made. The verifier changed after
 the frozen held-out run, so the historical held-out results describe source `61e1055`, not this
-version; they were not rerun. Public deployment of these fixes is recorded separately.
+version; they were not rerun. The fixes are public and deployed: the anonymous Production check passed with
+live requests paused ([release record](public-release-fix-2026-10-30.json)).
 
 ## Outside this selected round
 

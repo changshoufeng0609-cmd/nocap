@@ -48,12 +48,13 @@ accuracy or correction-quality benchmark. No held-out result is embedded in the 
 
 The public player is [receipts-nocap.vercel.app/demo](https://receipts-nocap.vercel.app/demo).
 This **165-second export** is deployed there. Production deployment
-`dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` serves public source `04ecc91` with
+`dpl_DWzZqy43YFywgeQTrW5S9REN9jz3` serves public source `9db6cfc` with
 byte-identical MP4/VTT copies from `web/public/demo/`. Anonymous desktop and mobile
-checks on October 29 started muted playback with a reported 165-second duration and
-18 optional English cues. The sidecar track is off by default because captions are
-burned in. The browser-fetched MP4 and VTT matched these files' hashes.
-See the [current release record](../public-release-update-2026-10-29.json).
+checks on October 30, as on October 29 for the previous deployment, started playback
+with a reported 165-second duration and 18 optional English cues. The sidecar track is
+off by default because captions are burned in. The browser-fetched MP4 and VTT matched
+these files' hashes. See the [current release record](../public-release-fix-2026-10-30.json)
+and the [October 29 record](../public-release-update-2026-10-29.json).
 These are automated playback-start and download checks, not human viewing or
 listening approval. Public live model requests remain paused; saved examples remain available.
 

@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-30",
+  "status": "passed",
+  "scope": "Public release of the October 29 review fixes; anonymous Production acceptance with live model requests paused.",
+  "public_repository": "https://github.com/changshoufeng0609-cmd/nocap",
+  "public_product": "https://receipts-nocap.vercel.app",
+  "public_demo": "https://receipts-nocap.vercel.app/demo",
+  "public_benchmarks": "https://receipts-nocap.vercel.app/benchmarks",
+  "deployed_public_commit": "9db6cfcd058d81c59b87e165caaedaaf8f2f381d",
+  "previous_public_main": "e432f5ddde6ec31e45bec28a1a64d18ca9ee04f6",
+  "source_private_commit": "04e5450a37e9f3f68cf68b90d0efbf6e6f619876",
+  "source_archive_sha256": "7369d0f5ca6a67462cc723ed1650ed7a2b2c0c3fa96a93956c19822bc58b81d2",
+  "export": {
+    "files": 577,
+    "credential_scan": "Known local credential values and token patterns: no undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. Not a guarantee that every unknown credential is detectable.",
+    "checkout_tests": "1,532 passed, 3 skipped (local-data-dependent)",
+    "fresh_clone_quickstart": "7 verified / 2 wrong / 2 unverifiable, 5/5 cached extraction calls, $0"
+  },
+  "deployment": {
+    "id": "dpl_DWzZqy43YFywgeQTrW5S9REN9jz3",
+    "target": "production",
+    "source": "Vercel REST API deployment from the public GitHub commit (repository Git auto-deployments are disabled for this project)",
+    "triggered_by": "Owner-run command in the operator session after explicit approval",
+    "ready": true,
+    "build_seconds_approx": 26.7,
+    "aliases": ["receipts-nocap.vercel.app"],
+    "environment_changes": "none",
+    "previous_production_for_rollback": "dpl_34X9vCXnCGf3SHSYTvs1uQezGKji (public source 04ecc91)"
+  },
+  "health": {
+    "live_requests_paused": true,
+    "draft_cache_policy": "snapshot_only",
+    "companies": 11,
+    "facts": 11554,
+    "data_snapshot": "2026-10-29"
+  },
+  "anonymous_browser": {
+    "harness": "data/eval_runs/public_release_acceptance.py (unchanged; local, gitignored)",
+    "evidence": "data/eval_runs/public-fix-update-20261030/result.json (local, gitignored)",
+    "evidence_sha256": "7997fadc47770c439ff0e57fa2056dcc28750076bff1cdab22ef1554025ab5db",
+    "started_utc": "2026-10-29T18:59:40Z",
+    "finished_utc": "2026-10-29T19:01:04Z",
+    "authentication_supplied": false,
+    "mock_responses": false,
+    "checks_passed": 21,
+    "cached_saved_example_checks": 6,
+    "pause_probes": 2,
+    "layout_states": 22,
+    "saved_examples": {
+      "nvda-ai-story": "7 verified / 2 wrong / 2 unverifiable; 10/10 number coverage",
+      "meta-ai-story": "5 verified / 3 wrong; 8/8 number coverage",
+      "q2-roundup-look-ahead": "6 verified / 3 wrong; 9/9 number coverage"
+    },
+    "media": "Desktop and mobile playback started, 165-second duration and 18 English cues; browser-downloaded MP4 and VTT SHA-256 match 8e8701cc... and 7ddeb84e...",
+    "benchmarks": "50 questions; all 200 model records match the committed JSON on desktop and mobile",
+    "page_errors": 0,
+    "console_errors": 0,
+    "console_warnings": 0,
+    "http_errors": 0,
+    "external_requests": 0,
+    "provider_calls": 0,
+    "new_spend_usd": 0
+  },
+  "deployment_protection": {
+    "production_alias_anonymous_head": 200,
+    "new_generated_deployment_anonymous_head": 302,
+    "previous_generated_deployment_anonymous_head": 302
+  },
+  "operating_policy": {
+    "live_requests_enabled": false,
+    "shared_ledger_configuration_changed": false,
+    "budget_or_namespace_reset": false,
+    "heldout_rerun": false
+  },
+  "fix_evidence": "docs/reviews/opus-review-20261029/fix-closure.md",
+  "limitations": [
+    "Playback-start, metadata and file-hash checks are not full human viewing or listening review.",
+    "The harness verifies saved examples and pause behaviour; it does not exercise live model calls, which remain paused.",
+    "Held-out figures describe frozen source 61e1055 and were not rerun for this version."
+  ]
+}

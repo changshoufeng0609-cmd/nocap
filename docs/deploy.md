@@ -4,14 +4,15 @@
 
 [NoCap](https://receipts-nocap.vercel.app), the [2:45 demo](https://receipts-nocap.vercel.app/demo)
 and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public.
-The [current acceptance record](public-release-update-2026-10-29.json) binds the source, deployment,
-real browser checks, file hashes and the retained harness failures.
+The [current acceptance record](public-release-fix-2026-10-30.json) binds the source, deployment,
+real browser checks and file hashes. The [October 29 record](public-release-update-2026-10-29.json)
+remains for the previous deployment.
 
 | Setting | Current state |
 |---|---|
 | Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
-| Production deployment | `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji`, READY, 44.173-second build |
-| Deployed public source | `04ecc91bf9ee2362471359ba44d026775c82f8b7` |
+| Production deployment | `dpl_DWzZqy43YFywgeQTrW5S9REN9jz3`, READY, about 27-second build; previous `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` kept for rollback |
+| Deployed public source | `9db6cfcd058d81c59b87e165caaedaaf8f2f381d` (review fixes; private `04e5450`) |
 | Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
 | Live access | Paused. Saved examples, recorded demo and benchmark inspection are available. |
@@ -40,15 +41,16 @@ suite passed **1,246 Python tests**, **144 frontend checks**, typecheck and lint
 build passed. Known batch model/GPU usage is **$3.30454604**, subject to delayed provider metering.
 Whole-filing live validation still needs a real SEC contact; formal submission remains unsubmitted.
 
-## Runtime review follow-up (source changes, not yet deployed)
+## Runtime review follow-up (deployed October 30)
 
-The runtime safeguards described below have offline regression coverage in the current source. They
-are not claims about the public deployment recorded above. Check/Fix now stop reading request chunks
+The runtime safeguards below shipped with the October 30 review-fix release. Production `/api/health`
+reports `draft_cache_policy: snapshot_only` with live requests paused; anonymous acceptance replayed the
+saved examples and both pause probes with 0 provider calls. Check/Fix now stop reading request chunks
 at the body limit; all six paid routes offload synchronous ledger admission; paused requests consume
 no per-client rate allowance. Vercel defaults to committed snapshot caches only, with the active
 policy disclosed by `/api/health`. The source also defines an explicit forwarded-IP trust boundary.
 See [draft retention](#draft-cache-policy-and-retention) and [proxy configuration](#trusted-proxy-boundary).
-No deployment, cloud configuration change or historical cache deletion was performed for these fixes.
+The release changed no environment variable or cloud configuration and deleted no historical cache.
 
 ## Historical first public release
 

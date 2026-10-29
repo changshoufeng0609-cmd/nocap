@@ -160,6 +160,15 @@ review fixes; the accepted record for the committed code (`ccac9c8`) is
 
 Each code commit's tree passed the Python suite on its own before the next was added.
 
+## Public release
+
+Owner-approved on October 30. A clean export of private `04e5450` was published as public commit `9db6cfc`.
+The export passed its credential scan, the suite and the fresh-clone quickstart. Production deployment
+`dpl_DWzZqy43YFywgeQTrW5S9REN9jz3` was created from that commit with no environment change and live requests
+paused. Anonymous desktop/mobile acceptance passed 21 checks, with 6 saved-example replays at the expected
+counts and coverage and 2 pause probes. Media and benchmark records matched, with 0 page, console or HTTP
+errors, 0 external requests and **0 provider calls**. See the [release record](../../public-release-fix-2026-10-30.json).
+
 ## Residual limitations
 
 - A qualification separated from its number by more than one figure, or stated in another sentence,

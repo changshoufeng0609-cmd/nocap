@@ -242,8 +242,10 @@ The section above is the transfer state. Status of the nine integration items:
 7. **R11** done in `docs/demo/README.md`; historical entries kept.
 8. **Fix closure and HANDOFF** written; post-fix probes run from redirected copies in
    `docs/reviews/opus-review-20261029/post-fix/`, original evidence untouched.
-9. **Focused commits:** `ad22299`, `772bcc6`, `8285f84`, `06ff213`, `a9bb0ae`, `e7e4f04`, `ccac9c8`.
-   Public update status is recorded separately after its own checks.
+9. **Focused commits:** `ad22299`, `772bcc6`, `8285f84`, `06ff213`, `a9bb0ae`, `e7e4f04`, `ccac9c8`,
+   `04e5450`, pushed to the private origin.
+
+**Public update: published and accepted (owner approved).** The clean export of private `04e5450` is public commit `9db6cfc`. The owner ran the Vercel API command that created Production `dpl_DWzZqy43YFywgeQTrW5S9REN9jz3` from it; this session's permission policy blocks Production deploys. Anonymous acceptance passed 21/21 checks with live requests paused and 0 provider calls. See `docs/public-release-fix-2026-10-30.json`. The rollback target is `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji`.
 
 Boundaries kept: no held-out run, no live-request enablement, no budget/ledger change, no secret
 display, $0 provider/SEC spend.
