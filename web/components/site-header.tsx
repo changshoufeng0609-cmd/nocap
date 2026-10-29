@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function LogoMark({ className }: { className?: string }) {
@@ -26,7 +28,7 @@ export function SiteHeader() {
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <LogoMark className="size-7 shrink-0" />
-            <h1 className="font-serif text-[1.7rem] leading-none font-semibold tracking-[-0.015em]">NoCap</h1>
+            <h1 className="font-serif text-[1.7rem] leading-none font-semibold tracking-[-0.015em]"><Link href="/">NoCap</Link></h1>
           </div>
           <p className="mt-2.5 text-[0.95rem] text-pretty text-muted-foreground">
             Check financial numbers against SEC filings before you publish.
@@ -35,6 +37,7 @@ export function SiteHeader() {
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <p className="hidden text-xs text-muted-foreground sm:block">{BUILT_ON}</p>
+          <Link href="/demo" className="rounded-sm text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Demo</Link>
           <ThemeToggle />
         </div>
       </div>
