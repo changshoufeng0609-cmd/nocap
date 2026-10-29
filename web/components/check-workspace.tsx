@@ -1,13 +1,14 @@
 "use client";
 
 import { FileImageIcon, FileTextIcon, MessageSquareTextIcon, ShieldCheckIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ReceiptsApp } from "@/components/receipts-app";
 import { SlideApp } from "@/components/slide-app";
 import { AskWorkspace } from "@/components/ask-workspace";
 import { PrivateCheck } from "@/components/private-check";
 import { cn } from "@/lib/utils";
+import { fetchHealth } from "@/lib/api";
 
 const MODES = ["draft", "slide", "ask", "private"] as const;
 const LABELS = { draft: "Draft", slide: "Slide", ask: "Ask", private: "Private" };
@@ -15,9 +16,18 @@ const ICONS = { draft: FileTextIcon, slide: FileImageIcon, ask: MessageSquareTex
 
 export function CheckWorkspace() {
   const [mode, setMode] = useState<(typeof MODES)[number]>("draft");
+  const [livePaused, setLivePaused] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchHealth(controller.signal).then((health) => {
+      if (!controller.signal.aborted) setLivePaused(health?.live_requests_paused === true);
+    });
+    return () => controller.abort();
+  }, []);
   return (
     <>
       <div className="mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6">
+        {livePaused ? <p role="status" className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">Live model requests are currently paused. In Draft, choose a built-in example to explore its saved results and SEC receipts. The demo video is also available.</p> : null}
         <div className="max-w-full overflow-x-auto pb-1"><div role="tablist" aria-label="What to check" className="inline-flex min-w-max gap-1 rounded-lg border border-border bg-muted/40 p-1">
           {MODES.map((item) => {
             const Icon = ICONS[item];

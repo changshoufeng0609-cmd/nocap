@@ -156,6 +156,7 @@ export interface Example {
 }
 
 export interface Health {
+  live_requests_paused?: boolean;
   ok: boolean;
   data_snapshot: string;
   companies: string[];

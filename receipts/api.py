@@ -18,6 +18,8 @@ hashes, never draft text, keys or client IPs.
 Environment (all optional): RECEIPTS_DATA_DIR (default data/, or data/snapshot when data/facts.sqlite is absent),
 RECEIPTS_DAILY_BUDGET_USD, RECEIPTS_RATE_LIMIT_CHECKS and RECEIPTS_RATE_LIMIT_WINDOW_S (10 per 600 s),
 RECEIPTS_API_CACHE_DIR, RECEIPTS_SPARK_CACHE_DIR, RECEIPTS_NO_CACHE=1 (measure uncached latency),
+RECEIPTS_LIVE_REQUESTS_ENABLED (when set, only true enables live requests), RECEIPTS_LIVE_UNTIL
+(optional UTC ISO deadline; invalid values pause live requests without changing the spend ledger),
 RECEIPTS_CORS_ORIGINS (comma-separated, for a frontend that calls the API cross-origin). MODEL_API_KEY is read by
 receipts.extract.
 
@@ -111,6 +113,8 @@ class Settings:
     spend_database_url: Optional[str] = field(default=None, repr=False)
     spend_namespace: str = "nocap"
     require_shared_budget: bool = False
+    live_requests_enabled: bool = True
+    live_until: Optional[datetime] = None
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] = os.environ) -> "Settings":
@@ -123,6 +127,18 @@ class Settings:
         spark_cache = (_path(env["RECEIPTS_SPARK_CACHE_DIR"]) if (env.get("RECEIPTS_SPARK_CACHE_DIR") or "").strip()
                        else tmp / "spark" if on_vercel else _extract.CACHE_DIR)
         origins = tuple(o.strip() for o in (env.get("RECEIPTS_CORS_ORIGINS") or "").split(",") if o.strip())
+        live_enabled = ("RECEIPTS_LIVE_REQUESTS_ENABLED" not in env
+                        or env["RECEIPTS_LIVE_REQUESTS_ENABLED"].strip().lower() == "true")
+        live_until = None
+        if "RECEIPTS_LIVE_UNTIL" in env:
+            raw_until = env["RECEIPTS_LIVE_UNTIL"].strip()
+            try:
+                if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|\+00:00)",
+                                    raw_until):
+                    raise ValueError
+                live_until = datetime.fromisoformat(raw_until.replace("Z", "+00:00"))
+            except ValueError:
+                live_enabled = False
         return cls(
             data_dir=data_dir,
             api_cache_dir=api_cache,
@@ -139,6 +155,8 @@ class Settings:
             spend_namespace=(env.get("RECEIPTS_SPEND_NAMESPACE") or "nocap").strip(),
             require_shared_budget=(env.get("RECEIPTS_REQUIRE_SHARED_BUDGET", "1" if on_vercel else "0")
                                    .strip().lower() not in ("0", "false", "no")),
+            live_requests_enabled=live_enabled,
+            live_until=live_until,
         )
 
 
@@ -190,6 +208,47 @@ class UnavailableLedger:
         raise BudgetUnavailable()
 
 
+LIVE_PAUSED_MESSAGE = "Live requests are paused. The cached examples remain available."
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _live_requests_paused(settings: Settings) -> bool:
+    if settings.live_requests_enabled is not True:
+        return True
+    until = settings.live_until
+    if until is None:
+        return False
+    # Direct Settings construction must also fail closed for an invalid/naive deadline.
+    if not isinstance(until, datetime) or until.tzinfo is None or until.utcoffset() != timezone.utc.utcoffset(None):
+        return True
+    return _utc_now() >= until
+
+
+class AccessControlledLedger:
+    """Apply an operator live window without changing the underlying budget or namespace."""
+
+    def __init__(self, ledger: Any, settings: Settings):
+        self._ledger, self._settings = ledger, settings
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._ledger, name)
+
+    def require_live(self) -> None:
+        if _live_requests_paused(self._settings):
+            raise Rejected("live_paused", LIVE_PAUSED_MESSAGE, False)
+
+    def reserve(self, estimate_usd: float) -> Optional[Reservation]:
+        self.require_live()
+        return self._ledger.reserve(estimate_usd)
+
+    def settle(self, token: Reservation, actual_usd: float, *, uncertain: bool = False) -> None:
+        # A pause never prevents accounting for work admitted before it.
+        self._ledger.settle(token, actual_usd, uncertain=uncertain)
+
+
 class OperationBudget:
     """Authorize SDK attempts only within an already persisted request reservation."""
 
@@ -205,6 +264,11 @@ class OperationBudget:
             if (self._closed or self.token is None or not math.isfinite(estimate_usd) or estimate_usd <= 0
                     or self._admitted + estimate_usd > self.reserved_usd + 1e-9):
                 raise _extract.ModelCallRejected()
+            if isinstance(self.ledger, AccessControlledLedger):
+                try:
+                    self.ledger.require_live()
+                except Rejected:
+                    raise _extract.ModelCallRejected(LIVE_PAUSED_MESSAGE) from None
             self._admitted += estimate_usd
             self.started_calls += 1
 
@@ -225,7 +289,7 @@ class OperationBudget:
             stats.model_calls = self.started_calls
 
 
-def _ledger(settings: Settings) -> Any:
+def _spend_ledger(settings: Settings) -> Any:
     try:
         if settings.spend_database_url:
             return PostgresLedger(settings.daily_budget_usd, settings.spend_database_url,
@@ -239,6 +303,13 @@ def _ledger(settings: Settings) -> Any:
     except BudgetUnavailable:
         log.error("budget storage unavailable; live operations disabled")
         return UnavailableLedger()
+
+
+def _ledger(settings: Settings) -> Any:
+    ledger = _spend_ledger(settings)
+    if settings.live_requests_enabled is not True or settings.live_until is not None:
+        return AccessControlledLedger(ledger, settings)
+    return ledger
 
 
 def _reserve(ledger: Any, amount: float) -> Optional[Reservation]:
@@ -559,7 +630,11 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                 return error_response(f"Too many live checks from your network. Try again in {minutes} minute"
                                       f"{'s' if minutes != 1 else ''}, or open one of the examples.", True)
             try:
+                if isinstance(ledger, AccessControlledLedger):
+                    ledger.require_live()
                 client = get_client()
+            except Rejected as r:
+                return error_response(r.message, r.retryable)
             except _extract.ExtractionError:
                 log.error("check %s rejected reason=no_api_key", tag)
                 return error_response(_stream.MSG_NO_MODEL, False)
@@ -703,11 +778,13 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
 
     @app.get("/api/health")
     def health() -> JSONResponse:
+        paused = _live_requests_paused(settings)
         try:
-            return JSONResponse(data_info(settings.data_dir))
+            return JSONResponse({**data_info(settings.data_dir), "live_requests_paused": paused})
         except Exception as e:
             log.error("health check failed error=%s", type(e).__name__)
-            return JSONResponse({"ok": False, "data_snapshot": None, "companies": [], "facts": 0}, status_code=503)
+            return JSONResponse({"ok": False, "data_snapshot": None, "companies": [], "facts": 0,
+                                 "live_requests_paused": paused}, status_code=503)
 
     from receipts.ask_api import create_router as create_ask_router
     from receipts.private import create_private_router
