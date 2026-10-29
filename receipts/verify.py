@@ -407,6 +407,149 @@ def _leftover_words(text: str, phrase: tuple[int, int], company: set[str], quali
     return out
 
 
+_LEVEL_METRIC_ALIASES = {
+    "revenue": r"(?:net\s+)?(?:revenues?|sales)|top[ -]?line",
+    "segment_revenue": r"(?:(?:segment|business)\s+)?(?:revenues?|sales)",
+    "free_cash_flow": r"free\s+cash\s+flows?\s*\(FCF\)",
+    "operating_cash_flow": r"(?:net\s+)?cash\s+(?:flows?\s+from|(?:generated|provided)\s+(?:from|by))"
+                           r"\s+operating\s+activities",
+    "operating_expenses": r"total\s+expenses",
+    "gross_margin": r"gross\s+(?:profit\s+)?margins?",
+    "eps_diluted": r"(?:diluted\s+(?:EPS|earnings)|(?:earnings|earned)?\s*per\s+(?:common\s+)?diluted\s+share)",
+    "eps_basic": r"(?:basic\s+(?:EPS|earnings)|EPS|(?:earnings|net\s+income)\s+per\s+(?:common\s+)?share"
+                 r"|(?:earnings|earned)?\s*per\s+(?:common\s+)?basic\s+share)",
+    "net_income": r"net\s+loss(?:es)?",
+    "operating_income": r"operating\s+loss(?:es)?",
+    "research_and_development": r"(?:research\s+(?:and|&)\s+development|R&D)(?:\s+(?:expenses?|costs?))?",
+    "capital_returned": r"(?:capital|cash)\s+returned(?:\s+to\s+(?:shareholders|stockholders))?",
+    "repurchase_authorization_remaining": r"remaining\s+(?:share\s+)?(?:buyback|repurchase)\s+authorization"
+                                          r"|(?:share\s+)?repurchase\s+authorization\s+remaining",
+    "dividend_per_share": r"dividends?\s+per\s+(?:common\s+)?share",
+    "tax_rate": r"(?:effective\s+)?tax\s+rate",
+}
+
+
+def _level_metric_phrases(metric: str, text: str, segment: Optional[str] = None) -> list[tuple[int, int]]:
+    """Locate the canonical metric's own wording, keeping the longest supported aliases.
+
+    The enum is a proposal, not permission to discard words such as 'excluding
+    stock compensation' or 'from discontinued operations'. Unknown descriptions
+    cannot borrow the company-wide metric merely because the model selected it.
+    """
+    patterns = [rx for base, rx in _BASE_METRIC_WORDS if base == metric]
+    patterns.append(re.compile(rf"\b{re.escape(metric.replace('_', ' '))}\b", re.I))
+    if metric in _LEVEL_METRIC_ALIASES:
+        patterns.append(re.compile(rf"(?<!\w)(?:{_LEVEL_METRIC_ALIASES[metric]})(?!\w)", re.I))
+    # A declared segment name can itself contain a metric word: "Sales and
+    # trading revenue" is one revenue metric, not both sales and revenue. Only
+    # complete occurrences of that segment are masked; its own fact is still
+    # required downstream, and any additional qualifiers remain visible.
+    segment_spans = ([hit.span() for hit in re.finditer(rf"\b{re.escape(segment)}\b", text, re.I)]
+                     if segment else [])
+    matches = [hit.span() for pattern in patterns for hit in pattern.finditer(text)
+               if not any(a <= hit.start() and hit.end() <= b for a, b in segment_spans)]
+    chosen: list[tuple[int, int]] = []
+    for hit in sorted(set(matches), key=lambda hit: hit[1] - hit[0], reverse=True):
+        if not any(hit[0] < b and hit[1] > a for a, b in chosen):
+            chosen.append(hit)
+    return sorted(chosen)
+
+
+def _local_level_description(claim: Claim) -> Optional[str]:
+    """Recover modifiers attached to the metric nearest this claim's own number.
+
+    Stop the left context after a prior figure or sentence, and require no other
+    figure between the named metric and this value. This avoids borrowing a
+    different claim's modifiers in multi-number sentences. Number-only spans
+    cannot recover omitted semantics and still rely on metric_text.
+    """
+    pos = _value_pos(claim)
+    if pos is None:
+        return None
+    before = claim.span_text[:pos]
+    phrases = _level_metric_phrases(claim.metric, before, claim.segment)
+    if not phrases:
+        return None
+    start, end = phrases[-1]
+    if _FIGURE_RE.search(_without_period_phrases(before[end:])):
+        return None  # e.g. revenue rose 24%, or 23% FX-neutral, to $119.8B
+    boundaries = [hit.end() for hit in re.finditer(r"[;.!?]", before[:start])]
+    boundaries += [hit.end() for hit in _FIGURE_RE.finditer(_without_period_phrases(before[:start]))]
+    left = max(boundaries, default=0)
+    description = before[left:]
+    # Bounds and signs constrain the number rather than changing the metric.
+    description = re.sub(r"\s*(?:\$|USD)\s*$", "", description, flags=re.I)
+    description = re.sub(r"\b(?:negative|minus)\s*$", "", description, flags=re.I)
+    for _kind, _inclusive, pattern in _HEDGES:
+        if hit := re.search(pattern.pattern, description, re.I):
+            description = description[:hit.start()]
+            break
+    # A directly trailing qualifier belongs to this number; a new clause does
+    # not ("$59.7B, and European revenue was ..."). Period wording is harmless.
+    tail = claim.span_text[pos + len(claim.value_text):]
+    if re.match(r"^[\s,()]*\b(?:excluding|before|after|from|for|in|attributable|available|applicable)\b", tail, re.I):
+        tail = re.split(r"[;.!?]|\b(?:and|while|whereas|but|with)\b", tail, maxsplit=1, flags=re.I)[0]
+        if not _FIGURE_RE.search(_without_period_phrases(tail)):
+            description += " " + tail
+    return description
+
+
+def _without_period_phrases(text: str) -> str:
+    """Ignore recognized period scaffolding without shifting source offsets."""
+    while phrase := periods.find_period_phrase(text):
+        text = text.replace(phrase, " " * len(phrase), 1)
+    return text
+
+
+def _level_sentence_framing(text: str, phrase: tuple[int, int]) -> str:
+    """Blank reporting syntax, preserving offsets and all metric modifiers.
+
+    Position matters: "with revenue" can introduce a clause; "net income with
+    revenue" is a composite metric and must not gain a blanket 'with' exemption.
+    Likewise 'both' belongs to 'were both', not an arbitrary metric definition.
+    """
+    blank = lambda hit: " " * len(hit.group(0))
+    prefix, suffix = text[:phrase[0]], text[phrase[1]:]
+    prefix = re.sub(r"^[\s,]*(?:with|where|while|whereas|but)\b", blank, prefix, flags=re.I)
+    prefix = re.sub(r"\b(?:now\s+)?(?:report(?:s|ed|ing)?|generat(?:es|ed|ing)|produc(?:es|ed|ing))\b",
+                    blank, prefix, flags=re.I)
+    # Focusing on this one metric ("R&D alone came to ...") does not
+    # redefine it; a retained region/exclusion still goes through the guard.
+    suffix = re.sub(r"^\s+alone\b", blank, suffix, flags=re.I)
+    suffix = re.sub(r"\bheld\s+(?:up|steady)\s+at\b", blank, suffix, flags=re.I)
+    suffix = re.sub(r"\bcompared\s+with\b|\b(?:were|are)\s+both\b", blank, suffix, flags=re.I)
+    suffix = re.sub(r"\b(?:significantly|substantially|slightly)\s+(?:higher|lower)\b", blank, suffix, flags=re.I)
+    suffix = re.sub(r"\b(?:also|reached|totaled|totalled|totaling|totalling|amounted|stood|came|ended|"
+                    r"generated|recorded|earned|improved)\b", blank, suffix, flags=re.I)
+    return prefix + text[phrase[0]:phrase[1]] + suffix
+
+
+def _level_reading(claim: Claim, company: set[str], segment: Optional[str]) -> Optional[Reading]:
+    """Bind a canonical level metric to its description, just as for 'other'.
+
+    Inspect metric_text and its value-bound phrase, not the entire sentence:
+    another claim may carry a different region, basis, or adjustment. A prefix
+    naming a segment is retained in the Reading, never compared with the total.
+    """
+    descriptions = [claim.metric_text or ""]
+    if local := _local_level_description(claim):
+        descriptions.append(local)
+    for index, text in enumerate(descriptions):
+        text = re.sub(r"(?:'s|’s)\b", "", text)
+        text = _without_period_phrases(text)
+        phrases = _level_metric_phrases(claim.metric, text, segment)
+        if len(phrases) != 1 or _TO_COMMON_RE.search(text):
+            return None
+        phrase = phrases[0]
+        segment = segment or _qualifier_before(text, phrase[0], company)
+        checked_text = _level_sentence_framing(text, phrase) if index else text
+        leftover = _leftover_words(checked_text, phrase, company, segment)
+        rest = text[:phrase[0]] + text[phrase[1]:]
+        if leftover or any(char.isalpha() and not char.isascii() for char in rest):
+            return None
+    return Reading(claim.metric, None, segment, _eps_alternatives(claim.metric, claim))
+
+
 def _is_change(claim: Claim) -> bool:
     """The claim is a percent change: its comparison is stated, or change wording sits in metric_text or right
     before the number (after any earlier figure in the span)."""
@@ -452,7 +595,7 @@ def interpret(claim: Claim) -> Optional[Reading]:
             return Reading(m, None, seg)  # more wording than the metric: never the company total ("?")
         return Reading(m, m, seg)
     if m != "other":
-        return Reading(m, None, seg, _eps_alternatives(m, claim))
+        return _level_reading(claim, company, seg)
     mt = claim.metric_text or ""
     if _TO_COMMON_RE.search(mt):
         return None

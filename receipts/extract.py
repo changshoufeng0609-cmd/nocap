@@ -1039,10 +1039,39 @@ class _Located:
     span_text: str
 
 
+def _source_bound_span(passage: str, start: int, end: int, value_start: int,
+                       value_text: str) -> tuple[int, int]:
+    """Keep a number's adjacent bound even when the model omitted it from its quote.
+
+    Only an operator ending immediately before this exact source number qualifies.
+    The verifier's vocabulary is reused so recovery and interpretation cannot drift;
+    no sentence-wide inference or model-written qualifier is trusted here.
+    """
+    from receipts.verify import _HEDGES
+
+    # A shared quote may contain the same written value twice. The verifier finds
+    # value_text in span_text, so exclude earlier occurrences of that same value.
+    earlier = [i for i in _find_all(passage[start:value_start], value_text)]
+    if earlier:
+        start += earlier[-1] + len(value_text)
+    tokens = scan_numbers(value_text)
+    if len(tokens) == 1:
+        number_start = value_start + tokens[0]["num_start"]
+        prefix = re.sub(r"[\s$€£¥+\-−(]+$", "", passage[:number_start])
+        matches = [match for _, _, rx in _HEDGES if (match := re.search(rx.pattern, prefix, re.I))]
+        if matches:
+            # Long operators such as "no more than" take precedence over their
+            # shorter suffix "more than", including when the quote kept only it.
+            start = min(start, min(match.start() for match in matches))
+    return start, end
+
+
 def locate_claims(claims: list[ModelClaim], passage: str, base: int, warnings: list[str]) -> list[_Located]:
     """Offsets from code. Each verbatim span_text is searched from the previous claim's span start, so a repeated
     quote ('up 5%') lands on the next occurrence. A span that is not verbatim falls back to the value_text itself;
-    a value_text that is nowhere in the passage means an invented claim, which is dropped."""
+    a value_text that is nowhere in the passage means an invented claim, which is dropped.
+    Adjacent bounds/hedges are recovered from the source around the located number,
+    including for a verbatim but number-only quote. Returned spans remain verbatim."""
     out: list[_Located] = []
     cursor, prev = 0, None  # prev = (local span start, local value end)
     for c in claims:
@@ -1067,8 +1096,12 @@ def locate_claims(claims: list[ModelClaim], passage: str, base: int, warnings: l
             k = span_text.find(c.value_text, prev[1] - local)
         if k == -1:
             k = span_text.find(c.value_text)
-        out.append(_Located(c, (base + local, base + local + len(span_text)),
-                            (base + local + k, base + local + k + len(c.value_text)), span_text))
+        value_start = local + k
+        source_start, source_end = _source_bound_span(passage, local, local + len(span_text), value_start, c.value_text)
+        if source_start < local:
+            warnings.append(f"restored the source bound or hedge before the number at offset {base + value_start}")
+        out.append(_Located(c, (base + source_start, base + source_end),
+                            (base + value_start, base + value_start + len(c.value_text)), passage[source_start:source_end]))
         cursor, prev = local, (local, local + k + len(c.value_text))
     return out
 
