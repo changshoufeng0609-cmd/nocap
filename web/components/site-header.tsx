@@ -24,7 +24,7 @@ const BUILT_ON = "Built on Meta Muse Spark · SEC EDGAR";
 export function SiteHeader() {
   return (
     <header className="border-b border-border/80">
-      <div className="mx-auto flex w-full max-w-6xl items-start justify-between gap-4 px-4 py-5 sm:px-6 sm:py-7">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-4 px-4 py-5 sm:flex-row sm:px-6 sm:py-7">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             <LogoMark className="size-7 shrink-0" />
@@ -35,11 +35,12 @@ export function SiteHeader() {
           </p>
           <p className="mt-1.5 text-xs text-muted-foreground sm:hidden">{BUILT_ON}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
+        <nav aria-label="Main navigation" className="flex w-full shrink-0 items-center gap-4 sm:w-auto sm:gap-3">
           <p className="hidden text-xs text-muted-foreground sm:block">{BUILT_ON}</p>
           <Link href="/demo" className="rounded-sm text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Demo</Link>
+          <Link href="/benchmarks" className="rounded-sm text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Benchmarks</Link>
           <ThemeToggle />
-        </div>
+        </nav>
       </div>
     </header>
   );
