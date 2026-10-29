@@ -1,18 +1,18 @@
 # NoCap — X drafts
 
-**Unpublished.** Publication is within the owner's approved completion scope; the posting account and final public links remain to be confirmed. Replace placeholders only with verified, publicly accessible URLs. Do not use the authenticated private Preview as a public demo link. No official handle or event hashtag has been verified for this draft; leave them out until confirmed.
+**Unpublished.** Publication is within the owner's approved completion scope; the posting account remains unknown. The repository, public workspace and demo have passed anonymous access checks. Live model requests remain paused; public visitors can use saved examples and watch the recorded walkthrough. No official handle or event hashtag has been verified for this draft; leave them out until confirmed.
 
 ## Main post
 
 ```text
 Meet NoCap, built for the Meta Global AI Developer Hackathon: check earnings drafts against SEC filings, inspect receipts, then recheck numeric fixes. Powered by Muse Spark, Muse Wonder and SAM 3.1.
 
-Demo: [APPROVED_PUBLIC_DEMO_URL]
+Demo: https://receipts-nocap.vercel.app/demo
 ```
 
 ## Optional three-post thread
 
-Use these as replies to the main post. They can also stand alone once the approved demo link is supplied.
+Use these as replies to the main post. They can also stand alone after final link acceptance and account confirmation.
 
 ```text
 1/3 A plausible earnings draft can mix GAAP with adjusted EPS or confuse year-over-year and quarter-over-quarter growth. NoCap extracts claims; code checks filed values, periods and basis. Ambiguity stays ?.
@@ -23,20 +23,20 @@ Use these as replies to the main post. They can also stand alone once the approv
 ```
 
 ```text
-3/3 Follow a draft from flagged number to SEC receipt to rechecked correction, then try a historical cutoff and slide check. The video uses disclosed recorded responses and synthetic narration.
+3/3 Follow a draft from flagged number to SEC receipt to rechecked correction. See historical cutoffs and slide checks in the recorded walkthrough, with disclosed synthetic narration.
 
-Code: [APPROVED_PUBLIC_REPO_URL]
+Code: https://github.com/changshoufeng0609-cmd/nocap
 ```
 
 ## Attachment and release notes — do not paste
 
-- Submission status: the authenticated form has now been inspected; fields are recorded in [completion plan](../completion-plan.md#actual-form-observed). No input maxlength was exposed, so server-side limits remain unconfirmed. No final consent or submission has occurred; these posts remain unpublished drafts.
+- Submission status: the authenticated form is filled with final copy, links and the sole-member roster; the optional X URL is empty. Fields are recorded in [completion plan](../completion-plan.md#actual-form-observed). No final consent or submission has occurred; these posts remain unpublished drafts.
 - After owner review, attach the validated **NoCap** video with the replacement Kokoro narration, or use the audio-free 20-second GIF as a shorter teaser. Assets, validation and [narration sources](../demo/narration-license.md) are in the demo kit; use the current export, not an earlier-branded or earlier-voiced file.
 - Suggested media description: “NoCap checks a seeded NVIDIA earnings draft, opens SEC evidence receipts, rechecks a numeric correction, and shows a historical cutoff and slide check. Edited browser captures with synthetic narration; recorded responses are replayed.”
 - The short GIF does not contain every video scene. If using it, describe only the draft check, receipt, numeric correction and cutoff actually shown; do not imply it includes a slide segment or spoken narration.
 - Keep the captions and replay disclosure with the video. Its branded slide display reuses the original image's recorded response; a separate [October 29 smoke](../demo/live-smoke-2026-10-29.json) later checked the branded bytes. The video remains a replay and the seeded image is not a filing.
-- The main draft and each thread item are below 280 characters with the literal placeholders. Recheck the final composed posts, links and any confirmed tags in X before publication. Do not add unsupported performance, customer, accuracy or time-savings claims.
-- Current public link fields are pending: `[APPROVED_PUBLIC_DEMO_URL]`, `[APPROVED_PUBLIC_REPO_URL]`. Any official mention/hashtag and the posting account need owner confirmation. No post has been sent, scheduled or published.
-- The shared-ledger Preview release (`885a46f`; see deployment status for the latest build) has validated conservative accounting and a fixed shared Neon primary ledger. R1 remediation does not establish a provider billing hard cap; the approved public release still needs final acceptance. No paid live flow was repeated for that release; those historical cloud results predate the NoCap branding refresh.
+- The main draft and each thread item are below 280 literal characters with the current URLs. Recheck the final composed posts, X's link weighting and any confirmed tags before publication. Do not add unsupported performance, customer, accuracy or time-savings claims.
+- Public links are [the demo player](https://receipts-nocap.vercel.app/demo) and [the repository](https://github.com/changshoufeng0609-cmd/nocap); their anonymous access checks passed. Any official mention/hashtag and the posting account need owner confirmation. No post has been sent, scheduled or published.
+- [Public release acceptance](../public-release-2026-10-29.json) passed with saved examples, paused-request responses and zero new model calls. Live requests remain paused. Historical shared-Neon checks remain separate; admission accounting does not establish a provider billing hard cap.
 
 Evidence and limitations: [submission evidence map](evidence-map.md).

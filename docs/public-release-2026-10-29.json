@@ -1,0 +1,286 @@
+{
+  "date": "2026-10-29",
+  "status": "passed",
+  "public_repository": "https://github.com/changshoufeng0609-cmd/nocap",
+  "public_product": "https://receipts-nocap.vercel.app",
+  "public_demo": "https://receipts-nocap.vercel.app/demo",
+  "initial_public_commit": "7856fe65536597b13a96723f54b83b1bc8187df0",
+  "deployed_public_commit": "30133131e48cfccb863c55e8bfd8562d49d73db5",
+  "deployment_id": "dpl_7cezqJ72iLy18RW2GVTY8VMSCnNk",
+  "build_seconds": 47.121,
+  "repository_acceptance": {
+    "anonymous_http_200": true,
+    "initial_commit_has_no_parents": true,
+    "public_mp4_matches_licensed_export": true,
+    "private_development_history_retained": true
+  },
+  "deployment_protection": {
+    "production_domain_public": true,
+    "mode": "prod_deployment_urls_and_all_previews",
+    "generated_deployment_anonymous_head": 302,
+    "previous_preview_anonymous_head": 302
+  },
+  "operating_policy": {
+    "live_requests_enabled": false,
+    "cached_examples_available": true,
+    "shared_ledger_namespace_and_cap_unchanged": true,
+    "paid_judge_window_not_authorized": true
+  },
+  "health": {
+    "ok": true,
+    "data_snapshot": "2026-10-29",
+    "companies": [
+      "AAPL",
+      "AMD",
+      "AMZN",
+      "BAC",
+      "GOOGL",
+      "JPM",
+      "META",
+      "MSFT",
+      "NFLX",
+      "NVDA",
+      "TSLA"
+    ],
+    "facts": 11554,
+    "live_requests_paused": true
+  },
+  "anonymous_browser": {
+    "fresh_contexts": true,
+    "saved_authentication": false,
+    "fabricated_responses": false,
+    "post_redirects_allowed": false,
+    "post_retries_allowed": false,
+    "total_posts": 8,
+    "cached_checks": 6,
+    "pause_probes": 2,
+    "layout_states": 18,
+    "viewports": [
+      [
+        1440,
+        1050
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "horizontal_overflow": false,
+    "checks": [
+      "desktop: anonymous homepage and pause banner; health has 11 companies / 11,554 facts",
+      "desktop: nvda-ai-story completed cached replay, expected counts, 10/10 coverage, no page overflow",
+      "desktop: meta-ai-story completed cached replay, expected counts, 8/8 coverage, no page overflow",
+      "desktop: q2-roundup-look-ahead completed cached replay, expected counts, 9/9 coverage, no page overflow",
+      "check: well-formed uncached request rejected by pause with zero model calls and zero cost",
+      "ask: well-formed uncached request rejected by pause with zero model calls and zero cost",
+      "desktop: anonymous homepage and pause banner; health has 11 companies / 11,554 facts",
+      "desktop: Ask evidence options load and the empty complete-filing list is disclosed; quote search stays disabled",
+      "desktop: real Private status unavailable; no submit; disabled with nonempty input and cleared on unmount",
+      "Public MP4 and English captions downloaded through browser links; both hashes match the final media assets",
+      "desktop: demo plays, duration 179.94 seconds, 29 English caption cues, no page overflow",
+      "mobile: anonymous homepage and pause banner; health has 11 companies / 11,554 facts",
+      "mobile: nvda-ai-story completed cached replay, expected counts, 10/10 coverage, no page overflow",
+      "mobile: meta-ai-story completed cached replay, expected counts, 8/8 coverage, no page overflow",
+      "mobile: q2-roundup-look-ahead completed cached replay, expected counts, 9/9 coverage, no page overflow",
+      "mobile: Ask evidence options load and the empty complete-filing list is disclosed; quote search stays disabled",
+      "mobile: real Private status unavailable; no submit; disabled with nonempty input and cleared on unmount",
+      "mobile: demo plays, duration 179.94 seconds, 29 English caption cues, no page overflow"
+    ],
+    "error_counts": {
+      "blocked_requests": 0,
+      "external_requests": 0,
+      "http_errors": 0,
+      "page_errors": 0,
+      "console_errors": 0,
+      "console_warnings": 0
+    }
+  },
+  "examples": [
+    {
+      "id": "nvda-ai-story",
+      "device": "desktop",
+      "counts": {
+        "verified": 7,
+        "wrong": 2,
+        "unverifiable": 2,
+        "approximate": 0
+      },
+      "coverage": {
+        "version": 1,
+        "candidate_count": 10,
+        "covered_count": 10,
+        "excluded_count": 1,
+        "uncovered": []
+      }
+    },
+    {
+      "id": "meta-ai-story",
+      "device": "desktop",
+      "counts": {
+        "verified": 5,
+        "wrong": 3,
+        "unverifiable": 0,
+        "approximate": 0
+      },
+      "coverage": {
+        "version": 1,
+        "candidate_count": 8,
+        "covered_count": 8,
+        "excluded_count": 1,
+        "uncovered": []
+      }
+    },
+    {
+      "id": "q2-roundup-look-ahead",
+      "device": "desktop",
+      "counts": {
+        "verified": 6,
+        "wrong": 3,
+        "unverifiable": 0,
+        "approximate": 0
+      },
+      "coverage": {
+        "version": 1,
+        "candidate_count": 9,
+        "covered_count": 9,
+        "excluded_count": 2,
+        "uncovered": []
+      }
+    },
+    {
+      "id": "nvda-ai-story",
+      "device": "mobile",
+      "counts": {
+        "verified": 7,
+        "wrong": 2,
+        "unverifiable": 2,
+        "approximate": 0
+      },
+      "coverage": {
+        "version": 1,
+        "candidate_count": 10,
+        "covered_count": 10,
+        "excluded_count": 1,
+        "uncovered": []
+      }
+    },
+    {
+      "id": "meta-ai-story",
+      "device": "mobile",
+      "counts": {
+        "verified": 5,
+        "wrong": 3,
+        "unverifiable": 0,
+        "approximate": 0
+      },
+      "coverage": {
+        "version": 1,
+        "candidate_count": 8,
+        "covered_count": 8,
+        "excluded_count": 1,
+        "uncovered": []
+      }
+    },
+    {
+      "id": "q2-roundup-look-ahead",
+      "device": "mobile",
+      "counts": {
+        "verified": 6,
+        "wrong": 3,
+        "unverifiable": 0,
+        "approximate": 0
+      },
+      "coverage": {
+        "version": 1,
+        "candidate_count": 9,
+        "covered_count": 9,
+        "excluded_count": 2,
+        "uncovered": []
+      }
+    }
+  ],
+  "private_status": {
+    "available": false,
+    "backend": "modal",
+    "model": "muse-glimmer",
+    "message": "Private mode is unavailable until the operator configures Modal Glimmer.",
+    "offline": false,
+    "response_cache": false
+  },
+  "video": {
+    "desktop_playback": {
+      "duration": 179.937663,
+      "currentTime": 1.009763,
+      "paused": false,
+      "readyState": 4,
+      "tracks": [
+        {
+          "language": "en",
+          "label": "English",
+          "mode": "showing",
+          "cues": 29
+        }
+      ]
+    },
+    "mobile_playback": {
+      "duration": 179.937663,
+      "currentTime": 1.021631,
+      "paused": false,
+      "readyState": 4,
+      "tracks": [
+        {
+          "language": "en",
+          "label": "English",
+          "mode": "showing",
+          "cues": 29
+        }
+      ]
+    },
+    "downloads": [
+      {
+        "name": "receipts-demo.mp4",
+        "bytes": 5295052,
+        "sha256": "a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602"
+      },
+      {
+        "name": "receipts-demo.en.vtt",
+        "bytes": 3437,
+        "sha256": "42cd50967f931a1b7989be326484a3b1bf4deb38c07e9e6e1895100f09d66eed"
+      }
+    ],
+    "scope": "Automatic playback start and media metadata/caption checks, not a full human listening review. Full local media decode is documented separately."
+  },
+  "new_paid_provider_calls": 0,
+  "new_paid_provider_spend_usd": 0,
+  "known_completion_batch_usage_usd": 0.96663691,
+  "corrections": [
+    {
+      "deployment": "dpl_C5sUWZbBUnHmgbNiPEfKJSyCT2mQ",
+      "failure": "Initial production API import failed because the thin deployment dependency manifest omitted the filing parser. Anonymous acceptance stopped at health before any POST.",
+      "fix": "Declared beautifulsoup4, lxml and httpx in pyproject.toml. A fresh environment using only that manifest passed five read-only ASGI routes, HTML normalization and pip check with model creation forbidden."
+    },
+    {
+      "failure": "Second acceptance run stopped after its five successful POST responses because an alert locator also matched the Next.js route announcer.",
+      "fix": "Scoped the locator and resumed from SHA-bound prior evidence. Only three remaining mobile cached POSTs were sent; the prior probe requests were not repeated."
+    }
+  ],
+  "local_raw_evidence": {
+    "result": "data/eval_runs/public_release_acceptance_R3/result.json",
+    "sha256": "39d953d29827df0078843fff53fbc7c037cf68e7e920b939b22ff5c6c7033045",
+    "prior": {
+      "directory": "data/eval_runs/public_release_acceptance_R2",
+      "result_sha256": "8bd4d863b6bfd8ebdfbeb22aa01256d794a5ecf45b5b484d54f35f2c2fc1f598",
+      "status": "failed",
+      "resume_reason": "Harness alert selector also matched the Next.js route announcer after all five desktop POST responses had passed"
+    },
+    "note": "Raw browser traces/screenshots remain local; this file is the public summary."
+  },
+  "limitations": [
+    "No new paid model flow was run in this public deployment acceptance.",
+    "Whole-filing live acquisition requires a valid declared SEC contact.",
+    "Private live HTTP/browser acceptance remains separate from the prior bounded Modal pipeline smoke.",
+    "Human participant sessions and independent human gold review remain unperformed.",
+    "Held-out test split has not been run.",
+    "Submission form is prepared; final material-use consent and actual submission remain pending."
+  ]
+}

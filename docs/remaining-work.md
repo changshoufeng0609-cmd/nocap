@@ -29,9 +29,11 @@ only after their actual access checks or confirmation; drafts and implemented in
   The original 13-item benchmark is unchanged. No test split was run.
 - Official Vercel MCP team authorization completed; read-only team listing returned the intended team.
   Modal CLI authentication and a two-claim Glimmer pipeline smoke completed; this does not establish general model quality.
-- The actual authenticated submission form was inspected and its fields recorded in [completion plan](completion-plan.md#actual-form-observed).
-  No submission or consent acceptance has been made.
-- Submission copy, user-study kit, the 179.839-second demo, 29 subtitle cues and a 20-second GIF exist.
+- The authenticated submission form is filled with project copy, final public links and the sole-contributor roster;
+  the optional X URL is empty. No submission or consent acceptance has been made. See [completion plan](completion-plan.md#actual-form-observed).
+- [Public source](https://github.com/changshoufeng0609-cmd/nocap) was verified without authentication: initial commit `7856fe65536597b13a96723f54b83b1bc8187df0` has no parent. Original development history stays private. The public MP4's bytes match the licensed Kokoro export.
+- [Production workspace](https://receipts-nocap.vercel.app) and [demo player](https://receipts-nocap.vercel.app/demo) passed anonymous desktop/mobile acceptance: all three saved examples on each viewport, two uncached Check/Ask pause responses, expected unavailable quote/Private states, 29 video captions and matching MP4/VTT browser downloads. Live model requests remain paused; acceptance added zero model calls and zero provider cost. [Release evidence](public-release-2026-10-29.json).
+- Submission copy, user-study kit, the 179.937663-second demo, 29 subtitle cues and a 20-second GIF exist.
   The current feature UI passed 144 frontend checks, typecheck, lint and production build; the latest
   integrated Python suite passed 1,117 tests plus two independent follow-up regressions. Later release changes and live acceptance belong in the Hand-back log.
 
@@ -41,15 +43,12 @@ only after their actual access checks or confirmation; drafts and implemented in
 |---|---|---|
 | Whole-filing live validation | Acquire eligible complete filings through `receipts.edgar`, validate snapshot inclusion and run a bounded quote smoke. | The configured SEC contact is a placeholder; a real declared contact is required. Do not claim a measured million-token request. |
 | Modal / private live check | Bounded pipeline smoke and app-scoped usage audit complete; live HTTP/browser acceptance remains optional follow-up. | All four apps stopped, zero running tasks. $0.70780581 observed app-scoped usage; see [evidence](private-live-validation-2026-10-29.json). |
-| Integrated feature release | Finish combined regressions/browser acceptance, update the snapshot, record the resulting deployment and public-access checks. | Specialist tests and frontend build passed; see the current Hand-back log for final release results. |
-| Public repository | Complete final contents review and visibility change, then verify signed-out access. | Original development repo stays private; prepare a clean public main branch containing licensed replacement media, then verify signed-out access. |
-| Demo video | Finish owner editorial review and upload/publication, then verify signed-out playback/captions. | Kokoro narration replacement and media validation are complete; signed-out public playback is pending. |
-| Judge access to product | Complete the selected access method and test it without the owner's authenticated session. | Existing Preview requires Vercel Authentication. Availability and spending arrangements must match the eventual judge window. |
-| Final submission | Fill the observed form with final links, team/profile details and reviewed copy; resolve the final consent and retain confirmation. | Form fields are known; no submission yet. No HTML maxlength was exposed, which does not prove no server-side limits. |
+| Demo editorial review | Obtain the owner's final review of the video and captions. | Public desktop/mobile playback, caption behavior and MP4/VTT downloads passed. Technical checks do not imply human listening or editorial approval. |
+| Final submission | Resolve the final material-use consent, submit the prepared form when authorized and retain confirmation. | The form is filled with final links, reviewed copy and SHOU-FENG CHANG (`Robert_Chang`) only; consent remains unchecked and no submission has occurred. |
 | Real user sessions | Obtain participant contacts, run 2–3 prepared sessions and record permissioned feedback. | **0 actual sessions**; no invented users, findings or time savings. |
 | Human gold review | Complete the [offline 27-record review packet](gold-review.html) and export the named review with decisions/comments and human declaration. | A human reviewer is still needed; the review UI and agent/code reviews do not satisfy human adjudication. |
 | Held-out evaluation | Run only following an explicit user instruction covering the test split. | Intentionally unrun; “complete remaining work” does not override the earlier test prohibition. |
-| Judge-period operation | Confirm required availability window, actual provider balances and an operating budget. | Shared admission is implemented; it is not a provider invoice ceiling or evidence of remaining credits. |
+| Judge-period operation | Confirm required availability window, actual provider balances and an operating budget. | Live requests are initially paused; saved examples and the video are the intended public experience. The fixed shared allowance remains intact. Known batch usage is $0.96663691; public checks add $0 provider usage. Admission is not a provider invoice ceiling or evidence of remaining credits. |
 | X / Most Viral | Confirm posting identity, official tags and final links, then record any actual publication. | Drafts only; account and final details are still needed. |
 
 The owner confirmed SHOU-FENG CHANG (`Robert_Chang`) is the sole contributor. The final checkbox grants Meta and Cerebral Valley rights to use and

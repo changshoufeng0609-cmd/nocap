@@ -13,7 +13,7 @@ Both assets are edited sequences of actual browser screenshots, not a continuous
 
 ## Public player
 
-The web app includes `/demo`, with a byte-identical copy of the current MP4, 29 English WebVTT captions, visible synthetic-narration/replay disclosures and links back to the workspace. Media paths are `/demo/receipts-demo.mp4` and `/demo/receipts-demo.en.vtt`. Deployment/public-access status is tracked separately; adding the route does not by itself publish it.
+The public player is [receipts-nocap.vercel.app/demo](https://receipts-nocap.vercel.app/demo), with a byte-identical copy of the current MP4, 29 English WebVTT captions, visible synthetic-narration/replay disclosures and links back to the workspace. Media paths are `/demo/receipts-demo.mp4` and `/demo/receipts-demo.en.vtt`. Anonymous desktop/mobile checks confirmed playback started, reported duration was 179.937663 seconds and 29 caption cues loaded; actual browser downloads matched the final MP4/VTT hashes. This does not claim a full-duration viewing or human listening review. The [public GitHub video download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4) also passed anonymous HTTP and exact hash verification. [Public release evidence](../public-release-2026-10-29.json).
 
 ## Recording status
 
@@ -32,7 +32,7 @@ The text kit and reviewable media files are prepared. Frame review, full media d
 
 The earlier local MP4 used macOS Samantha. Section 2F of Apple's [macOS Tahoe 26 license](https://images.apple.com/legal/sla/docs/macOSTahoe.pdf) limits System Voices to “personal, non-commercial use” and expressly excludes other publication or redistribution in public-sharing contexts. That audio was replaced with local **Kokoro-82M v1.0 / `af_heart`** before public distribution. Its official model/voice source declares Apache-2.0; the kokoro-onnx runtime uses MIT. The [narration provenance](narration-license.md) records sources, versions, asset hashes and reproduction steps. The current on-screen attribution, manifest and player copy all identify the replacement. The GIF has no voice audio.
 
-The release plan keeps the original development repository private and exports a new clean public history, excluding the older voiced exports. The new player copy matches the validated export. No public media release is claimed until its signed-out access check is recorded.
+The [public repository](https://github.com/changshoufeng0609-cmd/nocap) begins with clean root commit `7856fe65536597b13a96723f54b83b1bc8187df0`, excluding the older voiced exports; the original incremental development history remains private. Anonymous HTTP on October 29 confirmed the public licensing record and downloaded the current MP4: **5,295,052 bytes**, SHA-256 `a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602`. Subsequent Production playback/caption and browser-download checks passed independently; these technical checks do not imply human editorial approval.
 
 ## What the demo may claim
 

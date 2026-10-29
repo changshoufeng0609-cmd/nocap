@@ -1,9 +1,60 @@
 # Deploy and run NoCap (updated 2026-10-29)
 
+## Current deployment state
+
+The owner authorized the integrated public release. The [public source repository](https://github.com/changshoufeng0609-cmd/nocap)
+and [licensed demo download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4)
+were verified through anonymous HTTP. Production URLs are [NoCap](https://receipts-nocap.vercel.app)
+and [the demo player](https://receipts-nocap.vercel.app/demo). **Production anonymous desktop/mobile acceptance passed**
+on deployment `dpl_7cezqJ72iLy18RW2GVTY8VMSCnNk`, source `30133131e48cfccb863c55e8bfd8562d49d73db5`.
+Live model requests remain paused; visitors can inspect built-in saved examples and the captioned demo.
+The [public release record](public-release-2026-10-29.json) summarizes the evidence and scope.
+
+The repair explicitly includes `beautifulsoup4`, `lxml` and `httpx` in `pyproject.toml`. A fresh environment
+containing only those declared API dependencies passed `/api/health`, `/api/examples`, `/api/ask/options`,
+`/api/grounding/filings` and `/api/private/status` (all 200), an `lxml` HTML-parser check and `pip check`.
+Model-client creation was forbidden during that validation; new provider usage was $0. The repaired
+deployment subsequently passed anonymous browser/API acceptance.
+
+| Setting | Current release state |
+|---|---|
+| Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects` |
+| Production domain | `https://receipts-nocap.vercel.app`; `/demo` is the video player |
+| Production deployment | `dpl_7cezqJ72iLy18RW2GVTY8VMSCnNk`, 47.1-second build, source `30133131e48cfccb863c55e8bfd8562d49d73db5`; anonymous acceptance passed |
+| Deployment Protection | Standard Vercel Authentication: `prod_deployment_urls_and_all_previews`; generated deployment URL `ax7czigrj` and the older Preview `7mo0cmo4y` returned 302. The Production domain is anonymously accessible. |
+| Live access | Initially paused. Saved examples and the video are the intended public experience pending the operating window; pausing does not reset the fixed shared ledger namespace or allowance. |
+| Shared admission | Existing free Neon primary, namespace `nocap`, $1 per UTC admission day; conservative admission accounting, not a provider billing ceiling |
+| Vercel MCP | Team authorization completed; read-only listing returned the intended team |
+| Public source | Initial root commit `7856fe65536597b13a96723f54b83b1bc8187df0`, anonymously readable; original incremental history remains private |
+
+Anonymous acceptance completed across R2 and its R3 continuation: R2 sent three desktop saved-example
+checks and two uncached Check/Ask pause probes; R3 reused that evidence and sent only the three mobile
+saved-example checks. All six replays returned expected verdicts and linked coverage **10/10, 8/8, 9/9**.
+Both pause responses reported zero model calls and zero cost. Ask options loaded, the empty whole-filing
+list kept quote search disabled, and unavailable Private mode stayed disabled and cleared input on unmount.
+Desktop/mobile video playback started successfully; the player reported **179.937663 seconds** and loaded
+**29 English caption cues**. Actual browser MP4/VTT downloads matched the committed hashes. Playback was
+not observed for the full video duration, and this was not a human listening review. These are acceptance
+observations, not independent model-quality tests. No new paid inference was requested.
+
+Local pre-release validation passed 1,117 full-suite Python tests plus two later independent regressions,
+144 frontend checks, typecheck, lint and a clean production build. Known batch model/GPU usage remains
+**$0.96663691**; public-source and Production acceptance add **0 provider calls / $0 provider usage**.
+See [completion status](completion-plan.md) for unresolved external work.
+
+The first Production attempt, `dpl_C5sUWZbBUnHmgbNiPEfKJSyCT2mQ`, built in 37.6 seconds but returned 500
+on anonymous health because the API runtime lacked `beautifulsoup4`. Its acceptance stopped before any
+POST. Declaring `beautifulsoup4`, `lxml` and `httpx` explicitly fixed the thin API environment; that failure
+is historical and does not describe the current Production deployment.
+
+The release used Vercel MCP. The installed CLI is 65.5.0; the session reports 65.7.0 available. Before future CLI work, upgrading with `npm i -g vercel@latest` is strongly recommended for compatibility. No global upgrade was performed for this release.
+
+## Historical protected Preview baseline
+
 One Vercel project serves the Next.js app in `web/` and the FastAPI backend under `/api`, using
 [Vercel Services](https://vercel.com/docs/services). The Next.js and FastAPI services have completed a real Vercel
-Preview build; the current build completed in about 33 seconds. Only an authenticated **private preview** is authorized; public production deployment,
-promotion, and making the repository public require separate user approval.
+Preview build; that build completed in about 33 seconds. At this historical checkpoint only an authenticated
+private Preview was authorized. The broader public-release authorization and current status are recorded above.
 
 **Shared spend protection is deployed and its hosted API checks passed.** The current authenticated Preview
 runs `778d5f8`, with number-coverage reporting, conservative per-attempt accounting and the approved free Neon `nocap-spend` database.
@@ -21,7 +72,7 @@ The deployed number-coverage source passed **905 Python tests**, **119 frontend 
 the held-out split was not run. The preceding shared-ledger release separately passed **8/8 actual PostgreSQL checks**; hosted budget guards
 were rechecked on this release with **0 provider calls / $0 new model spend**. These results have distinct evidence records.
 
-## Current deployment state
+## Historical Preview configuration
 
 | Setting | Current value |
 |---|---|
@@ -39,7 +90,7 @@ were rechecked on this release with **0 provider calls / $0 new model spend**. T
 
 Private preview: [Open NoCap with Vercel Authentication](https://receipts-nocap-7mo0cmo4y-changshoufeng0609-cmds-projects.vercel.app).
 
-## Number-coverage hosted validation (current source `778d5f8`)
+## Number-coverage hosted validation (historical source `778d5f8`)
 
 The owner approved this protected Preview on 2026-10-29. Deployment metadata confirms source `778d5f8`,
 `target: null` (Preview), **READY**, and **All Deployments** authentication. Both services built successfully
@@ -152,7 +203,7 @@ deployments to use Preview.
 | Piece | File | What it does |
 |---|---|---|
 | Services and routing | `vercel.json` | `web` service: `web/` (Next.js). `api` service: the repo root `.`, with entrypoint `receipts.api:app`. `/api/*` goes to `api`; everything else goes to `web`. |
-| Python dependencies | `pyproject.toml` | Runtime dependencies include fastapi, openai, pydantic, python-dotenv, Pillow for slide decoding, and `psycopg[binary]` for the optional shared ledger. In the repo root this takes precedence over `requirements.txt`, which remains the local dev and test environment. |
+| Python dependencies | `pyproject.toml` | Runtime dependencies include fastapi, openai, pydantic, python-dotenv, Pillow for slide decoding, beautifulsoup4/lxml for filing text, httpx for HTTP requests, and `psycopg[binary]` for the optional shared ledger. In the repo root this takes precedence over `requirements.txt`, which remains the local dev and test environment. The production repair adds the filing parser packages and declares httpx explicitly. |
 | Python version | `.python-version` | `3.12`, the same as `.venv`. |
 | Function limits | `vercel.json` → `services.api.functions["receipts/api.py"]` | `maxDuration: 300`. The API's own overall deadline is 100 s for a check, fix, or slide request. `excludeFiles` keeps `web/`, tests and tooling out of the Python bundle. |
 | Upload filter | `.vercelignore` | `vercel deploy` from this machine uploads no `.env`, no `.venv`, and nothing under `data/` except `data/snapshot/`. A Git deploy sees only committed files. |
@@ -378,8 +429,8 @@ its claim/verdict stream and ends with `done` or `error`.
 - **Validation has a defined scope.** Actual PostgreSQL contention/settlement checks, hosted shared-ledger
   guards and browser functional/visual acceptance passed on `885a46f`; coverage replay and budget rejection
   passed on `778d5f8`. Operator reservations were settled at zero, with no pending reservation at final readback.
-  Database failover and mid-commit network loss were not fault-injected. Public access remains separately
-  unauthorized, and provider-side hard limits have not been independently confirmed.
+  Database failover and mid-commit network loss were not fault-injected. Public release is authorized, with
+  current runtime/browser acceptance tracked above; provider-side hard limits have not been independently confirmed.
 - **Estimates are not invoices or billing ceilings.** Configured token prices, request-size allowances and
   output limits inform admission; they are not measured upper bounds for every provider/tokenizer or self-hosted
   GPU charge. Unknown usage may consume more allowance than reported model cost. Keep the database/namespace

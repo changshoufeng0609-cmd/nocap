@@ -8,6 +8,8 @@ Built by **Robert Chang · Team NoCap** for the [Meta Global AI Developer Hackat
 
 [Watch the three-minute demo](docs/demo/assets/receipts-demo.mp4) · [English captions and recording notes](docs/demo/README.md). Edited browser captures with recorded model responses; the video uses disclosed synthetic narration. These are demonstrations, not live latency measurements.
 
+**Try NoCap:** open the [public workspace](https://receipts-nocap.vercel.app) and choose a built-in example, or [watch the demo](https://receipts-nocap.vercel.app/demo). Desktop and mobile access, saved results, video playback and captions passed anonymous browser checks. **Live model requests are paused**; new draft checks, corrections, Slide and Ask requests are not currently open. [Source code](https://github.com/changshoufeng0609-cmd/nocap) and the [video download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4) are public. [Release evidence](docs/public-release-2026-10-29.json).
+
 ## The problem
 
 Financial journalists and analysts publish numbers under deadline pressure. A plausible earnings story can mix GAAP and adjusted EPS, compare the wrong quarters, or turn billions into millions. Finding the error means reopening filings and tracing each number to its source.
@@ -71,7 +73,7 @@ financial statement was found or verified. Check and Fix report text coverage; s
 
 ## Quickstart: a cached example in five commands
 
-Requires **Git and Python 3.12** and network access to clone and install dependencies. These commands target the planned public release repository; publication and signed-out access checks are still pending.
+Requires **Git and Python 3.12** and network access to clone and install dependencies. The public repository and its initial release history were verified through anonymous HTTP on October 29.
 
 ```bash
 git clone https://github.com/changshoufeng0609-cmd/nocap.git
@@ -97,7 +99,7 @@ Fix with receipts requires a Meta `MODEL_API_KEY` for Wonder, including when ext
 
 ## Results: development sets only
 
-The earlier numeric-coverage release passed **905 Python tests / 119 frontend checks**, typecheck, lint and production build. The October 29 full Python suite passed **1,117 tests**, followed by **2 additional targeted slide-expiry checks**. The frontend passed **144 checks**, typecheck and lint; release build/acceptance records are in the [Hand-back log](docs/HANDOFF.md#hand-back-log). Cached full-dev/trap replays preserve the results below and add **0 model calls / $0 model spend**. The held-out test split has **never been evaluated**.
+The earlier numeric-coverage release passed **905 Python tests / 119 frontend checks**, typecheck, lint and production build. The October 29 full Python suite passed **1,117 tests**, followed by **2 additional targeted slide-expiry checks**. The frontend passed **144 checks**, typecheck, lint and a clean production build; release acceptance records are in the [Hand-back log](docs/HANDOFF.md#hand-back-log). Cached full-dev/trap replays preserve the results below and add **0 model calls / $0 model spend**. The held-out test split has **never been evaluated**.
 
 | Measure | Seeded-error dev: v0 + basis5 | Wonder trap dev |
 |---|---:|---:|
@@ -129,7 +131,7 @@ Development began on **2026-10-27**. The NoCap implementation was written during
 - **Corrections:** Fix with receipts changes numeric fragments, not prose, signs, units, companies or accounting labels. Look-ahead errors, overlapping claims and unsafe or unverified proposals stay for manual review. A revised draft can still contain `?` claims, and model extraction remains fallible.
 - **Slides:** single PNG/JPEG, 2 MiB and 8 megapixels maximum; PDFs and multi-slide batches are unsupported. Visual transcription and grounding remain fallible. The image itself never becomes filing evidence.
 - **New workflows:** Ask supports one company and one explicit fiscal period, not investment advice or open-ended analysis. Exact whole-filing quotes prove where text appears, not its relevance or truth; live whole-document validation is still pending. Private mode needs an authenticated operator Modal deployment and does not make Ask/Fix/Slide private.
-- **Hosted status:** the authenticated Preview's `778d5f8` release contains number coverage and the validated shared Neon admission ledger. The October 29 feature extensions described above are separate from that hosted acceptance. Historical PostgreSQL and hosted rejection checks remain recorded in [deployment status](docs/deploy.md#current-deployment-state). Admission estimates are not provider billing ceilings. Public product/repository/video access and final submission are still being completed; see the [remaining-work checklist](docs/remaining-work.md).
+- **Hosted status:** the public workspace, source and licensed demo are available. Anonymous desktop/mobile acceptance passed with six saved-example replays and two paused-request responses, adding zero model calls and zero provider cost. Live requests remain paused pending the operating window. Historical paid checks and shared-ledger tests remain separate in [deployment status](docs/deploy.md#current-deployment-state). The shared Neon allowance is admission accounting, not a provider billing ceiling. Final submission and consent remain open; see the [remaining-work checklist](docs/remaining-work.md).
 
 ## Not investment advice
 
