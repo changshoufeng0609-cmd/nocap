@@ -1,0 +1,420 @@
+{
+ "corpus": "trap_v1",
+ "split": "test",
+ "verifier": "receipts.check",
+ "fingerprint": "eeb3a8b5318f5ff163c22a3522f5aaccb7f23411d11783734453681cfe40f747",
+ "args": {
+  "corpus": "trap_v1",
+  "split": "test",
+  "limit": "None",
+  "mutator": "None",
+  "ticker": "None",
+  "batch": "None",
+  "stub": "None",
+  "concurrency": "2",
+  "budget": "1.5",
+  "est_cost_per_item": "0.03",
+  "no_cache": "True",
+  "quiet": "True",
+  "json_out": "/Users/shou-fengchang/Desktop/Meta/eval/heldout_runs/release-20261029/trap_v1.json"
+ },
+ "items": [
+  "trap-JPM-FY2026Q2-a",
+  "trap-AMZN-FY2026Q1-a",
+  "trap-NVDA-FY2027Q2-b",
+  "trap-NFLX-FY2026Q2-a",
+  "trap-NVDA-FY2027Q2-a",
+  "trap-AMD-FY2026Q2-a",
+  "trap-BAC-FY2026Q2-a"
+ ],
+ "stats": {
+  "fresh": 7,
+  "cached": 0,
+  "skipped_budget": 0,
+  "errors": 0,
+  "sequential_retries": 0,
+  "spent_usd": 0.111078,
+  "notes": [
+   "up-front estimate 7 uncached items x $0.0300 = $0.21 (budget $1.50); the guard reserves the estimate for every item in flight and stops starting items when spend + reservations would pass the budget"
+  ]
+ },
+ "cost_usd": 0.111078,
+ "summary": {
+  "per_type": {
+   "scale": {
+    "n": 4,
+    "planted": 4,
+    "caught": 4,
+    "reason_ok": 4
+   },
+   "value": {
+    "n": 4,
+    "planted": 4,
+    "caught": 4,
+    "reason_ok": 4
+   },
+   "period": {
+    "n": 2,
+    "planted": 2,
+    "caught": 2,
+    "reason_ok": 2
+   },
+   "entity": {
+    "n": 4,
+    "planted": 4,
+    "caught": 4,
+    "reason_ok": 2
+   },
+   "basis": {
+    "n": 4,
+    "planted": 4,
+    "caught": 4,
+    "reason_ok": 4
+   },
+   "look_ahead": {
+    "n": 2,
+    "planted": 2,
+    "caught": 2,
+    "reason_ok": 2
+   }
+  },
+  "true_claims": {
+   "true_n": 52,
+   "true_verified": 49,
+   "true_unverifiable": 3,
+   "extra_claims": 0,
+   "extra_wrong": 0,
+   "fl_n": 10,
+   "fl_unverifiable": 10
+  },
+  "sentences": {
+   "true_sentences": 25
+  },
+  "claims": {
+   "items": 7,
+   "claims": 82,
+   "verified": 49,
+   "wrong": 20,
+   "unverifiable": 13
+  }
+ },
+ "rows": [
+  {
+   "item_id": "trap-JPM-FY2026Q2-a",
+   "ticker": "JPM",
+   "n_claims": 11,
+   "errors": [
+    {
+     "type": "scale",
+     "value_text": "$21.2 million",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "scale_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "value",
+     "value_text": "$8.15",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "value_mismatch"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 10.288,
+   "cached": false,
+   "all_caught": true
+  },
+  {
+   "item_id": "trap-AMZN-FY2026Q1-a",
+   "ticker": "AMZN",
+   "n_claims": 11,
+   "errors": [
+    {
+     "type": "period",
+     "value_text": "-15%",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "period_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "scale",
+     "value_text": "$23.9 million",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "scale_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "entity",
+     "value_text": "$4.27",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "entity_mismatch"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 13.776,
+   "cached": false,
+   "all_caught": true
+  },
+  {
+   "item_id": "trap-NVDA-FY2027Q2-b",
+   "ticker": "NVDA",
+   "n_claims": 12,
+   "errors": [
+    {
+     "type": "period",
+     "value_text": "18%",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "period_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "basis",
+     "value_text": "$2.22",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "basis_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "entity",
+     "value_text": "$89.0 billion",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "value_mismatch"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 12.803,
+   "cached": false,
+   "all_caught": true
+  },
+  {
+   "item_id": "trap-NFLX-FY2026Q2-a",
+   "ticker": "NFLX",
+   "n_claims": 12,
+   "errors": [
+    {
+     "type": "value",
+     "value_text": "$4.44 billion",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "value_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "entity",
+     "value_text": "$5.11",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "value_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "look_ahead",
+     "value_text": "$11.1 billion",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "look_ahead"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 10.996,
+   "cached": false,
+   "all_caught": true
+  },
+  {
+   "item_id": "trap-NVDA-FY2027Q2-a",
+   "ticker": "NVDA",
+   "n_claims": 12,
+   "errors": [
+    {
+     "type": "scale",
+     "value_text": "$96.2 million",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "scale_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "value",
+     "value_text": "79.0%",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "value_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "basis",
+     "value_text": "$2.46",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "basis_mismatch"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 13.167,
+   "cached": false,
+   "all_caught": true
+  },
+  {
+   "item_id": "trap-AMD-FY2026Q2-a",
+   "ticker": "AMD",
+   "n_claims": 12,
+   "errors": [
+    {
+     "type": "value",
+     "value_text": "$3.22 billion",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "value_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "basis",
+     "value_text": "$1.66",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "basis_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "look_ahead",
+     "value_text": "$96.2 billion",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "look_ahead"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 11.275,
+   "cached": false,
+   "all_caught": true
+  },
+  {
+   "item_id": "trap-BAC-FY2026Q2-a",
+   "ticker": "BAC",
+   "n_claims": 12,
+   "errors": [
+    {
+     "type": "basis",
+     "value_text": "$31.6 billion",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "basis_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "entity",
+     "value_text": "$7.70",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "entity_mismatch"
+      ]
+     ]
+    },
+    {
+     "type": "scale",
+     "value_text": "$8.02 million",
+     "outcome": "caught",
+     "conflicting_verified": false,
+     "verdicts": [
+      [
+       "wrong",
+       "scale_mismatch"
+      ]
+     ]
+    }
+   ],
+   "false_alarms": [],
+   "latency_s": 10.31,
+   "cached": false,
+   "all_caught": true
+  }
+ ]
+}

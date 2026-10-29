@@ -1,9 +1,11 @@
 {
   "exported_on": "2026-10-29",
   "development_began": "2026-10-27",
-  "source_private_commit": "386bfb9fd3117dc866527953becaa68e65810638",
+  "source_private_commit": "60223ce4ae213693a342ae268a5ecfa7493d9af4",
   "source_private_branch": "wip/day3-handoff",
-  "source_archive_sha256": "5612ecec218e7a06527aa1924c196ecc8d13fbbd8054e5dc70a0557def786584",
-  "public_history": "Clean release export; private incremental history retained and not rewritten. Legacy restricted narration is excluded.",
-  "public_video_sha256": "a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602"
+  "source_archive_sha256": "e2cfdb456e64f1e9ceab00c4b25cdbd24fec0e74d5df7d53d4b4d9481b71ab2d",
+  "public_history": "Clean main release updates; filtered source-only reconstructed development history is published separately on source-history. Private original history remains unchanged.",
+  "public_video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
+  "export_file_count": 549,
+  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable."
 }

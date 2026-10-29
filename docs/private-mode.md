@@ -62,7 +62,9 @@ fallback accounting. Browser-client tests reject public-model attribution, incom
 spans, unsafe receipt URLs and mismatched time cutoffs, with no fallback request. The focused private-routing
 and deployment suite passed **38 tests** in the 2026-10-29 follow-up.
 
-The [bounded live smoke](private-live-validation-2026-10-29.json) separately exercised
+### Earlier pipeline smoke
+
+The earlier [bounded live smoke](private-live-validation-2026-10-29.json) separately exercised
 `private.private_events` against the real authenticated Modal Glimmer server and SEC verifier: one model call,
 two claims, **1 verified / 1 wrong**, complete stream, and **401** for an unauthenticated request. It did not
 exercise the live HTTP private route or a live browser request. No private draft or response was cached.
@@ -71,3 +73,36 @@ available for demos. The provider's observed app costs total **$0.70780581**, su
 See [billing scope and timing limits](open-weights.md#modal-live-validation) for the separate workspace summary
 and cumulative wall-time estimate. No additional model/GPU run was needed for this follow-up. A two-claim
 smoke is not a quality benchmark or a guarantee of cold-start latency or future GPU availability.
+
+### Real browser and HTTP acceptance
+
+The later [October 29 browser acceptance](private-http-live-validation-2026-10-29.json) completed the
+actual Chromium → production-built Next UI → local FastAPI HTTP route → authenticated Modal Glimmer →
+deterministic verifier → rendered UI path. One public synthetic two-claim draft produced **1 verified /
+1 wrong** with **one model call**. The wrong GAAP EPS received the accounting-basis mismatch verdict and
+the expected filed value. The request included explicit company/period context and an as-of cutoff.
+No provider response was mocked in this successful run. This tested the local NoCap HTTP service against
+real Modal; it did not enable or validate a public Vercel Private service.
+
+The browser checks passed result rendering, SEC receipt links, clear, and clearing the private draft on
+mode changes. Only `/api/private/check` received a browser POST; no fallback request occurred. Responses
+were `no-store`, browser storage held no draft, response-cache file counts stayed zero, and accounting
+reservations settled. The in-memory SSE observation copy was deleted after validation. Runtime artifact
+scans found no configured secret, exact draft text or serialized claim payload; retained screenshots mask
+draft and result content. These checks do not audit Modal or operating-system retention.
+
+The warm-up took **125.517 seconds**, followed by **29.920 seconds** for the browser request and result
+checks. These are one-run observations, not latency guarantees. Two earlier validation attempts are
+retained: one hit Playwright's canceled-stream body limitation; the other passed HTTP/model/verdict checks
+but failed a test selector that omitted the status glyph. The observer and selector were fixed and tested
+offline before the successful live run; product routing and verdict code were unchanged for these retries.
+
+The same successful deployment then completed the separate fixed **50-question Glimmer Q&A** batch.
+All three new task apps were polled until **stopped with zero tasks**. Their provider-reported usage totals
+**$1.25997788** at the follow-up audit, including the two validation retries, warm-up, Private check and
+shared Q&A. Count that GPU usage once. The earlier pipeline apps cost **$0.70780581**, bringing observed
+Modal app usage across both rounds to **$1.96778369**; delayed metering may update these amounts. The
+new round's conservative compute wall-time estimate is **$1.338062**, excluding build, storage and network.
+The machine-readable record preserves app IDs, billing scope, source hashes, failed attempts and the
+separate offline self-tests. The recorded source hashes identify the tested runtime; subsequent code
+changes require their own validation. The deployment remains stopped.

@@ -1,0 +1,274 @@
+{
+  "reviewed_at": "2026-10-29T12:20:41.263837+00:00",
+  "reviewer": "Independent AI agent read-only post-run arithmetic/hash audit; not human gold review",
+  "status": "pass",
+  "scope": "Retained rows, frozen label metadata, usage ledger, extraction metadata, and file hashes; no scorer/model/SEC rerun or result-driven changes.",
+  "freeze": {
+    "source_commit": "61e10552409419d940735f91dd41f139a088c992",
+    "freeze_sha256": "b08cc37e6f7b6f7a5fb1fb6d9599e3e5050cd1af3ce53a9f8960931153887bba",
+    "file_count": 126,
+    "independently_rehashed_unchanged": true,
+    "path_set_unchanged": true,
+    "run_reported_unchanged": true,
+    "runner_import_fix_commit": "cd63e53"
+  },
+  "run": {
+    "started_at": "2026-10-29T12:07:19.744885+00:00",
+    "finished_at": "2026-10-29T12:11:52.841916+00:00",
+    "items": 104,
+    "errors": 0,
+    "skips": 0,
+    "sequential_retries": 0,
+    "result_cache_hits": 0,
+    "preexisting_response_cache_entries": 0,
+    "within_run_response_cache_hits": 11
+  },
+  "v0": {
+    "items": 97,
+    "per_mutator": {
+      "value": {
+        "n": 6,
+        "caught": 4,
+        "reason_ok": 4,
+        "target_unverifiable": 2,
+        "target_verified": 0,
+        "not_extracted": 0
+      },
+      "period": {
+        "n": 8,
+        "caught": 8,
+        "reason_ok": 8,
+        "target_unverifiable": 0,
+        "target_verified": 0,
+        "not_extracted": 0
+      },
+      "scale": {
+        "n": 8,
+        "caught": 7,
+        "reason_ok": 7,
+        "target_unverifiable": 1,
+        "target_verified": 0,
+        "not_extracted": 0
+      },
+      "basis": {
+        "n": 5,
+        "caught": 5,
+        "reason_ok": 5,
+        "target_unverifiable": 0,
+        "target_verified": 0,
+        "not_extracted": 0
+      },
+      "look_ahead": {
+        "n": 11,
+        "caught": 10,
+        "reason_ok": 10,
+        "target_unverifiable": 1,
+        "target_verified": 0,
+        "not_extracted": 0
+      },
+      "entity": {
+        "n": 10,
+        "caught": 10,
+        "reason_ok": 8,
+        "target_unverifiable": 0,
+        "target_verified": 0,
+        "not_extracted": 0
+      }
+    },
+    "mutants": 48,
+    "caught": 44,
+    "reason_correct": 42,
+    "misses": [
+      {
+        "item_id": "v0-JPM-FY2025Q3-s010205-look_ahead",
+        "mutator": "look_ahead",
+        "outcome": "missed_unverifiable",
+        "target_status": "unverifiable",
+        "target_reason": "no_evidence"
+      },
+      {
+        "item_id": "v0-MSFT-FY2026Q1-s003481-value",
+        "mutator": "value",
+        "outcome": "missed_unverifiable",
+        "target_status": "unverifiable",
+        "target_reason": "no_evidence"
+      },
+      {
+        "item_id": "v0-JPM-FY2026Q2-s001276-value",
+        "mutator": "value",
+        "outcome": "missed_unverifiable",
+        "target_status": "unverifiable",
+        "target_reason": "no_evidence"
+      },
+      {
+        "item_id": "v0-JPM-FY2026Q2-s010990-scale",
+        "mutator": "scale",
+        "outcome": "missed_unverifiable",
+        "target_status": "unverifiable",
+        "target_reason": "no_evidence"
+      }
+    ],
+    "originals": {
+      "n": 47,
+      "claims": 110,
+      "verified": 87,
+      "wrong": 1,
+      "unverifiable": 22,
+      "approximate": 0,
+      "false_alarm_items": 1
+    },
+    "false_alarm_items": [
+      {
+        "item_id": "v0-NVDA-FY2026Q3-s006548",
+        "statuses": {
+          "verified": 2,
+          "wrong": 1
+        }
+      }
+    ],
+    "controls": {
+      "n": 2,
+      "claims": 3,
+      "verified": 0,
+      "wrong": 0,
+      "unverifiable": 3,
+      "approximate": 0,
+      "false_alarm_items": 0
+    }
+  },
+  "trap_v1": {
+    "drafts": 7,
+    "per_type": {
+      "scale": {
+        "n": 4,
+        "caught": 4,
+        "reason_ok": 4,
+        "conflicting_verified": 0,
+        "missing": 0,
+        "target_verified": 0
+      },
+      "value": {
+        "n": 4,
+        "caught": 4,
+        "reason_ok": 4,
+        "conflicting_verified": 0,
+        "missing": 0,
+        "target_verified": 0
+      },
+      "period": {
+        "n": 2,
+        "caught": 2,
+        "reason_ok": 2,
+        "conflicting_verified": 0,
+        "missing": 0,
+        "target_verified": 0
+      },
+      "entity": {
+        "n": 4,
+        "caught": 4,
+        "reason_ok": 2,
+        "conflicting_verified": 0,
+        "missing": 0,
+        "target_verified": 0
+      },
+      "basis": {
+        "n": 4,
+        "caught": 4,
+        "reason_ok": 4,
+        "conflicting_verified": 0,
+        "missing": 0,
+        "target_verified": 0
+      },
+      "look_ahead": {
+        "n": 2,
+        "caught": 2,
+        "reason_ok": 2,
+        "conflicting_verified": 0,
+        "missing": 0,
+        "target_verified": 0
+      }
+    },
+    "planted_errors": 20,
+    "caught": 20,
+    "reason_correct": 18,
+    "false_alarm_figures": 0,
+    "true_figures": 52,
+    "true_unverifiable": 3,
+    "false_alarm_sentences": 0,
+    "scored_true_sentences": 25,
+    "forward_looking_figures": 10,
+    "forward_looking_unverifiable": 10,
+    "claims": {
+      "items": 7,
+      "claims": 82,
+      "verified": 49,
+      "wrong": 20,
+      "unverifiable": 13
+    }
+  },
+  "usage": {
+    "provider": "Meta",
+    "model": "muse-spark-1.3",
+    "started_sdk_calls": 117,
+    "unique_request_keys": 117,
+    "completed_known_usage_calls": 117,
+    "failed_calls": 0,
+    "estimated_calls": 0,
+    "unknown_usage_reservation_usd": "0",
+    "known_cost_usd": "0.49834625",
+    "cap_usd": "1.50",
+    "max_attempts": 250,
+    "pricing_usd_per_million": {
+      "uncached_input": "1.25",
+      "cached_input": "0.15",
+      "output": "4.25"
+    },
+    "reasoning_in_output_not_added_again": true,
+    "tokens": {
+      "input_tokens": 259347,
+      "output_tokens": 102824,
+      "cached_tokens": 238945,
+      "reasoning_tokens": 68443
+    },
+    "per_corpus": {
+      "v0": {
+        "items": 97,
+        "fresh_sdk_calls": 86,
+        "within_run_response_cache_hits": 11,
+        "known_cost_usd": "0.38726840"
+      },
+      "trap_v1": {
+        "items": 7,
+        "fresh_sdk_calls": 31,
+        "within_run_response_cache_hits": 0,
+        "known_cost_usd": "0.11107785"
+      }
+    },
+    "provider_invoice_reconciliation": false
+  },
+  "source_history": {
+    "map_sha256": "431ac56068010ba975b02ae54dd27ecd5fbddc0c174981e4b03d88e2b61b4f27",
+    "exported_source_commit": "adaf6ba849b561e07a22367815a35a00a69f7296",
+    "overlapping_frozen_source_files_verified": 23,
+    "url": "https://github.com/changshoufeng0609-cmd/nocap/tree/adaf6ba849b561e07a22367815a35a00a69f7296",
+    "scope": "Source/config development chronology; excludes eval/data history and is not complete evaluation reproduction."
+  },
+  "limitations": [
+    "Small seeded tests, provisional machine-assisted labels, correlated company/filing sources; not independent human labels or broad product accuracy.",
+    "Original false alarm is retained, not investigated for result-driven tuning; four uncaught mutants are all unverifiable.",
+    "Trap true-figure denominators were counted from frozen metadata; statuses and sentence counts crosschecked against retained summary partitions, not independently re-extracted or rescored from full claim/verdict pairs.",
+    "The sentence metric counts non-error sentences with at least one extracted figure; it is not extraction recall over all sentences.",
+    "The separate 200-response closed-book Q&A comparison used the pre-J2 frozen gate and must not be merged with these held-out metrics.",
+    "API usage-priced costs are not independently reconciled provider invoices; no audit model/SEC calls or new usage."
+  ],
+  "input_sha256": {
+    "eval/heldout_freeze.json": "b08cc37e6f7b6f7a5fb1fb6d9599e3e5050cd1af3ce53a9f8960931153887bba",
+    "eval/heldout_runs/release-20261029/started.json": "86838640e88f34c6774a08de9c59d9692885fa6a1e97f32d1a718989e50c4ccb",
+    "eval/heldout_runs/release-20261029/finished.json": "8814a008060b6af61d62a7bef3dc3327a9b140277381c3256ac67f112385edd7",
+    "eval/heldout_runs/release-20261029/attempts.json": "1b43e65c6e7ef08837465f9dfd6fb54da0817bc67d14eacb05abefb489feac1c",
+    "eval/heldout_runs/release-20261029/extractions.json": "65ca74f15abae0ab39507ee3b8413b7368f66c901ed67e3e34f9cd850ddce877",
+    "eval/heldout_runs/release-20261029/v0.json": "501a50147ba2bcab205b8378615cc0d698e918aa319f7c599022732f6890cc8f",
+    "eval/heldout_runs/release-20261029/trap_v1.json": "1f48ba2596627560d19759db0fd3f3e6f121d632982adbdc76f7af6e2ad3566f",
+    "eval/heldout_runs/release-20261029/cache_inputs.json": "14f3c5a13f2fa2df49a3ebe0e0f7da449a11600520339d3b5757ef0ded0fba33"
+  }
+}

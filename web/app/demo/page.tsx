@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
   title: "Demo · NoCap",
-  description: "A three-minute walkthrough: check a financial draft, inspect SEC receipts, review corrections and apply a historical filing cutoff.",
+  description: "A 2:45 product walkthrough: paste a financial draft, inspect SEC receipts, review corrections, apply a historical cutoff and check a slide.",
 };
 
 export default function DemoPage() {
@@ -17,19 +17,19 @@ export default function DemoPage() {
         <div className="max-w-3xl space-y-3">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Team NoCap · Meta Global AI Developer Hackathon</p>
           <h2 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Every financial number needs a receipt.</h2>
-          <p className="text-pretty text-muted-foreground">Watch a financial draft become an evidence-backed editorial review in this three-minute walkthrough.</p>
+          <p className="text-pretty text-muted-foreground">Follow a draft from pasted text to corrected numbers and SEC receipts in 2 minutes 45 seconds.</p>
         </div>
         <figure className="space-y-3">
-          <video controls playsInline preload="metadata" aria-label="NoCap three-minute product demonstration" className="aspect-video w-full rounded-lg border border-border bg-black">
+          <video controls playsInline preload="metadata" aria-label="NoCap product demonstration, 2 minutes 45 seconds" className="aspect-video w-full rounded-lg border border-border bg-black">
             <source src="/demo/receipts-demo.mp4" type="video/mp4" />
             <track kind="captions" src="/demo/receipts-demo.en.vtt" srcLang="en" label="English" default />
             Your browser does not support embedded video. <a href="/demo/receipts-demo.mp4">Download the MP4</a>.
           </video>
           <figcaption className="text-sm leading-relaxed text-muted-foreground">
-            Edited browser screenshots with local Kokoro-82M synthetic narration and English captions.
-            Draft checks use cached extraction; Fix and slide segments replay previously recorded responses.
-            The slide segment displays refreshed NoCap branding over the original image response.
-            This recording is a seeded demonstration, not a continuous live session or latency benchmark.
+            Continuous recording of actual browser actions, with local Kokoro-82M synthetic narration and English captions.
+            Draft checks use cached extraction. Fix, Slide and Ask replay real October 29 responses for the same inputs;
+            the recording labels these replays and shortens their original waiting time. It is a seeded demonstration,
+            not a live provider latency measurement. The recorded slide used Spark regions after SAM found none.
           </figcaption>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
             <a href="/demo/receipts-demo.mp4" download className="underline underline-offset-4">Download video</a>
@@ -52,7 +52,7 @@ export default function DemoPage() {
             ))}
           </ol>
         </section>
-        <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">The development figures shown in the recording are historical seeded results: 104/109 planted errors caught, 0/107 original items with false alarms, and 51/250 true claims unverifiable. They do not establish accuracy on arbitrary writing or slides. Ask and Private modes were added after this recording.</p>
+        <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">The demonstration shows specific seeded examples. Ambiguous and forward-looking claims remain unverifiable, and image readings need review. See the <Link href="/benchmarks" className="underline underline-offset-4">benchmark results and methods</Link> for measured accuracy, coverage and limitations.</p>
         <Link href="/" className="inline-flex rounded-md bg-foreground px-5 py-3 text-sm font-medium text-background focus-visible:outline-2 focus-visible:outline-offset-4">Open the workspace</Link>
       </main>
       <SiteFooter />

@@ -2,16 +2,23 @@
 
 The owner requested completion of the remaining-work checklist, including optional extensions, and approved
 an estimated **US$10 total** of new model/GPU usage. This authorizes the listed feature work, deployment,
-repository/video publication and submission preparation. No paid-plan upgrade is requested. The earlier
-explicit prohibition on the held-out split remains in force while the clarification is pending.
+repository/video publication and submission preparation. No paid-plan upgrade is requested. The owner subsequently selected items **1, 3, 4, 5, 6 and 8**, explicitly authorizing a frozen,
+recorded held-out evaluation. The [selected-round record](completion-round-2026-10-29.md)
+controls the current allocation and completion status; earlier checkpoints below remain historical.
 
 ## Current status
+
+The operation-led replacement is now a local **165-second continuous browser recording** with 18 English
+caption cues. Actual Private browser/HTTP/Modal acceptance and all **200 four-model Q&A calls** are complete.
+J2 fixes passed final integrated regression; the authorized one-time held-out run is complete. The current public
+host still has the earlier video until the new deployment is accepted. Keep the form unsubmitted.
+See [remaining work](remaining-work.md) for the precise distinction between completed artifacts and open dependencies.
 
 | Item | Current evidence / remaining acceptance |
 |---|---|
 | Ask | Implemented typed lookup plans, deterministic question binding, verified answers and source footnotes; independent review and specialist tests passed. Integrated API/UI and recorded live smoke passed; current full regression is 1,117 Python tests plus two independent follow-up regressions. The 10/29 follow-up adds conservative question binding. |
 | Whole-filing quotations | Implemented bounded whole-document requests, exact unique quotes, hashes and acceptance-time cutoffs; SEC importer needs a real declared contact address. No claim of a measured one-million-token request. |
-| Private extraction | Implemented operator Modal-only routing, no response cache or redirects and fail-closed setup; One live Glimmer check passed; all four task apps are stopped. See private-live-validation-2026-10-29.json. |
+| Private extraction | Real browser → HTTP → Modal → verifier acceptance passed, 1 verified / 1 wrong; clearing, no fallback and zero application cache checked. Three new shared apps stopped with zero tasks; [evidence](private-http-live-validation-2026-10-29.json). |
 | Slide readings | Duplicate reconciliation and conflict abstention implemented and reviewed; full regression passed (1,117 tests, plus two follow-up regressions); recorded live branded slide returned 2 verified / 2 wrong. |
 | MCP | Official SDK stdio server, three read-only tools, real protocol tests passed; included in the public source export. |
 | Evidence coverage | TSLA XBRL added offline: 379 facts / 57 filings; original ten-company row hashes unchanged. Committed snapshot and public documentation complete: 11 companies / 11,554 facts. |
@@ -24,7 +31,7 @@ explicit prohibition on the held-out split remains in force while the clarificat
 | Real user study | Materials exist; participant contacts requested, zero sessions recorded. |
 | Human gold review | Provisional labels require a human reviewer; agent reviews do not satisfy this item. |
 | X / team roster | Owner confirmed sole contributor: SHOU-FENG CHANG (`Robert_Chang`). X account remains unknown. |
-| Held-out evaluation | Not run; explicit clarification pending. |
+| Held-out evaluation | Complete: 44/48 seeded errors and 20/20 trap errors caught; 1/47 original-item false alarms in v0 and 0/52 trap true-figure false alarms. Frozen source unchanged; no result-driven tuning. [Round record](completion-round-2026-10-29.md). |
 
 ## Actual form observed
 
@@ -32,12 +39,12 @@ Authenticated Cerebral Valley `/hackathon/submit` displays Team Name, Team Membe
 Build for Your World/Push the Frontier theme, optional Most Viral X link, Project Description, Public GitHub
 Repository, 3-Minute Demo Video, use of Meta products, why Meta models matter, Meta product feedback and partner
 technology feedback. The browser inputs expose no `maxlength`; this does not establish a server-side limit.
-The form is filled with the final public links and project copy. The sole contributor and listed member is
+The form was filled at the earlier public-release checkpoint. Refresh its copy from the current submission kit before final submission. The sole contributor and listed member is
 SHOU-FENG CHANG (`Robert_Chang`), confirmed by the owner on 10/29. The optional X URL is empty. The final
 consent checkbox grants Meta and Cerebral Valley permission to use, publish, share and promote submitted
 materials. It is unchecked; no submission has occurred.
 
-## Spending allocation
+## Historical initial allocation
 
 - Expanded dev benchmark: at most US$3 in conservative token reservations.
 - Remaining US$7: root-managed bounded live feature checks and Modal GPU testing; actual use recorded separately.
@@ -46,7 +53,7 @@ materials. It is unchecked; no submission has occurred.
 - Estimates are operational controls, not provider invoice ceilings. Check actual available balances and preserve
   idle scale-to-zero before leaving a deployment running.
 
-## Release follow-up
+## Historical first public release
 
 The earlier macOS Samantha narration was replaced with locally generated Kokoro-82M audio because Apple Tahoe §2F restricts public sharing. New MP4: 179.937663 seconds; full decode, audio and source/public hash checks passed.
 The original private development repository and history are preserved. The [public repository](https://github.com/changshoufeng0609-cmd/nocap)

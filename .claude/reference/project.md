@@ -2,7 +2,9 @@
 
 Decided 2026-10-27. Indie Developer track, theme Build for Your World. This is the single source of truth for what we're building. Update it when scope changes.
 
-**One-liner:** a fact-checker that verifies every financial number in a draft against SEC filings before it's published.
+**One-liner:** check financial numbers in a draft against SEC filings before publishing, with receipts and visible uncertainty.
+
+**Current release checkpoint — October 29:** the local 165-second continuous browser walkthrough, real local Private HTTP/Modal acceptance and four-backend closed-book Q&A run (200 calls) are complete. J2 core fixes are integrated at `df76e67`, with 1,246 full-suite Python passes, 144 frontend checks, preserved dev baselines/saved-example counts and independent closure of both findings. The held-out source was frozen at `61e1055`; its authorized one-time run completed with all 126 frozen files unchanged and no outcome-driven tuning. Seeded test caught 44/48 errors, with 1/47 original-item false alarms; trap test caught 20/20 errors, with 0/52 true-figure false alarms. See `eval/heldout_results.md` for denominators and limits. The filtered source-history branch is public: 65 reconstructed commits and 104 final source/configuration files through private checkpoint `61e1055`; see `docs/source-history.md`. New public main/media/benchmark acceptance remains pending. The earlier public release is accessible with live model operations paused. Submission/consent, real participant sessions and independent human gold review remain open. See `docs/completion-round-2026-10-29.md` and the evidence-linked submission kit; historical spike results below retain their original scope.
 
 ## Users and job
 - **Primary user:** financial journalists and equity analysts who publish numbers on deadline. One wrong figure means a correction, reputational damage, or a compliance problem.
@@ -31,7 +33,8 @@ Decided 2026-10-27. Indie Developer track, theme Build for Your World. This is t
 2. **Ask mode (implemented 2026-10-29).** Standard Spark proposes a bounded lookup; code binds every supported company, metric, period and qualifier to the question, renders sentences from stored facts, and verifies them. Only verified sentences enter the answer; withheld items remain visible with a reason. Footnotes export with EDGAR accessions. Unrecognized or ambiguous questions require clarification. See `docs/ask.md`.
 3. **Time travel.** Run any check "as of" a date and time. Claims that depend on filings accepted after that moment are blocked as look-ahead.
 4. **Check a slide (implemented 2026-10-28, user approved).** Single PNG/JPEG upload; SAM 3.1 chart/table candidate regions and Standard Spark vision transcription; the same deterministic SEC verifier checks the readings. Click numbered overlays for receipts. Axis estimates can only receive ≈ or ?; uncertain readings remain ?. The upload is not evidence, vision can omit or misread labels, and Spark grounding supplies regions when SAM fails or finds none. No image is saved by the application.
-5. **Receipt panel.** Click any sentence to see the XBRL fact and the highlighted filing page and section. For 8-K slide exhibits, it also shows the chart or table region.
+5. **Receipt panel.** Click a checked figure to see its filed value, provenance, source link and available cell or derivation. Highlighting occurs in the draft; the linked filing is not a guaranteed highlighted filing-page viewer. Slide overlays mark the uploaded input, not the source filing.
+6. **Private check (live integration completed 2026-10-29).** Local browser → FastAPI HTTP → authenticated Muse Glimmer on Modal → deterministic verdicts passed a synthetic two-claim check with one verified and one wrong result. No application response cache or public-provider fallback is used. The NoCap host and Modal still process the draft. Task apps are stopped; this is not public or always-on Private availability. See `docs/private-mode.md`.
 
 ## Design rules from the spikes (2026-10-27)
 - **Character offsets come from code, not the model.** In Spike B, Muse Spark's own offsets were exact only 67% of the time. Every `span_text` did appear verbatim, so code computes the offsets from `span_text`. The model's offset is used only to tell repeated quotes apart.
@@ -62,12 +65,12 @@ Decided 2026-10-27. Indie Developer track, theme Build for Your World. This is t
 ## Meta models (each one does real work)
 - **Muse Spark 1.3:**
   - claim extraction (structured output)
-  - the tool-calling analyst in Ask mode
+  - the typed lookup planner in Ask mode; code retrieves facts and renders verified answers
   - reading charts on slide exhibits, with those numbers verified like any other claim
 - **Whole-filing quote search (implemented; real-document validation pending):** bounded complete-document input and exact unique quote spans with source hashes and acceptance cutoffs. Quote provenance is not a truth or relevance judgment. No million-token measurement is claimed; real SEC contact is still required to ingest a complete filing.
 - **Muse Wonder:** Fix with receipts proposes numeric corrections to wrong claims; code constrains each edit and verifies it, then the complete draft is extracted and checked again. The UI compares the original and revised draft with correction receipts and remaining flags. Signs, units, prose, company, period and basis stay unchanged; look-ahead and unsafe corrections remain for manual review. Wonder also generates adversarial "trap drafts" (only the dev split has been evaluated). Hard multi-step questions remain planned.
-- **SAM 3.1:** isolates chart and table regions on slide exhibits for precise receipts. Spike it on day 1. If it underperforms, use Muse Spark grounding boxes instead.
-- **Muse Glimmer and Muse Spark Open** (via Baseten, Fireworks, or Modal): a model-agnostic benchmark showing that the verifier makes any model trustworthy. This also qualifies the project for the open-weights bonus prize.
+- **SAM 3.1:** proposes chart and table regions. Spark grounding supplies regions when SAM finds none; the current NVIDIA demo explicitly shows this fallback.
+- **Muse Glimmer and Muse Spark Open:** live-tested alternatives on Modal, Baseten and Fireworks. Four backends completed a fixed 50-question closed-book Q&A experiment, with exact-contract results and a separately labeled post-run metadata sensitivity analysis. Accepted-answer coverage was limited; no claim that any model becomes trustworthy or that bonus-prize eligibility is certified. See `eval/qa_results.md` and `docs/open-weights.md`.
 
 ## Data
 SEC EDGAR only:
@@ -76,7 +79,7 @@ SEC EDGAR only:
 - **Filing documents:** 10-K, 10-Q, and 8-K, including EX-99 press releases and slides
 
 Rules and scope:
-- **Fair access:** send a User-Agent with a contact email, and stay at or below 10 requests per second.
+- **Fair access:** use `receipts/edgar.py`, a declared contact User-Agent, caching and at most two requests per second per process, shared across clients.
 - **Caching:** cache everything locally with content hashes.
 - **Current scope:** the original 10-company collection over eight fiscal quarters plus TSLA XBRL (379 facts / 57 filings), for 11 companies and 11,554 stored facts. Tesla EPS covers 6/8 quarters; no Tesla press-release or image-table coverage is claimed.
 - **Companies, approved by the user on 2026-10-27:** NVDA, AAPL, MSFT, META, AMZN, GOOGL, JPM, BAC, AMD, NFLX. TSLA was initially excluded because its press release uses images; the 10/29 expansion adds XBRL only. Swap out any company whose tables still can't be mapped on 10/29.
@@ -96,16 +99,17 @@ Rules and scope:
   - look-ahead
   - wrong entity
 
-  Report the catch rate (recall) and the false-alarm rate (precision).
-- **Raw vs verified Q&A per model** (Spark 1.3, Wonder, Glimmer): the hallucination rate of raw answers vs the precision and coverage of verified answers.
+  Report planted-error catch rate and false alarms with their distinct denominators. A false-alarm rate is not precision. Provisional labels still await human review. The frozen held-out run completed: 97 seeded test items, 44/48 errors caught (91.7%), 42/48 reasons, 1/47 original-item false alarms (1/110 true claims), 22/110 true claims left `?`; all four uncaught errors were `?`, not ✓. Seven trap-test drafts: 20/20 caught, 18/20 reasons, 0/52 figure and 0/25 sentence false alarms, 3/52 true figures left `?`, all ten guidance figures `?`. The 117 model attempts cost $0.49834625 with no estimated usage, errors or skips. Preserve every outcome and do not tune on it. Development zero-false-alarm results must remain labeled development.
+- **Raw vs verified Q&A per model (completed 2026-10-29):** Spark 1.3, Wonder 1.0, Baseten Spark Open and Modal Glimmer answered 50 supported snapshot questions each, without retrieval/tools. Report numeric/binding errors separately from abstentions, unsupported metadata and format failures. The pre-registered exact contract accepted zero answers. Post-run metadata sensitivity accepted 14/0/17/6 answers, all correct within this small set, with coverage 28%/0%/34%/12%; zero accepted means N/A precision. This is not a general hallucination-rate estimate or an evaluation of Ask's retrieval planner. The scorer and verifier share evidence sources; no independent human adjudication is claimed. See `eval/qa_methods.md` and `eval/qa_results.md`.
 
-## Demo story (3 minutes)
-1. Earnings day: an 8-K drops.
-2. Paste an AI-written article. Red flags appear, each with the correct value and its receipt.
-3. Time travel blocks a look-ahead claim.
-4. A quick pass through Ask mode.
-5. The benchmark chart.
-6. Origin story and impact.
+## Current demo (165 seconds)
+1. Paste a seeded earnings draft; inspect the growth and EPS errors and receipts.
+2. Run Fix, inspect the full recheck and copy the revision with receipts.
+3. Compare a historical filing cutoff with Now.
+4. Upload the seeded slide and inspect its verified/wrong readings and Spark fallback.
+5. Briefly show Ask (under ten seconds), then return to the draft and product links.
+
+This is a continuous actual-browser recording with cached extraction and clearly disclosed recorded Fix/Slide/Ask responses, local Kokoro synthetic narration and 18 English cues. It is not live latency evidence. The local export passed media checks; its new public acceptance and owner editorial approval remain separate. The four-backend benchmark has a separate page and downloadable records. See `docs/demo/README.md`.
 
 ## Guardrails
 - **Research and fact-checking only:** no buy or sell opinions, and a disclaimer in the UI.

@@ -1,0 +1,2900 @@
+{
+  "target": "spark-open-baseten",
+  "model": "meta-models/muse-spark-open-1026",
+  "started_at": "2026-10-29T09:51:31.365171+00:00",
+  "manifest_sha256": "cbb66ebe97df238be8aa0df1e05fcda60507b605344a19097ce8c3470abe8224",
+  "scope": "Closed-book financial QA, provisional public-snapshot dev questions; not held-out or retrieval-augmented QA",
+  "planned": 50,
+  "source_hashes": {
+    "eval/qa_core.py": "22a13085d19d0f47a5f6ab9d1891df6f890b20327a3a0af5afd29fd2c9d71230",
+    "eval/qa_benchmark.py": "a27afbd39b53fe1fbb570f104757ac8664de330a025cd9d99e5c8ffc62159bab",
+    "receipts/extract.py": "9cb0cc3ee4b569a35fbf4c8d931f1f2a036364cb0543f62fa660916467e2e1d4",
+    "receipts/verify.py": "70cccd862337f8b2490106428f2e31f3dc07c9857567a943d1ebac78d01c8764",
+    "receipts/store.py": "3f621e7643eb501122efbe60ec0d31748127560a918cd761451119a172d6ae8a",
+    "receipts/periods.py": "74a7db335722b28c6d515f15771764c68eafb713ab5a06eaa0ea6393c5dedf82",
+    "receipts/types.py": "59957d8aac829d4f521ba037af3fdb694cbdbd5c4094acbf87ecbda4a5d80b0e"
+  },
+  "snapshot_hashes": {
+    "facts.sqlite": "ee1cb5a313cadfac9a8d36c6dbb2832996fbd91b823a045e62e5280418df0b53",
+    "manifest.json": "fd4edc556f7dd15433582ff05c544f4ae353cddbe8e0ef15202aa6af28dec971",
+    "pr_facts/AAPL/0000320193-24-000120.jsonl": "1d7da002f19f5952fed071fc544de77970d688abf95f5bed0b9f84d21e2771b7",
+    "pr_facts/AAPL/0000320193-25-000007.jsonl": "3874f783f0e9cadda5a9ea20c223a649d8409120787f5e93bb79ea00879784ba",
+    "pr_facts/AAPL/0000320193-25-000055.jsonl": "0f9a3b5b99d88d55af696b0d882047fba4e0bf7d4084203c4afb7477bf88b25c",
+    "pr_facts/AAPL/0000320193-25-000071.jsonl": "8c0a2df3ce8becfb09019fe635b12f588a646119ea7a3b778e2ef2f964c451d0",
+    "pr_facts/AAPL/0000320193-25-000077.jsonl": "0ba9de9c75faafe2001a50b5bafd264646c54594e5564871e025c469f6a0554f",
+    "pr_facts/AAPL/0000320193-26-000005.jsonl": "9813295ff9464058798ac1ef121ef498a5b5c9dd8d42e7f97ec7c49edc12f900",
+    "pr_facts/AAPL/0000320193-26-000011.jsonl": "c80de47b6fbb0e31ef82bd91e9d45cdc6a0f90f9e93e41c48fe2acfbda527eaa",
+    "pr_facts/AAPL/0000320193-26-000018.jsonl": "f80bf8b475027b20addce5956f3fc8897b2fbd1e4258632e9d7e55ac40610ba3",
+    "pr_facts/AMD/0000002488-24-000161.jsonl": "5c82e9a5b9c9dae251eea08e28d3534ef774a46084cd28f96ccb4d8a0d8caf5b",
+    "pr_facts/AMD/0000002488-25-000009.jsonl": "4fe2695f6e6f6140db072ddec13318cbf4cf3b0ca80c0e3382bac7549b3a88e3",
+    "pr_facts/AMD/0000002488-25-000045.jsonl": "f5b9dfb5bffeb0daa4556b6b1f0084d255aceb8017f0dc325d10356147b5a08b",
+    "pr_facts/AMD/0000002488-25-000106.jsonl": "ecbd6a297aa57402e1fb60cd62dde216f808304d5d90c16c231846e8eb8f7fc9",
+    "pr_facts/AMD/0000002488-25-000163.jsonl": "eb1a51c56614934ec088fffedf2b4b5d7c53f8a61082444b4989166b3243e35d",
+    "pr_facts/AMD/0000002488-26-000014.jsonl": "2894a674d83e0d5a3f7615385a61c517346b3c3531df5737766f79447b92482f",
+    "pr_facts/AMD/0000002488-26-000072.jsonl": "e712d8dccae475b219d41377f5e06fbdc0b935f6cf6d4bdd5c6c0a2af73a1010",
+    "pr_facts/AMD/0000002488-26-000121.jsonl": "0dbc786e577eb4da2080a6d3d1e5025c66ab421618f94ac07dc60827b0ee0302",
+    "pr_facts/AMZN/0001018724-24-000158.jsonl": "51f248f90d3ba1b10495ce80be3b9c217344d293f989a93119a3818fc4b8244f",
+    "pr_facts/AMZN/0001018724-25-000002.jsonl": "6d3b44aadd52d1b648386f402edc3723ae415cf7c5cd83eca6a76cabd20912b2",
+    "pr_facts/AMZN/0001018724-25-000034.jsonl": "76674252e632152eb6649ec5dea740649a4ec4ecd2e9f84c9f21322de92fe0a7",
+    "pr_facts/AMZN/0001018724-25-000084.jsonl": "41f67956922fa8548af25f72981902702cc5cda5de863f7e7c831d3e5c2cbde7",
+    "pr_facts/AMZN/0001018724-25-000121.jsonl": "17c720691194022f8e83da5b27e80830c70e4b94d3a2ccf4f488e9dd26e7410f",
+    "pr_facts/AMZN/0001018724-26-000002.jsonl": "416f99095048d4de21872bb57d458382890ae9452386fee151babc4f93857adf",
+    "pr_facts/AMZN/0001018724-26-000012.jsonl": "ec16c4055278a918894a10e7633bc01f66d28cb2cd5c2c6eee3320998c84dbfc",
+    "pr_facts/AMZN/0001018724-26-000024.jsonl": "51ec50b9aca44d942dfedadb84f9aa664959547ba7da267d1ce6f812ef2c965b",
+    "pr_facts/BAC/0000070858-24-000266.jsonl": "be6b378b5a433ac5cdd8283bc60cb569ffa03a060280d457f898f2009dddfa91",
+    "pr_facts/BAC/0000070858-25-000011.jsonl": "e74099b69162272a843571589be5dd6161f756e611b0b3f671e289134c82a330",
+    "pr_facts/BAC/0000070858-25-000187.jsonl": "35c9101226f535463a408d850ec5db4329b2fda8d58f55557f88a5518b7e6e27",
+    "pr_facts/BAC/0000070858-25-000254.jsonl": "5e660d61c48d67df61613d45dd2a634f225972fbc58b1588219c0111c4485cc5",
+    "pr_facts/BAC/0000070858-25-000390.jsonl": "90aa90c52f3b1e469777740343f4a261fc1f369473f7d079cccbc88987335776",
+    "pr_facts/BAC/0000070858-26-000020.jsonl": "6e3e380b3b5b44a3c5f421ca40de2d9f1ee20162cf64b8d7edf0955b19b7186e",
+    "pr_facts/BAC/0000070858-26-000222.jsonl": "cb64712ff38b009660730b2baf18105f1289947a86dd366878c2f0c5ab5bc682",
+    "pr_facts/BAC/0000070858-26-000353.jsonl": "5075e5ba31eb93c4356b21bdac1d21bf634e111b3bdd6ac4ade0ec339832962f",
+    "pr_facts/GOOGL/0001652044-24-000115.jsonl": "2bc3daf18cf751d4ab55f47afac767c82c2fc0b99d97e234ce1dcf3ad915abff",
+    "pr_facts/GOOGL/0001652044-25-000010.jsonl": "d0c3eeace698c2ba6cd8a9d12ebd4e1ba179eaf678290e6cdd95612453941664",
+    "pr_facts/GOOGL/0001652044-25-000040.jsonl": "5eab47753bc367676b0a8e059b7e7a4034836050836641064020e2f8f910b8a1",
+    "pr_facts/GOOGL/0001652044-25-000056.jsonl": "babb205a80dac7754933a02e02d71dfa2c4013a1e63d5d707c3ee65fc7f4f2cb",
+    "pr_facts/GOOGL/0001652044-25-000087.jsonl": "8d8905bc41562ceb49ed8fbd9129fdf8e4b0bbeeb2c5b3b36ef22fca9fca1512",
+    "pr_facts/GOOGL/0001652044-26-000012.jsonl": "502405f02a8933e4fb90bfe4651c967b15df49ae3d472682e17fcf07b13d4ebe",
+    "pr_facts/GOOGL/0001652044-26-000043.jsonl": "66b191fd6adc6782cbf18a4278ea261374cbc7c0e72e6696ac474563c4b5fdae",
+    "pr_facts/GOOGL/0001652044-26-000066.jsonl": "29d9aeae06605e241c8ed23792b75453f2e274b56f5fa3bbbb4635af7c901678",
+    "pr_facts/JPM/0000019617-24-000555.jsonl": "872e1a2dac98547c5e62d746a73f4ffcebf0f419e703a2b7c9683867044e7db8",
+    "pr_facts/JPM/0000019617-25-000040.jsonl": "582cf9faa8de2bac9e361267639ed8dffcb2442036b5483c2c0b29a2ab933c2a",
+    "pr_facts/JPM/0000019617-25-000332.jsonl": "5456cd0c59c5b7cf68222152ea365d8b5573042b70af8960326fb28b824bed81",
+    "pr_facts/JPM/0000019617-25-000518.jsonl": "02e8603d529bcd1431c40758d0b6e0aff142b971c3052863c918f2eebd30db33",
+    "pr_facts/JPM/0001628280-25-044845.jsonl": "7d368f3ac15dc00d05cad7b78700acf141c40968ddb56e1f6dd1d244f23aec00",
+    "pr_facts/JPM/0001628280-26-001902.jsonl": "fb6fccca234e0bc7bdbd1d9a79676f054ee07c4b6a369f053ff58c1d61538400",
+    "pr_facts/JPM/0001628280-26-024990.jsonl": "a7f965fc2b1e3dce1f629f0191a1f4f1efff1317817f69fd9c52e8e3af9448e0",
+    "pr_facts/JPM/0001628280-26-048078.jsonl": "e37c27fadbd39b3885678fbf257650b0d37c6146297eecaeab7350451fbde4c9",
+    "pr_facts/META/0001326801-25-000014.jsonl": "67d6023847b92cab548d3293d70bd3e24b050f094763963e2c1ab8631a8e1be8",
+    "pr_facts/META/0001326801-25-000050.jsonl": "89cdd939034b761609c33559062080867a45773dc15f3637a6cc86e82ab58283",
+    "pr_facts/META/0001628280-25-036719.jsonl": "6c29a61a5bb2445ae7b091ce7dc0ebdce39a6116c73a2d0840bfac0d33f3ed8b",
+    "pr_facts/META/0001628280-25-047114.jsonl": "194ddf1429508570bbf37cadfdcd889d5a4acb96b22ca1dd3248a095b1575632",
+    "pr_facts/META/0001628280-26-003832.jsonl": "c6394806a459bf7a322bf8eaa2890603a22fe82d998d7c81f4e6ff45cfd5cfd4",
+    "pr_facts/META/0001628280-26-028364.jsonl": "27e57a0021a354e8ad57538010783b5efac2d210a28b970e8be75def490dfade",
+    "pr_facts/META/0001628280-26-050596.jsonl": "c84001354f01d01f743646d3bd1f36ffb6c85526334c376e84891cb9bf108475",
+    "pr_facts/META/0001628280-26-066700.jsonl": "4130bc8d8ff5177c7cc9ba41d6550f22969256e3d4e73298b113564608463644",
+    "pr_facts/MSFT/0000950170-24-118955.jsonl": "c9b34e1d9f7ffe1c2d3b46626b7fd2b48f163565ad645fc24581795951db9c1b",
+    "pr_facts/MSFT/0000950170-25-010484.jsonl": "4d614c3c1513685c898b0136f14083d1d0f69f6a7aab36454575f9efd968f7e8",
+    "pr_facts/MSFT/0000950170-25-061032.jsonl": "80016ce1b58f8be49a10ed7651b2e21d19b01f46b323c8f7a349430c325c1383",
+    "pr_facts/MSFT/0000950170-25-100226.jsonl": "09d68c7e1e3daed19138124f4bb5b93a95691ebded99967d908424908b823bcf",
+    "pr_facts/MSFT/0001193125-25-256310.jsonl": "304998a3794432f0a21bd2a3ce072772545391937f4bb445b66d2d3ec1987eaf",
+    "pr_facts/MSFT/0001193125-26-027198.jsonl": "fb9d254e715b1479a2eb6aa5d3d84877bb6c871b2cec6bbc887a8cf7e2d289c1",
+    "pr_facts/MSFT/0001193125-26-191457.jsonl": "84d190d3e6d0a1d928c450d24ec0aa10599960a77c3b282f369b8d6dc66a0c32",
+    "pr_facts/MSFT/0001193125-26-323632.jsonl": "9b6e5d020cd4bf3c29b85b5eac5461c2c52fa0990f3a463410d962f0490ef9a3",
+    "pr_facts/NFLX/0001065280-25-000033.jsonl": "588b16bdd8d1cf0ca1e9fa7c0916d5c11b89955ab59046fbca6870680f3a3b35",
+    "pr_facts/NFLX/0001065280-25-000175.jsonl": "1997d3124a739bd1d9dbbd0b229f9306deae25cc4fc5d54f264dafabd68a70a4",
+    "pr_facts/NFLX/0001065280-25-000322.jsonl": "04b1857b7f79c6bb7da3d21229981f8e9bca84e16d19d2ad120baa4612719fba",
+    "pr_facts/NFLX/0001065280-25-000404.jsonl": "2ef4fb41b851d3780a44c9169d8b8d197fab6dcf82683e93e80230b2a35cc72d",
+    "pr_facts/NFLX/0001065280-26-000033.jsonl": "4489b4be6a7846f900e31ffbe766df550cf107f1853ee652ebe4c15bde8f143b",
+    "pr_facts/NFLX/0001065280-26-000137.jsonl": "7a89fa405c174582eee0b3e42678014803d84d374bce0171b76a9dbd2a8a7920",
+    "pr_facts/NFLX/0001065280-26-000211.jsonl": "1a2fc9fbded17407f65cde8080311c7ab77ba33c010b316a7f50ef2469b3721d",
+    "pr_facts/NFLX/0001065280-26-000290.jsonl": "8b88f57e2ad59e1e15b419284ddac1bc73eb55fb988ab53ea3b9fd155055f57a",
+    "pr_facts/NVDA/0001045810-24-000315.jsonl": "a5334a5ba881db5fb0e48b2073fb81e11e3775b5c9094cc1b31b21f7bc62cdb3",
+    "pr_facts/NVDA/0001045810-25-000021.jsonl": "2f420bd7eae898a3dfe695432e51d5a6e64f7cc518879826499c879b8aa83188",
+    "pr_facts/NVDA/0001045810-25-000115.jsonl": "d5b788031950c16463d95b097c7c3db5bdd1e248aa0d2aa3488584d3a6c424db",
+    "pr_facts/NVDA/0001045810-25-000207.jsonl": "4bdc9a62a7a1075ba04084eeed55329c5d209ee7ac2a2bea568d52fb0eefa2e0",
+    "pr_facts/NVDA/0001045810-25-000228.jsonl": "0f27613021b1970a651f70999f55e24a036af7207e54713f62ca57d6ab9095e2",
+    "pr_facts/NVDA/0001045810-26-000019.jsonl": "791bdd438e0d80b14c56f094eef668ca67bb7224b00f375222e5f42a944bde6b",
+    "pr_facts/NVDA/0001045810-26-000051.jsonl": "4b18b0ba3f45d2e2f0276898bcbeb0426cae66d200dad170b3d714b2561b2b7a",
+    "pr_facts/NVDA/0001045810-26-000073.jsonl": "3ded5fce43de1410164e96889e7db8306ef6cce37ceeae672e7490f5e8feaef3"
+  },
+  "max_output_tokens": 2048,
+  "reasoning_effort": "low",
+  "local_run_dir": "data/eval_runs/qa-closed-book-20261029",
+  "concurrency": 2,
+  "timeout_s": 120,
+  "batch_wall_limit_s": 720,
+  "cleanup_margin_s": 15,
+  "sdk_retries": 0,
+  "redirects": false,
+  "records": [
+    {
+      "question_id": "qa-AAPL-2023Q4-net_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Apple Inc.",
+        "metric": "net_income",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$22,956 million",
+        "reason": "Closed-book recall of Apple Q4 FY2023 earnings release (quarter ended 2023-09-30); exact figure subject to recall uncertainty without source verification."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "49fa721f8175c5bf620826ec1985bd58368a9c22f48425b4c92ffd7a49cd642d",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Apple Inc.\", \"metric\": \"net_income\", \"fiscal_year\": 2023, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$22,956 million\", \"reason\": \"Closed-book recall of Apple Q4 FY2023 earnings release (quarter ended 2023-09-30); exact figure subject to recall uncertainty without source verification.\"}",
+      "output_sha256": "34b2882734c5a92eeef8444dc7472583796c0b9ac9e042c028148e28c6b37662",
+      "response_complete": true,
+      "latency_s": 3.415802,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 683,
+        "cached_tokens": 0,
+        "reasoning_tokens": 573
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003653,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AAPL-2024Q3-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Apple Inc.",
+        "metric": "eps_diluted",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD per share",
+        "value_text": "$1.40 per share",
+        "reason": "Closed-book recall; Q3 FY2024 quarter ended 2024-06-29 reported diluted EPS ~$1.40, subject to rounding/restatement uncertainty without filing verification."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "d53a81afff550dbaa649fe46f6296de82bfec240711331a4bea81d60305454d8",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Apple Inc.\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q3\", \"basis\": \"GAAP\", \"unit\": \"USD per share\", \"value_text\": \"$1.40 per share\", \"reason\": \"Closed-book recall; Q3 FY2024 quarter ended 2024-06-29 reported diluted EPS ~$1.40, subject to rounding/restatement uncertainty without filing verification.\"}",
+      "output_sha256": "c8105bec741951fc656ba5547c4191597aa499fe6c6c7b116dcc98c460bf864a",
+      "response_complete": true,
+      "latency_s": 2.408534,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 338,
+        "cached_tokens": 0,
+        "reasoning_tokens": 220
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002191,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AAPL-2024Q4-gross_profit",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Apple Inc.",
+        "metric": "gross_profit",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$43858 million",
+        "reason": "Derived from reported Q4 FY2024 revenue $94,930m and reported gross margin 46.2%, exact statement value not independently verified to the million, uncertainty from rounding."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "071bec71711df9d5354c8f40d37432fc652d63206727cf2bf1c0a9674a001249",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Apple Inc.\", \"metric\": \"gross_profit\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$43858 million\", \"reason\": \"Derived from reported Q4 FY2024 revenue $94,930m and reported gross margin 46.2%, exact statement value not independently verified to the million, uncertainty from rounding.\"}",
+      "output_sha256": "5d093a8a6c19923cf94b6df0a68b2d0b243fd87496be64bd5702ce301175329f",
+      "response_complete": true,
+      "latency_s": 5.013666,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 1207,
+        "cached_tokens": 0,
+        "reasoning_tokens": 1093
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00588,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AAPL-2026Q1-operating_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Requested quarter ended 2025-12-27 would be reported after knowledge cutoff of 2026-01-04, so GAAP operating income value is not in available knowledge; must not invent."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "a70ca775c69af74a0c6a34a4b54d2a89734d00e92bf22b0b665a9724d61696e6",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Requested quarter ended 2025-12-27 would be reported after knowledge cutoff of 2026-01-04, so GAAP operating income value is not in available knowledge; must not invent.\"}",
+      "output_sha256": "acd6f82cf34478bc5e0403f2ec81752dbe5e96d362a9d68feace19e41df36ff0",
+      "response_complete": true,
+      "latency_s": 1.928623,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 332,
+        "cached_tokens": 512,
+        "reasoning_tokens": 229
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001598,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMD-2023Q3-revenue",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "No filings or retrieval provided in this closed-book request and precise GAAP revenue to the nearest million cannot be verified without source documents; abstaining to avoid invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "ae6edfba4fc1a55800c6dfc273da1d2efc322f4f14e2603f67a9595e16777406",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"No filings or retrieval provided in this closed-book request and precise GAAP revenue to the nearest million cannot be verified without source documents; abstaining to avoid invention.\"}",
+      "output_sha256": "20e81a40b45c66f812e535ba6869ae5a4617c6898d5173bdfdeddec4c5288be7",
+      "response_complete": true,
+      "latency_s": 2.368873,
+      "usage": {
+        "input_tokens": 602,
+        "output_tokens": 537,
+        "cached_tokens": 0,
+        "reasoning_tokens": 443
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003035,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMD-2025Q1-operating_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Cannot recall precise GAAP operating income for AMD Q1 FY2025 (quarter ended 2025-03-29) to nearest million from memory alone with sufficient confidence, and no retrieval is available to verify the reported filing value."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "e8555da5b9828609931a7d1b906fd8d029c3bef3a73c41797a304a6d974f351a",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Cannot recall precise GAAP operating income for AMD Q1 FY2025 (quarter ended 2025-03-29) to nearest million from memory alone with sufficient confidence, and no retrieval is available to verify the reported filing value.\"}",
+      "output_sha256": "145e7cdbdd1324ee89e5525d0a9c6e28930b09c52377ec29ec7077b684656a41",
+      "response_complete": true,
+      "latency_s": 6.125981,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 1271,
+        "cached_tokens": 0,
+        "reasoning_tokens": 1162
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.006156,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMD-2025Q3-net_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "No filings, retrieval, search or tools are provided and I do not have the verified reported GAAP net income for AMD Q3 FY2025 memorized to the required precision; I must not invent a value."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "818abf5217b302de0c36372e5c19e1dd23d6efe35ff55bb2dd4609a200eee264",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"No filings, retrieval, search or tools are provided and I do not have the verified reported GAAP net income for AMD Q3 FY2025 memorized to the required precision; I must not invent a value.\"}",
+      "output_sha256": "1723117033aeb287284c3f1ecd36da0f968dc83f47ddf5df20d50fc05c6b68c5",
+      "response_complete": true,
+      "latency_s": 1.586785,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 326,
+        "cached_tokens": 512,
+        "reasoning_tokens": 221
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001577,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMD-2026Q2-operating_cash_flow",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Knowledge cutoff 2026-01-04 is before quarter ended 2026-06-27; cannot verify GAAP value from own knowledge without retrieval, risking hallucination."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "e708b9824c188955dcf716349a9847b385d0d42ea5f1f5e751e474d88aab3782",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Knowledge cutoff 2026-01-04 is before quarter ended 2026-06-27; cannot verify GAAP value from own knowledge without retrieval, risking hallucination.\"}",
+      "output_sha256": "e3a19ab75d358be2aeb9a315b469708c41754dd4542a3128744aa1f487f42f1e",
+      "response_complete": true,
+      "latency_s": 1.390523,
+      "usage": {
+        "input_tokens": 605,
+        "output_tokens": 250,
+        "cached_tokens": 512,
+        "reasoning_tokens": 150
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001256,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMZN-2023Q4-net_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Amazon",
+        "metric": "net_income",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$10624 million",
+        "reason": "Figure from Amazon Q4 2023 earnings release; slight rounding variants exist between press release table and derived 10-K quarterly sum."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "935030d0844f65a127d0d354371bd959cf4f9f17a814997ee1b5d88494e32719",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Amazon\", \"metric\": \"net_income\", \"fiscal_year\": 2023, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$10624 million\", \"reason\": \"Figure from Amazon Q4 2023 earnings release; slight rounding variants exist between press release table and derived 10-K quarterly sum.\"}",
+      "output_sha256": "ae37cfa76921999c096a6d972b1b1218cc0b64843a35ecafd0afc9597ef93ec7",
+      "response_complete": true,
+      "latency_s": 2.98922,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 764,
+        "cached_tokens": 0,
+        "reasoning_tokens": 662
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003999,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMZN-2024Q2-operating_cash_flow",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "In closed-book setting I cannot locate the precise Amazon Q2 FY2024 quarterly GAAP operating cash flow figure in my knowledge base at the required precision and do not have filing data available to verify it, so I cannot provide a reliable USD-millions value without retrieval."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "c921e6931254e4cb8c4a933456f7305299bba99c3bcd52b7e2cfeec0b5dae614",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"In closed-book setting I cannot locate the precise Amazon Q2 FY2024 quarterly GAAP operating cash flow figure in my knowledge base at the required precision and do not have filing data available to verify it, so I cannot provide a reliable USD-millions value without retrieval.\"}",
+      "output_sha256": "01b2338b96b0226e9e4640b2bb54f1d7b5a98246380cd2099718d56c84c4062e",
+      "response_complete": true,
+      "latency_s": 4.523329,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 934,
+        "cached_tokens": 512,
+        "reasoning_tokens": 818
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.004161,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMZN-2024Q3-operating_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Amazon",
+        "metric": "operating_income",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$17413 million",
+        "reason": "Closed-book estimate without filings; Q3 FY2024 operating income recalled as ~$17.4B but exact million precision uncertain"
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "805160d37c108f5f427f996a65d873f0feb6b3cf2c79a6d63f6074b43f63cd2f",
+      "output_text": "{\"status\":\"answer\",\"entity\":\"Amazon\",\"metric\":\"operating_income\",\"fiscal_year\":2024,\"fiscal_period\":\"Q3\",\"basis\":\"GAAP\",\"unit\":\"USD millions\",\"value_text\":\"$17413 million\",\"reason\":\"Closed-book estimate without filings; Q3 FY2024 operating income recalled as ~$17.4B but exact million precision uncertain\"}",
+      "output_sha256": "4101cb0d06a24057cb9f56fb6d1908c32e9c2fc6791c9c077a175f27b0a30bbc",
+      "response_complete": true,
+      "latency_s": 2.639019,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 551,
+        "cached_tokens": 512,
+        "reasoning_tokens": 466
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00253,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMZN-2024Q3-research_and_development",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Closed-book without retrieval; cannot verify Amazon's exact GAAP research and development (Technology and infrastructure) expense for Q3 FY2024 to the nearest million without risking invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "e49d473cdd1addffc2edbf4f8c438ea10ffcc4b2ad9167279ae27bde82a57c7e",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Closed-book without retrieval; cannot verify Amazon's exact GAAP research and development (Technology and infrastructure) expense for Q3 FY2024 to the nearest million without risking invention.\"}",
+      "output_sha256": "d893f6cff7a94c9ca3d618122f313e1d241ca7e815d5a55769e7f360203d39e4",
+      "response_complete": true,
+      "latency_s": 2.607398,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 493,
+        "cached_tokens": 512,
+        "reasoning_tokens": 395
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002286,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-AMZN-2025Q2-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Amazon.com, Inc.",
+        "metric": "eps_diluted",
+        "fiscal_year": 2025,
+        "fiscal_period": "Q2",
+        "basis": "GAAP",
+        "unit": "USD per share",
+        "value_text": "$1.68 per share",
+        "reason": "Closed-book recall of Amazon Q2 FY2025 reported GAAP diluted EPS; precision to nearest cent requires exact filing value and cannot be fully verified without retrieval."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "360b7c2ace70d3c5b33bb7542d0724c4009eac3e9c9619a3d2c3d8d01efbb085",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Amazon.com, Inc.\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2025, \"fiscal_period\": \"Q2\", \"basis\": \"GAAP\", \"unit\": \"USD per share\", \"value_text\": \"$1.68 per share\", \"reason\": \"Closed-book recall of Amazon Q2 FY2025 reported GAAP diluted EPS; precision to nearest cent requires exact filing value and cannot be fully verified without retrieval.\"}",
+      "output_sha256": "b96768255cbf7c73061352fcf2e2f3c2f09f4bac63696ae949086b9a64e493b3",
+      "response_complete": true,
+      "latency_s": 2.354626,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 468,
+        "cached_tokens": 0,
+        "reasoning_tokens": 354
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002744,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-BAC-2023Q3-operating_cash_flow",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "No filing data provided in context and no retrieval capability to verify Bank of America's reported GAAP operating cash flow for Q3 FY2023, so cannot supply audited numeric value without risk of hallucination."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "aadd9b9f06e77b23d082c17d8d8b79d5d6ce89780d88505ed5a19dd9c8270cbc",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"No filing data provided in context and no retrieval capability to verify Bank of America's reported GAAP operating cash flow for Q3 FY2023, so cannot supply audited numeric value without risk of hallucination.\"}",
+      "output_sha256": "70cc171793c26652cc15cd74319eb56a804971f142ba56123683ad39b70d185f",
+      "response_complete": true,
+      "latency_s": 1.275298,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 168,
+        "cached_tokens": 512,
+        "reasoning_tokens": 64
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.000906,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-BAC-2024Q2-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Bank of America Corporation",
+        "metric": "eps_diluted",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q2",
+        "basis": "GAAP",
+        "unit": "USD per share",
+        "value_text": "$0.83 per share",
+        "reason": "Closed-book recall of reported GAAP diluted EPS; uncertainty remains without source verification but value matches published Q2 FY2024 result."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "entity_mismatch_or_unknown",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "bdc55f717cea394c795a27d968638c72312ccc7bcded47f25d5a5823ab161294",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Bank of America Corporation\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q2\", \"basis\": \"GAAP\", \"unit\": \"USD per share\", \"value_text\": \"$0.83 per share\", \"reason\": \"Closed-book recall of reported GAAP diluted EPS; uncertainty remains without source verification but value matches published Q2 FY2024 result.\"}",
+      "output_sha256": "0002d98450dfce663e756a63eea3a5edefd4b85ba0e17fd8f91c100af34ed97e",
+      "response_complete": true,
+      "latency_s": 2.739464,
+      "usage": {
+        "input_tokens": 605,
+        "output_tokens": 557,
+        "cached_tokens": 0,
+        "reasoning_tokens": 449
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003124,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-BAC-2024Q3-net_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Closed-book verification would require precise GAAP net income file without retrieval; cannot confirm exact USD millions value to nearest million with high confidence."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "1c55a02c1a1041a6b031abf91fdf77a218295c11be618ce125b8a94240bb21c4",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Closed-book verification would require precise GAAP net income file without retrieval; cannot confirm exact USD millions value to nearest million with high confidence.\"}",
+      "output_sha256": "5a84252ead1b9904e89661d126bfb0518746bc7a9a8462c97fd6b2aec0ff0ad5",
+      "response_complete": true,
+      "latency_s": 2.862475,
+      "usage": {
+        "input_tokens": 602,
+        "output_tokens": 607,
+        "cached_tokens": 512,
+        "reasoning_tokens": 518
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00277,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-BAC-2025Q2-net_interest_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Exact GAAP net interest income for Bank of America Q2 FY2025 not in knowledge without retrieval; cannot verify to nearest million so abstain rather than guess."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "c605960d535a12d788d37687d7e325c900405611da11539fbfdbfad97053117f",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Exact GAAP net interest income for Bank of America Q2 FY2025 not in knowledge without retrieval; cannot verify to nearest million so abstain rather than guess.\"}",
+      "output_sha256": "8e9ba8b4d0437bde46d8fdc6466a45f138f10b869219e1c7209471a995d431c2",
+      "response_complete": true,
+      "latency_s": 2.082291,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 491,
+        "cached_tokens": 0,
+        "reasoning_tokens": 396
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002841,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-BAC-2026Q1-revenue",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Knowledge cutoff 2026-01-04 precedes Q1 FY2026 reporting period ended 2026-03-31, so reported value not in closed-book knowledge."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "a857ebc2ad5cfd7005f2695befef8eff84a4852b4553274024b7d73f04c3594b",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Knowledge cutoff 2026-01-04 precedes Q1 FY2026 reporting period ended 2026-03-31, so reported value not in closed-book knowledge.\"}",
+      "output_sha256": "63561b74e209423ae369b9d40391d4bf731935b33bf3ec4e8d41f4a54a36eec0",
+      "response_complete": true,
+      "latency_s": 1.834289,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 266,
+        "cached_tokens": 512,
+        "reasoning_tokens": 167
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001319,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-GOOGL-2023Q4-operating_cash_flow",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Insufficient confidence in exact quarterly GAAP operating cash flow value for Q4 FY2023 without retrieval; do not have verified figure to required precision."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "6b04eebaccdc656ce83296220881f30135e8ba3b9adc7d57afc83383334c1393",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Insufficient confidence in exact quarterly GAAP operating cash flow value for Q4 FY2023 without retrieval; do not have verified figure to required precision.\"}",
+      "output_sha256": "e5894bc045f6a2f660c245bb5912b3f93ad5089bc6871af5a37e8b9ec05163be",
+      "response_complete": true,
+      "latency_s": 3.47094,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 914,
+        "cached_tokens": 0,
+        "reasoning_tokens": 822
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.004639,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-GOOGL-2025Q1-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Alphabet",
+        "metric": "eps_diluted",
+        "fiscal_year": 2025,
+        "fiscal_period": "Q1",
+        "basis": "GAAP",
+        "unit": "USD",
+        "value_text": "$2.81 per share",
+        "reason": "Based on closed-book recall of Alphabet Q1 FY2025 earnings release; no retrieval to verify precise GAAP value"
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "912570d5b4612c31b7339d95eb530d26cedadfb49bc9e98c162b67478fa78225",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Alphabet\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2025, \"fiscal_period\": \"Q1\", \"basis\": \"GAAP\", \"unit\": \"USD\", \"value_text\": \"$2.81 per share\", \"reason\": \"Based on closed-book recall of Alphabet Q1 FY2025 earnings release; no retrieval to verify precise GAAP value\"}",
+      "output_sha256": "0a7204633458e4d7c54f01f17e1e844c326c110ded632600ebe514083c202629",
+      "response_complete": true,
+      "latency_s": 3.010046,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 778,
+        "cached_tokens": 512,
+        "reasoning_tokens": 678
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003499,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-GOOGL-2025Q2-operating_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Exact GAAP operating income for Alphabet Q2 FY2025 to nearest million cannot be recalled with certainty under closed-book constraints; abstaining to avoid invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "5322d87a0e06fb6a3d77f4b7a55863d15e8c02599cb978d965db1c2948419934",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Exact GAAP operating income for Alphabet Q2 FY2025 to nearest million cannot be recalled with certainty under closed-book constraints; abstaining to avoid invention.\"}",
+      "output_sha256": "7d861988e0a5a175574796d11d3573dd7de278f889247ee136f01f8d56d489a7",
+      "response_complete": true,
+      "latency_s": 2.414046,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 531,
+        "cached_tokens": 0,
+        "reasoning_tokens": 438
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003008,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-GOOGL-2026Q2-research_and_development",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Fiscal period Q2 FY2026 ended 2026-06-30 is after knowledge cutoff 2026-01-04; no closed-book verified value available."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "8cde299816d5372c548b343d1e084014f1fee87ea0c30b6f73735b2dc5836bdd",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Fiscal period Q2 FY2026 ended 2026-06-30 is after knowledge cutoff 2026-01-04; no closed-book verified value available.\"}",
+      "output_sha256": "75e25077c6906fc5ccf4336288c218f857b21c78c7dd15f7ba294d39b652b1ff",
+      "response_complete": true,
+      "latency_s": 1.28301,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 257,
+        "cached_tokens": 512,
+        "reasoning_tokens": 160
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001283,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-JPM-2023Q4-revenue",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Cannot recall exact GAAP reported vs managed Q4 FY2023 revenue for JPMorgan Chase to nearest million without retrieval; distinction between reported and managed basis creates uncertainty about precise figure."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "8f9d0488a5172fedaa8f0d04237e67dbd2dec86789735713080b55850220f9be",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Cannot recall exact GAAP reported vs managed Q4 FY2023 revenue for JPMorgan Chase to nearest million without retrieval; distinction between reported and managed basis creates uncertainty about precise figure.\"}",
+      "output_sha256": "1ceffa74fa0a94e84aec45a20d7ef9e9937a26b8605c78309062831e6d532f1e",
+      "response_complete": true,
+      "latency_s": 5.755134,
+      "usage": {
+        "input_tokens": 602,
+        "output_tokens": 1422,
+        "cached_tokens": 0,
+        "reasoning_tokens": 1323
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.006796,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-JPM-2024Q3-net_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "JPMorgan Chase",
+        "metric": "net_income",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$12900 million",
+        "reason": "Precise GAAP net income to nearest million not verified in closed-book context; $12.9 billion headline figure typically rounded to $12,900 million."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "9b21d5e99ac7ca876ea994250ebe6849aed02f2fab9985e65a571a763eef28cc",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"JPMorgan Chase\", \"metric\": \"net_income\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q3\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$12900 million\", \"reason\": \"Precise GAAP net income to nearest million not verified in closed-book context; $12.9 billion headline figure typically rounded to $12,900 million.\"}",
+      "output_sha256": "215c038ed62dae9a43c9c22f9d0ec2f6444fbfcf1bde3a0bc9e67a129414a170",
+      "response_complete": true,
+      "latency_s": 3.680038,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 919,
+        "cached_tokens": 512,
+        "reasoning_tokens": 810
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.004097,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-JPM-2024Q4-net_interest_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Closed-book; no filings provided and exact GAAP net interest income value for Q4 FY2024 not in memory with sufficient precision to report to nearest million without risking invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "141412e2ff383d1b7f7c4a07c74f5c59adffcb289e650b65dbec54a0b4e93a79",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Closed-book; no filings provided and exact GAAP net interest income value for Q4 FY2024 not in memory with sufficient precision to report to nearest million without risking invention.\"}",
+      "output_sha256": "dae13e68959b55faa60c42180bf88100331eed3712686926b5d88afe9f6cae1f",
+      "response_complete": true,
+      "latency_s": 2.215788,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 445,
+        "cached_tokens": 512,
+        "reasoning_tokens": 347
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002084,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-JPM-2025Q3-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "JPMorgan Chase & Co.",
+        "metric": "eps_diluted",
+        "fiscal_year": 2025,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD_per_share",
+        "value_text": "$5.07 per share",
+        "reason": "Closed-book recall; Q3 FY2025 (ended 2025-09-30) GAAP diluted EPS reported ~$5.07 but precision not verified against primary filing."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "8e672c4d4ec861d8e89d0dc90915fd896b0d2e784c76cb82eaa04191da38ada8",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"JPMorgan Chase & Co.\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2025, \"fiscal_period\": \"Q3\", \"basis\": \"GAAP\", \"unit\": \"USD_per_share\", \"value_text\": \"$5.07 per share\", \"reason\": \"Closed-book recall; Q3 FY2025 (ended 2025-09-30) GAAP diluted EPS reported ~$5.07 but precision not verified against primary filing.\"}",
+      "output_sha256": "e6851f7e46c11a66e0aa0c9360252d18d24bdd384fee2b15881bae8d184e7348",
+      "response_complete": true,
+      "latency_s": 3.552195,
+      "usage": {
+        "input_tokens": 606,
+        "output_tokens": 824,
+        "cached_tokens": 512,
+        "reasoning_tokens": 703
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003697,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-JPM-2026Q2-operating_cash_flow",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Knowledge cutoff 2026-01-04 is before fiscal period ended 2026-06-30, so reported value is not in knowledge base; cannot retrieve or verify by public cutoff date without tools."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "f383fc0aabe2a903c2e8af315380ed07bed3f8ee2de826dbd81abfc6b0c39d46",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Knowledge cutoff 2026-01-04 is before fiscal period ended 2026-06-30, so reported value is not in knowledge base; cannot retrieve or verify by public cutoff date without tools.\"}",
+      "output_sha256": "dcf73d82aa0543cbeda9031fab049ef24cd7c8afc355bce438ea2d7e2e649c97",
+      "response_complete": true,
+      "latency_s": 1.344026,
+      "usage": {
+        "input_tokens": 605,
+        "output_tokens": 252,
+        "cached_tokens": 512,
+        "reasoning_tokens": 147
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001265,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-META-2023Q3-net_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Meta Platforms",
+        "metric": "net_income",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$11583 million",
+        "reason": "Closed-book recall of Meta Q3 FY2023 10-Q/earnings release net income; uncertainty low but without retrieval verification."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "469e0ba93c99056514400edb0744766b2de1d3a35569cc0cb287977850355d1a",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Meta Platforms\", \"metric\": \"net_income\", \"fiscal_year\": 2023, \"fiscal_period\": \"Q3\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$11583 million\", \"reason\": \"Closed-book recall of Meta Q3 FY2023 10-Q/earnings release net income; uncertainty low but without retrieval verification.\"}",
+      "output_sha256": "18059e5cbd880112b7f634fb3d73cd1df30af6fae11a452502d2e548e7d6dafa",
+      "response_complete": true,
+      "latency_s": 2.357516,
+      "usage": {
+        "input_tokens": 602,
+        "output_tokens": 503,
+        "cached_tokens": 512,
+        "reasoning_tokens": 400
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002328,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-META-2023Q4-revenue",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Meta Platforms",
+        "metric": "revenue",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$40111 million",
+        "reason": "Recalled from Q4 FY2023 earnings release issued Feb 1, 2024; value widely reported as $40.11B. No retrieval provided, uncertainty low but closed-book."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "41b55b813ccc5f9875aaa2b1af667a361149e28bf7262f3e2fe19e4a819b5b19",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Meta Platforms\", \"metric\": \"revenue\", \"fiscal_year\": 2023, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$40111 million\", \"reason\": \"Recalled from Q4 FY2023 earnings release issued Feb 1, 2024; value widely reported as $40.11B. No retrieval provided, uncertainty low but closed-book.\"}",
+      "output_sha256": "a33e393891ff904054e21b990244e9728b4740f46a8ca92226abf635017c89d3",
+      "response_complete": true,
+      "latency_s": 2.872305,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 667,
+        "cached_tokens": 512,
+        "reasoning_tokens": 552
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003023,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-META-2025Q2-operating_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "No filings, retrieval, search or tools provided and instructions require not inventing a value when not known from own knowledge; cannot verify Meta Platforms GAAP operating income for Q2 FY2025 from memory alone."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "2b901efcb50b8bf3dae1dd08ab6fcc2a21bf30fa2016bd95adff045ab4328f8d",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"No filings, retrieval, search or tools provided and instructions require not inventing a value when not known from own knowledge; cannot verify Meta Platforms GAAP operating income for Q2 FY2025 from memory alone.\"}",
+      "output_sha256": "c012785c4e7a53bb43b0db9057a2ceb1e55a21867902963402d659e139f8544d",
+      "response_complete": true,
+      "latency_s": 1.145137,
+      "usage": {
+        "input_tokens": 602,
+        "output_tokens": 172,
+        "cached_tokens": 0,
+        "reasoning_tokens": 68
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001484,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-META-2025Q3-eps_diluted",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "No filing retrieval or search tools provided and no verified reported GAAP value for the requested metric/period in available knowledge; cannot supply numeric answer without inventing data."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "5884a913d2f97bd163f13c01e7f6595ddaa0737c0046e672042f5298ca592be3",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"No filing retrieval or search tools provided and no verified reported GAAP value for the requested metric/period in available knowledge; cannot supply numeric answer without inventing data.\"}",
+      "output_sha256": "ecf5a69012942a086bdd2c071ee7a152ad1515ecc99ecd3cc7414a2c9a952c0a",
+      "response_complete": true,
+      "latency_s": 1.699921,
+      "usage": {
+        "input_tokens": 605,
+        "output_tokens": 271,
+        "cached_tokens": 0,
+        "reasoning_tokens": 176
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001908,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-MSFT-2024Q1-operating_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Microsoft",
+        "metric": "operating_income",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q1",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$26,895 million",
+        "reason": "Closed-book recall of Microsoft Q1 FY2024 10-Q operating income; value subject to rounding/memory uncertainty without retrieval."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "e78aa771154f02ddca33b8a3192320f8c2e7d41014279e4ab1cc74fe8cf2e1d0",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Microsoft\", \"metric\": \"operating_income\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q1\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$26,895 million\", \"reason\": \"Closed-book recall of Microsoft Q1 FY2024 10-Q operating income; value subject to rounding/memory uncertainty without retrieval.\"}",
+      "output_sha256": "3904a0cb182505519885ce3d06fe3b692d053804a793676fa01ddff64956e80a",
+      "response_complete": true,
+      "latency_s": 2.357271,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 529,
+        "cached_tokens": 512,
+        "reasoning_tokens": 428
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002437,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-MSFT-2024Q4-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Microsoft",
+        "metric": "eps_diluted",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD per share",
+        "value_text": "$2.95 per share",
+        "reason": "Microsoft Q4 FY2024 (quarter ended 2024-06-30) reported diluted EPS of $2.95 from memory of July 30, 2024 earnings release; FY2024 10-K cross-check with annual $11.80 supports quarterly sum, but no filing retrieved to verify - uncertainty remains without source verification."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "a2d502ec086413c5571f65d8f8a50c72a9b9c69ca622f0505978bc6c8758a117",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Microsoft\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD per share\", \"value_text\": \"$2.95 per share\", \"reason\": \"Microsoft Q4 FY2024 (quarter ended 2024-06-30) reported diluted EPS of $2.95 from memory of July 30, 2024 earnings release; FY2024 10-K cross-check with annual $11.80 supports quarterly sum, but no filing retrieved to verify - uncertainty remains without source verification.\"}",
+      "output_sha256": "4640f6cee6fdd45ebfe25da59e76f44d4a999b70b71bc1dbd91a2ca57431da77",
+      "response_complete": true,
+      "latency_s": 2.440842,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 526,
+        "cached_tokens": 0,
+        "reasoning_tokens": 377
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002991,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-MSFT-2024Q4-gross_profit",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "No filings were provided and the precise Microsoft Q4 FY2024 GAAP gross profit to the nearest million cannot be recalled with sufficient certainty closed-book without retrieval; abstaining to avoid invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "1dfa98216695503c174855a2f9cc4dfe078759d0fe43a4a8044eefb08d55613d",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"No filings were provided and the precise Microsoft Q4 FY2024 GAAP gross profit to the nearest million cannot be recalled with sufficient certainty closed-book without retrieval; abstaining to avoid invention.\"}",
+      "output_sha256": "6e75ea9cc090ccbd71d8a470fbed55bfc27131fb44fc0ff942f803f514ce5ec2",
+      "response_complete": true,
+      "latency_s": 6.84952,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 1583,
+        "cached_tokens": 512,
+        "reasoning_tokens": 1483
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.006916,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-MSFT-2025Q4-revenue",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Microsoft",
+        "metric": "revenue",
+        "fiscal_year": 2025,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$76,441 million",
+        "reason": "Q4 FY2025 revenue as reported July 30 2025; small uncertainty on exact million-level rounding"
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "a805ed4819244ff0d4ee0d67a7a2cc8bc01d421ea7bef9d9d8a663da83f5e532",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Microsoft\", \"metric\": \"revenue\", \"fiscal_year\": 2025, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$76,441 million\", \"reason\": \"Q4 FY2025 revenue as reported July 30 2025; small uncertainty on exact million-level rounding\"}",
+      "output_sha256": "aa5733424f7e4b73b5476121e1a8e1f6f846cd05cd1d605b57f1874421140936",
+      "response_complete": true,
+      "latency_s": 3.148446,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 655,
+        "cached_tokens": 512,
+        "reasoning_tokens": 557
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002971,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-MSFT-2026Q2-operating_cash_flow",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Closed-book without filings; cannot verify GAAP cash flow from operations for Microsoft Q2 FY2026 ended 2025-12-31 with certainty and must not invent a value."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "0589ff8149857a49a59a224016fd9444d6cb80072a4bc4ecd320adb2d97ad979",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Closed-book without filings; cannot verify GAAP cash flow from operations for Microsoft Q2 FY2026 ended 2025-12-31 with certainty and must not invent a value.\"}",
+      "output_sha256": "d9f5c261dbdb9e41839c21a8e88d423756aab1af74d5b1337e471b113ff50717",
+      "response_complete": true,
+      "latency_s": 1.387395,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 271,
+        "cached_tokens": 512,
+        "reasoning_tokens": 172
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001343,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NFLX-2023Q4-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Netflix",
+        "metric": "eps_diluted",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD per share",
+        "value_text": "$2.11 per share",
+        "reason": "Retrieved from memory of Netflix Q4 FY2023 earnings release; no filing access to verify, uncertainty low but closed-book."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "3db29692df031d31576361e6fe002e259bd025b58d3915094cd24656f73520c3",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Netflix\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2023, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD per share\", \"value_text\": \"$2.11 per share\", \"reason\": \"Retrieved from memory of Netflix Q4 FY2023 earnings release; no filing access to verify, uncertainty low but closed-book.\"}",
+      "output_sha256": "695d3542ee81c6d67e61b351f07db5c0e0fb16b3ae5730023cd4c957a4cc020d",
+      "response_complete": true,
+      "latency_s": 1.783492,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 376,
+        "cached_tokens": 512,
+        "reasoning_tokens": 270
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00179,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NFLX-2026Q1-research_and_development",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Requested Q1 FY2026 (ended 2026-03-31) falls after knowledge cutoff 2026-01-04 and no retrieval/tools provided; cannot verify GAAP R&D value from memory without risk of invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "028869d7c8a12ffc66305754f538c6b8b5aee8fdaeec84c41e9c1072342aa78a",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Requested Q1 FY2026 (ended 2026-03-31) falls after knowledge cutoff 2026-01-04 and no retrieval/tools provided; cannot verify GAAP R&D value from memory without risk of invention.\"}",
+      "output_sha256": "ace5e41034c7a72378c945411f18acd25044c0d4446374ef7808659922024c5d",
+      "response_complete": true,
+      "latency_s": 1.780851,
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 344,
+        "cached_tokens": 512,
+        "reasoning_tokens": 235
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001653,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NFLX-2026Q2-net_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Requested fiscal period Q2 FY2026 ended 2026-06-30 is after knowledge cutoff of 2026-01-04; cannot verify reported GAAP net income from provided closed-book knowledge."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "deb85634fcd1e8b713e9db5ba22644a1a5479578e665fb675fc54b316dc40ad2",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Requested fiscal period Q2 FY2026 ended 2026-06-30 is after knowledge cutoff of 2026-01-04; cannot verify reported GAAP net income from provided closed-book knowledge.\"}",
+      "output_sha256": "a57c8c8c2159da7030a8c83c6ae8ff7bf27d1d722035f4e6596ee7dfeb635828",
+      "response_complete": true,
+      "latency_s": 1.417986,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 260,
+        "cached_tokens": 512,
+        "reasoning_tokens": 156
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001294,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NFLX-2026Q2-operating_income",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Requested fiscal period ends after knowledge cutoff (2026-01-04) and no retrieval/tools provided to verify reported GAAP value; cannot confirm without inventing data."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "233e54588b8f7a552e739b40bb4defe38c935f528f46cba30f6783074c8dc619",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Requested fiscal period ends after knowledge cutoff (2026-01-04) and no retrieval/tools provided to verify reported GAAP value; cannot confirm without inventing data.\"}",
+      "output_sha256": "e9e97f24737dccdcea6f8aa063e5540519c45cb2390e81af703946f34cd77026",
+      "response_complete": true,
+      "latency_s": 1.564366,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 260,
+        "cached_tokens": 512,
+        "reasoning_tokens": 164
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001294,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NFLX-2026Q3-revenue",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Requested fiscal period ends after knowledge cutoff (2026-01-04); no filings through 2026-10-29 are in knowledge base, so value cannot be verified."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "ce8eafe42e7515a6725f28640a4d1efafeae00819daa14d9201f3a2cbe76af7c",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Requested fiscal period ends after knowledge cutoff (2026-01-04); no filings through 2026-10-29 are in knowledge base, so value cannot be verified.\"}",
+      "output_sha256": "38ea509210f12135e53c2cbb1b3ea4cbaf6118295da331f60e94ea0d12aad5e1",
+      "response_complete": true,
+      "latency_s": 1.317188,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 213,
+        "cached_tokens": 512,
+        "reasoning_tokens": 114
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001093,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NVDA-2025Q3-eps_diluted",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "NVIDIA",
+        "metric": "eps_diluted",
+        "fiscal_year": 2025,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD per share",
+        "value_text": "$0.78 per share",
+        "reason": "Actual GAAP diluted EPS to nearest cent for period cannot be verified with certainty under closed-book constraints; value based on internal knowledge without source retrieval."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "d40e5ec5f5dd4ae6e312f6fdf7204a0521304dc60d7f48752769264a76e25fcd",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"NVIDIA\", \"metric\": \"eps_diluted\", \"fiscal_year\": 2025, \"fiscal_period\": \"Q3\", \"basis\": \"GAAP\", \"unit\": \"USD per share\", \"value_text\": \"$0.78 per share\", \"reason\": \"Actual GAAP diluted EPS to nearest cent for period cannot be verified with certainty under closed-book constraints; value based on internal knowledge without source retrieval.\"}",
+      "output_sha256": "ffbe378ac2ddbebaeb47051400a73e167bc9de405572d2b493c8a3ad20fd99e8",
+      "response_complete": true,
+      "latency_s": 2.481347,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 630,
+        "cached_tokens": 512,
+        "reasoning_tokens": 522
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00287,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NVDA-2026Q1-net_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "NVIDIA Corporation",
+        "metric": "net_income",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$18775 million",
+        "reason": "Q1 FY2026 ended 2025-04-27 reported 2025-05-28; GAAP net income ~$18.8B, precise $18,775M per income statement."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "entity_mismatch_or_unknown",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "883a0279166f0d4076198ae9807f29d7e129e2ce752998d8c597034e7fd59fae",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"NVIDIA Corporation\", \"metric\": \"net_income\", \"fiscal_year\": 2026, \"fiscal_period\": \"Q1\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$18775 million\", \"reason\": \"Q1 FY2026 ended 2025-04-27 reported 2025-05-28; GAAP net income ~$18.8B, precise $18,775M per income statement.\"}",
+      "output_sha256": "24e8a0fe9b57b38d5e36295636353825cff1a8e852e7f7f68ff72f6e27adc16d",
+      "response_complete": true,
+      "latency_s": 3.686577,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 558,
+        "cached_tokens": 512,
+        "reasoning_tokens": 440
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00256,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NVDA-2026Q2-revenue",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q2",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$46743 million",
+        "reason": "Closed-book recall of NVIDIA Q2 FY2026 press release (Aug 27, 2025) reporting ~$46.7B; cannot verify live filings."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "78efd1f1c7fbc1db50260c3337d4d7145ed6b3963e08a6ec82133f5c6786a004",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"NVIDIA\", \"metric\": \"revenue\", \"fiscal_year\": 2026, \"fiscal_period\": \"Q2\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$46743 million\", \"reason\": \"Closed-book recall of NVIDIA Q2 FY2026 press release (Aug 27, 2025) reporting ~$46.7B; cannot verify live filings.\"}",
+      "output_sha256": "418d4ae6cf147bca545ea5ae7fbb2f01e12358f247fbea027afb7d1aab778c91",
+      "response_complete": true,
+      "latency_s": 2.648149,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 575,
+        "cached_tokens": 512,
+        "reasoning_tokens": 466
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002631,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-NVDA-2026Q3-gross_profit",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Exact GAAP gross profit value for NVIDIA Q3 FY2026 to the nearest million not verifiable from memory without filings; closed-book uncertainty too high to avoid invention."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "7b20f3574bf855704f21afadc23a59b14509c33b1692e8393c2f155c31d1d87a",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Exact GAAP gross profit value for NVIDIA Q3 FY2026 to the nearest million not verifiable from memory without filings; closed-book uncertainty too high to avoid invention.\"}",
+      "output_sha256": "7a492ad989d2fdc1e73c57839b763dfcd4fe2544220cb0ab3bcd777d763bd0c7",
+      "response_complete": true,
+      "latency_s": 3.215353,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 708,
+        "cached_tokens": 512,
+        "reasoning_tokens": 611
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.003198,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-TSLA-2023Q3-revenue",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Tesla, Inc.",
+        "metric": "revenue",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q3",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$23,350 million",
+        "reason": "Tesla Q3 FY2023 GAAP revenue as reported; no conflicting values in memory."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "5e18850ac172bbe7e1e6bfc8edd1a6ec1530e20afd98d640e7de32f28f265208",
+      "output_text": "{\"status\":\"answer\",\"entity\":\"Tesla, Inc.\",\"metric\":\"revenue\",\"fiscal_year\":2023,\"fiscal_period\":\"Q3\",\"basis\":\"GAAP\",\"unit\":\"USD millions\",\"value_text\":\"$23,350 million\",\"reason\":\"Tesla Q3 FY2023 GAAP revenue as reported; no conflicting values in memory.\"}",
+      "output_sha256": "c2702628b19d87098c51cab3b8df04c6836fbfd1b3743b003d509c40e0ebd6f6",
+      "response_complete": true,
+      "latency_s": 2.381826,
+      "usage": {
+        "input_tokens": 600,
+        "output_tokens": 418,
+        "cached_tokens": 512,
+        "reasoning_tokens": 339
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.001964,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-TSLA-2023Q4-operating_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Tesla, Inc.",
+        "metric": "operating_income",
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$2064 million",
+        "reason": "Closed-book recall of reported figure; uncertainty on precise million rounding without filing access."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "f2d36666ee5cf018d062def174bf03fb890c35578dd0192068845ca10f1f3cea",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Tesla, Inc.\", \"metric\": \"operating_income\", \"fiscal_year\": 2023, \"fiscal_period\": \"Q4\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$2064 million\", \"reason\": \"Closed-book recall of reported figure; uncertainty on precise million rounding without filing access.\"}",
+      "output_sha256": "a05dc4abb5861bcba21eba27670a2ce8ab31e549419ef367b15a8615e7baafe8",
+      "response_complete": true,
+      "latency_s": 1.541909,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 317,
+        "cached_tokens": 0,
+        "reasoning_tokens": 224
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.002099,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-TSLA-2024Q2-gross_profit",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Tesla",
+        "metric": "gross_profit",
+        "fiscal_year": 2024,
+        "fiscal_period": "Q2",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$4578 million",
+        "reason": "Value from reported Q2 FY2024 financials (10-Q) gross profit, subject to rounding/memory uncertainty but within closed-book knowledge."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "120275733183ee2cfa8b9fb5792f9425c0a94c65204835746bd3524a082495ef",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Tesla\", \"metric\": \"gross_profit\", \"fiscal_year\": 2024, \"fiscal_period\": \"Q2\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$4578 million\", \"reason\": \"Value from reported Q2 FY2024 financials (10-Q) gross profit, subject to rounding/memory uncertainty but within closed-book knowledge.\"}",
+      "output_sha256": "42558173246ef848d5d56726369ac1bebec65a4643e58dc11d852543a02637cc",
+      "response_complete": true,
+      "latency_s": 2.694369,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 565,
+        "cached_tokens": 512,
+        "reasoning_tokens": 461
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00259,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-TSLA-2025Q1-net_income",
+      "raw_answer": {
+        "status": "answer",
+        "entity": "Tesla",
+        "metric": "net_income",
+        "fiscal_year": 2025,
+        "fiscal_period": "Q1",
+        "basis": "GAAP",
+        "unit": "USD millions",
+        "value_text": "$409 million",
+        "reason": "Closed-book estimate from memory of Q1 FY2025 earnings release; unable to verify filing directly."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "unit_mismatch",
+        "verdict": null
+      },
+      "raw_outcome": "wrong",
+      "request_sha256": "f64a7745c3508dc1ee4576a98b7e6e7201105912fed965f6869824019b9a077e",
+      "output_text": "{\"status\": \"answer\", \"entity\": \"Tesla\", \"metric\": \"net_income\", \"fiscal_year\": 2025, \"fiscal_period\": \"Q1\", \"basis\": \"GAAP\", \"unit\": \"USD millions\", \"value_text\": \"$409 million\", \"reason\": \"Closed-book estimate from memory of Q1 FY2025 earnings release; unable to verify filing directly.\"}",
+      "output_sha256": "a7210e757288079aa1b5d18a775c96b322a03594000ca21880c2484418aa85c3",
+      "response_complete": true,
+      "latency_s": 2.454187,
+      "usage": {
+        "input_tokens": 601,
+        "output_tokens": 536,
+        "cached_tokens": 0,
+        "reasoning_tokens": 442
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.00303,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    },
+    {
+      "question_id": "qa-TSLA-2026Q2-eps_diluted",
+      "raw_answer": {
+        "status": "abstain",
+        "entity": null,
+        "metric": null,
+        "fiscal_year": null,
+        "fiscal_period": null,
+        "basis": null,
+        "unit": null,
+        "value_text": null,
+        "reason": "Requested fiscal period Q2 FY2026 ended 2026-06-30 is after knowledge cutoff of 2026-01-04 and no verified GAAP value is available in closed-book knowledge; cannot provide without retrieval."
+      },
+      "gate": {
+        "accepted": false,
+        "reason": "model_abstained",
+        "verdict": null
+      },
+      "raw_outcome": "abstain",
+      "request_sha256": "9d6d06463d0cab761941379be1a3a000ab94ecdf15e980022145682774a2f3c2",
+      "output_text": "{\"status\": \"abstain\", \"entity\": null, \"metric\": null, \"fiscal_year\": null, \"fiscal_period\": null, \"basis\": null, \"unit\": null, \"value_text\": null, \"reason\": \"Requested fiscal period Q2 FY2026 ended 2026-06-30 is after knowledge cutoff of 2026-01-04 and no verified GAAP value is available in closed-book knowledge; cannot provide without retrieval.\"}",
+      "output_sha256": "0bd61a57dfd3fc582ada8afe17f22cf1abfb688a38cff411c3f07b734e6c11d0",
+      "response_complete": true,
+      "latency_s": 1.293176,
+      "usage": {
+        "input_tokens": 604,
+        "output_tokens": 237,
+        "cached_tokens": 512,
+        "reasoning_tokens": 129
+      },
+      "error_type": null,
+      "token_api_cost_usd": 0.0012,
+      "unknown_reservation_retained": false,
+      "gpu_cost_not_free": false
+    }
+  ],
+  "not_started": [],
+  "token_api_pricing_per_million": {
+    "input": 1.25,
+    "cached_input": 0.15,
+    "output": 4.25
+  },
+  "gpu_usage_separate": false,
+  "score": {
+    "planned": 50,
+    "completed_records": 50,
+    "not_run": 0,
+    "raw_correct": 0,
+    "raw_wrong": 23,
+    "raw_abstain": 27,
+    "format_errors": 0,
+    "api_errors": 0,
+    "raw_accuracy_all": 0.0,
+    "raw_answer_precision": 0.0,
+    "raw_answer_coverage": 0.46,
+    "verified_accepted": 0,
+    "verified_correct": 0,
+    "verified_precision": null,
+    "verified_coverage": 0.0,
+    "unsafe_passed": 0
+  },
+  "wall_s": 66.174631,
+  "latency_median_s": 2.41129,
+  "token_api_cost_usd": 0.137061,
+  "unknown_usage_calls": 0,
+  "ledger": {
+    "cap_usd": 3.5,
+    "charged_or_reserved_usd": 0.472679,
+    "attempts": [
+      {
+        "target": "spark",
+        "question": "qa-AAPL-2023Q4-net_income",
+        "request_hash": "37b0333487bd635fa46de6496ec41f1a14158572886e26f26637ea3d886a7d21",
+        "reservation": 7004,
+        "charged": 1816,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AAPL-2024Q3-eps_diluted",
+        "request_hash": "63abac546beb4c5b33bcfe3aced6dba1be6130087b2e2b8db531a7a888b017b8",
+        "reservation": 7022,
+        "charged": 1819,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AAPL-2024Q4-gross_profit",
+        "request_hash": "1cf609d1b449f96f74ced4bd009b065130118080d2f67070d7b57aaabce48948",
+        "reservation": 7007,
+        "charged": 3242,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AAPL-2026Q1-operating_income",
+        "request_hash": "9de276c9db87985e5ecf555f7e807ac98f7241692dec7ce13c15aff4f07aa827",
+        "reservation": 7012,
+        "charged": 1648,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMD-2023Q3-revenue",
+        "request_hash": "600d777410ecc3d07d54ce91c9a3a5f0515a6065ce4eca49a318fc92f54cf820",
+        "reservation": 7022,
+        "charged": 1264,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMD-2025Q1-operating_income",
+        "request_hash": "756dce1c966e74683b34f06207bef8e042dbac50d83cb89fb19302ee161f3591",
+        "reservation": 7033,
+        "charged": 1817,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMD-2025Q3-net_income",
+        "request_hash": "732f7fe361790aa0a074af08e6f8a4468de341f35974d07bf4ac32822193e728",
+        "reservation": 7026,
+        "charged": 1975,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMD-2026Q2-operating_cash_flow",
+        "request_hash": "245f2272525b39d869b39ee21f381d3ddbd3ee5b09e60b260492e66460a609a6",
+        "reservation": 7044,
+        "charged": 1467,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMZN-2023Q4-net_income",
+        "request_hash": "2175a9df3a65938948212428a7b3707169c8ebe77081d8d1560252972ed51004",
+        "reservation": 7006,
+        "charged": 1488,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMZN-2024Q2-operating_cash_flow",
+        "request_hash": "3147289ce1a4b3dc4c9f049795319e8241018561fc4ca0a7c58283546701cb78",
+        "reservation": 7024,
+        "charged": 2791,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMZN-2024Q3-operating_income",
+        "request_hash": "73ced238ed2c87f0c954be3a704ea3725cffd785d230a527bf2692a74bf89e6e",
+        "reservation": 7013,
+        "charged": 2571,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMZN-2024Q3-research_and_development",
+        "request_hash": "43a108dcc4fcadfe48c34a39a703c1b0216d5402e6272c064cece494f97dbbf7",
+        "reservation": 7033,
+        "charged": 1907,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-AMZN-2025Q2-eps_diluted",
+        "request_hash": "c99ef5985e1251581ad9a755971299f99524db4728596a31c5d21ab9209a7765",
+        "reservation": 7023,
+        "charged": 1793,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-BAC-2023Q3-operating_cash_flow",
+        "request_hash": "ff236e0713a86a7b23332b53f569f54a6f52caba1cbc7eba981c1ab133e883fb",
+        "reservation": 7036,
+        "charged": 1687,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-BAC-2024Q2-eps_diluted",
+        "request_hash": "68cd7425e49decb1935df6fd7232677fc72ebd725ffbd31c380a105c20aba738",
+        "reservation": 7034,
+        "charged": 1565,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-BAC-2024Q3-net_income",
+        "request_hash": "b9c689a09ef24601dce1b3e8c7a96d4838898d9c1d2cdc625f4e73052d653190",
+        "reservation": 7017,
+        "charged": 2131,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-BAC-2025Q2-net_interest_income",
+        "request_hash": "30545755a704e602d1eab5c0e1b26b7cc76a3a89a4caa4f5d8c18512ffd1e4d6",
+        "reservation": 7028,
+        "charged": 2285,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-BAC-2026Q1-revenue",
+        "request_hash": "18dbd5566640d899a5b50d24b49af4e7909dfbc3ef82f02f0d2d7e6aacc4dd17",
+        "reservation": 7013,
+        "charged": 1356,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-GOOGL-2023Q4-operating_cash_flow",
+        "request_hash": "ebbde1adc739d3af160a5da3cf27f7366aaf06a2b5ab9e60aadaf605e243ce5b",
+        "reservation": 7027,
+        "charged": 2289,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-GOOGL-2025Q1-eps_diluted",
+        "request_hash": "ae2c6a91327d78104cdddb08d36c18702ac5418e1591ba2abf1fb5d3f209e4e3",
+        "reservation": 7026,
+        "charged": 1317,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-GOOGL-2025Q2-operating_income",
+        "request_hash": "62dab7641c370c0d29273a70242a83a1001e7b8e6d6cc8cbe17d8e1d968dd477",
+        "reservation": 7016,
+        "charged": 1679,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-GOOGL-2026Q2-research_and_development",
+        "request_hash": "333a0b19c1337c0e343f5e964d15078fe6ea2fb46fca8664b9180b91bc26bf09",
+        "reservation": 7036,
+        "charged": 1622,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-JPM-2023Q4-revenue",
+        "request_hash": "c5ba44c39c85908f7c8b1d8d9b0ba769ce38849196ad425e666be7a7ec9cf916",
+        "reservation": 7012,
+        "charged": 2666,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-JPM-2024Q3-net_income",
+        "request_hash": "768ff492738838fa10750fa6d3a9a78097dfe86d1ac926a9af8f74617810cc2d",
+        "reservation": 7016,
+        "charged": 2234,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-JPM-2024Q4-net_interest_income",
+        "request_hash": "c8375c3d0edb42ae19f9c463fdeb2779c4561422f0e64d38f5bd95c9463e8bdb",
+        "reservation": 7027,
+        "charged": 1861,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-JPM-2025Q3-eps_diluted",
+        "request_hash": "84e0c5b2ddc1342dcf985523fefe793e86995c9fe80ba3fee2a4912e8914782a",
+        "reservation": 7033,
+        "charged": 1354,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-JPM-2026Q2-operating_cash_flow",
+        "request_hash": "99758ded0c2e5cd50ad80dfa0a3840557c7acecbda8aa2b2c8b8fadf7c9a7456",
+        "reservation": 7034,
+        "charged": 1539,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-META-2023Q3-net_income",
+        "request_hash": "356823da5f38a33e0855d711a59ce1655845270f835ee06f895c2209c1575579",
+        "reservation": 7016,
+        "charged": 958,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-META-2023Q4-revenue",
+        "request_hash": "0aa469ebf44bffaabcf649188c2b6fbfb1da225c45bb93218110ae5114fe98a2",
+        "reservation": 7012,
+        "charged": 1071,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-META-2025Q2-operating_income",
+        "request_hash": "252c11a4891383a34db4db149db922ca2e4593f62ae7d915dd6eda00ea14860d",
+        "reservation": 7023,
+        "charged": 2126,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-META-2025Q3-eps_diluted",
+        "request_hash": "fbb1e34024c786c5e5be8739d09558701f5a961625c23c3002ea858ce8ea0153",
+        "reservation": 7033,
+        "charged": 1272,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-MSFT-2024Q1-operating_income",
+        "request_hash": "d5a59a2f1b22329ae520cefc0598a1f38ff23f19495cb5bb8a5450e9f93623de",
+        "reservation": 7017,
+        "charged": 1173,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-MSFT-2024Q4-eps_diluted",
+        "request_hash": "3cd207b229b23d392253562c7a683b600f4bff9273c69aff7d0df8206402a607",
+        "reservation": 7027,
+        "charged": 1419,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-MSFT-2024Q4-gross_profit",
+        "request_hash": "1a77d423ff76cbd6b77b984b748185e86b614b39a094b6a2145f17ee7ad9eab5",
+        "reservation": 7012,
+        "charged": 2206,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-MSFT-2025Q4-revenue",
+        "request_hash": "6ce62731ae0a8eb9af6d8225d5f8442cbefa5d514ee125a23aecf529d8f36f36",
+        "reservation": 7006,
+        "charged": 2107,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-MSFT-2026Q2-operating_cash_flow",
+        "request_hash": "7d79fdc2656b2d854a97a2e332eb492239318d8293ad03ff5169b3fa7d724aa0",
+        "reservation": 7028,
+        "charged": 1558,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NFLX-2023Q4-eps_diluted",
+        "request_hash": "07e3b4d5fff93d928fb8de442e4e24cacb25a9e061958ac0f2c970df9f84d504",
+        "reservation": 7024,
+        "charged": 1151,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NFLX-2026Q1-research_and_development",
+        "request_hash": "35e6669892eec9c76957b77a9eb3fb576e8af05f611ec581e1040720b5b9f314",
+        "reservation": 7034,
+        "charged": 1133,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NFLX-2026Q2-net_income",
+        "request_hash": "3e1709e7d204de972e990f6ba4963e7ac13f71200c2a07835d49ba142910c25c",
+        "reservation": 7007,
+        "charged": 1160,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NFLX-2026Q2-operating_income",
+        "request_hash": "c95c426a4126715c40566f7fac4336269ae3992dbb5ef639f91585c1c68afa4e",
+        "reservation": 7014,
+        "charged": 1624,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NFLX-2026Q3-revenue",
+        "request_hash": "7c2956ef41ea10ef6d3b0e50137191531768f762abdf4e16d4601efba0de9f90",
+        "reservation": 7003,
+        "charged": 1061,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NVDA-2025Q3-eps_diluted",
+        "request_hash": "8fb66a530c7fbd63619fae3b1c676f3532d87fa22db2373c721bd193c87f5c88",
+        "reservation": 7023,
+        "charged": 1797,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NVDA-2026Q1-net_income",
+        "request_hash": "9e9a5735bcf9d4ea72c6600fec4ad84138aa16b2ee384d5bcbf09d59463b18f6",
+        "reservation": 7006,
+        "charged": 1411,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NVDA-2026Q2-revenue",
+        "request_hash": "0b8ab2e8de497171b4ff6d00706caeefc029c56cbc820023df0f5587d4b2f822",
+        "reservation": 7002,
+        "charged": 1435,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-NVDA-2026Q3-gross_profit",
+        "request_hash": "645fdc65d6fdf973fe23709533ec0c7a8f05f22dde4c5d23b8a14656b3e8b6d5",
+        "reservation": 7008,
+        "charged": 1976,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark",
+        "question": "qa-TSLA-2023Q3-revenue",
+        "request_hash": "c09e0f96a69777f7e31271ab00d2c2653b8d1ca19b22a4267aa04a4d2b7a385f",
+        "reservation": 7001,
+        "charged": 7001,
+        "status": "reserved"
+      },
+      {
+        "target": "spark",
+        "question": "qa-TSLA-2023Q4-operating_income",
+        "request_hash": "b97cddd004edf66d6c61d1ccc56e7913f57e50fc7325f49d94da1e6c3a156a7b",
+        "reservation": 7012,
+        "charged": 7012,
+        "status": "reserved"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AAPL-2023Q4-net_income",
+        "request_hash": "49fa721f8175c5bf620826ec1985bd58368a9c22f48425b4c92ffd7a49cd642d",
+        "reservation": 12541,
+        "charged": 3653,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AAPL-2024Q3-eps_diluted",
+        "request_hash": "d53a81afff550dbaa649fe46f6296de82bfec240711331a4bea81d60305454d8",
+        "reservation": 12558,
+        "charged": 2191,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AAPL-2024Q4-gross_profit",
+        "request_hash": "071bec71711df9d5354c8f40d37432fc652d63206727cf2bf1c0a9674a001249",
+        "reservation": 12543,
+        "charged": 5880,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AAPL-2026Q1-operating_income",
+        "request_hash": "a70ca775c69af74a0c6a34a4b54d2a89734d00e92bf22b0b665a9724d61696e6",
+        "reservation": 12548,
+        "charged": 1598,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMD-2023Q3-revenue",
+        "request_hash": "ae6edfba4fc1a55800c6dfc273da1d2efc322f4f14e2603f67a9595e16777406",
+        "reservation": 12558,
+        "charged": 3035,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMD-2025Q1-operating_income",
+        "request_hash": "e8555da5b9828609931a7d1b906fd8d029c3bef3a73c41797a304a6d974f351a",
+        "reservation": 12569,
+        "charged": 6156,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMD-2025Q3-net_income",
+        "request_hash": "818abf5217b302de0c36372e5c19e1dd23d6efe35ff55bb2dd4609a200eee264",
+        "reservation": 12562,
+        "charged": 1577,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMD-2026Q2-operating_cash_flow",
+        "request_hash": "e708b9824c188955dcf716349a9847b385d0d42ea5f1f5e751e474d88aab3782",
+        "reservation": 12581,
+        "charged": 1256,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMZN-2023Q4-net_income",
+        "request_hash": "935030d0844f65a127d0d354371bd959cf4f9f17a814997ee1b5d88494e32719",
+        "reservation": 12542,
+        "charged": 3999,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMZN-2024Q2-operating_cash_flow",
+        "request_hash": "c921e6931254e4cb8c4a933456f7305299bba99c3bcd52b7e2cfeec0b5dae614",
+        "reservation": 12561,
+        "charged": 4161,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMZN-2024Q3-operating_income",
+        "request_hash": "805160d37c108f5f427f996a65d873f0feb6b3cf2c79a6d63f6074b43f63cd2f",
+        "reservation": 12549,
+        "charged": 2530,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMZN-2024Q3-research_and_development",
+        "request_hash": "e49d473cdd1addffc2edbf4f8c438ea10ffcc4b2ad9167279ae27bde82a57c7e",
+        "reservation": 12569,
+        "charged": 2286,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-AMZN-2025Q2-eps_diluted",
+        "request_hash": "360b7c2ace70d3c5b33bb7542d0724c4009eac3e9c9619a3d2c3d8d01efbb085",
+        "reservation": 12559,
+        "charged": 2744,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-BAC-2023Q3-operating_cash_flow",
+        "request_hash": "aadd9b9f06e77b23d082c17d8d8b79d5d6ce89780d88505ed5a19dd9c8270cbc",
+        "reservation": 12572,
+        "charged": 906,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-BAC-2024Q2-eps_diluted",
+        "request_hash": "bdc55f717cea394c795a27d968638c72312ccc7bcded47f25d5a5823ab161294",
+        "reservation": 12571,
+        "charged": 3124,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-BAC-2024Q3-net_income",
+        "request_hash": "1c55a02c1a1041a6b031abf91fdf77a218295c11be618ce125b8a94240bb21c4",
+        "reservation": 12553,
+        "charged": 2770,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-BAC-2025Q2-net_interest_income",
+        "request_hash": "c605960d535a12d788d37687d7e325c900405611da11539fbfdbfad97053117f",
+        "reservation": 12564,
+        "charged": 2841,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-BAC-2026Q1-revenue",
+        "request_hash": "a857ebc2ad5cfd7005f2695befef8eff84a4852b4553274024b7d73f04c3594b",
+        "reservation": 12549,
+        "charged": 1319,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-GOOGL-2023Q4-operating_cash_flow",
+        "request_hash": "6b04eebaccdc656ce83296220881f30135e8ba3b9adc7d57afc83383334c1393",
+        "reservation": 12563,
+        "charged": 4639,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-GOOGL-2025Q1-eps_diluted",
+        "request_hash": "912570d5b4612c31b7339d95eb530d26cedadfb49bc9e98c162b67478fa78225",
+        "reservation": 12562,
+        "charged": 3499,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-GOOGL-2025Q2-operating_income",
+        "request_hash": "5322d87a0e06fb6a3d77f4b7a55863d15e8c02599cb978d965db1c2948419934",
+        "reservation": 12552,
+        "charged": 3008,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-GOOGL-2026Q2-research_and_development",
+        "request_hash": "8cde299816d5372c548b343d1e084014f1fee87ea0c30b6f73735b2dc5836bdd",
+        "reservation": 12572,
+        "charged": 1283,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-JPM-2023Q4-revenue",
+        "request_hash": "8f9d0488a5172fedaa8f0d04237e67dbd2dec86789735713080b55850220f9be",
+        "reservation": 12548,
+        "charged": 6796,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-JPM-2024Q3-net_income",
+        "request_hash": "9b21d5e99ac7ca876ea994250ebe6849aed02f2fab9985e65a571a763eef28cc",
+        "reservation": 12552,
+        "charged": 4097,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-JPM-2024Q4-net_interest_income",
+        "request_hash": "141412e2ff383d1b7f7c4a07c74f5c59adffcb289e650b65dbec54a0b4e93a79",
+        "reservation": 12563,
+        "charged": 2084,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-JPM-2025Q3-eps_diluted",
+        "request_hash": "8e672c4d4ec861d8e89d0dc90915fd896b0d2e784c76cb82eaa04191da38ada8",
+        "reservation": 12569,
+        "charged": 3697,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-JPM-2026Q2-operating_cash_flow",
+        "request_hash": "f383fc0aabe2a903c2e8af315380ed07bed3f8ee2de826dbd81abfc6b0c39d46",
+        "reservation": 12571,
+        "charged": 1265,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-META-2023Q3-net_income",
+        "request_hash": "469e0ba93c99056514400edb0744766b2de1d3a35569cc0cb287977850355d1a",
+        "reservation": 12552,
+        "charged": 2328,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-META-2023Q4-revenue",
+        "request_hash": "41b55b813ccc5f9875aaa2b1af667a361149e28bf7262f3e2fe19e4a819b5b19",
+        "reservation": 12548,
+        "charged": 3023,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-META-2025Q2-operating_income",
+        "request_hash": "2b901efcb50b8bf3dae1dd08ab6fcc2a21bf30fa2016bd95adff045ab4328f8d",
+        "reservation": 12559,
+        "charged": 1484,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-META-2025Q3-eps_diluted",
+        "request_hash": "5884a913d2f97bd163f13c01e7f6595ddaa0737c0046e672042f5298ca592be3",
+        "reservation": 12569,
+        "charged": 1908,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-MSFT-2024Q1-operating_income",
+        "request_hash": "e78aa771154f02ddca33b8a3192320f8c2e7d41014279e4ab1cc74fe8cf2e1d0",
+        "reservation": 12553,
+        "charged": 2437,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-MSFT-2024Q4-eps_diluted",
+        "request_hash": "a2d502ec086413c5571f65d8f8a50c72a9b9c69ca622f0505978bc6c8758a117",
+        "reservation": 12563,
+        "charged": 2991,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-MSFT-2024Q4-gross_profit",
+        "request_hash": "1dfa98216695503c174855a2f9cc4dfe078759d0fe43a4a8044eefb08d55613d",
+        "reservation": 12548,
+        "charged": 6916,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-MSFT-2025Q4-revenue",
+        "request_hash": "a805ed4819244ff0d4ee0d67a7a2cc8bc01d421ea7bef9d9d8a663da83f5e532",
+        "reservation": 12542,
+        "charged": 2971,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-MSFT-2026Q2-operating_cash_flow",
+        "request_hash": "0589ff8149857a49a59a224016fd9444d6cb80072a4bc4ecd320adb2d97ad979",
+        "reservation": 12564,
+        "charged": 1343,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NFLX-2023Q4-eps_diluted",
+        "request_hash": "3db29692df031d31576361e6fe002e259bd025b58d3915094cd24656f73520c3",
+        "reservation": 12561,
+        "charged": 1790,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NFLX-2026Q1-research_and_development",
+        "request_hash": "028869d7c8a12ffc66305754f538c6b8b5aee8fdaeec84c41e9c1072342aa78a",
+        "reservation": 12571,
+        "charged": 1653,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NFLX-2026Q2-net_income",
+        "request_hash": "deb85634fcd1e8b713e9db5ba22644a1a5479578e665fb675fc54b316dc40ad2",
+        "reservation": 12543,
+        "charged": 1294,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NFLX-2026Q2-operating_income",
+        "request_hash": "233e54588b8f7a552e739b40bb4defe38c935f528f46cba30f6783074c8dc619",
+        "reservation": 12551,
+        "charged": 1294,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NFLX-2026Q3-revenue",
+        "request_hash": "ce8eafe42e7515a6725f28640a4d1efafeae00819daa14d9201f3a2cbe76af7c",
+        "reservation": 12539,
+        "charged": 1093,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NVDA-2025Q3-eps_diluted",
+        "request_hash": "d40e5ec5f5dd4ae6e312f6fdf7204a0521304dc60d7f48752769264a76e25fcd",
+        "reservation": 12559,
+        "charged": 2870,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NVDA-2026Q1-net_income",
+        "request_hash": "883a0279166f0d4076198ae9807f29d7e129e2ce752998d8c597034e7fd59fae",
+        "reservation": 12542,
+        "charged": 2560,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NVDA-2026Q2-revenue",
+        "request_hash": "78efd1f1c7fbc1db50260c3337d4d7145ed6b3963e08a6ec82133f5c6786a004",
+        "reservation": 12538,
+        "charged": 2631,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-NVDA-2026Q3-gross_profit",
+        "request_hash": "7b20f3574bf855704f21afadc23a59b14509c33b1692e8393c2f155c31d1d87a",
+        "reservation": 12544,
+        "charged": 3198,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-TSLA-2023Q3-revenue",
+        "request_hash": "5e18850ac172bbe7e1e6bfc8edd1a6ec1530e20afd98d640e7de32f28f265208",
+        "reservation": 12537,
+        "charged": 1964,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-TSLA-2023Q4-operating_income",
+        "request_hash": "f2d36666ee5cf018d062def174bf03fb890c35578dd0192068845ca10f1f3cea",
+        "reservation": 12548,
+        "charged": 2099,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-TSLA-2024Q2-gross_profit",
+        "request_hash": "120275733183ee2cfa8b9fb5792f9425c0a94c65204835746bd3524a082495ef",
+        "reservation": 12543,
+        "charged": 2590,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-TSLA-2025Q1-net_income",
+        "request_hash": "f64a7745c3508dc1ee4576a98b7e6e7201105912fed965f6869824019b9a077e",
+        "reservation": 12541,
+        "charged": 3030,
+        "status": "known_usage"
+      },
+      {
+        "target": "spark-open-baseten",
+        "question": "qa-TSLA-2026Q2-eps_diluted",
+        "request_hash": "9d6d06463d0cab761941379be1a3a000ab94ecdf15e980022145682774a2f3c2",
+        "reservation": 12558,
+        "charged": 1200,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AAPL-2023Q4-net_income",
+        "request_hash": "e8f4de35a195d478564253c88366f39896dca374bc3d076f26bd388311fd24ba",
+        "reservation": 27332,
+        "charged": 6152,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AAPL-2024Q3-eps_diluted",
+        "request_hash": "dade7acecd11614127ab552f908b63be2c6e9d216b8da13183498e3bd17ef13a",
+        "reservation": 27388,
+        "charged": 6504,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AAPL-2024Q4-gross_profit",
+        "request_hash": "30e8e65cbc7a9fb7d4cfd903f486227de8f4b2e92347e78c28ed27c3207df5a6",
+        "reservation": 27340,
+        "charged": 7372,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AAPL-2026Q1-operating_income",
+        "request_hash": "bb8d60840901f2920bb3fc10becf9ada98a2dbd4d9fd48d45b3666ad84f084b6",
+        "reservation": 27356,
+        "charged": 6312,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMD-2023Q3-revenue",
+        "request_hash": "5bef5d909778e1f9c7439a97c23c77e0548080d983b7277fee26a47c3c5a2e38",
+        "reservation": 27388,
+        "charged": 7240,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMD-2025Q1-operating_income",
+        "request_hash": "97636201f1ebc34b3b572c1fd65144f578951df1198933f814d694ae37f5fcbe",
+        "reservation": 27424,
+        "charged": 7604,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMD-2025Q3-net_income",
+        "request_hash": "4da973b88d983cb2548cac104357eb7553abef0407dd447e0b461826191fcd7d",
+        "reservation": 27400,
+        "charged": 6664,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMD-2026Q2-operating_cash_flow",
+        "request_hash": "7a36e899b556f5e6f5e23c610f55ddd9d53a2b9a78b3717d78f2ec53ac100472",
+        "reservation": 27460,
+        "charged": 6432,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMZN-2023Q4-net_income",
+        "request_hash": "1439c7d68f2a6a5a0ae3fd07717202358b16ff02a65d58eb1a04faaae6fc7f2f",
+        "reservation": 27336,
+        "charged": 9096,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMZN-2024Q2-operating_cash_flow",
+        "request_hash": "fd53c3a86e08c1a33400b569beee72e6e04fab40f04f19a76fb84b2881882099",
+        "reservation": 27396,
+        "charged": 10304,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMZN-2024Q3-operating_income",
+        "request_hash": "c024b0633e680c00e6d1f016574ec97c7b6b39d1874f5dbda92a952568119c67",
+        "reservation": 27360,
+        "charged": 5536,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMZN-2024Q3-research_and_development",
+        "request_hash": "27bf2383e036160893e5d9cdedfa5b4edd15bff9096fb5f765afd7592bc13b14",
+        "reservation": 27424,
+        "charged": 7184,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-AMZN-2025Q2-eps_diluted",
+        "request_hash": "9451a2799fd7231f29ec7caf967e1a3ea2755c5685e6b74a58669d4ed5b5c3b1",
+        "reservation": 27392,
+        "charged": 7348,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-BAC-2023Q3-operating_cash_flow",
+        "request_hash": "8e8c92bc01111b6ebb2acb9371ded85148f02138829e0873600b5fe50fbdb9ef",
+        "reservation": 27432,
+        "charged": 5468,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-BAC-2024Q2-eps_diluted",
+        "request_hash": "b9a584319f91095bafed01bae5b7c6277769e6c0844dee4cc461b7b18d926894",
+        "reservation": 27428,
+        "charged": 6412,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-BAC-2024Q3-net_income",
+        "request_hash": "1a8fe0ecf73734c1f395353ad65a6f03caab59644146828c0ec77ceee32fee24",
+        "reservation": 27372,
+        "charged": 7300,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-BAC-2025Q2-net_interest_income",
+        "request_hash": "3ddd45b82501faf07008a5ce32eaa676716ce653aa3d6b934365105c588dec27",
+        "reservation": 27408,
+        "charged": 7644,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-BAC-2026Q1-revenue",
+        "request_hash": "6bf6e0ab2af0a3c78a5f833e099c006d07087414276fd114ecb798a7201e71f2",
+        "reservation": 27360,
+        "charged": 5336,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-GOOGL-2023Q4-operating_cash_flow",
+        "request_hash": "f3256baa4d2b272c727be0258852830c1b912da625919ca5323a13b4cf64372f",
+        "reservation": 27404,
+        "charged": 14524,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-GOOGL-2025Q1-eps_diluted",
+        "request_hash": "7ea7ee87c5557d2adc9dbfec40a2a4dd91d0fd9eff99c251300a71c55e90e660",
+        "reservation": 27400,
+        "charged": 6048,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-GOOGL-2025Q2-operating_income",
+        "request_hash": "2dae74f6d3112b24e3a9e45ebe621e1503349b770a675b818e77a9fd93286b5c",
+        "reservation": 27368,
+        "charged": 6116,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-GOOGL-2026Q2-research_and_development",
+        "request_hash": "5d4b9b81997161a819850f4e7afa18043493436e55d39da7abe86ab220894961",
+        "reservation": 27432,
+        "charged": 5884,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-JPM-2023Q4-revenue",
+        "request_hash": "f251971c802596f9f22ce8f3a6bce7b71f0c836bf0d8e56844ba8de722f9320d",
+        "reservation": 27356,
+        "charged": 7260,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-JPM-2024Q3-net_income",
+        "request_hash": "09561153bf1036a5cc0da33c11fa5ce8af88894b188dc8aa7efcf326cea9c962",
+        "reservation": 27368,
+        "charged": 8664,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-JPM-2024Q4-net_interest_income",
+        "request_hash": "18be523a75926308e6423a9d64fd736ff2419ef1ab403a1a34172cbb3f445204",
+        "reservation": 27404,
+        "charged": 6368,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-JPM-2025Q3-eps_diluted",
+        "request_hash": "fbadc8a9e8e7114cdd5772f254156f57209b84bb7aa96fde419a1c7929880c09",
+        "reservation": 27424,
+        "charged": 8216,
+        "status": "known_usage"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-JPM-2026Q2-operating_cash_flow",
+        "request_hash": "0e2d3e304a93bcaa0b4fa5fdd245fb37f3ccedf59575be517594e6fdbc81241f",
+        "reservation": 27428,
+        "charged": 27428,
+        "status": "reserved"
+      },
+      {
+        "target": "wonder",
+        "question": "qa-META-2023Q3-net_income",
+        "request_hash": "2dff6ea270163d815c69fe18ecc5705a1416f0873979289c00983d366e654f0e",
+        "reservation": 27368,
+        "charged": 27368,
+        "status": "reserved"
+      }
+    ],
+    "gpu_budget": "Glimmer has no token API tariff; shared Modal GPU usage is separately bounded and reported"
+  },
+  "finished_at": "2026-10-29T09:52:37.541756+00:00",
+  "status": "complete"
+}

@@ -1,6 +1,6 @@
 # NoCap — X drafts
 
-**Unpublished.** Publication is within the owner's approved completion scope; the posting account remains unknown. The repository, public workspace and demo have passed anonymous access checks. Live model requests remain paused; public visitors can use saved examples and watch the recorded walkthrough. No official handle or event hashtag has been verified for this draft; leave them out until confirmed.
+**Unpublished.** X publication is outside the currently selected completion round; the posting account remains unknown. The repository, public workspace and demo have passed anonymous access checks. Live model requests remain paused; public visitors can use saved examples and watch the recorded walkthrough. No official handle or event hashtag has been verified for this draft; leave them out until confirmed.
 
 ## Main post
 
@@ -19,7 +19,7 @@ Use these as replies to the main post. They can also stand alone after final lin
 ```
 
 ```text
-2/3 On our 224-item development set: 104/109 planted errors caught; 0/107 original items falsely flagged. 51/250 true claims stayed unverifiable. These are small dev results, not general accuracy. The held-out split has not been evaluated.
+2/3 In a frozen held-out test, NoCap caught 44/48 planted errors; 1/47 original drafts was falsely flagged, and 22/110 true claims stayed ?. Trap test: 20/20 caught, 0/52 true-figure false alarms. Small seeded tests, not general accuracy.
 ```
 
 ```text
@@ -30,11 +30,11 @@ Code: https://github.com/changshoufeng0609-cmd/nocap
 
 ## Attachment and release notes — do not paste
 
-- Submission status: the authenticated form is filled with final copy, links and the sole-member roster; the optional X URL is empty. Fields are recorded in [completion plan](../completion-plan.md#actual-form-observed). No final consent or submission has occurred; these posts remain unpublished drafts.
+- Submission status: the authenticated form contains earlier copy, links and the sole-member roster; refresh from the final submission kit before submission; the optional X URL is empty. Fields are recorded in [completion plan](../completion-plan.md#actual-form-observed). No final consent or submission has occurred; these posts remain unpublished drafts.
 - After owner review, attach the validated **NoCap** video with the replacement Kokoro narration, or use the audio-free 20-second GIF as a shorter teaser. Assets, validation and [narration sources](../demo/narration-license.md) are in the demo kit; use the current export, not an earlier-branded or earlier-voiced file.
-- Suggested media description: “NoCap checks a seeded NVIDIA earnings draft, opens SEC evidence receipts, rechecks a numeric correction, and shows a historical cutoff and slide check. Edited browser captures with synthetic narration; recorded responses are replayed.”
-- The short GIF does not contain every video scene. If using it, describe only the draft check, receipt, numeric correction and cutoff actually shown; do not imply it includes a slide segment or spoken narration.
-- Keep the captions and replay disclosure with the video. Its branded slide display reuses the original image's recorded response; a separate [October 29 smoke](../demo/live-smoke-2026-10-29.json) later checked the branded bytes. The video remains a replay and the seeded image is not a filing.
+- Suggested media description: “NoCap checks a seeded NVIDIA earnings draft, opens SEC evidence receipts, rechecks a numeric correction, and shows a historical cutoff and slide check. Continuous browser interaction with synthetic narration; cached extraction and recorded responses are disclosed.”
+- The short GIF is a continuous 20-second excerpt (seconds 8–28). Describe only visible actions; it does not contain every workflow or spoken narration.
+- Keep the captions and replay disclosure with the video. The new slide segment replays the [October 29 smoke](../demo/live-smoke-2026-10-29.json) for the exact branded input bytes. The video remains a replay and the seeded image is not a filing.
 - The main draft and each thread item are below 280 literal characters with the current URLs. Recheck the final composed posts, X's link weighting and any confirmed tags before publication. Do not add unsupported performance, customer, accuracy or time-savings claims.
 - Public links are [the demo player](https://receipts-nocap.vercel.app/demo) and [the repository](https://github.com/changshoufeng0609-cmd/nocap); their anonymous access checks passed. Any official mention/hashtag and the posting account need owner confirmation. No post has been sent, scheduled or published.
 - [Public release acceptance](../public-release-2026-10-29.json) passed with saved examples, paused-request responses and zero new model calls. Live requests remain paused. Historical shared-Neon checks remain separate; admission accounting does not establish a provider billing hard cap.

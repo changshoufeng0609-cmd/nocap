@@ -1,0 +1,68 @@
+{
+  "scope": "One seeded NVIDIA draft; not a correction quality benchmark",
+  "live_run": {
+    "request_sha256": "9d044efce8b8cd493ab28967b22d1b68559e96037facc3b34ed5fff0e7a4e134",
+    "allocation_usd": 0.8,
+    "reservation_usd": 0.758896,
+    "provider_response_mocked": false,
+    "transport": "FastAPI TestClient ASGI; not a browser live test",
+    "created_at": "2026-10-29T09:53:35.120512+00:00",
+    "http_status": 200,
+    "event_names": [
+      "progress",
+      "progress",
+      "progress",
+      "result"
+    ],
+    "status": "corrected",
+    "changes": 2,
+    "model_calls": 1,
+    "cost_usd": 0.01108,
+    "cost_is_estimate": false,
+    "pending_reservations": 0,
+    "has_current_coverage": true,
+    "has_original_coverage": true
+  },
+  "browser_recording": "Exact response replay; not a live browser-to-provider test",
+  "input": "examples/nvda_q2_fy2027.txt",
+  "input_text_sha256": "c285efe98a1072786bd1aa37b96cab74446f51315f5cd0384156856f28a9265c",
+  "context": "NVIDIA, second quarter of fiscal 2027",
+  "as_of": null,
+  "normalized_request_sha256": "dfd56a021e186b0a623fadbab3d2b5406963908523b136f1d67166dc2022b6b8",
+  "browser_request_exact_match": true,
+  "response_sha256": "30840f72749e5f7f1f8091ec749a1b510043dc8bce2ce44d7243c2891d8b7acb",
+  "response_source": "data/eval_runs/demo-fix-current-20261029/events.json",
+  "counts": {
+    "verified": 9,
+    "wrong": 0,
+    "unverifiable": 2,
+    "approximate": 0
+  },
+  "coverage": {
+    "version": 1,
+    "candidate_count": 10,
+    "covered_count": 10,
+    "excluded_count": 1,
+    "uncovered": []
+  },
+  "original_coverage": {
+    "version": 1,
+    "candidate_count": 10,
+    "covered_count": 10,
+    "excluded_count": 1,
+    "uncovered": []
+  },
+  "accepted_numeric_changes": [
+    {
+      "from": "18%",
+      "to": "105.9%"
+    },
+    {
+      "from": "$2.22",
+      "to": "$2.46"
+    }
+  ],
+  "recording_provider_calls": 0,
+  "recording_new_provider_spend_usd": 0,
+  "privacy": "Synthetic repository example only; no unpublished participant draft or credentials"
+}

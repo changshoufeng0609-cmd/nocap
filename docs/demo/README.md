@@ -1,81 +1,104 @@
 # NoCap demo kit
 
-This kit prepares a three-minute demonstration for financial journalists, analysts and hackathon judges. The story is **draft → check → receipt → constrained correction → historical cutoff**. It uses seeded examples, not an unseen accuracy test.
+[Watch the 165-second walkthrough](assets/receipts-demo.mp4) · [20-second GIF](assets/receipts-demo.gif) · [English SRT](assets/receipts-demo.en.srt) · [English VTT](assets/receipts-demo.en.vtt)
 
-**Review the generated assets:** [three-minute MP4](assets/receipts-demo.mp4), [20-second GIF](assets/receipts-demo.gif), [English captions](assets/receipts-demo.en.srt), [source and media manifest](assets/manifest.json).
+The current export is one continuous recording of the actual NoCap browser interface:
+paste a seeded NVIDIA draft, Check, open the growth and EPS receipts, Fix and recheck,
+inspect a historical cutoff, then show Slide and a short Ask flow. Product pixels
+come from Playwright video; screenshots and report cards do not replace interactions.
+The only recording overlays are the visible cursor, response-mode disclosure and closing links.
 
-Both assets are edited sequences of actual browser screenshots, not a continuous live session or latency measurement. The check frames use offline verification with existing extraction caches; Fix and slide frames replay recorded successful live responses. The video uses clearly labeled **Kokoro-82M `af_heart` synthetic narration**, not a human recording. The voice was generated locally on the CPU; creating these assets incurred **$0 new provider spend**. See [narration sources and permissions](narration-license.md).
+Check uses the real offline API with bundled extraction caches. Fix, Slide and Ask
+replay exact recorded successful provider responses, with their original wait omitted.
+The in-frame disclosures and captions identify cached/recorded operation. The runtime
+is not a live latency measurement. [Timed script](video-script.md) and
+[recording details](walkthrough-script.md) describe every scene.
 
-- [Three-minute script](video-script.md): timed narration, exact actions and a replaceable slide segment.
-- [20-second GIF storyboard](gif-storyboard.md): a compact loop for the README.
-- [Recording checklist](recording-checklist.md): setup, expected results, evidence and export settings.
-- [User-study kit](../user-study/README.md): a separate plan for real participant sessions.
+## Current exports
 
-## Public player
+| Artifact | Verified properties |
+|---|---|
+| MP4 | 165.000 seconds; 1920 × 1080; H.264/AAC; 12,443,559 bytes |
+| GIF | 20.000 seconds; 960 × 540; 10 fps; 1,664,486 bytes; source video 8–28 s at original speed |
+| Captions | 18 English cues; burned into the video; matching SRT/VTT sidecars |
+| Ask | Actual tab visibility 8.990 seconds; closing returns to Draft |
+| Scope | 11 companies; 11,554 stored facts; only seeded repository examples/public SEC evidence |
+| Narration | Local CPU Kokoro-82M v1.0 / af_heart, through kokoro-onnx 0.6.1; synthetic, not the author's voice |
 
-The public player is [receipts-nocap.vercel.app/demo](https://receipts-nocap.vercel.app/demo), with a byte-identical copy of the current MP4, 29 English WebVTT captions, visible synthetic-narration/replay disclosures and links back to the workspace. Media paths are `/demo/receipts-demo.mp4` and `/demo/receipts-demo.en.vtt`. Anonymous desktop/mobile checks confirmed playback started, reported duration was 179.937663 seconds and 29 caption cues loaded; actual browser downloads matched the final MP4/VTT hashes. This does not claim a full-duration viewing or human listening review. The [public GitHub video download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4) also passed anonymous HTTP and exact hash verification. [Public release evidence](../public-release-2026-10-29.json).
+Full MP4/GIF decoding, caption bounds/text, source and output hashes, and local
+public-player copies passed. Audio mean is −16.8 dB and peak is −1.9 dB. Agent
+review inspected the contact sheet and selected full-size receipt, Fix, cutoff,
+Slide and closing frames. This does not claim human listening or editorial approval.
+See the [manifest](assets/manifest.json), [validation](assets/validation.json),
+[narration permissions](narration-license.md) and [GIF source interval](gif-storyboard.md).
 
-## Recording status
+Recording, narration, export and validation made **zero provider calls / $0 new
+provider usage**. The separately authorized fresh Fix source cost **$0.01108 for
+one Wonder call**; its full recheck used cached extraction. [Fix evidence](fix-live-2026-10-29.json)
+records the exact request match, response hash, 105.9% / $2.46 corrections,
+9 verified / 0 wrong / 2 unverifiable claims, and number-coverage metadata.
 
-The text kit and reviewable media files are prepared. Frame review, full media decoding, audio-level checks and the narration replacement have passed. The owner should review the finished video before submission. No human listening or editorial sign-off is implied.
+Slide and Ask use the October 29 [live smoke](live-smoke-2026-10-29.json):
+the slide response is for the **identical NoCap-branded image bytes**, with four readings,
+two verified and two wrong. SAM found no region; Spark supplied the fallback region.
+The image is a claim, not filing evidence. These seeded successes are not a general
+accuracy or correction-quality benchmark. No held-out result is embedded in the video.
 
-| Deliverable | State | Evidence to record when finished |
-|---|---|---|
-| Three-minute script | Prepared | `video-script.md` |
-| README GIF storyboard | Prepared | `gif-storyboard.md` |
-| README GIF | Generated and checked | 20.000 s; 960 × 540; 304,543 bytes; edited screenshot sequence |
-| Three-minute video | Narration refreshed and checked | 179.937663 s; 1920 × 1080; H.264/AAC; 5,295,052 bytes; English captions and disclosed synthetic voice |
-| Product slide segment | Included from original-input response replay | Branding-refreshed NVIDIA display: 4 readings, 2 verified / 2 wrong. SAM returned no region on the original input; Spark supplied the fallback region. |
-| Human feedback | Not collected | Anonymized notes in `../user-study/`; no fabricated quotes |
+## Hosting boundary
 
-## Narration release check
+The established public player is [receipts-nocap.vercel.app/demo](https://receipts-nocap.vercel.app/demo).
+This commit prepares byte-identical MP4/VTT files in `web/public/demo/`; deployment
+and anonymous acceptance of this **new 165-second export** are separate steps.
+Do not describe the new media as deployed solely because these local copies match.
+Public live model requests remain paused; saved examples remain available.
 
-The earlier local MP4 used macOS Samantha. Section 2F of Apple's [macOS Tahoe 26 license](https://images.apple.com/legal/sla/docs/macOSTahoe.pdf) limits System Voices to “personal, non-commercial use” and expressly excludes other publication or redistribution in public-sharing contexts. That audio was replaced with local **Kokoro-82M v1.0 / `af_heart`** before public distribution. Its official model/voice source declares Apache-2.0; the kokoro-onnx runtime uses MIT. The [narration provenance](narration-license.md) records sources, versions, asset hashes and reproduction steps. The current on-screen attribution, manifest and player copy all identify the replacement. The GIF has no voice audio.
+The earlier public release passed anonymous playback-start and download checks
+for its **179.937663-second, 29-cue** version. Those observations are historical,
+not acceptance of this replacement. [Earlier release record](../public-release-2026-10-29.json).
+The current source/download target is the [public repository](https://github.com/changshoufeng0609-cmd/nocap).
 
-The [public repository](https://github.com/changshoufeng0609-cmd/nocap) begins with clean root commit `7856fe65536597b13a96723f54b83b1bc8187df0`, excluding the older voiced exports; the original incremental development history remains private. Anonymous HTTP on October 29 confirmed the public licensing record and downloaded the current MP4: **5,295,052 bytes**, SHA-256 `a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602`. Subsequent Production playback/caption and browser-download checks passed independently; these technical checks do not imply human editorial approval.
+## Reproduce on the recording machine
 
-## What the demo may claim
+Use the existing Python/Playwright environment, local Chrome, system Arial fonts,
+ffmpeg/ffprobe, and licensed local Kokoro assets. See the [setup checklist](recording-checklist.md)
+and [narration reproduction](narration-license.md#reproduction-and-review).
+The recording harness fails if the required local response files are missing; it
+never silently sends a replacement model call. A fresh clone includes final media
+and scripts, but the original raw response/capture files remain gitignored.
 
-The current evidence supports the local draft-check and Fix flows, cached examples, historical EDGAR cutoff, one small Fireworks live extraction benchmark, and the integrated slide flow's smoke tests. The slide segment shows a [NoCap-branded display of the NVIDIA draft](../../examples/slides/nvda-draft.html) with the original input's recorded model response and deterministic verdicts. **The recording itself replays the original image response.** A separate [2026-10-29 live smoke](live-smoke-2026-10-29.json) subsequently checked the NoCap-branded bytes: 4 readings, 2 verified / 2 wrong, $0.012618 for two SAM calls and one Spark call. The video was not changed; the new smoke is one seeded example, not general slide accuracy. Its numbers and layout are pixel-identical to the original outside the footer logo. The original input and recorded response are fixed by [replay provenance](slide-replay-provenance.json); the manifest separately identifies the branded display. This is not a benchmark of arbitrary slide-reading accuracy. SAM returned zero regions on the original input and Spark supplied the fallback region; the narration says so explicitly.
-
-The development results are **104/109 planted errors caught**, **0/107 original items with false alarms**, and **51/250 true claims unverifiable** for v0 + basis5. Keep the denominators and the word **development** visible. These results are not a benchmark of automatic correction quality or arbitrary uploaded slides. See [evaluation methodology](../../eval/README.md) and [Fix validation](../fix-with-receipts.md).
-
-Never claim a general accuracy percentage, guaranteed savings, an existing customer, or a production deployment from these examples. Do not show the held-out corpus. Ask mode is outside this recording.
-
-## Reproduce on this recording machine
-
-The scripts use the existing Python environment, local Chromium, system fonts, local Kokoro/ONNX assets, ffmpeg and ffprobe. Install the optional media dependencies and obtain the exact model assets as described in [narration reproduction](narration-license.md#reproduction-and-review). The renderer itself does not download weights or make paid API calls. Start the real local frontend as described in the [checklist](recording-checklist.md), then run:
+Start the built frontend on port 3106, then run:
 
 ```bash
-.venv/bin/python docs/demo/render_slide_fixture.py
-.venv/bin/python docs/demo/capture_demo.py
-.venv/bin/python docs/demo/capture_demo.py --slide-only
-.venv/bin/python docs/demo/render_demo.py --with-slide
+.venv/bin/python docs/demo/capture_walkthrough.py
+.venv/bin/python docs/demo/render_walkthrough.py
+.venv/bin/python docs/demo/validate_walkthrough.py data/eval_runs/demo-walkthrough-20261029/take3
+.venv/bin/python docs/demo/export_walkthrough.py
 .venv/bin/python docs/demo/validate_media.py
 ```
 
-`capture_demo.py` defaults to `http://localhost:3111`; pass `--url http://localhost:3100` for the checklist's default port. Use `localhost` for Next's development origin policy. The draft capture creates a local TestClient with provider factories forbidden and a zero model budget, then routes the UI to those verified saved responses. The slide capture intercepts all model-capable POSTs, checks that uploaded bytes match the branded display fixture and verifies the fixed original response hash. `render_slide_fixture.py` permits only the declared branding substitution in the HTML and compares financial pixels with the original image recovered from the recorded Git commit.
+Export copies files only; it does not publish, deploy, or submit. The recording
+harness blocks external requests and unapproved POSTs; provider factories are
+forbidden during real offline Check verification. Inputs are synthetic repository
+drafts and public filing facts, never a participant's private draft.
 
-The raw Fix and slide response files under `data/eval_runs/` are intentionally local and gitignored. A fresh clone contains the final assets and source scripts, but needs the original recording files to regenerate the same replay. Missing replay files fail rather than silently issuing a live request. Intermediate screenshots, speech files and clips stay under `data/eval_runs/demo_capture/`.
+## Historical provenance
 
-## Capture and validation record — 2026-10-28
+The October 28 export was an edited 29-frame screenshot sequence. It used the
+10-company / 11,175-fact snapshot, the earlier Fix response and the original
+pre-branding slide response. It is superseded by this continuous, 11-company recording.
 
-- NoCap draft/Fix/slide capture base commit: `cb033c56c50ba9d599d45d9d61d1c030396a83c0`, with the branding changes present in the working tree. All browser screenshots, cards, captions and synthetic narration were regenerated. The manifest records the capture/render script hashes, each source screenshot, original response hashes, frame hashes and exported assets.
-- The recorded UI reports **11,175 facts**, matching the October 28 snapshot's **3,281 SQLite + 7,894 press-release facts**; the later Tesla expansion is outside this recording. The slide footer change is confined to image pixels `(1089, 722)`–`(1356, 741)`; the complete financial content above row 700 is pixel-identical. Original live input SHA-256: `7de51244baf4b71e59dcdffd18a78373b0eea05b94234b110f3486f37183bcc0`. Branded display SHA-256: `7e93576180457003522abf1c46a4cfb4889869d476cc9a735d72d81545fa7c7c`. These new bytes were not sent for live checking during the October 28 capture; the separate October 29 check is recorded above.
-- Browser capture: Chromium, 1440 px viewport; no page errors in the capture flows. Frames were cropped for readability without changing any displayed product values.
-- Model spend for capture/render: **$0**. Historical provider costs visible inside screenshots belong to their original recorded runs.
-- Reviewed all 29 caption frames in a contact sheet and full-size title, receipt, Fix, cutoff, metrics, slide and closing frames. The Check crop preserves its actual verdict counts and Cached badge. `ffprobe` verified dimensions/codecs/durations; full MP4 and GIF decode passed. That original audio measured mean **−16.5 dB**, peak **−1.9 dB**; it was superseded by the October 29 narration refresh below.
-- The final video stays below 180 seconds; its SRT's last cue is bounded to the exported runtime. No hosted preview URL, customer quote, public-release claim or user-study outcome is included.
+Before public distribution on October 29, macOS Samantha narration was replaced
+with licensed Kokoro synthesis. That superseded public MP4 was 179.937663 seconds,
+5,295,052 bytes, SHA-256
+`a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602`.
+Its [manifest](assets/historical/2026-10-29-screenshot-manifest.json) and
+[validation](assets/historical/2026-10-29-screenshot-validation.json) retain the
+29-frame narration and original-input replay provenance. The earlier
+[slide replay record](slide-replay-provenance.json) applies to that export;
+the current recording uses the later identical-image live response.
 
-## Narration refresh and current exports — 2026-10-29
-
-The replacement rendered 29 local CPU speech segments with Kokoro-82M v1.0 / `af_heart` through kokoro-onnx 0.6.1. All caption text and cue boundaries remain byte-identical to the original SRT, and the GIF is unchanged. Pixel comparison found the same product content above the narration footer in all 29 frames; only the voice attribution changed. The original recorded responses and development results were not regenerated.
-
-Full MP4/GIF decoding, caption bounds, source/output hashes and public-player copy checks passed. The current MP4 is **179.937663 seconds / 5,295,052 bytes**, with audio mean **−17.6 dB** and peak **−3.7 dB**. The 29-frame contact sheet and a full-size EPS frame were visually reviewed. Pronunciation checks inspected the actual phonemizer output for NoCap, GAAP, EPS, SEC and UTC; they are not human listening or editorial approval. See [validation](assets/validation.json) and the per-segment [manifest](assets/manifest.json). New paid API/GPU usage was **$0**.
-
-| Current export | SHA-256 |
-|---|---|
-| `receipts-demo.mp4` · 5,295,052 bytes | `a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602` |
-| `receipts-demo.gif` · 304,543 bytes | `377407e49462b4e9dbfb654b47ae2005e9090108d256d0fa18409f3e7704f767` |
-| `receipts-demo.en.srt` | `b3ec47eb651b0d2e7911205d59745a40084efd3dacebae8a7c5d1c10e7c86158` |
-| Public `receipts-demo.en.vtt` | `42cd50967f931a1b7989be326484a3b1bf4deb38c07e9e6e1895100f09d66eed` |
+The public repository's clean initial root excluded the restricted Samantha media.
+Development began October 27; the clean export does not imply all work began on
+the export date. [Narration history](narration-license.md) retains the permissions
+rationale. Real participant feedback remains separate in the [user-study kit](../user-study/README.md);
+no user quotes or human-review outcomes are invented.

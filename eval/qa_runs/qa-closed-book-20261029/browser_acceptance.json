@@ -1,0 +1,68 @@
+{
+  "status": "passed",
+  "scope": "Fresh anonymous local production browser; real static benchmark artifact, no fixtures",
+  "provider_calls": 0,
+  "new_spend_usd": 0,
+  "layouts": {
+    "desktop-collapsed": {
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440
+    },
+    "desktop-first-open": {
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440
+    },
+    "desktop-last-open": {
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440
+    },
+    "mobile-collapsed": {
+      "viewport": 390,
+      "document": 390,
+      "body": 390
+    },
+    "mobile-first-open": {
+      "viewport": 390,
+      "document": 390,
+      "body": 390
+    },
+    "mobile-last-open": {
+      "viewport": 390,
+      "document": 390,
+      "body": 390
+    }
+  },
+  "downloads": [
+    {
+      "viewport": "desktop",
+      "filename": "nocap-financial-qa-records.json",
+      "bytes": 314122,
+      "sha256": "7af60b7222d49afc8b68080723f9d46e9d3b10a25cadcf87e278380a06023e44",
+      "matches_export": true
+    },
+    {
+      "viewport": "mobile",
+      "filename": "nocap-financial-qa-records.json",
+      "bytes": 314122,
+      "sha256": "7af60b7222d49afc8b68080723f9d46e9d3b10a25cadcf87e278380a06023e44",
+      "matches_export": true
+    }
+  ],
+  "console_errors": [],
+  "console_warnings": [],
+  "page_errors": [],
+  "http_errors": [],
+  "blocked": [],
+  "requests": {
+    "total": 46,
+    "methods": [
+      "GET"
+    ]
+  },
+  "harness": "GET-only local composition: production Next + real FastAPI snapshot health; model factories forbidden, no fixture responses",
+  "earlier_attempt": "R1 bare Next lacked local production API routing and failed on footer health; evidence preserved, R2/R3 use the real API composition.",
+  "final_version_note": "Includes explicit pre-J2 frozen gate disclosure and comparison-scoped held-out wording."
+}

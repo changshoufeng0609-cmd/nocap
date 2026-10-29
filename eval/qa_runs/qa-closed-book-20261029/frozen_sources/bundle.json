@@ -1,0 +1,18 @@
+{
+  "scope": "Minimal frozen scoring source overlay, not a complete historical repository commit",
+  "manifest_sha256": "cbb66ebe97df238be8aa0df1e05fcda60507b605344a19097ce8c3470abe8224",
+  "original_source_files": 7,
+  "additional_normalizer": "eval/qa_rescore.py",
+  "files": {
+    "eval/qa_core.py": "22a13085d19d0f47a5f6ab9d1891df6f890b20327a3a0af5afd29fd2c9d71230",
+    "eval/qa_benchmark.py": "a27afbd39b53fe1fbb570f104757ac8664de330a025cd9d99e5c8ffc62159bab",
+    "receipts/extract.py": "9cb0cc3ee4b569a35fbf4c8d931f1f2a036364cb0543f62fa660916467e2e1d4",
+    "receipts/verify.py": "70cccd862337f8b2490106428f2e31f3dc07c9857567a943d1ebac78d01c8764",
+    "receipts/store.py": "3f621e7643eb501122efbe60ec0d31748127560a918cd761451119a172d6ae8a",
+    "receipts/periods.py": "74a7db335722b28c6d515f15771764c68eafb713ab5a06eaa0ea6393c5dedf82",
+    "receipts/types.py": "59957d8aac829d4f521ba037af3fdb694cbdbd5c4094acbf87ecbda4a5d80b0e",
+    "eval/qa_rescore.py": "0b340e4e09327fc3aa19f2cb162a75bc9b2d340cd8542ed7174c0d12a437c008",
+    "receipts/__init__.py": "551273a7de59390d7bbd31ee120c25c961028126eb40cf360104609cb1843433",
+    "data/snapshot/manifest.json": "fd4edc556f7dd15433582ff05c544f4ae353cddbe8e0ef15202aa6af28dec971"
+  }
+}

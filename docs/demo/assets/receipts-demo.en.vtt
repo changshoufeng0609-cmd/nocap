@@ -1,0 +1,55 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:08.000
+Here's an NVIDIA earnings draft. Two figures look plausible. Let's check them before publishing.
+
+00:00:08.000 --> 00:00:18.000
+Muse Spark extracts the claims. Code checks the SEC evidence. Seven pass, two are wrong, and two remain unverifiable.
+
+00:00:18.000 --> 00:00:27.000
+Click eighteen percent. The draft says year over year, but eighteen percent is quarter-over-quarter growth.
+
+00:00:27.000 --> 00:00:35.000
+The receipt calculates the year-over-year change: about one hundred and six percent. We can inspect both filed values.
+
+00:00:35.000 --> 00:00:42.000
+Now click earnings per share. The draft labels two dollars and twenty-two cents as GAAP.
+
+00:00:42.000 --> 00:00:50.000
+That is the adjusted figure. The GAAP receipt says two dollars and forty-six cents, with the filing attached.
+
+00:00:50.000 --> 00:00:59.000
+Let's fix both. Muse Wonder proposes numeric edits; code constrains them and verifies the revised draft again.
+
+00:00:59.000 --> 00:01:06.000
+The original stays on the left. The rechecked version shows exactly which numbers changed.
+
+00:01:06.000 --> 00:01:18.000
+Each correction keeps its receipt. This is a recorded successful response, replayed through the actual interface, not a live speed test.
+
+00:01:18.000 --> 00:01:28.000
+All eleven claims are checked again. The two errors are resolved. Guidance still has question marks; a forecast is not a filed fact.
+
+00:01:28.000 --> 00:01:34.000
+Copy the revised draft with its correction receipts.
+
+00:01:34.000 --> 00:01:44.000
+A correct number can still arrive too late. Here is a roundup checked as of July twenty-ninth, sixteen hundred UTC.
+
+00:01:44.000 --> 00:01:50.000
+Microsoft's filing arrived later. These claims are marked not public yet.
+
+00:01:50.000 --> 00:02:01.000
+Switch to Now and check again. Those two numbers become verifiable. The cutoff follows EDGAR acceptance time.
+
+00:02:01.000 --> 00:02:13.000
+The same workflow handles a slide. Upload this seeded earnings table and select Check slide. SAM proposes regions; Spark reads the figures.
+
+00:02:13.000 --> 00:02:27.000
+Click a numbered reading to open its receipt. Both planted errors are caught. Here Spark supplied the region after SAM found none. The image is a claim, not evidence.
+
+00:02:27.000 --> 00:02:37.000
+Ask for one figure. Spark proposes the lookup; code builds a verified answer. Inspect its SEC footnotes.
+
+00:02:37.000 --> 00:02:45.000
+NoCap: eleven companies, SEC receipts. Built during this hackathon by Robert Chang. Explore the saved examples.

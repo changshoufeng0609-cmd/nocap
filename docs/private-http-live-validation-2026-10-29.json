@@ -1,0 +1,293 @@
+{
+  "audited_at_utc": "2026-10-29T10:45:04.777531+00:00",
+  "status": "passed",
+  "scope": "Real local Chromium browser -> production-built Next UI -> local FastAPI HTTP private router -> authenticated Modal Glimmer -> deterministic SEC verifier -> rendered UI. Public Vercel Private service availability was not tested or enabled.",
+  "fixture": {
+    "kind": "Source-defined public synthetic financial draft",
+    "claim_count": 2,
+    "company": "NVIDIA",
+    "fiscal_period": "Q2 FY2027",
+    "private_draft_or_provider_response_retained": false
+  },
+  "successful_run": {
+    "record": {
+      "path": "data/eval_runs/private_e2e-live-20261029T102821Z/result.json",
+      "sha256": "d2d41a0dee72ab0e18dc408f69bb3bf93ad8cdf281e871c0280161815a1daaa7"
+    },
+    "browser_record": {
+      "path": "data/eval_runs/private_e2e-live-20261029T102821Z/browser-result.json",
+      "sha256": "5d1ba0d4b2f2bf19cbb795edffe5cc123ca238acff252b6204b177fa4eded080"
+    },
+    "browser_validation": {
+      "status": "complete",
+      "preflight": false,
+      "ui_selftest": false,
+      "provider_response_mocked": false,
+      "private_request_bodies_retained": false,
+      "private_responses_retained": false,
+      "trace_or_har_recording": false,
+      "model_calls": 1,
+      "private_posts_started": 1,
+      "stage": "clear_and_mode_switch",
+      "browser_capture_deleted": true,
+      "event_names": [
+        "meta",
+        "claim",
+        "claim",
+        "verdict",
+        "verdict",
+        "done"
+      ],
+      "http_verdict_validation_complete": true,
+      "verdict_counts": {
+        "verified": 1,
+        "wrong": 1
+      },
+      "claim_count": 2,
+      "http_status": 200,
+      "no_store": true,
+      "cached": false,
+      "private_context_bound": true,
+      "as_of_bound": true,
+      "browser_credential_absent": true,
+      "deterministic_expected_verdicts_passed": true,
+      "sec_receipt_links": 4,
+      "ui_rendered": true,
+      "browser_latency_s": 29.92,
+      "no_local_or_session_draft": true,
+      "clear_action_passed": true,
+      "mode_switch_cleared_private": true,
+      "browser_api_posts": [
+        {
+          "method": "POST",
+          "host": "127.0.0.1",
+          "path": "/api/private/check"
+        }
+      ],
+      "public_fallback_requests": 0,
+      "page_error_count": 0,
+      "server_audit": {
+        "requests": [
+          {
+            "method": "GET",
+            "path": "/api/health"
+          },
+          {
+            "method": "GET",
+            "path": "/api/examples"
+          },
+          {
+            "method": "GET",
+            "path": "/api/health"
+          },
+          {
+            "method": "GET",
+            "path": "/api/health"
+          },
+          {
+            "method": "GET",
+            "path": "/api/private/status"
+          },
+          {
+            "method": "POST",
+            "path": "/api/private/check"
+          },
+          {
+            "method": "GET",
+            "path": "/api/health"
+          },
+          {
+            "method": "GET",
+            "path": "/api/examples"
+          },
+          {
+            "method": "GET",
+            "path": "/api/private/status"
+          }
+        ],
+        "pending_reservations": 0,
+        "api_response_cache_files": 0,
+        "model_response_cache_files": 0,
+        "provider_response_mocked": false
+      }
+    },
+    "model": "muse-glimmer",
+    "hosting": "operator Modal workspace",
+    "unauthenticated_http_status": 401,
+    "warmup_s": 125.517,
+    "browser_latency_s": 29.92,
+    "next_build_id": "XDycrWFG331HtuJq4vbLT",
+    "source_sha256": {
+      "receipts/private.py": "b2668f3580be5d7729b451dec71c9e395f5359ea7f57093c2cd375788eaecf53",
+      "deploy/modal_glimmer.py": "022319157f9bebd0fc1e395e610ff32d32c34fcfb71edf458239daff3bf69e96",
+      "web/components/private-check.tsx": "372ed018d2fb899512f39f0320fc69d9891f1f80a1a46c213a29a21c6da8aebc",
+      "data/eval_runs/private_e2e_run.py": "faf2af5f849bd137e4fa687891bda77453a1b040834857b94b7b0b318deed264",
+      "data/eval_runs/private_e2e_browser.py": "72fc78f9a01e648925a06a04c804eef8c13ffa06ca80de3e3786e7507cd83547",
+      "data/eval_runs/private_e2e_server.py": "5d29c887885616127219fcb62d64196d3758f13546cd81d5f61663304d65d8fc"
+    },
+    "runtime_followup": {
+      "recorded_at_utc": "2026-10-29T10:39:56.789608+00:00",
+      "scope": "Read-only hash capture after Private acceptance while shared frozen Q&A was still running, before the separately isolated core fixes were integrated.",
+      "sha256": {
+        "receipts/private.py": "b2668f3580be5d7729b451dec71c9e395f5359ea7f57093c2cd375788eaecf53",
+        "receipts/api.py": "cad5ff5b2d8e44d03594566d3d3fb46d0903b14bbe4f754030617677481cc10b",
+        "receipts/extract.py": "9cb0cc3ee4b569a35fbf4c8d931f1f2a036364cb0543f62fa660916467e2e1d4",
+        "receipts/stream.py": "f1bd18a433cebca85b3dd321bdc82c26388b881ec214811d31c1394e63779d09",
+        "receipts/verify.py": "70cccd862337f8b2490106428f2e31f3dc07c9857567a943d1ebac78d01c8764",
+        "receipts/store.py": "3f621e7643eb501122efbe60ec0d31748127560a918cd761451119a172d6ae8a",
+        "receipts/types.py": "59957d8aac829d4f521ba037af3fdb694cbdbd5c4094acbf87ecbda4a5d80b0e",
+        "data/snapshot/manifest.json": "fd4edc556f7dd15433582ff05c544f4ae353cddbe8e0ef15202aa6af28dec971"
+      }
+    },
+    "masked_screenshot": {
+      "path": "data/eval_runs/private_e2e-live-20261029T102821Z/private-results-masked.png",
+      "sha256": "34cc6b5e85b19e639664550c9540e40f55af96a41bcc4c33181ffdfc9b455391"
+    },
+    "cleared_screenshot": {
+      "path": "data/eval_runs/private_e2e-live-20261029T102821Z/private-cleared.png",
+      "sha256": "e6f5e6dbfe0717164097cb75dbe2c2105f0a6812f239d0cee4bccc597d9a3ad9"
+    }
+  },
+  "shared_qa": {
+    "record": {
+      "path": "eval/qa_runs/qa-closed-book-20261029/glimmer.json",
+      "sha256": "e2d567da65e5a41cfa4e2389265f691bc47428d6d1f12c3238bd053f5b214d0a"
+    },
+    "status": "complete",
+    "planned": 50,
+    "completed_records": 50,
+    "not_started": 0,
+    "wall_s": 526.726987,
+    "note": "Separate fixed public closed-book Q&A measurement; the shared app cost also includes warm-up and the Private browser request, so this is not a standalone Q&A price."
+  },
+  "failed_validation_attempts": [
+    {
+      "record": {
+        "path": "data/eval_runs/private_e2e-live-20261029T095145Z/result.json",
+        "sha256": "92b3d07c7c57ff8f757cf94675ff247262c9241be405533e1a28255aa3e356c0"
+      },
+      "app_id": "ap-6flcGT1gEfiCHj6zjlOwwf",
+      "failure": "Playwright response-body observation failed after the UI canceled its SSE reader; Q&A was not started.",
+      "model_calls": "unknown from retained aggregate evidence",
+      "retained": true
+    },
+    {
+      "record": {
+        "path": "data/eval_runs/private_e2e-live-20261029T100524Z/result.json",
+        "sha256": "80fd34fdd314dfc0804527fdf743afa157db016a3ccf8db0d012cc2a260b18f6"
+      },
+      "app_id": "ap-RVa55jpMDFftxa0t3GpdOY",
+      "failure": "Live HTTP, model and deterministic assertions passed; a glyph-insensitive UI test selector failed. Q&A was not started.",
+      "model_calls": 1,
+      "retained": true
+    }
+  ],
+  "offline_instrumentation_checks": {
+    "stream_clone": {
+      "path": "data/eval_runs/private_e2e-sse-selftest.json",
+      "sha256": "d51b7add23f63bb12461509f18adea7baae23c5c58e27abe2daef17e2fe948e5"
+    },
+    "ui_fixture": {
+      "path": "data/eval_runs/private_e2e-ui-selftest-20261029T101353Z/ui-selftest-browser.json",
+      "sha256": "b2a8f6cde9c460ee6eb5b71efc949b76ecf2d013dc163ee84a973c94a690c787"
+    },
+    "note": "These self-tests were explicitly synthetic/mocked and are not the successful live acceptance record."
+  },
+  "stopped_apps": [
+    {
+      "app_id": "ap-pPqHfNGEtebycUnhRRmRvh",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 18:28:25+08:00",
+      "stopped_at": "2026-10-29 18:40:08+08:00"
+    },
+    {
+      "app_id": "ap-RVa55jpMDFftxa0t3GpdOY",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 18:05:29+08:00",
+      "stopped_at": "2026-10-29 18:09:17+08:00"
+    },
+    {
+      "app_id": "ap-6flcGT1gEfiCHj6zjlOwwf",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 17:51:50+08:00",
+      "stopped_at": "2026-10-29 17:54:44+08:00"
+    }
+  ],
+  "all_new_task_apps_stopped_with_zero_tasks": true,
+  "billing": {
+    "record": {
+      "path": "data/eval_runs/private_e2e-live-20261029T102821Z/billing-followup.json",
+      "sha256": "18756637d6e7e4a84f749e92095e237ccc9ba59659a352e2df793a851d8913f0"
+    },
+    "audited_at_utc": "2026-10-29 10:42:55 UTC",
+    "new_round_app_costs_usd": {
+      "ap-6flcGT1gEfiCHj6zjlOwwf": "0.18764274",
+      "ap-RVa55jpMDFftxa0t3GpdOY": "0.25189594",
+      "ap-pPqHfNGEtebycUnhRRmRvh": "0.82043920"
+    },
+    "new_round_app_total_usd": "1.25997788",
+    "earlier_pipeline_apps_total_usd": "0.70780581",
+    "all_receipts_glimmer_apps_total_usd": "1.96778369",
+    "rounded_prior_attempt_compute_allowance_usd": 0.49,
+    "successful_run_elapsed_compute_upper_estimate_usd": 0.8480612736337853,
+    "combined_new_round_compute_upper_estimate_usd": 1.338061,
+    "metering_may_be_delayed": true,
+    "same_day_pricing_source": "https://modal.com/pricing",
+    "note": "New-round app usage is counted once across Private and shared Q&A. Provider report includes app CPU, memory, H100 and network egress observed at audit time. The separate compute wall-time estimate excludes build/storage/network and is not a provider billing ceiling; workspace monthly billing is not added."
+  },
+  "privacy_audit": {
+    "record": {
+      "path": "data/eval_runs/private_e2e-live-20261029T102821Z/privacy-audit.json",
+      "sha256": "06295f9575458e817aade7281528216037ad88f6600c685d6b155160657eb526"
+    },
+    "result": {
+      "audited_at_utc": "2026-10-29T10:43:13.063876+00:00",
+      "status": "passed",
+      "scope": "Read-only runtime artifact scan after all task apps stopped; source-defined public synthetic fixture and separate public Q&A outputs are outside the private-response artifacts.",
+      "records": [
+        {
+          "artifact_directory": "data/eval_runs/private_e2e-live-20261029T095145Z",
+          "files_scanned": 8,
+          "known_secret_file_matches": 0,
+          "exact_synthetic_draft_file_matches": 0,
+          "serialized_claim_marker_file_matches": 0,
+          "response_cache_json_files": 0
+        },
+        {
+          "artifact_directory": "data/eval_runs/private_e2e-live-20261029T100524Z",
+          "files_scanned": 8,
+          "known_secret_file_matches": 0,
+          "exact_synthetic_draft_file_matches": 0,
+          "serialized_claim_marker_file_matches": 0,
+          "response_cache_json_files": 0
+        },
+        {
+          "artifact_directory": "data/eval_runs/private_e2e-live-20261029T102821Z",
+          "files_scanned": 13,
+          "known_secret_file_matches": 0,
+          "exact_synthetic_draft_file_matches": 0,
+          "serialized_claim_marker_file_matches": 0,
+          "response_cache_json_files": 0
+        }
+      ],
+      "secret_values_or_patterns_retained": false,
+      "limitations": [
+        "This checks known configured secrets, the exact synthetic draft and serialized claim marker in the retained artifact bytes; it is not a provider or operating-system retention audit."
+      ]
+    }
+  },
+  "validation_limits": [
+    "One synthetic two-claim browser request is an integration check, not a general extraction or financial-accuracy benchmark.",
+    "The successful call used a warmed endpoint; its browser latency does not include cold start.",
+    "No private draft, raw provider response, HAR or trace was retained. Screenshots mask draft and result text; browser capture variables were deleted. Browser, NoCap host and Modal infrastructure policies still apply.",
+    "All task apps are stopped. This does not enable an always-on or public Private service.",
+    "Original failed attempts and explicitly mocked offline self-tests remain separate from live success.",
+    "Source hashes identify the tested runtime; subsequent code changes require their own validation."
+  ]
+}

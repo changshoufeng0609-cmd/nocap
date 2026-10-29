@@ -1,0 +1,17 @@
+{
+  "finished_at": "2026-10-29T12:11:52.841916+00:00",
+  "freeze_unchanged": true,
+  "metering": {
+    "cap_usd": 1.5,
+    "max_attempts": 250,
+    "charge_usd": 0.49834625,
+    "calls": 117,
+    "estimated_calls": 0
+  },
+  "extraction_cache_hits": 11,
+  "extraction_fresh_attempts": 117,
+  "corpus_records_written": [
+    "v0",
+    "trap_v1"
+  ]
+}

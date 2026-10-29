@@ -1,0 +1,82 @@
+{
+  "status": "passed",
+  "scope": "Identical synthetic model-proposal probes against public snapshot, before/after J2 fixes; not live-model occurrence rates",
+  "provider_calls": 0,
+  "sec_calls": 0,
+  "rows": [
+    {
+      "case": "verbatim_bound",
+      "description": "revenue was under $96.2 billion",
+      "before": "wrong",
+      "after": "wrong",
+      "reason": "value_mismatch",
+      "expected": "wrong"
+    },
+    {
+      "case": "fallback_bound",
+      "description": "Revenue was under $96.2 billion",
+      "before": "verified",
+      "after": "wrong",
+      "reason": "value_mismatch",
+      "expected": "wrong"
+    },
+    {
+      "case": "omitted_bound",
+      "description": "$96.2 billion",
+      "before": "verified",
+      "after": "wrong",
+      "reason": "value_mismatch",
+      "expected": "wrong"
+    },
+    {
+      "case": "canonical_qualifier",
+      "description": "net income",
+      "before": "verified",
+      "after": "verified",
+      "reason": "match",
+      "expected": "verified"
+    },
+    {
+      "case": "canonical_qualifier",
+      "description": "net income attributable to common stockholders",
+      "before": "verified",
+      "after": "unverifiable",
+      "reason": "no_evidence",
+      "expected": "unverifiable"
+    },
+    {
+      "case": "canonical_qualifier",
+      "description": "net income excluding stock compensation",
+      "before": "verified",
+      "after": "unverifiable",
+      "reason": "no_evidence",
+      "expected": "unverifiable"
+    },
+    {
+      "case": "canonical_qualifier",
+      "description": "European net income",
+      "before": "verified",
+      "after": "unverifiable",
+      "reason": "no_evidence",
+      "expected": "unverifiable"
+    },
+    {
+      "case": "canonical_qualifier",
+      "description": "net income from discontinued operations",
+      "before": "verified",
+      "after": "unverifiable",
+      "reason": "no_evidence",
+      "expected": "unverifiable"
+    }
+  ],
+  "targeted_regressions_passed": 98,
+  "source_commit": "df76e678172867701d9ce1d6e66c47c21ac19ef9",
+  "source_sha256": {
+    "receipts/extract.py": "7f6b2ee065517439ae60227b9e4c330c4b5b45f9c4869570b8dfc72ef010ce6e",
+    "receipts/verify.py": "f79ce7586e1da29c5120e78668f6828c1f7c3d0877d09b43fd3d75fdb6327bb4"
+  },
+  "evidence_sha256": {
+    "j2_core_probe_before.json": "387e1b19cf13615b0d0fb84e4667367652370c0a10850735c0715b27a5d969bf",
+    "j2_core_probe_after.json": "c6314efeb124946bb790ff020dcdfded1f6c612d286201bb318701d816de09ff"
+  }
+}

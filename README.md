@@ -6,9 +6,9 @@ Built by **Robert Chang · Team NoCap** for the [Meta Global AI Developer Hackat
 
 ![NoCap checks a seeded earnings draft, shows receipts and rechecks corrections](docs/demo/assets/receipts-demo.gif)
 
-[Watch the three-minute demo](docs/demo/assets/receipts-demo.mp4) · [English captions and recording notes](docs/demo/README.md). Edited browser captures with recorded model responses; the video uses disclosed synthetic narration. These are demonstrations, not live latency measurements.
+[Watch the 165-second walkthrough](docs/demo/assets/receipts-demo.mp4) · [English captions and recording notes](docs/demo/README.md). A continuous recording of the actual local browser workflow, with cached Check extraction, disclosed recorded Fix/Slide/Ask responses and local synthetic narration. It is a demonstration, not a live latency measurement. The replacement media passed local checks; public deployment and anonymous acceptance of this new export remain pending.
 
-**Try NoCap:** open the [public workspace](https://receipts-nocap.vercel.app) and choose a built-in example, or [watch the demo](https://receipts-nocap.vercel.app/demo). Desktop and mobile access, saved results, video playback and captions passed anonymous browser checks. **Live model requests are paused**; new draft checks, corrections, Slide and Ask requests are not currently open. [Source code](https://github.com/changshoufeng0609-cmd/nocap) and the [video download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4) are public. [Release evidence](docs/public-release-2026-10-29.json).
+**Try NoCap:** open the [public workspace](https://receipts-nocap.vercel.app) and choose a built-in example, or [watch the hosted demo](https://receipts-nocap.vercel.app/demo). The earlier release passed anonymous desktop/mobile checks for saved results, video playback and captions. **Live model requests are paused**; new draft checks, corrections, Slide and Ask requests are not currently open. [Source code](https://github.com/changshoufeng0609-cmd/nocap) and a [licensed video download](https://raw.githubusercontent.com/changshoufeng0609-cmd/nocap/main/docs/demo/assets/receipts-demo.mp4) are public. The [earlier release evidence](docs/public-release-2026-10-29.json) covers the 179.937663-second export, not the new 165-second walkthrough or benchmark page.
 
 ## The problem
 
@@ -65,7 +65,7 @@ financial statement was found or verified. Check and Fix report text coverage; s
 
 **[Ask with receipts](docs/ask.md):** ask an explicit question such as “What was NVIDIA's GAAP revenue in Q2 FY2027?” Spark proposes lookup parameters; code independently matches them to the question, retrieves eligible facts, writes the answer and verifies each sentence. Unsupported comparisons, advice and ambiguous requests require clarification. The same workspace includes whole-filing quote search: a selected, pre-ingested SEC document is sent in full, and accepted quotes must match a unique exact span. A quote is source attribution, not a verified financial verdict. The interface and guards are implemented; real whole-filing acquisition/live validation still requires a valid SEC contact identity.
 
-**[Private check](docs/private-mode.md):** an explicit draft-only workflow routes extraction to the operator's Muse Glimmer deployment on Modal, without NoCap response caching or fallback to a public model provider. It fails closed when setup is unavailable. This is hosted processing, not offline computation; Modal and the NoCap host still handle the draft. One bounded live pipeline smoke produced **1 verified / 1 wrong** and rejected an unauthenticated request; the deployment was stopped afterward. Live HTTP/browser acceptance remains separate. [Validation and billing scope](docs/private-live-validation-2026-10-29.json).
+**[Private check](docs/private-mode.md):** an explicit draft-only workflow routes extraction to the operator's Muse Glimmer deployment on Modal, without NoCap response caching or fallback to a public model provider. It fails closed when setup is unavailable. This is hosted processing, not offline computation; Modal and the NoCap host still handle the draft. A real local browser → FastAPI HTTP → Modal → deterministic-verifier check completed with **1 verified / 1 wrong** from one model call. Clear/mode-switch behavior and absence of application caching or browser credentials passed checks. All task apps were then confirmed stopped with zero running tasks. This is a two-claim local integration check, not public Private availability or a quality benchmark. [Validation and billing scope](docs/private-http-live-validation-2026-10-29.json).
 
 **[Local MCP server](docs/mcp.md):** connect an agent to three read-only stdio tools for coverage discovery, bounded evidence search and deterministic typed-claim verification with historical cutoffs. The tools themselves make no model or SEC calls. Agent hosts retain their own privacy responsibilities.
 
@@ -97,9 +97,21 @@ For the browser interface, follow [local API and web setup](docs/deploy.md#local
 
 Fix with receipts requires a Meta `MODEL_API_KEY` for Wonder, including when extraction uses another backend. It makes paid model calls and shares the API's rate limit and durable estimated spend admission. Unknown usage retains conservative charges; the UI labels estimates and shows unavailable accounting explicitly. Vercel requires a shared ledger by default, while local development uses SQLite. See [spend protection](docs/spend-protection.md). Existing extraction caches can be reused; correction proposals are not cached. Mock mode demonstrates the check UI but does not generate corrections.
 
-## Results: development sets only
+## Results: held-out, development and closed-book Q&A
 
-The earlier numeric-coverage release passed **905 Python tests / 119 frontend checks**, typecheck, lint and production build. The October 29 full Python suite passed **1,117 tests**, followed by **2 additional targeted slide-expiry checks**. The frontend passed **144 checks**, typecheck, lint and a clean production build; release acceptance records are in the [Hand-back log](docs/HANDOFF.md#hand-back-log). Cached full-dev/trap replays preserve the results below and add **0 model calls / $0 model spend**. The held-out test split has **never been evaluated**.
+The integrated October 29 core fixes passed **1,246 full-suite Python tests** and retained the **144 frontend checks**. [J2](docs/j2-review-2026-10-29.md) independently closed both semantic guard findings with 98 targeted tests and eight unchanged before/after probes. Development baselines and all three saved-example counts were preserved. Earlier 905/119 and 1,117-plus-two-targeted checkpoints remain historical. The owner-authorized **held-out evaluation is complete**, with no result-driven tuning. Current release steps are in the [round record](docs/completion-round-2026-10-29.md).
+
+| Held-out measure | Seeded-error test: v0 + basis5 | Wonder trap test |
+|---|---:|---:|
+| Inputs | 97 items | 7 drafts |
+| Errors caught | **44/48 (91.7%)** | **20/20 (100%)** |
+| Correct error reason | 42/48 (87.5%) | 18/20 (90.0%) |
+| False alarms | **1/47 original items; 1/110 true claims** | **0/52 true figures; 0/25 true sentences** |
+| Unverifiable true claims/figures | 22/110 (20.0%) | 3/52 (5.8%) |
+
+All four uncaught seeded test errors remained `?`, not ✓; all ten trap-test guidance figures remained `?`. The held-out run made **117 model attempts**, cost **$0.49834625** by recorded usage, and retained zero errors/skips or estimated-usage attempts. All 126 frozen files remained unchanged. These are small held-out splits of correlated, provisionally labeled corpora, not independent human adjudication or general financial accuracy. The **one original-item false alarm** must not be replaced by the development set's zero. [Held-out methods, results and records](eval/heldout_results.md).
+
+The following development sets were used during implementation and are reported separately:
 
 | Measure | Seeded-error dev: v0 + basis5 | Wonder trap dev |
 |---|---:|---:|
@@ -117,9 +129,11 @@ These are small development sets used during implementation. Corpus sentences an
 
 **Expanded comparison:** a separate fixed-seed **50-item dev sample** gives both cached Meta Spark and fresh Baseten Spark Open **24/24 errors caught, 23/24 expected reasons, 0/24 original false alarms**, and **2/2 guidance controls left unverifiable**. Baseten made 48 new calls, with two identical extraction requests reused inside the run; independent usage accounting is **$0.24020610**. Meta made zero new calls. All 100 outcomes reproduced in a zero-spend replay. The sample is correlated development data with provisional labels, not a held-out score. [Selection, complete records and limitations](eval/expanded_dev_results.md).
 
+**Closed-book Q&A:** four backends completed the same **50 fixed questions each (200 calls)** without retrieval or tools. The original strict metadata contract accepted no answers; its rejection counts mix format/binding and numeric failures. An explicitly **post-run metadata sensitivity analysis** accepted 14/50 Spark, 0/50 Wonder, 17/50 Baseten Spark Open and 6/50 Glimmer answers, with no incorrect answer accepted in this small supported set. Precision is **N/A** for Wonder because none were accepted. Coverage was only **28% / 0% / 34% / 12%**; the result does not show that any model becomes trustworthy. Reference labels share the SEC evidence store and await human adjudication. The frozen gate predates the J2 runtime fixes and is retained unchanged; these are not measurements of the later production code. [Complete results](eval/qa_results.md), [methods and offline reproduction](eval/qa_methods.md), and the [benchmark page source](web/app/benchmarks/page.tsx) retain every response and failure. Public acceptance of the new page is pending.
+
 ## Built during the hackathon
 
-Development began on **2026-10-27**. The NoCap implementation was written during the hackathon. The October 29 release is exported as a clean snapshot; the original incremental development history is retained in the private development repository. Public release commits record exported versions, not the date every feature was first written. Third-party libraries and model weights retain their own provenance and licenses.
+Development began on **2026-10-27**. The NoCap implementation was written during the hackathon. The October 29 release is exported as a clean snapshot; the original incremental development history is retained in the private development repository. A [public filtered source-history branch](https://github.com/changshoufeng0609-cmd/nocap/tree/source-history) now contains 65 reconstructed commits and 104 final source/configuration files, through the post-J2 checkpoint. Its [scope and mapping](docs/source-history.md) distinguish reconstructed history from original Git objects and independent timestamp attestation. Public release commits record exported versions, not the date every feature was first written. Third-party libraries and model weights retain their own provenance and licenses.
 
 **Prior-work disclosure:** the idea grew out of the author's earlier Taiwan portfolio agent and its unreliable financial numbers. Only the concept carries over. No code from that earlier project was copied into NoCap.
 

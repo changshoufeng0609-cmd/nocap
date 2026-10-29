@@ -1,32 +1,23 @@
-# README GIF: 20-second storyboard
+# README GIF: 20 seconds of actual operation
 
-**Purpose:** show the review loop in one glance. The [generated GIF](assets/receipts-demo.gif) is a 20-second edited sequence of actual browser screenshots, not a continuous live session or measured end-to-end timing.
+The [current GIF](assets/receipts-demo.gif) is the continuous **8–28 second interval**
+of the [165-second walkthrough](assets/receipts-demo.mp4), at original speed.
+It is 960 × 540, 10 fps, muted and looping. There are no screenshot substitutions
+or internal cuts.
 
-Target: **20 seconds**, **960 px wide**, **10 fps**, muted, looping. Preserve readable figures and the selected receipt. Use a constant lower caption: **Edited demo · cached checks / recorded Fix response** when reusing the saved live Fix output. If all Fix footage is newly live, change that portion to **live Fix, wait shortened** only when accurate.
-
-| Time | Picture | Short caption |
+| GIF time | Source-video time | Actual operation |
 |---|---|---|
-| 0–3 s | NVIDIA results with both planted errors highlighted and all verdict counts visible. | **One draft. Two planted errors.** |
-| 3–6 s | Growth-rate receipt and the code-derived year-over-year calculation. | **Find the comparison that went wrong.** |
-| 6–10 s | Open the `$2.22` GAAP EPS receipt. Show `$2.46`, basis and accession. | **Trace the correction to the filing.** |
-| 10–15 s | Fix side-by-side result and the two retained `?` guidance claims. | **Propose. Constrain. Recheck.** |
-| 15–20 s | June-quarter roundup at `2026-07-29 16:00 UTC`; select Microsoft's revenue and show its later acceptance time. | **Check what EDGAR knew at the cutoff.** |
+| 0–2 s | 8–10 s | Move to Check and click; the cached example is verified |
+| 2–10 s | 10–18 s | Inspect 7 verified / 2 wrong / 2 unverifiable results |
+| 10–13 s | 18–21 s | Click the 18% growth claim and open its receipt |
+| 13–20 s | 21–28 s | Read the filed year-over-year growth comparison and source evidence |
 
-The last shot may jump back to the first without a fade. Keep captions outside the claimed/filing values. Do not animate false counts or draw a checkmark over a `?` claim. The full video, rather than this loop, carries the detailed metric caveats and optional slide segment.
+The inherited captions and response-mode disclosure identify cached verification.
+The loop is not a model-latency benchmark. Its first and final frames deliberately
+jump at the loop boundary, without a fabricated transition or invented result.
 
-## Capture and export
-
-Use Playwright's video capture or a normal screen recorder. The local machine already has `ffmpeg` and `ffprobe`; no download is required. Save intermediate recordings under a gitignored directory such as `data/eval_runs/demo_capture/`, and keep the final reviewable GIF under `docs/demo/`.
-
-For the delivered screenshot sequence, run `capture_demo.py` and `render_demo.py` as described in the [demo README](README.md). The renderer exports a palette-optimized **960 × 540 GIF, 304,543 bytes**. The command below is an alternative for a future continuous video capture; it was not used to create a fictitious live recording.
-
-After editing the exact 20-second sequence to `data/eval_runs/demo_capture/hero.webm`, this export command creates a palette for that sequence:
-
-```bash
-ffmpeg -y -i data/eval_runs/demo_capture/hero.webm -t 20 \
-  -vf 'fps=10,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a' \
-  -loop 0 docs/demo/receipts-demo.gif
-ffprobe -v error -show_entries format=duration,size -of json docs/demo/receipts-demo.gif
-```
-
-Watch the exported file at its README display size. Confirm the basis, corrected EPS, question marks and cutoff remain legible. If it is too large, lower fps or crop unused whitespace before reducing text legibility. Update the main README placeholder only once the final GIF exists and has passed this review.
+`export_walkthrough.py` uses ffmpeg palette generation and dithering to export this
+exact interval. `validate_media.py` checks its full decoding, duration, dimensions,
+size and hash. The current file is 1,664,486 bytes; its source and SHA-256 are in
+[the manifest](assets/manifest.json). The old 304,543-byte screenshot-sequence GIF
+is historical and has been replaced.

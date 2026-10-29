@@ -1,6 +1,6 @@
 # Demo narration provenance
 
-The public demo uses **Kokoro-82M v1.0, `af_heart`**, synthesized locally on the CPU with
+The current repository demo export uses **Kokoro-82M v1.0, `af_heart`**, synthesized locally on the CPU with
 **kokoro-onnx 0.6.1**. It is a generic synthetic voice, not Robert Chang's recorded voice or a custom
 voice clone. No cloud speech service, paid model endpoint or GPU instance is used for narration.
 
@@ -35,21 +35,30 @@ Install the optional local media dependencies, outside the product's runtime req
 ```
 
 Download those two named assets from the linked release into the local directory above. Then run
-`docs/demo/render_demo.py --with-slide` with the project's Python environment and original capture files.
-`--tts-model` and `--tts-voices` can supply different local paths to the same assets. The renderer performs
+`docs/demo/render_walkthrough.py` with the project's Python environment and original continuous capture.
+The assets are read from the named local directory. The renderer performs
 CPU inference with ONNX telemetry disabled; it never downloads weights or sends narration text to a server.
 
-The original 29 English caption texts and cue boundaries are retained. Spoken-only substitutions separate
+The current export contains **18 English cues over 165 seconds**, following actual browser actions.
+Spoken-only substitutions separate
 “No Cap”, pronounce GAAP as “gap”, and spell EPS, SEC and UTC by their letters. The manifest records each
-caption, spoken text, phonemes, source-audio hash and timing adjustment. Audio is normalized and fitted to
-the existing screenshot scene durations. This pronunciation and media verification is not a claim of
+caption, spoken text, source-audio hash and timing adjustment; the local speech cache retains generated
+phonemes. Audio is normalized and fitted to the continuous recording's cue durations. This media verification is not a claim of
 human listening or editorial approval.
 
-This replaces the earlier local macOS Samantha narration before public distribution. Apple's
+## Historical narration replacement
+
+The earlier local macOS Samantha narration was replaced before public distribution. Apple's
 [macOS Tahoe license §2F](https://images.apple.com/legal/sla/docs/macOSTahoe.pdf) restricts System Voices to
 personal, noncommercial use and separately restricts public sharing. Earlier media was preserved only
-in the private repository history and a gitignored local backup; it is not the current public demo.
+in the private repository history and a gitignored local backup; it is not distributed in current exports.
 
-The final asset hashes, decode/audio-level results and public-file comparisons are recorded in
+That first Kokoro replacement preserved all 29 captions and screenshot frames of the old 179.937663-second
+montage. Its metadata remains in [the historical manifest](assets/historical/2026-10-29-screenshot-manifest.json)
+and [historical validation](assets/historical/2026-10-29-screenshot-validation.json). The later interaction-led
+export replaces the old narration script and picture sequence; it uses the same licensed model and voice,
+with 18 newly timed speech segments. Neither replacement claims human listening or editorial approval.
+
+The current asset hashes, decode/audio-level results and local public-file comparisons are recorded in
 [`assets/validation.json`](assets/validation.json); per-segment TTS provenance is in
-[`assets/manifest.json`](assets/manifest.json).
+[`assets/manifest.json`](assets/manifest.json). Deployment acceptance is recorded separately from these local exports.
