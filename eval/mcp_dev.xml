@@ -1,0 +1,42 @@
+<evaluation>
+  <qa_pair>
+    <question>Find NVIDIA revenue receipts for the quarter ending 2026-07-26, preserve their distinct filing versions, and verify the draft rounded to $96.2 billion. Return the verifier reason code.</question>
+    <answer>match</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Search the NVIDIA quarter ending 2026-07-26, compare the source with a draft reporting $90.2 billion in revenue, and verify the draft without silently replacing its figure. Return the reason code.</question>
+    <answer>value_mismatch</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find the units and amount of NVIDIA revenue for Q2 FY2027. A draft says $96.2 million; type the quotation faithfully and check it. Return the reason code.</question>
+    <answer>scale_mismatch</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Compare GAAP and non-GAAP diluted EPS evidence for NVIDIA Q2 FY2027, then verify a draft labeling $2.22 as GAAP. Return the reason code.</question>
+    <answer>basis_mismatch</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Look up NVIDIA revenue across the periods needed to distinguish sequential and annual growth for Q2 FY2027, then verify the claim that revenue grew 18% year over year. Return the reason code.</question>
+    <answer>period_mismatch</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Search NVIDIA Q2 FY2027 revenue receipts with an as-of cutoff of 2026-08-26T20:00:00Z, then verify the $96.2 billion claim at the same cutoff. Return the reason code.</question>
+    <answer>look_ahead</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Compare available NVIDIA revenue evidence with the sentence expecting $108.0 billion in Q3 FY2027. Preserve its forward-looking meaning when verifying. Return the reason code.</question>
+    <answer>forward_looking</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Find Tesla revenue for the quarter ending 2026-09-30 and its filing acceptance time, then check the draft value $28.046 billion. Return the reason code.</question>
+    <answer>match</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>At 2026-10-22T00:12:40Z search Tesla revenue for Q3 FY2026 and verify $28.046 billion. Account for the earlier 8-K having no stored revenue cell and the 10-Q arriving one second later. Return the reason code.</question>
+    <answer>no_evidence</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Search Tesla operating-cash-flow evidence for the quarter ending 2026-09-30, distinguish a derived quarter from a year-to-date amount, then verify $6.263 billion for Q3 FY2026. Return the reason code.</question>
+    <answer>match</answer>
+  </qa_pair>
+</evaluation>

@@ -1,0 +1,3178 @@
+{
+ "id": "nvda-q1-fy2027",
+ "text": "SANTA CLARA, Calif.—May 20, 2026―NVIDIA (NASDAQ: NVDA) today reported record revenue for the first quarter ended April 26, 2026, of $81.6 million, up 20% from the previous quarter and up 85% from a year ago.\n\nFor the quarter, GAAP earnings per diluted share were $2.39 and $1.87, respectively.\n\nData Center networking revenue was a record $14.8 billion, up 199% from a year ago and up 35% sequentially.\n",
+ "context": "NVIDIA (NVDA), first quarter of fiscal 2027, the quarter ended April 26, 2026",
+ "source": "python -m receipts check - --json --context \"NVIDIA (NVDA), first quarter of fiscal 2027, the quarter ended April 26, 2026\" (cached Muse Spark responses), generated 2026-10-27",
+ "latest": {
+  "valid_from": null,
+  "events": [
+   {
+    "event": "meta",
+    "data": {
+     "draft_hash": "{{DRAFT_HASH}}",
+     "cached": true,
+     "passages": 3,
+     "as_of": null
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c1",
+      "metric": "revenue",
+      "metric_text": "revenue",
+      "value_text": "$81.6 million",
+      "value": 81.6,
+      "unit": "USD",
+      "scale": "millions",
+      "period_text": "first quarter ended April 26, 2026",
+      "period_type": "quarter",
+      "comparison": "none",
+      "basis": null,
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": null,
+      "span_text": "record revenue for the first quarter ended April 26, 2026, of $81.6 million",
+      "span_start": 70,
+      "span_end": 145
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c2",
+      "metric": "revenue_growth",
+      "metric_text": "revenue growth",
+      "value_text": "20%",
+      "value": 20.0,
+      "unit": "%",
+      "scale": "units",
+      "period_text": "first quarter ended April 26, 2026",
+      "period_type": "quarter",
+      "comparison": "QoQ",
+      "basis": null,
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": null,
+      "span_text": "up 20% from the previous quarter",
+      "span_start": 147,
+      "span_end": 179
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c3",
+      "metric": "revenue_growth",
+      "metric_text": "revenue growth",
+      "value_text": "85%",
+      "value": 85.0,
+      "unit": "%",
+      "scale": "units",
+      "period_text": "first quarter ended April 26, 2026",
+      "period_type": "quarter",
+      "comparison": "YoY",
+      "basis": null,
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": null,
+      "span_text": "up 85% from a year ago",
+      "span_start": 184,
+      "span_end": 206
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c4",
+      "metric": "eps_diluted",
+      "metric_text": "GAAP earnings per diluted share",
+      "value_text": "$2.39",
+      "value": 2.39,
+      "unit": "USD/share",
+      "scale": "units",
+      "period_text": "For the quarter",
+      "period_type": "quarter",
+      "comparison": "none",
+      "basis": "GAAP",
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": null,
+      "span_text": "GAAP earnings per diluted share were $2.39",
+      "span_start": 226,
+      "span_end": 268
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c5",
+      "metric": "eps_diluted",
+      "metric_text": "GAAP earnings per diluted share",
+      "value_text": "$1.87",
+      "value": 1.87,
+      "unit": "USD/share",
+      "scale": "units",
+      "period_text": "For the quarter",
+      "period_type": "quarter",
+      "comparison": "none",
+      "basis": "GAAP",
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": null,
+      "span_text": "GAAP earnings per diluted share were $2.39 and $1.87, respectively",
+      "span_start": 226,
+      "span_end": 292
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c6",
+      "metric": "segment_revenue",
+      "metric_text": "Data Center networking revenue",
+      "value_text": "$14.8 billion",
+      "value": 14.8,
+      "unit": "USD",
+      "scale": "billions",
+      "period_text": "first quarter of fiscal 2027",
+      "period_type": "quarter",
+      "comparison": "none",
+      "basis": null,
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": "Data Center networking",
+      "span_text": "Data Center networking revenue was a record $14.8 billion",
+      "span_start": 295,
+      "span_end": 352
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c7",
+      "metric": "revenue_growth",
+      "metric_text": "Data Center networking revenue growth",
+      "value_text": "199%",
+      "value": 199.0,
+      "unit": "%",
+      "scale": "units",
+      "period_text": "first quarter of fiscal 2027",
+      "period_type": "quarter",
+      "comparison": "YoY",
+      "basis": null,
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": "Data Center networking",
+      "span_text": "up 199% from a year ago",
+      "span_start": 354,
+      "span_end": 377
+     }
+    }
+   },
+   {
+    "event": "claim",
+    "data": {
+     "claim": {
+      "id": "c8",
+      "metric": "revenue_growth",
+      "metric_text": "Data Center networking revenue growth",
+      "value_text": "35%",
+      "value": 35.0,
+      "unit": "%",
+      "scale": "units",
+      "period_text": "first quarter of fiscal 2027",
+      "period_type": "quarter",
+      "comparison": "sequential",
+      "basis": null,
+      "forward_looking": false,
+      "entity": "NVIDIA",
+      "segment": "Data Center networking",
+      "span_text": "up 35% sequentially",
+      "span_start": 382,
+      "span_end": 401
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c1",
+     "verdict": {
+      "claim_id": "c1",
+      "status": "wrong",
+      "reason": "scale_mismatch",
+      "explanation": "NVIDIA's 10-Q reports that revenue was $81.615 billion for Q1 FY2027 (quarter ended Apr 26, 2026), so $81.6 million is off by a factor of 1,000.",
+      "expected_value": 81615.0,
+      "evidence": [
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": "us-gaap:Revenues",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-26-000052",
+        "accepted_at": "2026-05-20T20:35:52Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+        "locator": null,
+        "decimals": -6
+       }
+      ],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c2",
+     "verdict": {
+      "claim_id": "c2",
+      "status": "verified",
+      "reason": "match",
+      "explanation": "Matches NVIDIA's 10-Q: revenue grew 19.8% quarter over quarter in Q1 FY2027 (quarter ended Apr 26, 2026).",
+      "expected_value": null,
+      "evidence": [
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": "us-gaap:Revenues",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 68127000000.0,
+        "unit": "USD",
+        "period_start": "2025-10-27",
+        "period_end": "2026-01-25",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q4",
+        "source": "derived",
+        "derived_from": [
+         "0001045810-26-000021",
+         "0001045810-25-000230"
+        ],
+        "form": "10-K",
+        "accession": "0001045810-26-000021",
+        "accepted_at": "2026-02-25T21:42:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+        "locator": "Q4 = FY (10-K 0001045810-26-000021) - 9M YTD (10-Q 0001045810-25-000230)",
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000051",
+        "accepted_at": "2026-05-20T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+        "locator": "Revenue | $81,615",
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 68127000000.0,
+        "unit": "USD",
+        "period_start": "2025-10-27",
+        "period_end": "2026-01-25",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q4",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000051",
+        "accepted_at": "2026-05-20T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+        "locator": "Revenue | $68,127",
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": "us-gaap:Revenues",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-26-000052",
+        "accepted_at": "2026-05-20T20:35:52Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+        "locator": null,
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000073",
+        "accepted_at": "2026-08-26T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+        "locator": "Revenue | $81,615",
+        "decimals": -6
+       }
+      ],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c3",
+     "verdict": {
+      "claim_id": "c3",
+      "status": "verified",
+      "reason": "match",
+      "explanation": "Matches NVIDIA's 10-Q: revenue grew 85.2% year over year in Q1 FY2027 (quarter ended Apr 26, 2026).",
+      "expected_value": null,
+      "evidence": [
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": "us-gaap:Revenues",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 44062000000.0,
+        "unit": "USD",
+        "period_start": "2025-01-27",
+        "period_end": "2025-04-27",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-25-000116",
+        "accepted_at": "2025-05-28T20:32:57Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000116/nvda-20250427.htm",
+        "locator": null,
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000051",
+        "accepted_at": "2026-05-20T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+        "locator": "Revenue | $81,615",
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 44062000000.0,
+        "unit": "USD",
+        "period_start": "2025-01-27",
+        "period_end": "2025-04-27",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000051",
+        "accepted_at": "2026-05-20T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+        "locator": "Revenue | $44,062",
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": "us-gaap:Revenues",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 44062000000.0,
+        "unit": "USD",
+        "period_start": "2025-01-27",
+        "period_end": "2025-04-27",
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-26-000052",
+        "accepted_at": "2026-05-20T20:35:52Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+        "locator": null,
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": "us-gaap:Revenues",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-26-000052",
+        "accepted_at": "2026-05-20T20:35:52Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+        "locator": null,
+        "decimals": -6
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "revenue",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 81615000000.0,
+        "unit": "USD",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000073",
+        "accepted_at": "2026-08-26T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+        "locator": "Revenue | $81,615",
+        "decimals": -6
+       }
+      ],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c4",
+     "verdict": {
+      "claim_id": "c4",
+      "status": "verified",
+      "reason": "match",
+      "explanation": "Matches NVIDIA's 10-Q: GAAP diluted EPS was $2.39 for Q1 FY2027 (quarter ended Apr 26, 2026).",
+      "expected_value": null,
+      "evidence": [
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "eps_diluted",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 2.39,
+        "unit": "USD/share",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000051",
+        "accepted_at": "2026-05-20T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+        "locator": "Diluted earnings per share | $2.39",
+        "decimals": 2
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "eps_diluted",
+        "concept": "us-gaap:EarningsPerShareDiluted",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 2.39,
+        "unit": "USD/share",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-26-000052",
+        "accepted_at": "2026-05-20T20:35:52Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+        "locator": null,
+        "decimals": 2
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "eps_diluted",
+        "concept": null,
+        "basis": "GAAP",
+        "segment": null,
+        "value": 2.39,
+        "unit": "USD/share",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000073",
+        "accepted_at": "2026-08-26T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+        "locator": "Diluted earnings per share | $2.39",
+        "decimals": 2
+       }
+      ],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c5",
+     "verdict": {
+      "claim_id": "c5",
+      "status": "wrong",
+      "reason": "basis_mismatch",
+      "explanation": "$1.87 is NVIDIA's non-GAAP diluted EPS for Q1 FY2027 (quarter ended Apr 26, 2026); the GAAP figure is $2.39.",
+      "expected_value": 2.39,
+      "evidence": [
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "eps_diluted",
+        "concept": null,
+        "basis": "non-GAAP",
+        "segment": null,
+        "value": 1.87,
+        "unit": "USD/share",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "press_release",
+        "derived_from": [],
+        "form": "8-K",
+        "accession": "0001045810-26-000051",
+        "accepted_at": "2026-05-20T20:21:19Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+        "locator": "Diluted earnings per share | $1.87",
+        "decimals": 2
+       },
+       {
+        "cik": 1045810,
+        "ticker": "NVDA",
+        "metric": "eps_diluted",
+        "concept": "us-gaap:EarningsPerShareDiluted",
+        "basis": "GAAP",
+        "segment": null,
+        "value": 2.39,
+        "unit": "USD/share",
+        "period_start": "2026-01-26",
+        "period_end": "2026-04-26",
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "source": "xbrl",
+        "derived_from": [],
+        "form": "10-Q",
+        "accession": "0001045810-26-000052",
+        "accepted_at": "2026-05-20T20:35:52Z",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+        "locator": null,
+        "decimals": 2
+       }
+      ],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c6",
+     "verdict": {
+      "claim_id": "c6",
+      "status": "unverifiable",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for NVIDIA's Data Center networking revenue for Q1 FY2027 (quarter ended Apr 26, 2026).",
+      "expected_value": null,
+      "evidence": [],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c7",
+     "verdict": {
+      "claim_id": "c7",
+      "status": "unverifiable",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+      "expected_value": null,
+      "evidence": [],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "verdict",
+    "data": {
+     "claim_id": "c8",
+     "verdict": {
+      "claim_id": "c8",
+      "status": "unverifiable",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+      "expected_value": null,
+      "evidence": [],
+      "as_of": null
+     }
+    }
+   },
+   {
+    "event": "done",
+    "data": {
+     "counts": {
+      "verified": 3,
+      "wrong": 2,
+      "unverifiable": 3,
+      "approximate": 0
+     },
+     "latency_s": 5.7,
+     "cost_usd": 0.0119,
+     "model": "muse-spark-1.3"
+    }
+   }
+  ]
+ },
+ "timeline": [
+  {
+   "valid_from": null,
+   "events": [
+    {
+     "event": "meta",
+     "data": {
+      "draft_hash": "{{DRAFT_HASH}}",
+      "cached": true,
+      "passages": 3,
+      "as_of": "{{AS_OF_ISO}}"
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c1",
+       "metric": "revenue",
+       "metric_text": "revenue",
+       "value_text": "$81.6 million",
+       "value": 81.6,
+       "unit": "USD",
+       "scale": "millions",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "record revenue for the first quarter ended April 26, 2026, of $81.6 million",
+       "span_start": 70,
+       "span_end": 145
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c2",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "20%",
+       "value": 20.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "QoQ",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 20% from the previous quarter",
+       "span_start": 147,
+       "span_end": 179
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c3",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "85%",
+       "value": 85.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 85% from a year ago",
+       "span_start": 184,
+       "span_end": 206
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c4",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$2.39",
+       "value": 2.39,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39",
+       "span_start": 226,
+       "span_end": 268
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c5",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$1.87",
+       "value": 1.87,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39 and $1.87, respectively",
+       "span_start": 226,
+       "span_end": 292
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c6",
+       "metric": "segment_revenue",
+       "metric_text": "Data Center networking revenue",
+       "value_text": "$14.8 billion",
+       "value": 14.8,
+       "unit": "USD",
+       "scale": "billions",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "Data Center networking revenue was a record $14.8 billion",
+       "span_start": 295,
+       "span_end": 352
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c7",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "199%",
+       "value": 199.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 199% from a year ago",
+       "span_start": 354,
+       "span_end": 377
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c8",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "35%",
+       "value": 35.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "sequential",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 35% sequentially",
+       "span_start": 382,
+       "span_end": 401
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c1",
+      "verdict": {
+       "claim_id": "c1",
+       "status": "wrong",
+       "reason": "look_ahead",
+       "explanation": "NVIDIA's revenue for Q1 FY2027 (quarter ended Apr 26, 2026) wasn't public until its 8-K earnings release (0001045810-26-000051) was accepted at 2026-05-20 20:21:19 UTC, after the as-of time {{AS_OF_TEXT}}, and the filed figure is $81.615 billion.",
+       "expected_value": 81615.0,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c2",
+      "verdict": {
+       "claim_id": "c2",
+       "status": "wrong",
+       "reason": "look_ahead",
+       "explanation": "NVIDIA's revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026) wasn't public until its 8-K earnings release (0001045810-26-000051) was accepted at 2026-05-20 20:21:19 UTC, after the as-of time {{AS_OF_TEXT}}.",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "derived",
+         "derived_from": [
+          "0001045810-26-000021",
+          "0001045810-25-000230"
+         ],
+         "form": "10-K",
+         "accession": "0001045810-26-000021",
+         "accepted_at": "2026-02-25T21:42:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+         "locator": "Q4 = FY (10-K 0001045810-26-000021) - 9M YTD (10-Q 0001045810-25-000230)",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c3",
+      "verdict": {
+       "claim_id": "c3",
+       "status": "wrong",
+       "reason": "look_ahead",
+       "explanation": "NVIDIA's revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026) wasn't public until its 8-K earnings release (0001045810-26-000051) was accepted at 2026-05-20 20:21:19 UTC, after the as-of time {{AS_OF_TEXT}}.",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-25-000116",
+         "accepted_at": "2025-05-28T20:32:57Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000116/nvda-20250427.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c4",
+      "verdict": {
+       "claim_id": "c4",
+       "status": "wrong",
+       "reason": "look_ahead",
+       "explanation": "NVIDIA's GAAP diluted EPS for Q1 FY2027 (quarter ended Apr 26, 2026) wasn't public until its 8-K earnings release (0001045810-26-000051) was accepted at 2026-05-20 20:21:19 UTC, after the as-of time {{AS_OF_TEXT}}.",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c5",
+      "verdict": {
+       "claim_id": "c5",
+       "status": "wrong",
+       "reason": "look_ahead",
+       "explanation": "NVIDIA's GAAP diluted EPS for Q1 FY2027 (quarter ended Apr 26, 2026) wasn't public until its 8-K earnings release (0001045810-26-000051) was accepted at 2026-05-20 20:21:19 UTC, after the as-of time {{AS_OF_TEXT}}, and the filed figure is $2.39.",
+       "expected_value": 2.39,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c6",
+      "verdict": {
+       "claim_id": "c6",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c7",
+      "verdict": {
+       "claim_id": "c7",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c8",
+      "verdict": {
+       "claim_id": "c8",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "done",
+     "data": {
+      "counts": {
+       "verified": 0,
+       "wrong": 5,
+       "unverifiable": 3,
+       "approximate": 0
+      },
+      "latency_s": 5.7,
+      "cost_usd": 0.0119,
+      "model": "muse-spark-1.3"
+     }
+    }
+   ]
+  },
+  {
+   "valid_from": "2026-05-20T20:21:19Z",
+   "events": [
+    {
+     "event": "meta",
+     "data": {
+      "draft_hash": "{{DRAFT_HASH}}",
+      "cached": true,
+      "passages": 3,
+      "as_of": "{{AS_OF_ISO}}"
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c1",
+       "metric": "revenue",
+       "metric_text": "revenue",
+       "value_text": "$81.6 million",
+       "value": 81.6,
+       "unit": "USD",
+       "scale": "millions",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "record revenue for the first quarter ended April 26, 2026, of $81.6 million",
+       "span_start": 70,
+       "span_end": 145
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c2",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "20%",
+       "value": 20.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "QoQ",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 20% from the previous quarter",
+       "span_start": 147,
+       "span_end": 179
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c3",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "85%",
+       "value": 85.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 85% from a year ago",
+       "span_start": 184,
+       "span_end": 206
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c4",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$2.39",
+       "value": 2.39,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39",
+       "span_start": 226,
+       "span_end": 268
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c5",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$1.87",
+       "value": 1.87,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39 and $1.87, respectively",
+       "span_start": 226,
+       "span_end": 292
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c6",
+       "metric": "segment_revenue",
+       "metric_text": "Data Center networking revenue",
+       "value_text": "$14.8 billion",
+       "value": 14.8,
+       "unit": "USD",
+       "scale": "billions",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "Data Center networking revenue was a record $14.8 billion",
+       "span_start": 295,
+       "span_end": 352
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c7",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "199%",
+       "value": 199.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 199% from a year ago",
+       "span_start": 354,
+       "span_end": 377
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c8",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "35%",
+       "value": 35.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "sequential",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 35% sequentially",
+       "span_start": 382,
+       "span_end": 401
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c1",
+      "verdict": {
+       "claim_id": "c1",
+       "status": "wrong",
+       "reason": "scale_mismatch",
+       "explanation": "NVIDIA's 8-K press release reports that revenue was $81.615 billion for Q1 FY2027 (quarter ended Apr 26, 2026), so $81.6 million is off by a factor of 1,000.",
+       "expected_value": 81615.0,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c2",
+      "verdict": {
+       "claim_id": "c2",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 8-K press release: revenue grew 19.8% quarter over quarter in Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "derived",
+         "derived_from": [
+          "0001045810-26-000021",
+          "0001045810-25-000230"
+         ],
+         "form": "10-K",
+         "accession": "0001045810-26-000021",
+         "accepted_at": "2026-02-25T21:42:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+         "locator": "Q4 = FY (10-K 0001045810-26-000021) - 9M YTD (10-Q 0001045810-25-000230)",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $68,127",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c3",
+      "verdict": {
+       "claim_id": "c3",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 8-K press release: revenue grew 85.2% year over year in Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-25-000116",
+         "accepted_at": "2025-05-28T20:32:57Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000116/nvda-20250427.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $44,062",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c4",
+      "verdict": {
+       "claim_id": "c4",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 8-K press release: GAAP diluted EPS was $2.39 for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c5",
+      "verdict": {
+       "claim_id": "c5",
+       "status": "wrong",
+       "reason": "basis_mismatch",
+       "explanation": "$1.87 is NVIDIA's non-GAAP diluted EPS for Q1 FY2027 (quarter ended Apr 26, 2026); the GAAP figure is $2.39.",
+       "expected_value": 2.39,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "non-GAAP",
+         "segment": null,
+         "value": 1.87,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $1.87",
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c6",
+      "verdict": {
+       "claim_id": "c6",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c7",
+      "verdict": {
+       "claim_id": "c7",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c8",
+      "verdict": {
+       "claim_id": "c8",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "done",
+     "data": {
+      "counts": {
+       "verified": 3,
+       "wrong": 2,
+       "unverifiable": 3,
+       "approximate": 0
+      },
+      "latency_s": 5.7,
+      "cost_usd": 0.0119,
+      "model": "muse-spark-1.3"
+     }
+    }
+   ]
+  },
+  {
+   "valid_from": "2026-05-20T20:35:52Z",
+   "events": [
+    {
+     "event": "meta",
+     "data": {
+      "draft_hash": "{{DRAFT_HASH}}",
+      "cached": true,
+      "passages": 3,
+      "as_of": "{{AS_OF_ISO}}"
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c1",
+       "metric": "revenue",
+       "metric_text": "revenue",
+       "value_text": "$81.6 million",
+       "value": 81.6,
+       "unit": "USD",
+       "scale": "millions",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "record revenue for the first quarter ended April 26, 2026, of $81.6 million",
+       "span_start": 70,
+       "span_end": 145
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c2",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "20%",
+       "value": 20.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "QoQ",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 20% from the previous quarter",
+       "span_start": 147,
+       "span_end": 179
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c3",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "85%",
+       "value": 85.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 85% from a year ago",
+       "span_start": 184,
+       "span_end": 206
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c4",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$2.39",
+       "value": 2.39,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39",
+       "span_start": 226,
+       "span_end": 268
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c5",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$1.87",
+       "value": 1.87,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39 and $1.87, respectively",
+       "span_start": 226,
+       "span_end": 292
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c6",
+       "metric": "segment_revenue",
+       "metric_text": "Data Center networking revenue",
+       "value_text": "$14.8 billion",
+       "value": 14.8,
+       "unit": "USD",
+       "scale": "billions",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "Data Center networking revenue was a record $14.8 billion",
+       "span_start": 295,
+       "span_end": 352
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c7",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "199%",
+       "value": 199.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 199% from a year ago",
+       "span_start": 354,
+       "span_end": 377
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c8",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "35%",
+       "value": 35.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "sequential",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 35% sequentially",
+       "span_start": 382,
+       "span_end": 401
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c1",
+      "verdict": {
+       "claim_id": "c1",
+       "status": "wrong",
+       "reason": "scale_mismatch",
+       "explanation": "NVIDIA's 10-Q reports that revenue was $81.615 billion for Q1 FY2027 (quarter ended Apr 26, 2026), so $81.6 million is off by a factor of 1,000.",
+       "expected_value": 81615.0,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c2",
+      "verdict": {
+       "claim_id": "c2",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 10-Q: revenue grew 19.8% quarter over quarter in Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "derived",
+         "derived_from": [
+          "0001045810-26-000021",
+          "0001045810-25-000230"
+         ],
+         "form": "10-K",
+         "accession": "0001045810-26-000021",
+         "accepted_at": "2026-02-25T21:42:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+         "locator": "Q4 = FY (10-K 0001045810-26-000021) - 9M YTD (10-Q 0001045810-25-000230)",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $68,127",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c3",
+      "verdict": {
+       "claim_id": "c3",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 10-Q: revenue grew 85.2% year over year in Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-25-000116",
+         "accepted_at": "2025-05-28T20:32:57Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000116/nvda-20250427.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $44,062",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c4",
+      "verdict": {
+       "claim_id": "c4",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 10-Q: GAAP diluted EPS was $2.39 for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": "us-gaap:EarningsPerShareDiluted",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c5",
+      "verdict": {
+       "claim_id": "c5",
+       "status": "wrong",
+       "reason": "basis_mismatch",
+       "explanation": "$1.87 is NVIDIA's non-GAAP diluted EPS for Q1 FY2027 (quarter ended Apr 26, 2026); the GAAP figure is $2.39.",
+       "expected_value": 2.39,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "non-GAAP",
+         "segment": null,
+         "value": 1.87,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $1.87",
+         "decimals": 2
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": "us-gaap:EarningsPerShareDiluted",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c6",
+      "verdict": {
+       "claim_id": "c6",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c7",
+      "verdict": {
+       "claim_id": "c7",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c8",
+      "verdict": {
+       "claim_id": "c8",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "done",
+     "data": {
+      "counts": {
+       "verified": 3,
+       "wrong": 2,
+       "unverifiable": 3,
+       "approximate": 0
+      },
+      "latency_s": 5.7,
+      "cost_usd": 0.0119,
+      "model": "muse-spark-1.3"
+     }
+    }
+   ]
+  },
+  {
+   "valid_from": "2026-08-26T20:21:19Z",
+   "events": [
+    {
+     "event": "meta",
+     "data": {
+      "draft_hash": "{{DRAFT_HASH}}",
+      "cached": true,
+      "passages": 3,
+      "as_of": "{{AS_OF_ISO}}"
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c1",
+       "metric": "revenue",
+       "metric_text": "revenue",
+       "value_text": "$81.6 million",
+       "value": 81.6,
+       "unit": "USD",
+       "scale": "millions",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "record revenue for the first quarter ended April 26, 2026, of $81.6 million",
+       "span_start": 70,
+       "span_end": 145
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c2",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "20%",
+       "value": 20.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "QoQ",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 20% from the previous quarter",
+       "span_start": 147,
+       "span_end": 179
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c3",
+       "metric": "revenue_growth",
+       "metric_text": "revenue growth",
+       "value_text": "85%",
+       "value": 85.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter ended April 26, 2026",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "up 85% from a year ago",
+       "span_start": 184,
+       "span_end": 206
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c4",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$2.39",
+       "value": 2.39,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39",
+       "span_start": 226,
+       "span_end": 268
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c5",
+       "metric": "eps_diluted",
+       "metric_text": "GAAP earnings per diluted share",
+       "value_text": "$1.87",
+       "value": 1.87,
+       "unit": "USD/share",
+       "scale": "units",
+       "period_text": "For the quarter",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": "GAAP",
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": null,
+       "span_text": "GAAP earnings per diluted share were $2.39 and $1.87, respectively",
+       "span_start": 226,
+       "span_end": 292
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c6",
+       "metric": "segment_revenue",
+       "metric_text": "Data Center networking revenue",
+       "value_text": "$14.8 billion",
+       "value": 14.8,
+       "unit": "USD",
+       "scale": "billions",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "none",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "Data Center networking revenue was a record $14.8 billion",
+       "span_start": 295,
+       "span_end": 352
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c7",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "199%",
+       "value": 199.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "YoY",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 199% from a year ago",
+       "span_start": 354,
+       "span_end": 377
+      }
+     }
+    },
+    {
+     "event": "claim",
+     "data": {
+      "claim": {
+       "id": "c8",
+       "metric": "revenue_growth",
+       "metric_text": "Data Center networking revenue growth",
+       "value_text": "35%",
+       "value": 35.0,
+       "unit": "%",
+       "scale": "units",
+       "period_text": "first quarter of fiscal 2027",
+       "period_type": "quarter",
+       "comparison": "sequential",
+       "basis": null,
+       "forward_looking": false,
+       "entity": "NVIDIA",
+       "segment": "Data Center networking",
+       "span_text": "up 35% sequentially",
+       "span_start": 382,
+       "span_end": 401
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c1",
+      "verdict": {
+       "claim_id": "c1",
+       "status": "wrong",
+       "reason": "scale_mismatch",
+       "explanation": "NVIDIA's 10-Q reports that revenue was $81.615 billion for Q1 FY2027 (quarter ended Apr 26, 2026), so $81.6 million is off by a factor of 1,000.",
+       "expected_value": 81615.0,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c2",
+      "verdict": {
+       "claim_id": "c2",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 10-Q: revenue grew 19.8% quarter over quarter in Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "derived",
+         "derived_from": [
+          "0001045810-26-000021",
+          "0001045810-25-000230"
+         ],
+         "form": "10-K",
+         "accession": "0001045810-26-000021",
+         "accepted_at": "2026-02-25T21:42:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000021/nvda-20260125.htm",
+         "locator": "Q4 = FY (10-K 0001045810-26-000021) - 9M YTD (10-Q 0001045810-25-000230)",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 68127000000.0,
+         "unit": "USD",
+         "period_start": "2025-10-27",
+         "period_end": "2026-01-25",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q4",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $68,127",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000073",
+         "accepted_at": "2026-08-26T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c3",
+      "verdict": {
+       "claim_id": "c3",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 10-Q: revenue grew 85.2% year over year in Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-25-000116",
+         "accepted_at": "2025-05-28T20:32:57Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000116/nvda-20250427.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Revenue | $44,062",
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 44062000000.0,
+         "unit": "USD",
+         "period_start": "2025-01-27",
+         "period_end": "2025-04-27",
+         "fiscal_year": 2026,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": "us-gaap:Revenues",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": -6
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "revenue",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 81615000000.0,
+         "unit": "USD",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000073",
+         "accepted_at": "2026-08-26T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+         "locator": "Revenue | $81,615",
+         "decimals": -6
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c4",
+      "verdict": {
+       "claim_id": "c4",
+       "status": "verified",
+       "reason": "match",
+       "explanation": "Matches NVIDIA's 10-Q: GAAP diluted EPS was $2.39 for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": "us-gaap:EarningsPerShareDiluted",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": 2
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000073",
+         "accepted_at": "2026-08-26T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+         "locator": "Diluted earnings per share | $2.39",
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c5",
+      "verdict": {
+       "claim_id": "c5",
+       "status": "wrong",
+       "reason": "basis_mismatch",
+       "explanation": "$1.87 is NVIDIA's non-GAAP diluted EPS for Q1 FY2027 (quarter ended Apr 26, 2026); the GAAP figure is $2.39.",
+       "expected_value": 2.39,
+       "evidence": [
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": null,
+         "basis": "non-GAAP",
+         "segment": null,
+         "value": 1.87,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "press_release",
+         "derived_from": [],
+         "form": "8-K",
+         "accession": "0001045810-26-000051",
+         "accepted_at": "2026-05-20T20:21:19Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000051/q1fy27pr.htm",
+         "locator": "Diluted earnings per share | $1.87",
+         "decimals": 2
+        },
+        {
+         "cik": 1045810,
+         "ticker": "NVDA",
+         "metric": "eps_diluted",
+         "concept": "us-gaap:EarningsPerShareDiluted",
+         "basis": "GAAP",
+         "segment": null,
+         "value": 2.39,
+         "unit": "USD/share",
+         "period_start": "2026-01-26",
+         "period_end": "2026-04-26",
+         "fiscal_year": 2027,
+         "fiscal_period": "Q1",
+         "source": "xbrl",
+         "derived_from": [],
+         "form": "10-Q",
+         "accession": "0001045810-26-000052",
+         "accepted_at": "2026-05-20T20:35:52Z",
+         "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000052/nvda-20260426.htm",
+         "locator": null,
+         "decimals": 2
+        }
+       ],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c6",
+      "verdict": {
+       "claim_id": "c6",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c7",
+      "verdict": {
+       "claim_id": "c7",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "verdict",
+     "data": {
+      "claim_id": "c8",
+      "verdict": {
+       "claim_id": "c8",
+       "status": "unverifiable",
+       "reason": "no_evidence",
+       "explanation": "No filing fact for NVIDIA's Data Center networking revenue growth for Q1 FY2027 (quarter ended Apr 26, 2026).",
+       "expected_value": null,
+       "evidence": [],
+       "as_of": "{{AS_OF_ISO}}"
+      }
+     }
+    },
+    {
+     "event": "done",
+     "data": {
+      "counts": {
+       "verified": 3,
+       "wrong": 2,
+       "unverifiable": 3,
+       "approximate": 0
+      },
+      "latency_s": 5.7,
+      "cost_usd": 0.0119,
+      "model": "muse-spark-1.3"
+     }
+    }
+   ]
+  }
+ ]
+}

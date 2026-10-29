@@ -1,0 +1,43 @@
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Secrets — never commit
+.env
+.env.*
+
+# Local Vercel project link and authentication cache
+/.vercel/
+
+# Provider skills installed locally by Vercel Marketplace
+/.agents/skills/neon/
+/.agents/skills/neon-postgres/
+/skills-lock.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Local data caches (EDGAR downloads, model outputs). Only data/snapshot/ is committed: the read-only
+# evidence and pre-baked demo streams the deployed API serves (scripts/build_snapshot.py).
+data/*
+!data/snapshot/
+spikes/out/
+
+# Company slide images from SEC filings are third-party assets: keep them local and
+# re-fetch with spikes/c_edgar_slides.py (the .source.json metadata is committed)
+spikes/inputs/slides/*.jpg
+spikes/inputs/slides/*.png
+spikes/inputs/slides/*.pdf
+
+# Claude Code: keep agents/spec public, keep personal memory, local settings,
+# login-gated event content and the internal plan out of the public repo
+.claude/agent-memory/
+.claude/settings.local.json
+.claude/reference/hackathon-brief.md
+.claude/reference/plan.md
+.claude/judging/
+
+# OS
+.DS_Store
+.env*

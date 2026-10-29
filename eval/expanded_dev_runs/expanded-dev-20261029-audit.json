@@ -1,0 +1,40 @@
+{
+  "record_sha256": "95afc964e8f02f55557b92cebf7aa30f4424964d98470096db877edae96c267d",
+  "passed": true,
+  "source_unchanged_during_run": true,
+  "guard_dispatched_attempts": 48,
+  "successful_usage_records": 48,
+  "retained_estimate_attempts": 0,
+  "tokens": {
+    "input_tokens": 113254,
+    "output_tokens": 49812,
+    "cached_tokens": 102784,
+    "reasoning_tokens": 38347
+  },
+  "independent_usage_priced_usd": "0.24020610",
+  "targets": {
+    "spark": {
+      "items": 50,
+      "errors": 0,
+      "cache_hits": 50,
+      "cache_misses": 0,
+      "unique_responses": 48
+    },
+    "spark-open-baseten": {
+      "items": 50,
+      "errors": 0,
+      "cache_hits": 2,
+      "cache_misses": 48,
+      "unique_responses": 48
+    }
+  },
+  "prices_per_million": {
+    "input": "1.25",
+    "cached_input": "0.15",
+    "output": "4.25"
+  },
+  "pricing_source": "https://www.baseten.co/library/muse-spark-open/",
+  "price_checked_on": "2026-10-29",
+  "new_model_calls_for_audit": 0,
+  "limitation": "SDK usage at published prices; not a provider invoice or remaining credit balance."
+}

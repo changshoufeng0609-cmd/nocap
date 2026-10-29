@@ -1,0 +1,15 @@
+{
+  "description": "Original live slide input before the NoCap branding refresh. New display bytes must not be presented as a newly live-checked image.",
+  "original_live_input_path": "examples/slides/nvda-draft.png",
+  "original_live_input_git_commit": "cb033c56c50ba9d599d45d9d61d1c030396a83c0",
+  "original_live_input_sha256": "7de51244baf4b71e59dcdffd18a78373b0eea05b94234b110f3486f37183bcc0",
+  "original_html_sha256": "dfca084890815cc84cbe549ea09cf373acde706b11fc4e0dc6e6b86f619f2f0a",
+  "recorded_response_path": "data/eval_runs/slide_live/nvda-draft-events.json",
+  "recorded_response_sha256": "ba5b37e879e3bfae61cb4cb3ea106b525b6cd21dd2b194fe04433634a8ae8af5",
+  "allowed_html_substitution": {
+    "before": "Receipts demo",
+    "after": "NoCap demo"
+  },
+  "new_branded_input_live_checked": false,
+  "financial_claims_and_layout_changed": false
+}

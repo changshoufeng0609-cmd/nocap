@@ -1,0 +1,26 @@
+[
+ {
+  "id": "earnings-roundup",
+  "title": "Earnings roundup: NVIDIA, Microsoft, Meta",
+  "description": "Six figures from three earnings reports. Two of them are wrong.",
+  "text": "NVIDIA reported revenue of $96.2 billion for the second quarter of fiscal 2027, with diluted earnings per share of $2.46.\n\nMicrosoft's revenue for the quarter ended December 31, 2025 was $82.9 billion.\n\nMeta Platforms reported third-quarter 2026 revenue of $64.6 billion. Net income was $9.86 million, or $3.83 per diluted share.\n",
+  "as_of": null,
+  "context": null
+ },
+ {
+  "id": "earnings-day-time-travel",
+  "title": "Time travel: 21 minutes before NVIDIA's 8-K",
+  "description": "The same draft, checked as of 20:00 UTC on Aug 26, 2026, before the numbers were public.",
+  "text": "NVIDIA reported revenue of $96.2 billion for the second quarter of fiscal 2027, with diluted earnings per share of $2.46.\n\nMicrosoft's revenue for the quarter ended December 31, 2025 was $82.9 billion.\n\nMeta Platforms reported third-quarter 2026 revenue of $64.6 billion. Net income was $9.86 million, or $3.83 per diluted share.\n",
+  "as_of": "2026-08-26T20:00:00Z",
+  "context": null
+ },
+ {
+  "id": "nvda-q1-recap",
+  "title": "NVIDIA Q1 FY2027 recap",
+  "description": "A scale slip, a GAAP vs non-GAAP swap, and segment figures no filing breaks out.",
+  "text": "SANTA CLARA, Calif.—May 20, 2026―NVIDIA (NASDAQ: NVDA) today reported record revenue for the first quarter ended April 26, 2026, of $81.6 million, up 20% from the previous quarter and up 85% from a year ago.\n\nFor the quarter, GAAP earnings per diluted share were $2.39 and $1.87, respectively.\n\nData Center networking revenue was a record $14.8 billion, up 199% from a year ago and up 35% sequentially.\n",
+  "as_of": null,
+  "context": "NVIDIA (NVDA), first quarter of fiscal 2027, the quarter ended April 26, 2026"
+ }
+]

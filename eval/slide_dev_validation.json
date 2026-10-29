@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-28",
+  "scope": "Three local live product smoke checks on two development images; not a held-out or general image accuracy evaluation.",
+  "synthetic_expected_errors": {
+    "basis_mismatch": 1,
+    "period_mismatch": 1
+  },
+  "total_meta_cost_usd": 0.07012575,
+  "runs": [
+    {
+      "input": "examples/slides/nvda-draft.png",
+      "sha256": "7de51244baf4b71e59dcdffd18a78373b0eea05b94234b110f3486f37183bcc0",
+      "done": {
+        "counts": {
+          "verified": 2,
+          "wrong": 2,
+          "unverifiable": 0,
+          "approximate": 0
+        },
+        "claims": 4,
+        "model_calls": 3,
+        "latency_s": 6.86,
+        "cost_usd": 0.012412,
+        "cost_is_estimate": false,
+        "warnings": [
+          "Vision can misread labels or omit figures. Confirm the highlighted readings against the image; the uploaded image is not filing evidence."
+        ]
+      },
+      "regions": [
+        {
+          "id": "r1",
+          "label": "Earnings summary draft table",
+          "source": "spark"
+        }
+      ],
+      "usage": [
+        {
+          "model": "sam-3.1",
+          "complete": true,
+          "usage": {
+            "input_tokens": 0,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 0,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 0,
+            "images_processed": 1
+          }
+        },
+        {
+          "model": "sam-3.1",
+          "complete": true,
+          "usage": {
+            "input_tokens": 0,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 0,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 0,
+            "images_processed": 1
+          }
+        },
+        {
+          "model": "muse-spark-1.3",
+          "complete": true,
+          "usage": {
+            "input_tokens": 3213,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 799,
+            "output_tokens_details": {
+              "reasoning_tokens": 215
+            },
+            "total_tokens": 4012
+          }
+        }
+      ],
+      "sam_concepts": [
+        "chart",
+        "table"
+      ]
+    },
+    {
+      "input": "spikes/inputs/slides/bac_0000070858-26-000481_bac09302026ex992010.jpg",
+      "sha256": "17d30615c8bd86d97453dd964744ed2a6ee8f80c234bf9fec70217801ab9348b",
+      "done": {
+        "counts": {
+          "verified": 4,
+          "wrong": 0,
+          "unverifiable": 28,
+          "approximate": 0
+        },
+        "claims": 32,
+        "model_calls": 3,
+        "latency_s": 18.73,
+        "cost_usd": 0.030795,
+        "cost_is_estimate": false,
+        "warnings": [
+          "Vision can misread labels or omit figures. Confirm the highlighted readings against the image; the uploaded image is not filing evidence."
+        ]
+      },
+      "regions": [
+        {
+          "id": "r1",
+          "label": "Total Noninterest Expense ($B)",
+          "source": "spark"
+        },
+        {
+          "id": "r2",
+          "label": "Efficiency Ratio",
+          "source": "spark"
+        },
+        {
+          "id": "r3",
+          "label": "bullets",
+          "source": "spark"
+        }
+      ],
+      "usage": [
+        {
+          "model": "sam-3.1",
+          "complete": true,
+          "usage": {
+            "input_tokens": 0,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 0,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 0,
+            "images_processed": 1
+          }
+        },
+        {
+          "model": "sam-3.1",
+          "complete": true,
+          "usage": {
+            "input_tokens": 0,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 0,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 0,
+            "images_processed": 1
+          }
+        },
+        {
+          "model": "muse-spark-1.3",
+          "complete": true,
+          "usage": {
+            "input_tokens": 3357,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 5082,
+            "output_tokens_details": {
+              "reasoning_tokens": 684
+            },
+            "total_tokens": 8439
+          }
+        }
+      ],
+      "sam_concepts": [
+        "chart",
+        "table"
+      ]
+    },
+    {
+      "input": "spikes/inputs/slides/bac_0000070858-26-000481_bac09302026ex992010.jpg",
+      "sha256": "17d30615c8bd86d97453dd964744ed2a6ee8f80c234bf9fec70217801ab9348b",
+      "sam_concepts": [
+        "bar chart",
+        "table"
+      ],
+      "done": {
+        "counts": {
+          "verified": 4,
+          "wrong": 0,
+          "unverifiable": 19,
+          "approximate": 0
+        },
+        "claims": 23,
+        "model_calls": 3,
+        "latency_s": 22.04,
+        "cost_usd": 0.026919,
+        "cost_is_estimate": false,
+        "warnings": [
+          "Vision can misread labels or omit figures. Confirm the highlighted readings against the image; the uploaded image is not filing evidence."
+        ]
+      },
+      "regions": [
+        {
+          "id": "r1",
+          "label": "Bar Chart",
+          "source": "sam"
+        },
+        {
+          "id": "r2",
+          "label": "Efficiency Ratio",
+          "source": "spark"
+        }
+      ],
+      "usage": [
+        {
+          "model": "sam-3.1",
+          "complete": true,
+          "usage": {
+            "input_tokens": 0,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 0,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 0,
+            "images_processed": 1
+          }
+        },
+        {
+          "model": "sam-3.1",
+          "complete": true,
+          "usage": {
+            "input_tokens": 0,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 0,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 0,
+            "images_processed": 1
+          }
+        },
+        {
+          "model": "muse-spark-1.3",
+          "complete": true,
+          "usage": {
+            "input_tokens": 3391,
+            "input_tokens_details": {
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "output_tokens": 4160,
+            "output_tokens_details": {
+              "reasoning_tokens": 998
+            },
+            "total_tokens": 7551
+          }
+        }
+      ]
+    }
+  ]
+}

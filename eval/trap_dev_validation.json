@@ -1,0 +1,78 @@
+{
+  "mode": "validate-dev",
+  "validated_dev_rows": 15,
+  "dev_rows": 15,
+  "held_out_rows_validated": 0,
+  "corpus_unchanged": true,
+  "before": {
+    "corpus_sha256": "165dc1b74db3c289f4bbd6be90e508dd6220f5498cdedd922dc2dcfb9046cb4c",
+    "dev_sha256": "1082d7c4cebc02255651f0f59584299ee7b9c805e04005e888b859c782bedd42",
+    "held_out_sha256": "beaf097a7e3676705a74bb60bf82b296333c5fcf975d73cb1cceb25a63267a98",
+    "dev_rows": 15,
+    "held_out_rows": 7
+  },
+  "after": {
+    "corpus_sha256": "165dc1b74db3c289f4bbd6be90e508dd6220f5498cdedd922dc2dcfb9046cb4c",
+    "dev_sha256": "1082d7c4cebc02255651f0f59584299ee7b9c805e04005e888b859c782bedd42",
+    "held_out_sha256": "beaf097a7e3676705a74bb60bf82b296333c5fcf975d73cb1cceb25a63267a98",
+    "dev_rows": 15,
+    "held_out_rows": 7
+  },
+  "gold": {
+    "errors_by_type": {
+      "basis": 4,
+      "entity": 7,
+      "look_ahead": 6,
+      "period": 8,
+      "scale": 7,
+      "value": 8
+    },
+    "errors": 40,
+    "true_figures": 112,
+    "guidance_figures": 13
+  },
+  "model_calls": 0,
+  "cost_usd": 0.0,
+  "errors": [],
+  "ok": true,
+  "corpus_correction": {
+    "reason": "Exclude evidence published after each draft dateline from secondary diagnostic candidates; primary gold labels, text and offsets unchanged.",
+    "corrections": [
+      {
+        "item_id": "trap-AMD-FY2026Q1-a",
+        "value_text": "$81.6 billion",
+        "field": "types_seen",
+        "before": [
+          "look_ahead",
+          "basis"
+        ],
+        "after": [
+          "look_ahead"
+        ]
+      },
+      {
+        "item_id": "trap-JPM-FY2026Q1-b",
+        "value_text": "8.8%",
+        "field": "types_seen",
+        "before": [
+          "period",
+          "entity"
+        ],
+        "after": [
+          "period"
+        ]
+      }
+    ],
+    "before": {
+      "corpus_sha256": "378677d5c125e5d961d27dc1133a43f17f8d69acbc57738d58a92082883f3726",
+      "dev_sha256": "744e0ebdddb8a996825fd123609c40ea76b3a07b886f90a87c92938e46aa74b6",
+      "held_out_sha256": "beaf097a7e3676705a74bb60bf82b296333c5fcf975d73cb1cceb25a63267a98"
+    },
+    "after": {
+      "corpus_sha256": "165dc1b74db3c289f4bbd6be90e508dd6220f5498cdedd922dc2dcfb9046cb4c",
+      "dev_sha256": "1082d7c4cebc02255651f0f59584299ee7b9c805e04005e888b859c782bedd42",
+      "held_out_sha256": "beaf097a7e3676705a74bb60bf82b296333c5fcf975d73cb1cceb25a63267a98"
+    },
+    "held_out_raw_lines_unchanged": true
+  }
+}

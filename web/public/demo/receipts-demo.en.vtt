@@ -1,0 +1,117 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:06.250
+A financial draft can sound convincing while comparing the wrong quarters or mixing accounting bases.
+
+2
+00:00:06.250 --> 00:00:11.250
+I built NoCap after seeing unreliable numbers in an earlier portfolio-agent project.
+
+3
+00:00:11.250 --> 00:00:15.000
+This is the verification layer I wanted before publishing.
+
+4
+00:00:15.000 --> 00:00:20.542
+Here is an NVIDIA earnings story with two planted errors.
+
+5
+00:00:20.542 --> 00:00:28.875
+Muse Spark extracts the numeric claims. Deterministic code checks them against stored SEC filing evidence.
+
+6
+00:00:28.875 --> 00:00:35.000
+Most numbers pass, two need correction, and the outlook stays unverifiable.
+
+7
+00:00:35.000 --> 00:00:42.000
+Eighteen percent is the quarter-over-quarter growth rate, but the draft says year over year.
+
+8
+00:00:42.000 --> 00:00:47.000
+The receipt shows the comparison and the filing behind it.
+
+9
+00:00:47.000 --> 00:00:52.750
+The EPS claim uses an adjusted number under a GAAP label.
+
+10
+00:00:52.750 --> 00:00:58.000
+The filed GAAP figure is two dollars and forty-six cents.
+
+11
+00:00:58.000 --> 00:01:03.750
+Fix with receipts asks Muse Wonder to propose numeric substitutions.
+
+12
+00:01:03.750 --> 00:01:13.000
+Code restricts those edits, checks each candidate, then extracts and verifies the whole revised draft again.
+
+13
+00:01:13.000 --> 00:01:19.208
+Here both original errors are resolved. The two guidance figures still have question marks.
+
+14
+00:01:19.208 --> 00:01:25.000
+I can review the changes and copy the draft with its correction receipts.
+
+15
+00:01:25.000 --> 00:01:30.292
+The right number can still be unavailable at a historical cutoff.
+
+16
+00:01:30.292 --> 00:01:39.000
+At sixteen hundred UTC on July twenty-ninth, Microsoft had not filed. NoCap separates those claims from numeric mistakes.
+
+17
+00:01:39.000 --> 00:01:44.000
+Switching to the latest filings makes those two figures verifiable.
+
+18
+00:01:44.000 --> 00:01:49.000
+That cutoff describes EDGAR availability, not every possible public channel.
+
+19
+00:01:49.000 --> 00:01:55.000
+Same seeded figures, refreshed NoCap branding. This replays the original image response.
+
+20
+00:01:55.000 --> 00:02:02.000
+SAM returned no region here, so Spark supplied the region and read the values.
+
+21
+00:02:02.000 --> 00:02:09.000
+Code caught both planted errors against SEC evidence. The image itself is not proof.
+
+22
+00:02:09.000 --> 00:02:17.458
+Spark extracts claims and helps map earnings tables. Wonder proposes corrections and generated adversarial drafts.
+
+23
+00:02:17.458 --> 00:02:22.542
+The evidence store covers ten companies across eight quarters.
+
+24
+00:02:22.542 --> 00:02:31.000
+We also validated Muse Spark Open through Fireworks, using the same extraction and verification interface.
+
+25
+00:02:31.000 --> 00:02:37.667
+Our seeded development set caught one hundred and four of one hundred and nine planted errors.
+
+26
+00:02:37.667 --> 00:02:44.750
+No false alarms across one hundred and seven original items. Twenty percent of true claims remained unverifiable.
+
+27
+00:02:44.750 --> 00:02:51.000
+These small development sets guided implementation. They do not guarantee accuracy on arbitrary financial writing.
+
+28
+00:02:51.000 --> 00:02:55.125
+NoCap gives an editor numbers to review and evidence to inspect.
+
+29
+00:02:55.125 --> 00:02:59.839
+Built during this hackathon by Team NoCap. Research and fact-checking, not investment advice.

@@ -1,0 +1,26 @@
+# What `vercel deploy` from this machine must not upload. Git deploys only see committed files (.gitignore).
+# Secrets and local environments
+.env
+.env.*
+.venv
+**/__pycache__
+.pytest_cache
+
+# Local data: only the read-only snapshot ships (scripts/build_snapshot.py)
+/data/*
+!/data/snapshot
+
+# Not used by the deployment
+/graft
+/spikes
+/eval
+/tests
+/.claude
+/.agents
+/skills-lock.json
+/docs
+
+# Vercel builds web/ itself
+web/node_modules
+web/.next
+web/tsconfig.tsbuildinfo

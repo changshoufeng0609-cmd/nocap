@@ -1,0 +1,9 @@
+NVIDIA (NASDAQ: NVDA) delivered another blowout quarter. Revenue for the second quarter of fiscal 2027 reached a record $96.2 billion, up 18% from a year ago, as hyperscalers kept pouring money into AI infrastructure and the Vera Rubin platform began shipping in volume.
+
+Data Center revenue was $89.0 billion, accounting for more than nine-tenths of total sales. GAAP and non-GAAP gross margins were both 75.0%, roughly in line with the prior quarter despite the cost of ramping a new architecture.
+
+Profits kept pace with sales. Operating income climbed to $63.7 billion, and GAAP net income reached $59.7 billion. GAAP earnings per diluted share were $2.22.
+
+Operating expenses rose to $8.4 billion as the company stepped up spending on networking, software and the next generation of systems.
+
+Looking ahead, NVIDIA expects third-quarter revenue of $108.0 billion, plus or minus 2%, which would set yet another record and suggests demand is still running ahead of supply.

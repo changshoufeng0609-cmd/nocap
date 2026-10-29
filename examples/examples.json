@@ -1,0 +1,28 @@
+{
+  "examples": [
+    {
+      "id": "nvda-ai-story",
+      "title": "NVIDIA Q2 FY2027 earnings story",
+      "description": "An AI-drafted earnings story. Most figures are right, but one growth rate compares the wrong quarters and one EPS figure is on the wrong accounting basis.",
+      "file": "nvda_q2_fy2027.txt",
+      "as_of": null,
+      "context": "NVIDIA, second quarter of fiscal 2027"
+    },
+    {
+      "id": "meta-ai-story",
+      "title": "Meta Q3 2026 earnings story",
+      "description": "AI-written coverage of Meta's third quarter with three planted slips, including millions written for billions.",
+      "file": "meta_q3_2026.txt",
+      "as_of": null,
+      "context": "Meta Platforms, third quarter of 2026"
+    },
+    {
+      "id": "q2-roundup-look-ahead",
+      "title": "June-quarter roundup, as of July 29",
+      "description": "Microsoft, Alphabet and JPMorgan in one roundup, checked as of noon ET on July 29, before Microsoft reported. One figure belongs to the wrong company, and time travel flags what wasn't public yet.",
+      "file": "roundup_q2_2026.txt",
+      "as_of": "2026-07-29T16:00:00Z",
+      "context": "Microsoft, Alphabet and JPMorgan Chase, quarter ended June 30, 2026"
+    }
+  ]
+}

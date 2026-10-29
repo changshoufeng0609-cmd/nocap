@@ -1,0 +1,17 @@
+{
+ "ok": true,
+ "data_snapshot": "2026-10-27",
+ "companies": [
+  "AAPL",
+  "AMD",
+  "AMZN",
+  "BAC",
+  "GOOGL",
+  "JPM",
+  "META",
+  "MSFT",
+  "NFLX",
+  "NVDA"
+ ],
+ "facts": 5222
+}

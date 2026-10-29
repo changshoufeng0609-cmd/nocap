@@ -1,0 +1,20 @@
+{
+  "ticker": "BAC",
+  "company": "BANK OF AMERICA CORP /DE/",
+  "cik": 70858,
+  "accession": "0000070858-26-000481",
+  "form": "8-K",
+  "items": "2.02,7.01,9.01",
+  "filing_date": "2026-10-14",
+  "report_date": "2026-10-14",
+  "acceptance_datetime": "2026-10-14T10:44:44.000Z",
+  "primary_document": "bac-20261014.htm",
+  "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085826000481/bac09302026ex992009.jpg",
+  "folder_index": "https://www.sec.gov/Archives/edgar/data/70858/000007085826000481/index.json",
+  "file": "bac_0000070858-26-000481_bac09302026ex992009.jpg",
+  "bytes": 180460,
+  "sha256": "91d2aff6532f63a0272f6092e00b669a49c3aa51810c1b64277d931929501d07",
+  "fetched_via": "spikes/a_edgar.py Edgar (declared User-Agent, content-hash cache, 4 req/s)",
+  "selected_at": "2026-10-27T08:38:46+00:00",
+  "note": "Q3 2026 earnings presentation (EX-99.2 'THE PRESENTATION MATERIALS'). Page 9: Net Interest Income, GAAP values printed inside bars, FTE (non-GAAP) totals on top. Page 10: Total Noninterest Expense ($B), printed totals and components."
+}

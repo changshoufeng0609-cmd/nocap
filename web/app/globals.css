@@ -1,0 +1,445 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-heading: var(--font-newsreader), ui-serif, Georgia, serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Verdict colors: ✓ ok, ✗ bad, ? unk, ≈ approx, and "checking" pending */
+  --color-ok: var(--ok);
+  --color-ok-tint: var(--ok-tint);
+  --color-ok-line: var(--ok-line);
+  --color-bad: var(--bad);
+  --color-bad-tint: var(--bad-tint);
+  --color-bad-line: var(--bad-line);
+  --color-bad-solid: var(--bad-solid);
+  --color-unk: var(--unk);
+  --color-unk-tint: var(--unk-tint);
+  --color-unk-line: var(--unk-line);
+  --color-approx: var(--approx);
+  --color-approx-tint: var(--approx-tint);
+  --color-approx-line: var(--approx-line);
+  --color-pending: var(--pending);
+  --color-pending-tint: var(--pending-tint);
+  --color-time: var(--time);
+  --color-time-tint: var(--time-tint);
+  --color-time-line: var(--time-line);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  color-scheme: light;
+  --background: oklch(0.982 0.004 85);
+  --foreground: oklch(0.2 0.008 60);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.008 60);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.008 60);
+  --primary: oklch(0.22 0.008 60);
+  --primary-foreground: oklch(0.985 0.003 85);
+  --secondary: oklch(0.955 0.005 80);
+  --secondary-foreground: oklch(0.24 0.008 60);
+  --muted: oklch(0.958 0.005 80);
+  --muted-foreground: oklch(0.47 0.01 60);
+  --accent: oklch(0.95 0.006 80);
+  --accent-foreground: oklch(0.22 0.008 60);
+  --destructive: oklch(0.52 0.2 27);
+  --border: oklch(0.9 0.006 75);
+  --input: oklch(0.86 0.007 75);
+  --ring: oklch(0.55 0.13 255);
+  --radius: 0.625rem;
+
+  --ok: oklch(0.47 0.11 152);
+  --ok-tint: oklch(0.952 0.035 152);
+  --ok-line: oklch(0.63 0.13 152);
+  --bad: oklch(0.5 0.19 27);
+  --bad-tint: oklch(0.955 0.025 27);
+  --bad-line: oklch(0.57 0.21 27);
+  --bad-solid: oklch(0.52 0.2 27);
+  --unk: oklch(0.46 0.01 60);
+  --unk-tint: oklch(0.95 0.004 70);
+  --unk-line: oklch(0.6 0.012 60);
+  --approx: oklch(0.5 0.11 65);
+  --approx-tint: oklch(0.955 0.045 85);
+  --approx-line: oklch(0.72 0.15 75);
+  --pending: oklch(0.55 0.01 60);
+  --pending-tint: oklch(0.93 0.005 70);
+  --pending-shine: oklch(0.985 0.003 85);
+  --time: oklch(0.45 0.13 255);
+  --time-tint: oklch(0.95 0.025 255);
+  --time-line: oklch(0.64 0.13 255);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.165 0.004 60);
+  --foreground: oklch(0.94 0.005 80);
+  --card: oklch(0.2 0.005 60);
+  --card-foreground: oklch(0.94 0.005 80);
+  --popover: oklch(0.22 0.005 60);
+  --popover-foreground: oklch(0.94 0.005 80);
+  --primary: oklch(0.94 0.005 80);
+  --primary-foreground: oklch(0.2 0.006 60);
+  --secondary: oklch(0.27 0.005 60);
+  --secondary-foreground: oklch(0.94 0.005 80);
+  --muted: oklch(0.25 0.005 60);
+  --muted-foreground: oklch(0.73 0.008 75);
+  --accent: oklch(0.27 0.006 60);
+  --accent-foreground: oklch(0.94 0.005 80);
+  --destructive: oklch(0.7 0.17 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.72 0.12 255);
+  --time: oklch(0.8 0.1 255);
+  --time-tint: oklch(0.32 0.06 255 / 0.55);
+  --time-line: oklch(0.7 0.12 255);
+
+  --ok: oklch(0.82 0.13 152);
+  --ok-tint: oklch(0.33 0.06 152 / 0.55);
+  --ok-line: oklch(0.7 0.14 152);
+  --bad: oklch(0.78 0.13 25);
+  --bad-tint: oklch(0.36 0.09 25 / 0.5);
+  --bad-line: oklch(0.7 0.17 25);
+  --bad-solid: oklch(0.56 0.19 27);
+  --unk: oklch(0.78 0.01 70);
+  --unk-tint: oklch(0.3 0.005 60 / 0.6);
+  --unk-line: oklch(0.62 0.01 70);
+  --approx: oklch(0.85 0.12 82);
+  --approx-tint: oklch(0.38 0.07 75 / 0.5);
+  --approx-line: oklch(0.75 0.13 78);
+  --pending: oklch(0.7 0.01 70);
+  --pending-tint: oklch(0.28 0.005 60);
+  --pending-shine: oklch(0.36 0.006 60);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply bg-background font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* The checked draft                                                          */
+/* ------------------------------------------------------------------------- */
+.proof {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-size: 1.125rem;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-variant-numeric: lining-nums;
+}
+@media (min-width: 640px) {
+  .proof {
+    font-size: 1.25rem;
+  }
+}
+
+/* Underlines are drawn as backgrounds, not text-decoration: Chrome leaves a gap under the space at
+   the end of each inline box, which would break a claim's underline at every value boundary. */
+.claim-span {
+  --line: var(--pending);
+  --tint: var(--pending-tint);
+  --ink: inherit;
+  --uline-color: color-mix(in oklch, var(--line) 75%, transparent);
+  --uline: linear-gradient(var(--uline-color), var(--uline-color));
+  --uline-size: 100% 2px;
+  cursor: pointer;
+  background-image: var(--uline);
+  background-size: var(--uline-size);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  padding-bottom: 0.08em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-color 0.2s ease;
+}
+.claim-span[data-status="verified"] {
+  --line: var(--ok-line);
+  --tint: var(--ok-tint);
+  --ink: var(--ok);
+}
+/* Verified context stays quiet so the errors carry the page. */
+.claim-span[data-status="verified"]:not([data-hover]):not([data-selected]) {
+  --uline-color: color-mix(in oklch, var(--line) 45%, transparent);
+  --uline-size: 100% 1.5px;
+}
+.claim-span[data-status="wrong"] {
+  --line: var(--bad-line);
+  --tint: var(--bad-tint);
+  --ink: var(--bad);
+}
+.claim-span[data-status="look_ahead"] {
+  --line: var(--time-line);
+  --tint: var(--time-tint);
+  --ink: var(--time);
+}
+.claim-span[data-status="unverifiable"] {
+  --line: var(--unk-line);
+  --tint: var(--unk-tint);
+  --ink: var(--unk);
+  --uline: repeating-linear-gradient(90deg, var(--uline-color) 0 5px, transparent 5px 9px);
+}
+.claim-span[data-status="approximate"] {
+  --line: var(--approx-line);
+  --tint: var(--approx-tint);
+  --ink: var(--approx);
+  --uline: repeating-linear-gradient(90deg, var(--uline-color) 0 2.5px, transparent 2.5px 5.5px);
+  --uline-size: 100% 2.5px;
+}
+.claim-span[data-status="pending"] {
+  background-color: var(--pending-tint);
+  background-image: linear-gradient(100deg, transparent 20%, var(--pending-shine) 50%, transparent 80%);
+  background-size: 220% 100%;
+  animation: receipts-shimmer 1.4s ease-in-out infinite;
+}
+.claim-span[data-hover],
+.claim-span[data-selected] {
+  --uline-color: var(--line);
+  background-color: var(--tint);
+}
+
+.claim-value {
+  color: var(--ink);
+  font-weight: 600;
+  background-color: var(--tint);
+}
+/* The red-pen strike: a second background layer drawn left to right when the verdict lands. */
+.claim-value[data-strike] {
+  background-image: linear-gradient(var(--bad-line), var(--bad-line)), var(--uline);
+  background-position:
+    0 52%,
+    0 100%;
+  background-size:
+    100% 0.085em,
+    var(--uline-size);
+  animation: receipts-strike 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.12s both;
+}
+.claim-value[data-status="pending"] {
+  color: inherit;
+}
+
+/* Verdict mark after each checked number: a button, so Tab walks the claims. */
+.claim-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  height: 1.45em;
+  min-width: 1.45em;
+  margin-inline: 0.25em 0.1em;
+  padding-inline: 0.36em;
+  vertical-align: 0.12em;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 0.68em;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.claim-mark-glyph {
+  font-size: 1.08em;
+  line-height: 1;
+}
+.claim-mark-fix {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.claim-mark:not([data-status="pending"]) {
+  animation: receipts-stamp 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
+}
+.claim-mark[data-status="verified"] {
+  color: var(--ok);
+  background: var(--ok-tint);
+  border-color: color-mix(in oklch, var(--ok-line) 50%, transparent);
+}
+.claim-mark[data-status="wrong"] {
+  color: #fff;
+  background: var(--bad-solid);
+}
+.claim-mark[data-status="look_ahead"] {
+  color: var(--time);
+  background: var(--time-tint);
+  border-color: color-mix(in oklch, var(--time-line) 60%, transparent);
+}
+.claim-mark[data-status="unverifiable"] {
+  color: var(--unk);
+  background: var(--card);
+  border: 1px dashed var(--unk-line);
+}
+.claim-mark[data-status="approximate"] {
+  color: var(--approx);
+  background: var(--approx-tint);
+  border-color: color-mix(in oklch, var(--approx-line) 60%, transparent);
+}
+.claim-mark[data-status="pending"] {
+  color: var(--pending);
+  background: var(--pending-tint);
+}
+.claim-mark:hover {
+  transform: translateY(-1px);
+}
+.claim-mark[data-selected] {
+  box-shadow:
+    0 0 0 2px var(--card),
+    0 0 0 3.5px var(--foreground);
+}
+.claim-mark:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.pending-dots {
+  display: inline-flex;
+  gap: 0.18em;
+}
+.pending-dots > span {
+  width: 0.28em;
+  height: 0.28em;
+  border-radius: 999px;
+  background: currentColor;
+  animation: receipts-dot 1s ease-in-out infinite;
+}
+.pending-dots > span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.pending-dots > span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Shimmer for list rows and other "checking" placeholders. */
+.shimmer {
+  background-color: var(--pending-tint);
+  background-image: linear-gradient(100deg, transparent 20%, var(--pending-shine) 50%, transparent 80%);
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: receipts-shimmer 1.4s ease-in-out infinite;
+}
+
+/* A receipt card: perforated top edge, like a till slip. */
+.receipt-slip {
+  position: relative;
+  background:
+    radial-gradient(circle at 6px -1px, transparent 4.5px, var(--card) 5px) top left / 12px 7px repeat-x,
+    linear-gradient(var(--card), var(--card)) 0 6px / 100% calc(100% - 6px) no-repeat;
+  filter: drop-shadow(0 0 0.5px color-mix(in oklch, var(--foreground) 35%, transparent))
+    drop-shadow(0 1px 1px color-mix(in oklch, var(--foreground) 6%, transparent));
+}
+
+@keyframes receipts-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+@keyframes receipts-strike {
+  from {
+    background-size:
+      0% 0.085em,
+      var(--uline-size);
+  }
+  to {
+    background-size:
+      100% 0.085em,
+      var(--uline-size);
+  }
+}
+@keyframes receipts-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-10deg);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes receipts-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes receipts-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: receipts-rise 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .claim-span,
+  .claim-value,
+  .claim-mark,
+  .shimmer,
+  .pending-dots > span,
+  .rise {
+    animation: none !important;
+    transition: none !important;
+  }
+}

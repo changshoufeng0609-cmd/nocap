@@ -1,0 +1,228 @@
+{
+  "audited_at_utc": "2026-10-29T07:49:22.675272+00:00",
+  "scope": "Historical bounded Modal smoke, independently followed by read-only app and billing inspection",
+  "new_model_calls_in_followup": 0,
+  "smoke_record": {
+    "path": "data/eval_runs/modal-smoke-20261029-vllm-cli-fix/result.json",
+    "sha256": "4f63af33c2bb70caf22ee2bc11e84d0e1b0af76a6f16e19fdab4ac835156c14a",
+    "result": {
+      "started_epoch": 1793257057.430775,
+      "wall_limit_s": 3600,
+      "budget_usd": 5.0,
+      "full_60min_compute_estimate_usd": 4.265712,
+      "token_scope": "workspace (RBAC unavailable)",
+      "request_origin": "one configured Modal origin",
+      "redirects": false,
+      "model": "muse-glimmer",
+      "model_calls": 1,
+      "app_stopped": true,
+      "private_draft_persisted": false,
+      "status": "complete",
+      "token_retained": true,
+      "unauthorized_http_status": 401,
+      "health_checks": 39,
+      "warmup_s": 1435.96,
+      "event_names": [
+        "meta",
+        "claim",
+        "claim",
+        "verdict",
+        "verdict",
+        "done"
+      ],
+      "verdict_counts": {
+        "verified": 1,
+        "wrong": 1
+      },
+      "complete": true,
+      "estimated_admission_usd": 0.05,
+      "elapsed_s": 1470.74,
+      "compute_elapsed_upper_estimate_usd": 1.74271
+    }
+  },
+  "deployment_source_sha256": "022319157f9bebd0fc1e395e610ff32d32c34fcfb71edf458239daff3bf69e96",
+  "observed_apps": [
+    {
+      "app_id": "ap-6bhWR5h87bQQu1Sx0IBA1j",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 15:14:31+08:00",
+      "stopped_at": "2026-10-29 15:22:18+08:00"
+    },
+    {
+      "app_id": "ap-NGQVW8eXd17UU9cWFvE0XY",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 15:10:21+08:00",
+      "stopped_at": "2026-10-29 15:11:55+08:00"
+    },
+    {
+      "app_id": "ap-QcZyLj7pbKMbelHfeBsExV",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 15:04:19+08:00",
+      "stopped_at": "2026-10-29 15:08:01+08:00"
+    },
+    {
+      "app_id": "ap-Y5fZRWtzza9zR1GtKL8bIa",
+      "description": "receipts-glimmer",
+      "state": "stopped",
+      "tasks": "0",
+      "created_at": "2026-10-29 14:57:42+08:00",
+      "stopped_at": "2026-10-29 15:03:01+08:00"
+    }
+  ],
+  "workspace_month_billing_summary": {
+    "metered_cost": "0.71237107",
+    "billed_cost": "0E-8",
+    "adjustments": {
+      "reservation_adjustment": "-0E-8",
+      "credits": "-0.65000000",
+      "free_storage": "-0E-8",
+      "plan_cost": "0E-8",
+      "network_egress_allowance": "-0.06237107"
+    },
+    "metered_cost_breakdown": {
+      "volumes": "0E-8",
+      "deployed_apps": "0.64245083",
+      "llm_tokens": "0E-8",
+      "network_egress": "0.06237107",
+      "ephemeral_apps": "0.00298390"
+    }
+  },
+  "app_hourly_billing_report": [
+    {
+      "object_id": "ap-Y5fZRWtzza9zR1GtKL8bIa",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T06:00:00",
+      "resource": "CPU",
+      "cost": "0.00067009"
+    },
+    {
+      "object_id": "ap-Y5fZRWtzza9zR1GtKL8bIa",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T06:00:00",
+      "resource": "Memory",
+      "cost": "0.00011333"
+    },
+    {
+      "object_id": "ap-6bhWR5h87bQQu1Sx0IBA1j",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "Network Egress",
+      "cost": "0.06236940"
+    },
+    {
+      "object_id": "ap-6bhWR5h87bQQu1Sx0IBA1j",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "CPU",
+      "cost": "0.02386019"
+    },
+    {
+      "object_id": "ap-6bhWR5h87bQQu1Sx0IBA1j",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "Memory",
+      "cost": "0.01614220"
+    },
+    {
+      "object_id": "ap-6bhWR5h87bQQu1Sx0IBA1j",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "H100",
+      "cost": "0.49813821"
+    },
+    {
+      "object_id": "ap-NGQVW8eXd17UU9cWFvE0XY",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "Network Egress",
+      "cost": "0.00000167"
+    },
+    {
+      "object_id": "ap-NGQVW8eXd17UU9cWFvE0XY",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "CPU",
+      "cost": "0.00462493"
+    },
+    {
+      "object_id": "ap-NGQVW8eXd17UU9cWFvE0XY",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "Memory",
+      "cost": "0.00312892"
+    },
+    {
+      "object_id": "ap-NGQVW8eXd17UU9cWFvE0XY",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "H100",
+      "cost": "0.09655639"
+    },
+    {
+      "object_id": "ap-QcZyLj7pbKMbelHfeBsExV",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "CPU",
+      "cost": "0.00102484"
+    },
+    {
+      "object_id": "ap-QcZyLj7pbKMbelHfeBsExV",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "Memory",
+      "cost": "0.00017333"
+    },
+    {
+      "object_id": "ap-Y5fZRWtzza9zR1GtKL8bIa",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "CPU",
+      "cost": "0.00085731"
+    },
+    {
+      "object_id": "ap-Y5fZRWtzza9zR1GtKL8bIa",
+      "description": "receipts-glimmer",
+      "environment": "main",
+      "interval_start": "2026-10-29T07:00:00",
+      "resource": "Memory",
+      "cost": "0.00014500"
+    }
+  ],
+  "app_report_total_usd": "0.70780581",
+  "validation": {
+    "offline_command": ".venv/bin/python -m pytest -q tests/test_private.py tests/test_modal_deploy.py",
+    "offline_passed": 38,
+    "live_path": "private.private_events -> authenticated Modal Glimmer -> deterministic SEC verifier",
+    "live_http_api_and_browser_checked": false,
+    "private_draft_or_response_retained": false
+  },
+  "limitations": [
+    "The retained smoke contains aggregate events and verdict counts; private draft and model response were not cached.",
+    "One small smoke is not a quality benchmark or a guarantee of cold-start latency or future availability.",
+    "HTTP /api/private/check and browser integration were validated separately with fake transports or controlled fixtures.",
+    "All compatibility attempts shared one start time; do not add their cumulative wall-time estimates together.",
+    "The $1.742710 wall-time compute estimate excludes build, storage and network and is not measured billing.",
+    "Workspace monthly billing includes other usage and adjustments; it is neither a remaining balance nor a task-only invoice.",
+    "Hourly app costs are provider-reported at observation time and can be updated by delayed metering.",
+    "The deployment is stopped, not left serving public or private traffic; minimum containers zero alone is not a spending cap."
+  ]
+}

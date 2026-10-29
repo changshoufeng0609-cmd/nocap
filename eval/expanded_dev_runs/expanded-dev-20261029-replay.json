@@ -1,0 +1,1633 @@
+{
+  "source_record_sha256": "95afc964e8f02f55557b92cebf7aa30f4424964d98470096db877edae96c267d",
+  "quality_matches": true,
+  "new_model_calls": 0,
+  "runs": [
+    {
+      "target": "spark",
+      "score": {
+        "per_mutator": {
+          "value": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "period": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "scale": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "basis": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "entity": {
+            "n": 4,
+            "caught": 4,
+            "any_affected_wrong": 4,
+            "reason_ok": 3,
+            "reason_any_status": 3
+          },
+          "look_ahead": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          }
+        },
+        "originals": {
+          "n": 24,
+          "claims": 56,
+          "verified": 49,
+          "wrong": 0,
+          "unverifiable": 7,
+          "approximate": 0
+        },
+        "controls": {
+          "n": 2,
+          "claims": 4,
+          "verified": 0,
+          "wrong": 0,
+          "unverifiable": 4,
+          "approximate": 0,
+          "fl_all_unverifiable": 2,
+          "fl_reason_seen": 2
+        },
+        "rows": [
+          {
+            "item_id": "v0-MSFT-FY2026Q1-s000424",
+            "mutator": "none",
+            "ticker": "MSFT",
+            "n_claims": 5,
+            "statuses": {
+              "verified": 4,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q2-s008024",
+            "mutator": "none",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s000096",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-MSFT-FY2026Q3-s003031",
+            "mutator": "none",
+            "ticker": "MSFT",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-GOOGL-FY2026Q2-s001079",
+            "mutator": "none",
+            "ticker": "GOOGL",
+            "n_claims": 3,
+            "statuses": {
+              "unverifiable": 1,
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q2-s009538",
+            "mutator": "none",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-BAC-FY2026Q2-s020727",
+            "mutator": "none",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q1-s000718",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q3-s013547",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s016451",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NVDA-FY2027Q1-s002640",
+            "mutator": "none",
+            "ticker": "NVDA",
+            "n_claims": 3,
+            "statuses": {
+              "unverifiable": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q2-s003614",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q1-s008667",
+            "mutator": "none",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q1-s003037",
+            "mutator": "none",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s005413",
+            "mutator": "none",
+            "ticker": "BAC",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q2-s017415",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s002429",
+            "mutator": "none",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2025Q3-s000212",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000142",
+            "mutator": "none",
+            "ticker": "NVDA",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s000050",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s000788",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-META-FY2026Q2-s002112",
+            "mutator": "none",
+            "ticker": "META",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q2-s003429",
+            "mutator": "none",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s001268",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q2-s000534-value",
+            "mutator": "value",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q3-s013547-value",
+            "mutator": "value",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2025Q3-s001575-value",
+            "mutator": "value",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2026Q2-s020727-value",
+            "mutator": "value",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2025Q3-s001258-period",
+            "mutator": "period",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s002429-period",
+            "mutator": "period",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s000057-period",
+            "mutator": "period",
+            "ticker": "AMZN",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q2-s003201-period",
+            "mutator": "period",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-MSFT-FY2026Q2-s000341-scale",
+            "mutator": "scale",
+            "ticker": "MSFT",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-META-FY2026Q2-s002112-scale",
+            "mutator": "scale",
+            "ticker": "META",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s005413-scale",
+            "mutator": "scale",
+            "ticker": "BAC",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s016451-scale",
+            "mutator": "scale",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000440-basis",
+            "mutator": "basis",
+            "ticker": "NVDA",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2027Q1-s000640-basis2",
+            "mutator": "basis",
+            "ticker": "NVDA",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q2-s000485-basis",
+            "mutator": "basis",
+            "ticker": "AMD",
+            "n_claims": 4,
+            "statuses": {
+              "wrong": 4
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000440-basis2",
+            "mutator": "basis",
+            "ticker": "NVDA",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s002429-entity",
+            "mutator": "entity",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-GOOGL-FY2026Q1-s001089-entity",
+            "mutator": "entity",
+            "ticker": "GOOGL",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "entity_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q1-s000784-entity",
+            "mutator": "entity",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "entity_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-MSFT-FY2026Q3-s000334-entity",
+            "mutator": "entity",
+            "ticker": "MSFT",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "entity_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000142-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "NVDA",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-META-FY2026Q1-s002689-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "META",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-GOOGL-FY2026Q2-s000840-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "GOOGL",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q1-s003037-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s015158",
+            "mutator": "forward_looking_control",
+            "ticker": "AMZN",
+            "n_claims": 1,
+            "statuses": {
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s000236",
+            "mutator": "forward_looking_control",
+            "ticker": "NFLX",
+            "n_claims": 3,
+            "statuses": {
+              "unverifiable": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          }
+        ]
+      },
+      "application_cache_hits": 50,
+      "application_cache_misses": 0
+    },
+    {
+      "target": "spark-open-baseten",
+      "score": {
+        "per_mutator": {
+          "value": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "period": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "scale": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "basis": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          },
+          "entity": {
+            "n": 4,
+            "caught": 4,
+            "any_affected_wrong": 4,
+            "reason_ok": 3,
+            "reason_any_status": 3
+          },
+          "look_ahead": {
+            "n": 4,
+            "caught": 4,
+            "reason_ok": 4,
+            "reason_any_status": 4,
+            "any_affected_wrong": 4
+          }
+        },
+        "originals": {
+          "n": 24,
+          "claims": 56,
+          "verified": 49,
+          "wrong": 0,
+          "unverifiable": 7,
+          "approximate": 0
+        },
+        "controls": {
+          "n": 2,
+          "claims": 4,
+          "verified": 0,
+          "wrong": 0,
+          "unverifiable": 4,
+          "approximate": 0,
+          "fl_all_unverifiable": 2,
+          "fl_reason_seen": 2
+        },
+        "rows": [
+          {
+            "item_id": "v0-MSFT-FY2026Q1-s000424",
+            "mutator": "none",
+            "ticker": "MSFT",
+            "n_claims": 5,
+            "statuses": {
+              "verified": 4,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q2-s008024",
+            "mutator": "none",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s000096",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-MSFT-FY2026Q3-s003031",
+            "mutator": "none",
+            "ticker": "MSFT",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-GOOGL-FY2026Q2-s001079",
+            "mutator": "none",
+            "ticker": "GOOGL",
+            "n_claims": 3,
+            "statuses": {
+              "unverifiable": 1,
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q2-s009538",
+            "mutator": "none",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-BAC-FY2026Q2-s020727",
+            "mutator": "none",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q1-s000718",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q3-s013547",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s016451",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NVDA-FY2027Q1-s002640",
+            "mutator": "none",
+            "ticker": "NVDA",
+            "n_claims": 3,
+            "statuses": {
+              "unverifiable": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q2-s003614",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q1-s008667",
+            "mutator": "none",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q1-s003037",
+            "mutator": "none",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s005413",
+            "mutator": "none",
+            "ticker": "BAC",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q2-s017415",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s002429",
+            "mutator": "none",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2025Q3-s000212",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000142",
+            "mutator": "none",
+            "ticker": "NVDA",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s000050",
+            "mutator": "none",
+            "ticker": "NFLX",
+            "n_claims": 3,
+            "statuses": {
+              "verified": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s000788",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-META-FY2026Q2-s002112",
+            "mutator": "none",
+            "ticker": "META",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q2-s003429",
+            "mutator": "none",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s001268",
+            "mutator": "none",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-JPM-FY2026Q2-s000534-value",
+            "mutator": "value",
+            "ticker": "JPM",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q3-s013547-value",
+            "mutator": "value",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2025Q3-s001575-value",
+            "mutator": "value",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2026Q2-s020727-value",
+            "mutator": "value",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2025Q3-s001258-period",
+            "mutator": "period",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s002429-period",
+            "mutator": "period",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s000057-period",
+            "mutator": "period",
+            "ticker": "AMZN",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q2-s003201-period",
+            "mutator": "period",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "period_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-MSFT-FY2026Q2-s000341-scale",
+            "mutator": "scale",
+            "ticker": "MSFT",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-META-FY2026Q2-s002112-scale",
+            "mutator": "scale",
+            "ticker": "META",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s005413-scale",
+            "mutator": "scale",
+            "ticker": "BAC",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s016451-scale",
+            "mutator": "scale",
+            "ticker": "NFLX",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "scale_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000440-basis",
+            "mutator": "basis",
+            "ticker": "NVDA",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2027Q1-s000640-basis2",
+            "mutator": "basis",
+            "ticker": "NVDA",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "verified": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q2-s000485-basis",
+            "mutator": "basis",
+            "ticker": "AMD",
+            "n_claims": 4,
+            "statuses": {
+              "wrong": 4
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000440-basis2",
+            "mutator": "basis",
+            "ticker": "NVDA",
+            "n_claims": 2,
+            "statuses": {
+              "verified": 1,
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "basis_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-BAC-FY2025Q3-s002429-entity",
+            "mutator": "entity",
+            "ticker": "BAC",
+            "n_claims": 1,
+            "statuses": {
+              "wrong": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "value_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-GOOGL-FY2026Q1-s001089-entity",
+            "mutator": "entity",
+            "ticker": "GOOGL",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "entity_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q1-s000784-entity",
+            "mutator": "entity",
+            "ticker": "AMZN",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 1,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "entity_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-MSFT-FY2026Q3-s000334-entity",
+            "mutator": "entity",
+            "ticker": "MSFT",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "entity_mismatch",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-NVDA-FY2026Q3-s000142-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "NVDA",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-META-FY2026Q1-s002689-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "META",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-GOOGL-FY2026Q2-s000840-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "GOOGL",
+            "n_claims": 3,
+            "statuses": {
+              "wrong": 2,
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMD-FY2026Q1-s003037-look_ahead",
+            "mutator": "look_ahead",
+            "ticker": "AMD",
+            "n_claims": 2,
+            "statuses": {
+              "wrong": 2
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "match": "value_text+span",
+            "target_status": "wrong",
+            "target_reason": "look_ahead",
+            "outcome": "caught"
+          },
+          {
+            "item_id": "v0-AMZN-FY2026Q2-s015158",
+            "mutator": "forward_looking_control",
+            "ticker": "AMZN",
+            "n_claims": 1,
+            "statuses": {
+              "unverifiable": 1
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          },
+          {
+            "item_id": "v0-NFLX-FY2026Q1-s000236",
+            "mutator": "forward_looking_control",
+            "ticker": "NFLX",
+            "n_claims": 3,
+            "statuses": {
+              "unverifiable": 3
+            },
+            "error": null,
+            "latency_s": 0.0,
+            "cached": true,
+            "outcome": "ok"
+          }
+        ]
+      },
+      "application_cache_hits": 50,
+      "application_cache_misses": 0
+    }
+  ]
+}

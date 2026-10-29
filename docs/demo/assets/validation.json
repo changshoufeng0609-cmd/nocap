@@ -1,0 +1,115 @@
+{
+  "video_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio"
+      }
+    ],
+    "format": {
+      "duration": "179.937663",
+      "size": "5295052"
+    }
+  },
+  "gif_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "gif",
+        "codec_type": "video",
+        "width": 960,
+        "height": 540
+      }
+    ],
+    "format": {
+      "duration": "20.000000",
+      "size": "304543"
+    }
+  },
+  "full_video_decode": "passed",
+  "full_gif_decode": "passed",
+  "product_brand": "NoCap",
+  "caption_brand_check": "NoCap present; old product name absent",
+  "audio_mean_db": -17.6,
+  "audio_peak_db": -3.7,
+  "caption_cues": 29,
+  "caption_timing": "ordered, nonoverlapping, within exported duration",
+  "fixture": {
+    "dimensions": [
+      1440,
+      900
+    ],
+    "bytes": 79601
+  },
+  "new_model_spend_usd": 0,
+  "review_scope": "automated media checks; separate visual frame review documented in README; no human editorial approval claimed",
+  "asset_sha256": {
+    "receipts-demo.mp4": "a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602",
+    "receipts-demo.gif": "377407e49462b4e9dbfb654b47ae2005e9090108d256d0fa18409f3e7704f767",
+    "receipts-demo.en.srt": "b3ec47eb651b0d2e7911205d59745a40084efd3dacebae8a7c5d1c10e7c86158"
+  },
+  "narration": {
+    "model": "hexgrad/Kokoro-82M v1.0",
+    "voice": "af_heart",
+    "model_license": "Apache-2.0",
+    "runtime": "kokoro-onnx",
+    "runtime_license": "MIT",
+    "execution": "local CPU",
+    "new_provider_calls": 0,
+    "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "runtime_version": "0.6.1",
+    "onnxruntime_version": "1.31.1",
+    "phonemizer_version": "3.4.0",
+    "soundfile_version": "0.14.0",
+    "model_source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "export_source": "https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.1",
+    "voice_tensor_sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+    "segments_checked": 29,
+    "pronunciation_check": "NoCap -> No Cap; GAAP -> gap; EPS/SEC/UTC -> letter names; phonemes retained per segment",
+    "listening_review": "Not a human listening or editorial approval"
+  },
+  "slide_source": {
+    "new_model_spend_usd": 0,
+    "model_post_requests_intercepted": true,
+    "source_url": "http://localhost:3111",
+    "product_brand": "NoCap",
+    "mode": "actual NoCap UI; branding-only display image; recorded response for the original live input",
+    "browser_errors": [],
+    "description": "Original live slide input before the NoCap branding refresh. New display bytes must not be presented as a newly live-checked image.",
+    "original_live_input_path": "examples/slides/nvda-draft.png",
+    "original_live_input_git_commit": "cb033c56c50ba9d599d45d9d61d1c030396a83c0",
+    "original_live_input_sha256": "7de51244baf4b71e59dcdffd18a78373b0eea05b94234b110f3486f37183bcc0",
+    "original_html_sha256": "dfca084890815cc84cbe549ea09cf373acde706b11fc4e0dc6e6b86f619f2f0a",
+    "recorded_response_path": "data/eval_runs/slide_live/nvda-draft-events.json",
+    "recorded_response_sha256": "ba5b37e879e3bfae61cb4cb3ea106b525b6cd21dd2b194fe04433634a8ae8af5",
+    "allowed_html_substitution": {
+      "before": "Receipts demo",
+      "after": "NoCap demo"
+    },
+    "new_branded_input_live_checked": false,
+    "financial_claims_and_layout_changed": false,
+    "branded_display_input_sha256": "7e93576180457003522abf1c46a4cfb4889869d476cc9a735d72d81545fa7c7c",
+    "input_relation": "Branding-only display refresh; original live-input response replay. Financial values and layout unchanged.",
+    "response_sha256": "ba5b37e879e3bfae61cb4cb3ea106b525b6cd21dd2b194fe04433634a8ae8af5",
+    "branded_display_input": "examples/slides/nvda-draft.png",
+    "screenshot_sha256": "b53241379018cbcf457da139a285df88dc3978203d3daf24f6eb6f05a6229a20",
+    "screenshot_health": "11,175 facts; refreshed from the actual evidence snapshot",
+    "capture": "actual NoCap UI with original-input response replay; 2 verified, 2 wrong",
+    "region_source": "SAM returned zero regions; Spark fallback region"
+  },
+  "public_media": {
+    "video_matches": true,
+    "caption_text_and_timing_match": true,
+    "vtt_sha256": "42cd50967f931a1b7989be326484a3b1bf4deb38c07e9e6e1895100f09d66eed"
+  }
+}

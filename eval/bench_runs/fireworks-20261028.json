@@ -1,0 +1,383 @@
+{
+  "purpose": "First live Fireworks Muse Spark Open validation; dev only, no deployment.",
+  "benchmark_record_sha256": "1f4cde6889bed4d5c25c8e3a9bf5fc7c699489fd13beba08164945a36bb80c65",
+  "benchmark_record": {
+    "ran_at": "20261028T032421Z",
+    "budget_usd": 0.6,
+    "spent_usd": 0.130053,
+    "runs": [
+      {
+        "target": "spark-open-fireworks",
+        "label": "Muse Spark Open · Fireworks (open weights)",
+        "backend": "fireworks",
+        "model": "accounts/fireworks/models/muse-spark-open",
+        "hosting": "Fireworks serverless (partner inference)",
+        "open_weights": true,
+        "self_hosted": false,
+        "base_url": "https://api.fireworks.ai/inference/v1",
+        "ran_at": "2026-10-28T03:20:10+00:00",
+        "notes": [],
+        "gold": {
+          "passages": 10,
+          "failed_passages": 0,
+          "context": "NVIDIA, second quarter ended July 26, 2026",
+          "fresh_calls": 10,
+          "raw": {
+            "claims": 23,
+            "wrong": 0,
+            "by_reason": {},
+            "verbatim_spans": 23,
+            "schema_rejected": 0,
+            "failed_calls": 0,
+            "examples": []
+          },
+          "raw_label_errors": 0,
+          "shipped_claims": 28,
+          "strict_matched": 27,
+          "value_matched": 27,
+          "recall": 1.0,
+          "precision": 0.9642857142857143,
+          "verdicts": {
+            "verified": 12,
+            "unverifiable": 15,
+            "approximate": 1
+          },
+          "unmatched": [
+            {
+              "value_text": "50 basis points",
+              "metric": "guidance_tolerance",
+              "basis": "non-GAAP",
+              "period_text": "second quarter ended July 26, 2026",
+              "verdict": "unverifiable",
+              "reason": "forward_looking"
+            }
+          ],
+          "unflagged_errors": 0,
+          "uncovered_numbers": [],
+          "wall_s": 71.74,
+          "wall_from": "this run",
+          "call_latency_p50_s": 21.81,
+          "call_latency_max_s": 71.73,
+          "tokens": {
+            "input_tokens": 23644,
+            "cached_tokens": 13888,
+            "output_tokens": 9344,
+            "reasoning_tokens": 6664
+          },
+          "cost_per_check_usd": 0.05399,
+          "spent_usd": 0.053991,
+          "gpu_cost_estimate_usd": null
+        },
+        "dev": {
+          "items": 13,
+          "ran": 13,
+          "skipped_budget": [],
+          "skip_reasons": {},
+          "errors": 0,
+          "raw": {
+            "claims": 30,
+            "wrong": 0,
+            "verbatim_spans": 30,
+            "schema_rejected": 0,
+            "failed_calls": 0
+          },
+          "mutants": 6,
+          "caught": 6,
+          "reason_ok": 6,
+          "missed_marked_verified": 0,
+          "missed_unverifiable": 0,
+          "target_not_extracted": 0,
+          "originals": 6,
+          "false_alarm_items": 0,
+          "controls": 1,
+          "controls_all_unverifiable": 1,
+          "call_latency_p50_s": 34.39,
+          "spent_usd": 0.076062,
+          "rows": [
+            {
+              "item_id": "v0-MSFT-FY2026Q2-s002843",
+              "mutator": "none",
+              "ticker": "MSFT",
+              "n_claims": 2,
+              "statuses": {
+                "unverifiable": 2
+              },
+              "error": null,
+              "latency_s": 24.12,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-NFLX-FY2026Q3-s013638-value",
+              "mutator": "value",
+              "ticker": "NFLX",
+              "n_claims": 2,
+              "statuses": {
+                "wrong": 1,
+                "verified": 1
+              },
+              "error": null,
+              "latency_s": 54.51,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "value_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-BAC-FY2026Q2-s002519",
+              "mutator": "none",
+              "ticker": "BAC",
+              "n_claims": 1,
+              "statuses": {
+                "verified": 1
+              },
+              "error": null,
+              "latency_s": 15.32,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-BAC-FY2025Q3-s002429-period",
+              "mutator": "period",
+              "ticker": "BAC",
+              "n_claims": 1,
+              "statuses": {
+                "wrong": 1
+              },
+              "error": null,
+              "latency_s": 15.32,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "period_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-NFLX-FY2026Q1-s016451",
+              "mutator": "none",
+              "ticker": "NFLX",
+              "n_claims": 2,
+              "statuses": {
+                "verified": 2
+              },
+              "error": null,
+              "latency_s": 42.31,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-AAPL-FY2026Q1-s000277-scale",
+              "mutator": "scale",
+              "ticker": "AAPL",
+              "n_claims": 2,
+              "statuses": {
+                "wrong": 1,
+                "verified": 1
+              },
+              "error": null,
+              "latency_s": 31.31,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "scale_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-AMZN-FY2025Q3-s000212",
+              "mutator": "none",
+              "ticker": "AMZN",
+              "n_claims": 3,
+              "statuses": {
+                "verified": 3
+              },
+              "error": null,
+              "latency_s": 29.33,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-MSFT-FY2026Q2-s000578-basis",
+              "mutator": "basis",
+              "ticker": "MSFT",
+              "n_claims": 5,
+              "statuses": {
+                "verified": 2,
+                "wrong": 2,
+                "unverifiable": 1
+              },
+              "error": null,
+              "latency_s": 39.81,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "basis_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-NVDA-FY2026Q3-s000525",
+              "mutator": "none",
+              "ticker": "NVDA",
+              "n_claims": 2,
+              "statuses": {
+                "verified": 2
+              },
+              "error": null,
+              "latency_s": 14.7,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-NVDA-FY2026Q3-s000142-look_ahead",
+              "mutator": "look_ahead",
+              "ticker": "NVDA",
+              "n_claims": 3,
+              "statuses": {
+                "wrong": 3
+              },
+              "error": null,
+              "latency_s": 34.4,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "look_ahead",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-AAPL-FY2026Q3-s000498",
+              "mutator": "none",
+              "ticker": "AAPL",
+              "n_claims": 3,
+              "statuses": {
+                "verified": 2,
+                "unverifiable": 1
+              },
+              "error": null,
+              "latency_s": 39.49,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-AMZN-FY2026Q1-s000206-entity",
+              "mutator": "entity",
+              "ticker": "AMZN",
+              "n_claims": 3,
+              "statuses": {
+                "wrong": 3
+              },
+              "error": null,
+              "latency_s": 36.54,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "entity_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-NFLX-FY2026Q1-s004131",
+              "mutator": "forward_looking_control",
+              "ticker": "NFLX",
+              "n_claims": 2,
+              "statuses": {
+                "unverifiable": 2
+              },
+              "error": null,
+              "latency_s": 92.57,
+              "cached": false,
+              "outcome": "ok"
+            }
+          ]
+        },
+        "spent_usd": 0.130053
+      }
+    ],
+    "allow_self_hosted": false,
+    "offline": false,
+    "dev_item_ids": [
+      "v0-MSFT-FY2026Q2-s002843",
+      "v0-NFLX-FY2026Q3-s013638-value",
+      "v0-BAC-FY2026Q2-s002519",
+      "v0-BAC-FY2025Q3-s002429-period",
+      "v0-NFLX-FY2026Q1-s016451",
+      "v0-AAPL-FY2026Q1-s000277-scale",
+      "v0-AMZN-FY2025Q3-s000212",
+      "v0-MSFT-FY2026Q2-s000578-basis",
+      "v0-NVDA-FY2026Q3-s000525",
+      "v0-NVDA-FY2026Q3-s000142-look_ahead",
+      "v0-AAPL-FY2026Q3-s000498",
+      "v0-AMZN-FY2026Q1-s000206-entity",
+      "v0-NFLX-FY2026Q1-s004131"
+    ]
+  },
+  "independent_sdk_metering": {
+    "target": "spark-open-fireworks",
+    "ran_at": "2026-10-28T03:20:10.153383+00:00",
+    "budget_estimate_usd": 0.6,
+    "fresh": true,
+    "spent_usd": 0.13005095,
+    "calls": 23,
+    "tokens": {
+      "input": 54307,
+      "cached": 34048,
+      "output": 23440
+    },
+    "unknown_models": {}
+  },
+  "smoke": {
+    "backend": "fireworks",
+    "model": "accounts/fireworks/models/muse-spark-open",
+    "calls": [
+      {
+        "status": "ok",
+        "cached": false,
+        "cost_usd": 0.009449,
+        "usage": {
+          "input_tokens": 2425,
+          "cached_tokens": 0,
+          "output_tokens": 1510,
+          "reasoning_tokens": 919
+        },
+        "http_status": null,
+        "claims": 7
+      }
+    ],
+    "latency_s": 35.96,
+    "cost_usd": 0.009449
+  },
+  "smoke_cost_usd_from_usage": 0.00944875,
+  "task_cost_usd_from_usage": 0.1394997,
+  "cost_basis": {
+    "input_per_million_usd": 1.25,
+    "cached_input_per_million_usd": 0.15,
+    "output_per_million_usd": 4.25,
+    "source": "https://fireworks.ai/models/fireworks/muse-spark-open",
+    "checked_on": "2026-10-28"
+  },
+  "input_sha256": {
+    "spikes/inputs/gold_text.txt": "6eb8cb0e0eefd0968a17239861f5094820185bf0065e541de13c997a7456f602",
+    "spikes/inputs/gold_claims.json": "489ff2c278c632c619fdb56e67a8abbd2d577c673b8d19f3135f56ed7b5a79a0",
+    "eval/corpus/v0_dev.jsonl": "08a1b772921acbf6b91c05b21be17fbd09567ebaf02f74057c7f5b3b0ba2a4f4"
+  },
+  "audit_notes": [
+    "All 23 benchmark calls returned usable output; no schema rejections, failed passages, dev errors or budget skips.",
+    "The extra 50 basis points non-GAAP guidance claim comes from GAAP/non-GAAP basis expansion of one raw claim; the gold set has one tolerance record. This is a granularity mismatch, not an invented numeric quotation. Gold labels and the 27/28 precision score were retained.",
+    "Some guidance gold claims have no period labels. Their inherited-context period fields are not evaluated by this gold set; full recall is not proof that every field is correct.",
+    "Gold verdicts: 12 verified, 15 unverifiable, 1 approximate. No unmatched claim was verified.",
+    "The 13-item dev subset is not the full 224-item dev corpus. The held-out test split was not run.",
+    "Meta baseline rows are prior cached measurements, not simultaneous live latency comparisons.",
+    "Usage-priced estimates are not provider invoice or remaining-credit queries. Summed rounded per-passage costs differ slightly from independent SDK metering."
+  ],
+  "api_replay": {
+    "network_calls_allowed": false,
+    "http_status": 200,
+    "claims": 28,
+    "counts": {
+      "verified": 12,
+      "wrong": 0,
+      "unverifiable": 15,
+      "approximate": 1
+    },
+    "model": "accounts/fireworks/models/muse-spark-open",
+    "cost_usd": 0
+  }
+}

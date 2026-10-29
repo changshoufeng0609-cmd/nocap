@@ -1,0 +1,796 @@
+{
+  "version": 1,
+  "split": "dev",
+  "corpus_sha256": "08a1b772921acbf6b91c05b21be17fbd09567ebaf02f74057c7f5b3b0ba2a4f4",
+  "seed": 20261029,
+  "algorithm": "Python Random(seed); ordered bucket iteration; each pool sorted by item_id; sample without replacement",
+  "bucket_counts": {
+    "none": 24,
+    "value": 4,
+    "period": 4,
+    "scale": 4,
+    "basis": 4,
+    "entity": 4,
+    "look_ahead": 4,
+    "forward_looking_control": 2
+  },
+  "available_counts": {
+    "none": 107,
+    "period": 20,
+    "scale": 20,
+    "entity": 18,
+    "look_ahead": 17,
+    "value": 22,
+    "basis": 12,
+    "forward_looking_control": 8
+  },
+  "ticker_counts": {
+    "MSFT": 4,
+    "JPM": 4,
+    "AMZN": 9,
+    "GOOGL": 3,
+    "BAC": 7,
+    "NFLX": 8,
+    "NVDA": 6,
+    "AMD": 6,
+    "META": 3
+  },
+  "overlap_with_original_13": [
+    "v0-AMZN-FY2025Q3-s000212",
+    "v0-BAC-FY2025Q3-s002429-period",
+    "v0-NFLX-FY2026Q1-s016451",
+    "v0-NVDA-FY2026Q3-s000142-look_ahead"
+  ],
+  "items": [
+    {
+      "item_id": "v0-MSFT-FY2026Q1-s000424",
+      "item_hash": "99483d488e5f0e79c46d880badd2a34dd5a66b77fa5fd23a61b0f9c05a9f5be0",
+      "input_sha256": "08b9806f7c35f1ae7f9b9636e0275a39afecb6976d861a055dc20eab71686a10",
+      "mutator": "none",
+      "ticker": "MSFT",
+      "requests": {
+        "spark": [
+          "45dd6de0f431454bde54635eacdf8d2e249876a8b0bdccf2ce3142217c8b9fe6"
+        ],
+        "spark-open-baseten": [
+          "4fc603cf07a19c07b75c9fb3263aa45af7f6e871ec1e4e91ef2651eddc94842b"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-JPM-FY2026Q2-s008024",
+      "item_hash": "d583fc1de923d26c8ecf21c8795a04076ea2ef132d7cf414bea2b04ccdcb0825",
+      "input_sha256": "9801b5dd92acb71cc37a3d61c242fc5d220875a0f4b57910df398743eb424644",
+      "mutator": "none",
+      "ticker": "JPM",
+      "requests": {
+        "spark": [
+          "56b2608ea441fc1e09171b53d831097a519af40c9b64aa17cfe972e8a156c2e2"
+        ],
+        "spark-open-baseten": [
+          "38afee2b2ea84a5cd303641b8d5abd89d75d40d0cbd62edb1a4489011a1018fd"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q2-s000096",
+      "item_hash": "bd53228269c3e33671ab1246dbfc35c9fb0541a51b82f75f23d918d3a1925d8f",
+      "input_sha256": "6849a4168e469140fb28bd06b5886eb4b8ecaa590b611a255acd56730470a096",
+      "mutator": "none",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "e1c31eb95632dc9101fc938ba948df2f7118d24dab4f9df539833666bbe039f9"
+        ],
+        "spark-open-baseten": [
+          "07df83d10405a96420047af2aa88dcee774b5758988b3b9ba1c47d65548bab78"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-MSFT-FY2026Q3-s003031",
+      "item_hash": "d3e94b639c1a034f3256912c763017cef0255f7abb6e3f542d6ea575da44b2e3",
+      "input_sha256": "fcdea64b55d0ece85299b04ef21b78c46edc2c58561b4418286ecdc6e1cae3b9",
+      "mutator": "none",
+      "ticker": "MSFT",
+      "requests": {
+        "spark": [
+          "85244de79793415fba001705cafeb567cf47b0670e1ad9352cd7f52c0e579f26"
+        ],
+        "spark-open-baseten": [
+          "12340151301a28e8656bc96fbd23747f0c8b47d2f62b48919664ff39d861d9b3"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-GOOGL-FY2026Q2-s001079",
+      "item_hash": "60fe07ced1966b4ab1dcd46ff6ca10b0cf501031acef2475aefc553c66c9472c",
+      "input_sha256": "710c9ff411f7fbb7627689b1205feaa111f9c6f4adde7820c1464beed7fbe70a",
+      "mutator": "none",
+      "ticker": "GOOGL",
+      "requests": {
+        "spark": [
+          "0c30d16c1ce554ba9bf9c0cf6d5a737f065d949b01fbaa225f6c3b08c8472e99"
+        ],
+        "spark-open-baseten": [
+          "ea9e8d24e1d3783de5fd047e4be7a134b4062bc51b04f5d9644f31cc29053487"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-JPM-FY2026Q2-s009538",
+      "item_hash": "79b15ff4a751798c786e51656172b4a51d6898d6da6ca348f6c0de304e099e6c",
+      "input_sha256": "cff53bb61c5a368b72e310bce22f5826441a359370403ff2de1e4c9f0b1a83b2",
+      "mutator": "none",
+      "ticker": "JPM",
+      "requests": {
+        "spark": [
+          "e47487a0a2ec4e32f1b131411fdfdb88d12b0e21cae012563416b4f6386bd3aa"
+        ],
+        "spark-open-baseten": [
+          "5a49d29ee02f0ced8a0c6e922901542c1ea19f0f33febe4a53a762fbae805401"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2026Q2-s020727",
+      "item_hash": "38eed2ac370e00edc32dbc6d66d94c5bd490321625dac0872f26c4f9d1c9f546",
+      "input_sha256": "8942124460df0a43b907cddc1b53e42a607347db9fa03187853094be7f487c69",
+      "mutator": "none",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "84cef57fbb3e660a63d6ca0a3179ae00df30af355229d79724b84266372ab7e2"
+        ],
+        "spark-open-baseten": [
+          "b4717101854f77ef730e7606f0e2b42e4ba423696f2cd037ee55106934f32e33"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q1-s000718",
+      "item_hash": "d80bbd566d9898283f1eb85aec1992a62075ae3093f7135b5add6f43e5b63303",
+      "input_sha256": "c99101c6a89c134f56ffc4288ba5a7f8ffd46a67dcea404843b3278cf4e1b2e8",
+      "mutator": "none",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "9238f8328b91b9be91904716147ff322ef48485afc66438a7611ae7caafa5af3"
+        ],
+        "spark-open-baseten": [
+          "ae8c758ce3187e59cea16ae06f900262af1e91665fa40a0bef32f308f2ee6fa6"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q3-s013547",
+      "item_hash": "7c238adf2f72556572024f14c75e7c42b45c9b90ebce2176cb78a9fa67e9a00e",
+      "input_sha256": "17f59c97af3c234c458ac901d77bfd9cb879cd13450749a1892eb6c41b56174e",
+      "mutator": "none",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "50781ce6bb852f4286d1fcbd5fec58d4953b4aa7c38dacbcafa105f7b69ff537"
+        ],
+        "spark-open-baseten": [
+          "7ab2ef872aa4027c5d5da6079d7a25a190a028a62d8da0a0f815cc5a8635d74a"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q1-s016451",
+      "item_hash": "0cd3d6b80287803764fdca0cd3c1e430fdd0aa14460c7e4a146afa843a5b485e",
+      "input_sha256": "0fa42cbf8a5e1ddf70b963ad4d5c55ad801b04c1f490172c34bec2ca475d1560",
+      "mutator": "none",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "d068ef15b49aac3e87dde9ac1d4234f85f22a0e83f84a7f4e55b58f8b7ce17fb"
+        ],
+        "spark-open-baseten": [
+          "c1a3c9e042c4bf9888c8dc0c17de9f225722ab89ad82989098c4cbcedeb5574d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NVDA-FY2027Q1-s002640",
+      "item_hash": "fe5455ca88a66066b799015f4d541aa2113606cb647649ec0df67a8fcb4e2fa8",
+      "input_sha256": "fe926430149692a3b11087a50881504f67bc15659a46b7cf8492bfd1c8b7ab57",
+      "mutator": "none",
+      "ticker": "NVDA",
+      "requests": {
+        "spark": [
+          "5046c376a4e46b974db1d389b6b2c71bcbcb5222f353d407014a79776f5b895e"
+        ],
+        "spark-open-baseten": [
+          "5fb9e325a66deded6ea8349a07a8b9100a1d0f33d00482decad3d2eb1b4ddbd7"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q2-s003614",
+      "item_hash": "c22dc70c0b3f0e29eff3d7b7c02f3b66dfdd7bf9f751d2d8240259bb99a4b1db",
+      "input_sha256": "776da5887aba2c2881e1f89ea89387dcf2bedbb95c535755dc9d60f0c55cf946",
+      "mutator": "none",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "bbca2dccba163bf7f0db95cf981cacf9a6f2d86587a22243d604de332fe82863"
+        ],
+        "spark-open-baseten": [
+          "52a9c2433fa68e1dda76f7a6b4a13e83d30064e783dcf5ed15f1295afd4a8d8d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-JPM-FY2026Q1-s008667",
+      "item_hash": "82fe561a2eb6281d86bafc76813fe4561e1b9a8b9ed4c721204dc71f2d1bbda1",
+      "input_sha256": "d5df8f1c7a8916c8299d00703208afd0ebcdefe5fd46c182a1c678f81d88d1f5",
+      "mutator": "none",
+      "ticker": "JPM",
+      "requests": {
+        "spark": [
+          "9cad94fae535ca7133d6bdaf0240ca2c37a9861885c4c84a5df66eeed810fdb6"
+        ],
+        "spark-open-baseten": [
+          "e320ada0e5a1d97413d6e417b382ed83df62cd9a1c90974c59f610fe4c30d76b"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMD-FY2026Q1-s003037",
+      "item_hash": "6f652dde3e88b133a20dfcd2e21bf8a3863a0a266aa683d3d07bca2bdbae38a3",
+      "input_sha256": "ef570b2b0d5a9e0e533af9b200a6b0647e246d9b61236ead92271f3ce84529b3",
+      "mutator": "none",
+      "ticker": "AMD",
+      "requests": {
+        "spark": [
+          "21097ee08eccf65c7de9d619ef3244a79eff2b6a8c76e0518f576b97135e1c7d"
+        ],
+        "spark-open-baseten": [
+          "bb216d95a35f5febed370c4352ceedde2896dbf47f98f379d89effc98370a73a"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2025Q3-s005413",
+      "item_hash": "a9b51311e299573e4c72919a57270765eac16617c9e8518423b3f955624affa4",
+      "input_sha256": "211fe69937be3183b61ce570db0d3cac8ef3461aa48705261f3ccf3518ea9068",
+      "mutator": "none",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "ced8c8dbe7dc678db036762cc1cc11cfb3ece6a2ed5d98e1996b65ba4518844b"
+        ],
+        "spark-open-baseten": [
+          "e24e3638ff817d9ffdb27f5c94cd7b1158af87834f958d05a5b1ee48f1dc5672"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q2-s017415",
+      "item_hash": "900ca215e14b1a28d352ea6946d4a6a2fef2a3356250af06126d86e5ec74a499",
+      "input_sha256": "f223e041becf5fd54a8a47060c35b7bfe85ac99ae77b3b60b83ca4532b811a65",
+      "mutator": "none",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "728af56c85b49dec3912ce90bb48b3d7f22621d4a3d6650351ce34f086674f28"
+        ],
+        "spark-open-baseten": [
+          "3d7366c561059accb4ff9f2c312d02138928ca4e531463d8fcc51263c341c85c"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2025Q3-s002429",
+      "item_hash": "4aea175dc078a6a9bd9c4ae404ae9d233e5f5e44f5d5552c009fe17b5df76a72",
+      "input_sha256": "4491f279083c4d0e697e0763800bae0523e7d5d27e80eee7fa98c9ed481e8c76",
+      "mutator": "none",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "27284e1b0012b67cde73f38b84e19be9f0f2a95b356a54e08eabfa56714fd44c"
+        ],
+        "spark-open-baseten": [
+          "b3be718e43c495a99ca53232b945c4a5b9e9cf5fbd648e4dbcbf90d3a5f413aa"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2025Q3-s000212",
+      "item_hash": "0fb1f68d757fb7a03dc45ad0fc1cda8e3f761ca68669631e3cf4f85744b53d75",
+      "input_sha256": "1c04cfeeb5d72a0128ba71b5e0f6f001cc7a6947b1e9f304ff450b00cac7f9e3",
+      "mutator": "none",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "8f5345a4740e0bc6c38442fa6a774c8b3aaf2a5aa0e996c8c2484adf1ab8320f"
+        ],
+        "spark-open-baseten": [
+          "fc80d4dbc42fd610a6d7792595de95cdcc9d0cabe29570c0389d17455720d60d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NVDA-FY2026Q3-s000142",
+      "item_hash": "279fe5faa46a1ce12bce4d06edf96a0339b2fe401d7ea7335e1a65a18cb1cbf8",
+      "input_sha256": "0d141d96bb3c53ac14e7faf93e183579c282a8120fe83f967661403395cf399c",
+      "mutator": "none",
+      "ticker": "NVDA",
+      "requests": {
+        "spark": [
+          "ff0dbc69f98d3b75f9e759e40878048effb8e9371b475c9b957700f3c52208ee"
+        ],
+        "spark-open-baseten": [
+          "085c36d757f1ffa2925c30a60b4a45663d738f51976141ab569eaac76f54d74d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q1-s000050",
+      "item_hash": "1d2c5e93a7ec24721e762c9eb955cdea3a1fb2ca321af94c96a193551f69ead4",
+      "input_sha256": "cbb47186efe0de89662551ebcc63da2a50e335ab3a351d9d407c42fac082a1f7",
+      "mutator": "none",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "26095e02569dcd65f839eb7e6896a7a205947f9660187dfcbe7e5b82c9b3a0e7"
+        ],
+        "spark-open-baseten": [
+          "c7233c3dffdc6d2385c436972f868d69e288a492cbf7400ad48309f4ff768101"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q2-s000788",
+      "item_hash": "9fde4726c00fe0fc2a89f00a44bc97883b9c9917c4d9d8a0700af534f8a94e7e",
+      "input_sha256": "9520c14807916b04368239c5bdad45be14a433e7167388f442184c90defc8a30",
+      "mutator": "none",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "40ccb71117e8fccbec73a3ca54092af4b0bfb38986d12999b8bde7f09424a820"
+        ],
+        "spark-open-baseten": [
+          "aeefa08888f195ddea83c353035ad9164c179a80240a75da980418a6ff76899f"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-META-FY2026Q2-s002112",
+      "item_hash": "2c194bd46796f154fd114ca8e15d41d235b292f1320daf4253ead574f2143d92",
+      "input_sha256": "b41692e0975958eb0132a64f5c79c8a0d6438294f416507df5db2aa2bb482a4c",
+      "mutator": "none",
+      "ticker": "META",
+      "requests": {
+        "spark": [
+          "a4d74139efdd59b7b72a5e63098fdf957ac0d547d8f2bb027142ae96c1419caf"
+        ],
+        "spark-open-baseten": [
+          "440298010834124d000e7d7f5d8a843ba8c35af9e0b92604127eb8656fb7070e"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMD-FY2026Q2-s003429",
+      "item_hash": "3066d751a7be858ddb70ee060fe37efb716917fa44051fd6c9325a6fa034c47a",
+      "input_sha256": "e37b727fbe1396333302523f77d66d9556687f8bd3afab532028599c6f0b9449",
+      "mutator": "none",
+      "ticker": "AMD",
+      "requests": {
+        "spark": [
+          "a1fd2a4caebef5cc1c0251720fb34cc485b054080370f7ef3bc90d81a49a7e5d"
+        ],
+        "spark-open-baseten": [
+          "bb66f6d040104f6ca33950d006db693146116534f0b44802a7099cfa3e146d74"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q2-s001268",
+      "item_hash": "2106527122652d1f5d2d117bca1d3b99c56ed6659266baabb171cdc57acb308f",
+      "input_sha256": "b3a8127680133e2f9b693bd430e782d4e081807221b1226678a63bdb6ba0ba3f",
+      "mutator": "none",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "e7c3bd3a10423cf6b3d16149b09f5143f467fbaa14c4813d64cea423fe66db62"
+        ],
+        "spark-open-baseten": [
+          "e9f337e1e620325cfe585aa531483afb890530e977a82863f1fcd4ebc01a4966"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-JPM-FY2026Q2-s000534-value",
+      "item_hash": "e0d8f2d0eb859bd99cb10bae21477e0e452ce200e16be16038b1c6a6fb3c276c",
+      "input_sha256": "5d20f77fa9cebe9e788dc736270a456f94edd472bc9c1e0d9e0c197c3591e880",
+      "mutator": "value",
+      "ticker": "JPM",
+      "requests": {
+        "spark": [
+          "10c2e195ed1032f7e3c20ad204880601fb062bb6042558b4cb3bd0069a288b64"
+        ],
+        "spark-open-baseten": [
+          "3c3c73c5e4c3d6670cfc1eb3f2bfef92705a9a18a3cecbff7d6dafc368e1790c"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q3-s013547-value",
+      "item_hash": "95bb51e7e3af5083748fd1fda3aa02af753cc43dea33686d10bcacb56fd9d025",
+      "input_sha256": "1cb61150847c2aa3fa94260164141cfe8f228bf38a685fa19c78f867d59adb5e",
+      "mutator": "value",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "cc70c1d12931510a664c46dda7564743ae45a2985c18093b6771cd52da4b29ee"
+        ],
+        "spark-open-baseten": [
+          "2f3a798b27a4688d3e358d7f62d03faa958ac7596a8e72bddfd49ecff0e70fc6"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2025Q3-s001575-value",
+      "item_hash": "d1ad5e09499942298c618746012a523d3eb46acbd52b1ffaa08483c3f653c312",
+      "input_sha256": "e8975ea1d9c4076511f6a4f46b0991ce06e6e710bf0ffdb05b736b2fc7f0f211",
+      "mutator": "value",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "41051832d11d89b0ce18d1796b3536e8c00047c788d1b693f1baa8767d50077e"
+        ],
+        "spark-open-baseten": [
+          "6b50a730d70ec895110534105382654860c508215d51a66a723b5be048bc024d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2026Q2-s020727-value",
+      "item_hash": "755c57f987c75b4430e77599984065392983c4f4616d6e6a7bbea7bb0a87197d",
+      "input_sha256": "3f7215b85af3e1f7da687f7965bfaffaeec5a0ba28c781c68f051952bbf7fc77",
+      "mutator": "value",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "9eb549b489cf59bcec656708ebf43cc56aa31749b7a107b342d9a180584c92ed"
+        ],
+        "spark-open-baseten": [
+          "46d253e8538e5f4ce981f5dab52e980bca5fc79fa6c9d44e661740b74821a3f2"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMD-FY2025Q3-s001258-period",
+      "item_hash": "ad9baef5bd7f3181d6175e118924d078c62ba68c545e22e5de726518ef82a2cb",
+      "input_sha256": "75b3d0c1e4edb54d9f543f9616a469e19cbb706923b4f64efe6ef08b10b9c0b9",
+      "mutator": "period",
+      "ticker": "AMD",
+      "requests": {
+        "spark": [
+          "13f677acddb96ca989bd92bde00712fd4f6378c18da2c2b96a3c8e1061d0c2ec"
+        ],
+        "spark-open-baseten": [
+          "789646656b5f6adb8a3b777467579b772bc32c5eb297fd94cae185b44ce4422d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2025Q3-s002429-period",
+      "item_hash": "04612959dba149d375b6baf4a442a65e505fe7811e1e2643a50c93f67abf7b20",
+      "input_sha256": "9e795aac2db4dc3c00178a6fd46d1eeb2c01afc599033e07f82d1195bd0f3086",
+      "mutator": "period",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "643f77671cb3e4a3677f3e158e8c8ab914de14b23efda5816714091dc79c2004"
+        ],
+        "spark-open-baseten": [
+          "20faa2a8ad8339b6a4d9743561927244bd35893434d54aa1a7524e8cb43c34b5"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q2-s000057-period",
+      "item_hash": "ee89696379c566b663f6ec7da194d315a2168c464ed54a9678736cadce5f369d",
+      "input_sha256": "9dfb1d5bfccdabf7d45d4f91f32af04975629bb693ce8c0a96d959220039cffb",
+      "mutator": "period",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "f89f71eae8c1f53e68cfc06664cfdaabc8d7c5f461f454358cc7e8f18b16c2d4"
+        ],
+        "spark-open-baseten": [
+          "97ed0be62e82c9a42c1d1ef5211cbec371fc336d261cc975d789d277b0831222"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMD-FY2026Q2-s003201-period",
+      "item_hash": "05370664f2aead97ef8a0d7d113f4baba4f46488bd0a6a774c2b5eb01b1c440b",
+      "input_sha256": "3e3e212c6f6c0526dd90f07801de2563070e758de7f5c0ddf0ed509f4eebfca7",
+      "mutator": "period",
+      "ticker": "AMD",
+      "requests": {
+        "spark": [
+          "58cb41df872e5bb1427f87632f1420b39963989f23355f0b600a1ea6ee02fb73"
+        ],
+        "spark-open-baseten": [
+          "8ec28010f5432495ff21b1c003e0afc6c11296eab5f1ed20e6500efcdb86ae60"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-MSFT-FY2026Q2-s000341-scale",
+      "item_hash": "25563412c7a3b3c16837fb6bd0e5d64d9ac7a0659e0fc8649ef58fd45673722d",
+      "input_sha256": "9fb5f38afacc2e70aa4f0e944230ec87c621531977904ae08ec4c8ac9354354f",
+      "mutator": "scale",
+      "ticker": "MSFT",
+      "requests": {
+        "spark": [
+          "133bb901d8161b30411c716df29d235aa89fc9b8154bebf992498caca918bd92"
+        ],
+        "spark-open-baseten": [
+          "0d0486b5cd77ad4e738d4596ae659cb8d23761345410bed75bb378b05508acfb"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-META-FY2026Q2-s002112-scale",
+      "item_hash": "1fd9b78a3cc2f7a398c3f6194a0eceb79064427b0a02076857282c355144e75a",
+      "input_sha256": "522873555be745c1c79fe0be4b1f2194a15c4abe82e34b258a17ebab2b1c2801",
+      "mutator": "scale",
+      "ticker": "META",
+      "requests": {
+        "spark": [
+          "fdd5c6012f066dac0b646e8557e3223b1fd254535dbd723236b3e2cbb47c1db3"
+        ],
+        "spark-open-baseten": [
+          "1ce487034078e7bff33d629cf1234bade09b22e46d8dc01e8aeb1bc8b170c8f2"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2025Q3-s005413-scale",
+      "item_hash": "7f8d501e29b30195bc732ee43d39f8956afe36b2f40d4bc7b6fdb4ee7a769518",
+      "input_sha256": "11949d08a883f94956efaf2cf3be2dfd3ae8574bdc0d493a0006566e585de334",
+      "mutator": "scale",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "addc634cf3050856854dfd1c2239e489b8b113eaa814f9dc09ab66eef45306d7"
+        ],
+        "spark-open-baseten": [
+          "ca31b2e6bd3a165312c1283d3b02c097e984573a0e2452ef3242487be74539a1"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q1-s016451-scale",
+      "item_hash": "3f0b7f392e014511f3255e8d3f3748519b1bcda01c38799e4a0df226d9def68e",
+      "input_sha256": "9e1d4281811298a0307cf943345e071b5b3eda6d8bf22ba8a3a2c82eb48f7f7e",
+      "mutator": "scale",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "89695182cbfda37e0988157aeea3a5f22996e84ea9119c2af7c377e51d57ee42"
+        ],
+        "spark-open-baseten": [
+          "c30d92f4649b3c33b13e48bd54958e5444f0b51bb1a936e7cecdd489ef0679a1"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NVDA-FY2026Q3-s000440-basis",
+      "item_hash": "9b200f17de953bf18f84d2be3d5c6e4335062495999f91a1449ba3f4b7064bc4",
+      "input_sha256": "ec8f93b086e77fbfe88b9e89e60ecb126f1315d937ed327d6946b101372b87eb",
+      "mutator": "basis",
+      "ticker": "NVDA",
+      "requests": {
+        "spark": [
+          "b18eec0c234ab4435dd62a4061119624ac2cdaee2880821f7338eba7aa84ef95"
+        ],
+        "spark-open-baseten": [
+          "c250e93e979d6abbf4d402f9fc62de8c9493c38397ffb09ed3d981e70671424e"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NVDA-FY2027Q1-s000640-basis2",
+      "item_hash": "effc3446f811952565f5d273bde4a68f727031eb9d1c611105ba09d76929ddfb",
+      "input_sha256": "9af83670b5e4056e485345e873d0039ea4fec1b65ea3cdf8a51a1fe295e23bed",
+      "mutator": "basis",
+      "ticker": "NVDA",
+      "requests": {
+        "spark": [
+          "1ab2e7aae839a0d8aed5ca20cf92e0ab977f3e8c8d5dfb5f548de81df09a056f"
+        ],
+        "spark-open-baseten": [
+          "fb72dd8f6c2dbe71714c7bcfa6ed9d7b2709829bed4598c8d2bba0e363d4d8bb"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMD-FY2026Q2-s000485-basis",
+      "item_hash": "42210bc9baf574ee71d5c3475fdee3641d947667fb208f5a1372b1e51db6451a",
+      "input_sha256": "1752188e8610313c2299f3b8e7199c0e576cd9a2ae97b44299c16adf6d39fb7b",
+      "mutator": "basis",
+      "ticker": "AMD",
+      "requests": {
+        "spark": [
+          "2ef6374cf0f603428b50fac38fa43fde637b0fd0b7aa001e70295a55fd6e7de8"
+        ],
+        "spark-open-baseten": [
+          "034f9bd1e2c9d574616ea759167aca997d0fa4e83ee85999cf02df2a718b190e"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NVDA-FY2026Q3-s000440-basis2",
+      "item_hash": "9862d6d5b14f0f0009e41a5b3aff551cdc6f55a6ee2290a0ba1bd6fd629def3e",
+      "input_sha256": "6de984bba6d070a8b500ad6446d546453f5d83740722d21825013fedfc64c4b9",
+      "mutator": "basis",
+      "ticker": "NVDA",
+      "requests": {
+        "spark": [
+          "11e1b235630f7b73b1ea398b7b5a244bfbee160b91cfad8e8514bfc0bc501e1c"
+        ],
+        "spark-open-baseten": [
+          "30ff5471ec9a28743c8e2f93f11fe77873e0f9a9d5075b5094f68b3af8a1fde4"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-BAC-FY2025Q3-s002429-entity",
+      "item_hash": "eae07506caf6bae023c2cbe2469a60774f65181147b4ee856ce832608a6dcc6e",
+      "input_sha256": "e4932849ab2b7dfbdf68bb014d7f41624298e1514a247587df32f5181f897015",
+      "mutator": "entity",
+      "ticker": "BAC",
+      "requests": {
+        "spark": [
+          "af100dbfa61f3e6513dc2e0787bf4a08bfa1b2253649b348e979bc29530c2bdb"
+        ],
+        "spark-open-baseten": [
+          "0551ddd5a153a497d32a68d620ec670d638160202822b8a0872d5af5d6e12747"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-GOOGL-FY2026Q1-s001089-entity",
+      "item_hash": "ed5ad6550ba727209d59e0841be4da3d2f50293e655139f8a9fae57a52e4825b",
+      "input_sha256": "ed176730913bd4f3c98a7ea8942a3a5ff28f9508176f9496ed2a794f2e5ebc95",
+      "mutator": "entity",
+      "ticker": "GOOGL",
+      "requests": {
+        "spark": [
+          "328f4bdceba0502d4ffabe89a186d724f6ea8b560ddd6b2c56a19b2065f6bb71"
+        ],
+        "spark-open-baseten": [
+          "f555121d98b494f5206daa52221cdfdbade3b9175df34c599e438b18862d2631"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q1-s000784-entity",
+      "item_hash": "d328c32d1e4194cdf1b67e1ba0fc7c874315236b51f5b020a75d98fa4b94d890",
+      "input_sha256": "b57f958b598a0ad6c929b7a258b6dc91bd20e018692f13fce3052745d2fd0fa3",
+      "mutator": "entity",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "b0e105c6d9e61036edbfbf5aba65a6c9f94f9a6d9a12711828e00be23a45890f"
+        ],
+        "spark-open-baseten": [
+          "599746e86ba8412a10eb6badbb072bc067e507716c4373da9b548598d7252949"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-MSFT-FY2026Q3-s000334-entity",
+      "item_hash": "8731089fca3acd928cbb5ead58adde2812626900beab6476949d8c797bcf01b0",
+      "input_sha256": "f5f505410e27fa3b7d7b5cd46070dcb2a175bac03f2807354d0f765a5a103653",
+      "mutator": "entity",
+      "ticker": "MSFT",
+      "requests": {
+        "spark": [
+          "97756739a3eee68a694de4ea4488802e12fc13082142cccaecb1a69127e38c18"
+        ],
+        "spark-open-baseten": [
+          "4f69b493bf8476a3a84611c3a751dc48d371aabf85e8e66c6b49003eadbc548c"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NVDA-FY2026Q3-s000142-look_ahead",
+      "item_hash": "157ae0f6980ee8f91e4ce59bfc7fdc4b5339af7ae2e240a2575fd275dd37cd72",
+      "input_sha256": "c0bbc02bfc0ef7f7f2250a99953b810f8ad3caee5d77d22b71dde3b44e2455f7",
+      "mutator": "look_ahead",
+      "ticker": "NVDA",
+      "requests": {
+        "spark": [
+          "ff0dbc69f98d3b75f9e759e40878048effb8e9371b475c9b957700f3c52208ee"
+        ],
+        "spark-open-baseten": [
+          "085c36d757f1ffa2925c30a60b4a45663d738f51976141ab569eaac76f54d74d"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-META-FY2026Q1-s002689-look_ahead",
+      "item_hash": "f26b35fd9cfd5c088ee282706754e8f1e0460ffc3f314a2b1ccd5df2524c1da4",
+      "input_sha256": "0cffe0c989f5ad34c6e719bb32d2c2cdb6e8c08696d7c83cbd95ab93f4a55561",
+      "mutator": "look_ahead",
+      "ticker": "META",
+      "requests": {
+        "spark": [
+          "4a5561bc3417eaa38981eecfecc8b68008886ade8fd0e6fea6caff2278e8fcf9"
+        ],
+        "spark-open-baseten": [
+          "067cb027b3f6393816b3e69758efd38e82834d3605f0d5259364a9b68e68c229"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-GOOGL-FY2026Q2-s000840-look_ahead",
+      "item_hash": "8595add3b54384fe867e32904d9ac53aa13d295a93f7e030db45c5acf7dd388a",
+      "input_sha256": "ea7df6ed2869518d51268d451290c52b9733fb60b63b3a5f2ec68d5a5c45e4a7",
+      "mutator": "look_ahead",
+      "ticker": "GOOGL",
+      "requests": {
+        "spark": [
+          "b2e5b2be6796693b74a7657d0437528696ce0846fb54935519c9721a1394d9be"
+        ],
+        "spark-open-baseten": [
+          "4e46995162f4f108a7cdf9487598db4692f5d470a34ebb66312e835b33271d28"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMD-FY2026Q1-s003037-look_ahead",
+      "item_hash": "d0904d505af863892497e4e64980974e0f0bea6283763ded8f4ef439b6df8abe",
+      "input_sha256": "fa9cf818b8c1dec9264f0213de62379c52f60610ecfc8537eb9527401e4e4e1d",
+      "mutator": "look_ahead",
+      "ticker": "AMD",
+      "requests": {
+        "spark": [
+          "21097ee08eccf65c7de9d619ef3244a79eff2b6a8c76e0518f576b97135e1c7d"
+        ],
+        "spark-open-baseten": [
+          "bb216d95a35f5febed370c4352ceedde2896dbf47f98f379d89effc98370a73a"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-AMZN-FY2026Q2-s015158",
+      "item_hash": "572e22e79555f008625cab32ec2f9aad3c798ffaf094ab2d1964825cf90d70cf",
+      "input_sha256": "f40e0c23b21156c8b4d375feccd2142d67e8b794c160cad3a640e8e5d5901386",
+      "mutator": "forward_looking_control",
+      "ticker": "AMZN",
+      "requests": {
+        "spark": [
+          "8f0cdecbc295802e1992342c087fd9b368006d827b624f46f73a4c3fc1daacbf"
+        ],
+        "spark-open-baseten": [
+          "f18b20253eb1b89daff960ea80b187b2a87376d6a2fe48c6443f8c7e889c18fd"
+        ]
+      }
+    },
+    {
+      "item_id": "v0-NFLX-FY2026Q1-s000236",
+      "item_hash": "7bd05e91514e4d60d0fc023ddc388f5984ea78246cf360cf8b26e411354689b7",
+      "input_sha256": "e87685add9769331412289a07a5425420f266e88df81a8bc3ba33d118b95ccb7",
+      "mutator": "forward_looking_control",
+      "ticker": "NFLX",
+      "requests": {
+        "spark": [
+          "80aa9cd5af633fab7eb916505dd36d15669498f2ea4100d776997ea599e56057"
+        ],
+        "spark-open-baseten": [
+          "da12660dbb179960749b46b2f3f7a18330fa0ca33a08d3f821b1454d0739b03b"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "input": "spikes/inputs/gold_text.txt",
+  "note": "DRAFT gold labels written by Claude from the text alone (independent of Muse Spark output), pending review by the user. Values are as written (scale not applied).",
+  "claims": [
+    {"metric": ["revenue", "total revenue"], "value": 96.2, "scale": "billions", "value_text": "$96.2 billion",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter"]},
+    {"metric": ["revenue growth", "revenue change", "revenue increase", "sequential revenue growth"], "value": 18, "value_text": "18%",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter", "previous quarter"]},
+    {"metric": ["revenue growth", "revenue change", "revenue increase", "year-over-year revenue growth"], "value": 106, "value_text": "106%",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter", "a year ago"]},
+    {"metric": ["gross margin", "GAAP gross margin"], "value": 75.0, "value_text": "75.0%",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter", "the quarter"]},
+    {"metric": ["non-GAAP gross margin"], "value": 75.0, "value_text": "75.0%",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter", "the quarter"]},
+    {"metric": ["diluted EPS", "GAAP diluted EPS", "earnings per diluted share", "GAAP earnings per diluted share", "diluted earnings per share"], "value": 2.46, "value_text": "$2.46",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter", "the quarter"]},
+    {"metric": ["non-GAAP diluted EPS", "non-GAAP earnings per diluted share"], "value": 2.22, "value_text": "$2.22",
+     "period": ["second quarter ended July 26, 2026", "second quarter of fiscal 2027", "second quarter", "the quarter"]},
+
+    {"metric": ["Data Center revenue", "revenue"], "value": 89.0, "scale": "billions", "value_text": "$89.0 billion"},
+    {"metric": ["Data Center revenue growth", "revenue growth"], "value": 117, "value_text": "117%"},
+
+    {"metric": ["Edge Computing revenue", "revenue"], "value": 7.2, "scale": "billions", "value_text": "$7.2 billion",
+     "period": ["second quarter", "second-quarter"]},
+    {"metric": ["Edge Computing revenue growth", "revenue growth"], "value": 13, "value_text": "13%"},
+    {"metric": ["Edge Computing revenue growth", "revenue growth"], "value": 27, "value_text": "27%"},
+
+    {"metric": ["capital returned to shareholders", "shareholder returns", "returned to shareholders", "amount returned to shareholders"], "value": 26.0, "scale": "billions", "value_text": "$26.0 billion",
+     "period": ["second quarter of fiscal 2027", "second quarter"]},
+    {"metric": ["remaining share repurchase authorization", "share repurchase authorization", "repurchase authorization remaining"], "value": 99.0, "scale": "billions", "value_text": "$99.0 billion",
+     "period": ["end of the second quarter", "second quarter"]},
+
+    {"metric": ["quarterly cash dividend", "cash dividend", "dividend per share", "dividend"], "value": 0.25, "value_text": "$0.25"},
+
+    {"metric": ["revenue", "revenue outlook", "expected revenue", "revenue guidance"], "value": 108.0, "scale": "billions", "value_text": "$108.0 billion"},
+    {"metric": ["revenue outlook range", "revenue guidance range", "revenue"], "value": 2, "value_text": "2%"},
+
+    {"metric": ["gross margin", "GAAP gross margin", "gross margin outlook"], "value": 74.0, "value_text": "74.0%"},
+    {"metric": ["non-GAAP gross margin", "non-GAAP gross margin outlook"], "value": 74.0, "value_text": "74.0%"},
+    {"metric": ["gross margin outlook range", "gross margin range", "gross margin"], "value": 50, "value_text": "50 basis points"},
+
+    {"metric": ["operating expenses", "GAAP operating expenses", "operating expenses outlook"], "value": 9.2, "scale": "billions", "value_text": "$9.2 billion"},
+    {"metric": ["non-GAAP operating expenses", "non-GAAP operating expenses outlook"], "value": 9.0, "scale": "billions", "value_text": "$9.0 billion"},
+
+    {"metric": ["tax rate", "GAAP tax rate", "effective tax rate"], "value": 16.0, "value_text": "16.0%",
+     "period": ["full year fiscal 2027", "fiscal 2027"]},
+    {"metric": ["tax rate", "GAAP tax rate", "effective tax rate"], "value": 18.0, "value_text": "18.0%",
+     "period": ["full year fiscal 2027", "fiscal 2027"]},
+    {"metric": ["non-GAAP tax rate"], "value": 16.0, "value_text": "16.0%",
+     "period": ["full year fiscal 2027", "fiscal 2027"]},
+    {"metric": ["non-GAAP tax rate"], "value": 18.0, "value_text": "18.0%",
+     "period": ["full year fiscal 2027", "fiscal 2027"]},
+
+    {"metric": ["third-party capital", "capital to mobilize", "third-party capital for AI infrastructure", "financing"], "value": 500, "scale": "billions", "value_text": "$500 billion"}
+  ]
+}

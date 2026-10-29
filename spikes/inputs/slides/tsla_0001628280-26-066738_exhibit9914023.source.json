@@ -1,0 +1,20 @@
+{
+  "ticker": "TSLA",
+  "company": "Tesla, Inc.",
+  "cik": 1318605,
+  "accession": "0001628280-26-066738",
+  "form": "8-K",
+  "items": "2.02,9.01",
+  "filing_date": "2026-10-21",
+  "report_date": "2026-10-21",
+  "acceptance_datetime": "2026-10-21T20:41:42.000Z",
+  "primary_document": "tsla-20261021.htm",
+  "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026066738/exhibit9914023.jpg",
+  "folder_index": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026066738/index.json",
+  "file": "tsla_0001628280-26-066738_exhibit9914023.jpg",
+  "bytes": 98747,
+  "sha256": "4335441db6538747b7c3e03523573d31db652bdf3e02717b8523c48e06f28ac3",
+  "fetched_via": "spikes/a_edgar.py Edgar (declared User-Agent, content-hash cache, 4 req/s)",
+  "selected_at": "2026-10-27T08:34:21+00:00",
+  "note": "Q3 2026 Update deck, EX-99.1 page 23: KEY METRICS QUARTERLY (unaudited). Three bar charts, 4Q-2023..3Q-2026: vehicle deliveries; operating cash flow + free cash flow ($B); net income + adjusted EBITDA ($B). No printed data labels."
+}

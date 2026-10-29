@@ -1,0 +1,9 @@
+AMD Data Center Strength Anchors Quarter As Rivalry Intensifies
+
+AMD reported first-quarter revenue of $10.3 billion, up 38% year over year, as demand for data-center processors and accelerators remained the main engine of growth across the business.
+
+Data Center revenue reached $5.78 billion and rose 57% year over year, while Client revenue was $3.03 billion as personal-computer demand provided a smaller contribution to the overall mix. Profitability reflected that mix, with net income of $1.38 billion and non-GAAP gross margin of 55.4%, although GAAP diluted EPS was $1.37.
+
+The comparison with NVIDIA remained stark, after NVIDIA posted revenue of $68.1 billion in the quarter ended January 25, 2026, underscoring the scale gap AMD is trying to close in artificial-intelligence hardware. NVIDIA revenue was $81.6 billion in the quarter ended April 26, 2026, a result investors will weigh when assessing whether AMD can sustain its data-center momentum.
+
+AMD expects revenue of $11.2 billion, plus or minus $300 million, giving investors a guide to demand as the business shifts toward data-center products.

@@ -1,0 +1,247 @@
+[
+  {
+    "draft": "amd.txt",
+    "as_of": null,
+    "counts": {
+      "verified": 6,
+      "wrong": 3,
+      "unverifiable": 1
+    },
+    "cost_usd": 0.0,
+    "claims": [
+      {
+        "entity": "AMD",
+        "value": "$11.5 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "AMD",
+        "value": "50%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "AMD",
+        "value": "$6.7 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "AMD",
+        "value": "$3.07 billion",
+        "status": "wrong",
+        "reason": "value_mismatch"
+      },
+      {
+        "entity": "AMD",
+        "value": "$779 million",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "AMD",
+        "value": "54%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "AMD",
+        "value": "$3.1 billion",
+        "status": "wrong",
+        "reason": "basis_mismatch"
+      },
+      {
+        "entity": "AMD",
+        "value": "$2.3 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "AMD",
+        "value": "$1.66",
+        "status": "unverifiable",
+        "reason": "ambiguous"
+      },
+      {
+        "entity": "AMD",
+        "value": "$2.96 billion",
+        "status": "wrong",
+        "reason": "period_mismatch"
+      }
+    ]
+  },
+  {
+    "draft": "netflix.txt",
+    "as_of": null,
+    "counts": {
+      "verified": 5,
+      "wrong": 2
+    },
+    "cost_usd": 0.0,
+    "claims": [
+      {
+        "entity": "Netflix",
+        "value": "$12.87 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Netflix",
+        "value": "12%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Netflix",
+        "value": "$4.5 billion",
+        "status": "wrong",
+        "reason": "value_mismatch"
+      },
+      {
+        "entity": "Netflix",
+        "value": "34.6%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Netflix",
+        "value": "$3.66 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Netflix",
+        "value": "$0.87",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Netflix",
+        "value": "$5.87",
+        "status": "wrong",
+        "reason": "value_mismatch"
+      }
+    ]
+  },
+  {
+    "draft": "roundup.txt",
+    "as_of": null,
+    "counts": {
+      "verified": 5,
+      "wrong": 2,
+      "unverifiable": 1
+    },
+    "cost_usd": 0.0,
+    "claims": [
+      {
+        "entity": "Amazon",
+        "value": "20%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$200.6 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$42.2 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$16.6 billion",
+        "status": "wrong",
+        "reason": "value_mismatch"
+      },
+      {
+        "entity": "Apple",
+        "value": "$109.4 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Apple",
+        "value": "16%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Apple",
+        "value": "$2.01",
+        "status": "wrong",
+        "reason": "period_mismatch"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$195 billion",
+        "status": "unverifiable",
+        "reason": "no_evidence"
+      }
+    ]
+  },
+  {
+    "draft": "roundup.txt",
+    "as_of": "2026-07-30T20:15:00Z",
+    "counts": {
+      "verified": 3,
+      "wrong": 4,
+      "unverifiable": 1
+    },
+    "cost_usd": 0.0,
+    "claims": [
+      {
+        "entity": "Amazon",
+        "value": "20%",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$200.6 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$42.2 billion",
+        "status": "verified",
+        "reason": "match"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$16.6 billion",
+        "status": "wrong",
+        "reason": "value_mismatch"
+      },
+      {
+        "entity": "Apple",
+        "value": "$109.4 billion",
+        "status": "wrong",
+        "reason": "look_ahead"
+      },
+      {
+        "entity": "Apple",
+        "value": "16%",
+        "status": "wrong",
+        "reason": "look_ahead"
+      },
+      {
+        "entity": "Apple",
+        "value": "$2.01",
+        "status": "wrong",
+        "reason": "look_ahead"
+      },
+      {
+        "entity": "Amazon",
+        "value": "$195 billion",
+        "status": "unverifiable",
+        "reason": "no_evidence"
+      }
+    ]
+  }
+]

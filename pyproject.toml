@@ -1,0 +1,19 @@
+# The NoCap API as Vercel's Python builder sees it (docs/deploy.md). In this directory pyproject.toml takes
+# precedence over requirements.txt, so the deployed function gets only what receipts.api imports at runtime.
+# Local development, the CLI, ingestion and tests keep using requirements.txt. Python is pinned in .python-version.
+[project]
+name = "receipts"
+version = "0.3.0"
+description = "Verify every financial number in a draft against SEC filings."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.162,<1",
+    "openai>=3.39,<4",
+    "pydantic>=2.14,<3",
+    "python-dotenv>=1.0",
+    "pillow>=10.3",
+    "psycopg[binary]>=3.2,<4",
+]
+
+[tool.uv]
+package = false

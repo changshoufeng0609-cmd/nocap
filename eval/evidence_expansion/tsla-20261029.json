@@ -1,0 +1,197 @@
+{
+  "validated_on": "2026-10-29",
+  "scope": "TSLA XBRL and derived quarters; no press-release table facts",
+  "command": ".venv/bin/python -m receipts.ingest --tickers TSLA --quarters 8 --offline",
+  "company": {
+    "cik": 1318605,
+    "ticker": "TSLA",
+    "name": "Tesla, Inc.",
+    "aliases": [
+      "tesla",
+      "tesla motors",
+      "tsla"
+    ],
+    "fiscal_year_end": "1231"
+  },
+  "new_sqlite_facts": 379,
+  "new_filings": 57,
+  "xbrl_facts_matching_cached_source": 347,
+  "all_fact_acceptance_joins": 379,
+  "derived_facts_with_max_source_acceptance": 32,
+  "quarters": [
+    {
+      "year": 2024,
+      "quarter": "Q4",
+      "start": "2024-10-01",
+      "end": "2024-12-31"
+    },
+    {
+      "year": 2025,
+      "quarter": "Q1",
+      "start": "2025-01-01",
+      "end": "2025-03-31"
+    },
+    {
+      "year": 2025,
+      "quarter": "Q2",
+      "start": "2025-04-01",
+      "end": "2025-06-30"
+    },
+    {
+      "year": 2025,
+      "quarter": "Q3",
+      "start": "2025-07-01",
+      "end": "2025-09-30"
+    },
+    {
+      "year": 2025,
+      "quarter": "Q4",
+      "start": "2025-10-01",
+      "end": "2025-12-31"
+    },
+    {
+      "year": 2026,
+      "quarter": "Q1",
+      "start": "2026-01-01",
+      "end": "2026-03-31"
+    },
+    {
+      "year": 2026,
+      "quarter": "Q2",
+      "start": "2026-04-01",
+      "end": "2026-06-30"
+    },
+    {
+      "year": 2026,
+      "quarter": "Q3",
+      "start": "2026-07-01",
+      "end": "2026-09-30"
+    }
+  ],
+  "per_metric": {
+    "revenue": {
+      "rows": 26,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "cost_of_revenue": {
+      "rows": 26,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "gross_profit": {
+      "rows": 26,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "research_and_development": {
+      "rows": 26,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "operating_expenses": {
+      "rows": 26,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "operating_income": {
+      "rows": 26,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "net_income": {
+      "rows": 30,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "eps_basic": {
+      "rows": 26,
+      "quarters": 10,
+      "lastn": 6
+    },
+    "eps_diluted": {
+      "rows": 26,
+      "quarters": 10,
+      "lastn": 6
+    },
+    "operating_cash_flow": {
+      "rows": 21,
+      "quarters": 13,
+      "lastn": 8
+    },
+    "net_interest_income": {
+      "rows": 0,
+      "quarters": 0,
+      "lastn": 0
+    },
+    "dividend_per_share": {
+      "rows": 0,
+      "quarters": 0,
+      "lastn": 0
+    },
+    "repurchase_authorization_remaining": {
+      "rows": 0,
+      "quarters": 0,
+      "lastn": 0
+    }
+  },
+  "input_cache_provenance": [
+    {
+      "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001318605.json",
+      "sha256": "c951e0ae2402dd8cf8f39319928adccc4196b997941fe40b0d4d6b8060802db1",
+      "fetched_at": "2026-10-27T08:35:24.225722+00:00",
+      "bytes": 3700279
+    },
+    {
+      "url": "https://data.sec.gov/submissions/CIK0001318605.json",
+      "sha256": "f937c979c150f4ac4a3bd77ead42bcd63a2a1ef3f9c670ce4d31f217d8deac65",
+      "fetched_at": "2026-10-27T08:31:21.504377+00:00",
+      "bytes": 162058
+    }
+  ],
+  "original_ten_company_rows_before_and_after": {
+    "companies": {
+      "rows": 10,
+      "sha256": "393ac4b929cfaba07fdfa849c07924d66289c96df06c55481156db1b01c9f913"
+    },
+    "filings": {
+      "rows": 548,
+      "sha256": "8c966f6516c9ace5fc41f9146d6abfb126ea40268006188e1aa5159721d0aea4"
+    },
+    "facts": {
+      "rows": 3281,
+      "sha256": "0bd5f1671aa9caf6b37bc121cd2b74c675e2d46e38eaac30e98dd1f16442192e"
+    },
+    "fiscal_periods": {
+      "rows": 163,
+      "sha256": "3b5680ac8e1b94b052cb343a65bdc377065009ed380e790080a01d28cf681a7c"
+    }
+  },
+  "original_ten_company_rows_unchanged": true,
+  "boundary_probe": [
+    {
+      "as_of": "2026-10-22T00:12:40Z",
+      "status": "unverifiable",
+      "reason": "no_evidence",
+      "evidence_accessions": []
+    },
+    {
+      "as_of": "2026-10-22T00:12:41Z",
+      "status": "verified",
+      "reason": "match",
+      "evidence_accessions": [
+        "0001628280-26-066775"
+      ]
+    }
+  ],
+  "new_model_calls": 0,
+  "new_sec_requests": 0,
+  "model_cost_usd": 0,
+  "limitations": [
+    "No Tesla press-release facts, non-GAAP figures or image-only tables were ingested.",
+    "Quarterly EPS is not additive; only 6 of the latest 8 quarters have EPS facts. Missing figures remain unverifiable.",
+    "Acceptance boundary checks test store/verifier integration, not independent extraction quality.",
+    "The earlier 8-K with no stored revenue cell makes the pre-10-Q probe return no_evidence, not look_ahead.",
+    "No held-out evaluation was run."
+  ]
+}

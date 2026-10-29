@@ -1,0 +1,106 @@
+{
+  "ran_at": "2026-10-29T05:42:15.241033+00:00",
+  "transport": "stdio",
+  "sdk": "mcp==2.3.0",
+  "scope": "Fixed deterministic tool workflows, not LLM agent accuracy or held-out evaluation",
+  "scenarios_sha256": "6de592df733c0f230debb2d35fc22fe2eedab86aeecac46800df613310d46fa2",
+  "database_sha256": "4b4ca3d47f59a9bd1b369de8ba341ba6e2e0036f0327c011412451180f3133f7",
+  "passed": 10,
+  "total": 10,
+  "tool_calls": 21,
+  "model_calls": 0,
+  "sec_requests": 0,
+  "model_cost_usd": 0,
+  "results": [
+    {
+      "id": "nvidia_match",
+      "passed": true,
+      "status": "verified",
+      "reason": "match",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "nvidia_value",
+      "passed": true,
+      "status": "wrong",
+      "reason": "value_mismatch",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "nvidia_scale",
+      "passed": true,
+      "status": "wrong",
+      "reason": "scale_mismatch",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "nvidia_basis",
+      "passed": true,
+      "status": "wrong",
+      "reason": "basis_mismatch",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "nvidia_growth",
+      "passed": true,
+      "status": "wrong",
+      "reason": "period_mismatch",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "nvidia_cutoff",
+      "passed": true,
+      "status": "wrong",
+      "reason": "look_ahead",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "nvidia_guidance",
+      "passed": true,
+      "status": "unverifiable",
+      "reason": "forward_looking",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "tesla_revenue",
+      "passed": true,
+      "status": "verified",
+      "reason": "match",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "tesla_cutoff",
+      "passed": true,
+      "status": "unverifiable",
+      "reason": "no_evidence",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    },
+    {
+      "id": "tesla_ocf",
+      "passed": true,
+      "status": "verified",
+      "reason": "match",
+      "evidence_visible_at_cutoff": true,
+      "search_tool_error": false,
+      "verify_tool_error": false
+    }
+  ]
+}

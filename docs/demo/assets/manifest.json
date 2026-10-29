@@ -1,0 +1,613 @@
+{
+  "duration_planned_s": 180.00000000000003,
+  "source_capture": {
+    "source_commit": "cb033c56c50ba9d599d45d9d61d1c030396a83c0",
+    "source_worktree_dirty": true,
+    "source_url": "http://localhost:3111",
+    "product_brand": "NoCap",
+    "capture_script_sha256": "65ccf29b501ef34038ca6fee5a02cffc385a3d3b18e66ca9486552cc0112a5e6",
+    "new_model_spend_usd": 0,
+    "provider_calls_forbidden": true,
+    "check_mode": "real offline verification replay using bundled extraction caches",
+    "fix_mode": "recorded successful live response from 2026-10-27",
+    "fix_record_sha256": "d23b57704ddf73035a8375756100775b97a5c33dec175406f65ce0788b31fba4",
+    "screenshot_sha256": {
+      "01-editor": "8101b61a58bd4e1a0f46954ae64f29c0f0fc13173025b9e6bff8e71881a30e1a",
+      "02-check": "aeb40917c569d6ac456028bedda6d685b55c7d771ae9a7eca9754baad3c48ba0",
+      "03-growth-receipt": "0d34162c91af1f37bbf20c47123eb2888b470c241c323d933a48512fd75ad770",
+      "04-eps-receipt": "5507601e493494da408f7f2911543bf6459c9d7cf96eab80353096870d541cbf",
+      "04b-eps-context": "26845f523053b2fc0f6a74bd5e81ae5a9c645802b6f8411a370b8f909e4e712d",
+      "05-fix": "15196aa04a58a88d2b2627b8c04fb1121de1d05fde3c0b8be34d3e54d976c2ec",
+      "06-correction-receipts": "f4f2e7bc52c172af04dac74a93544982953b707f71483b9d1217b40793f7eac7",
+      "07-all-rechecked": "e066d5172a5fb5c925200b8fa33432ba4692c99a811f01875b4fe8e54b99c464",
+      "08-time-cutoff": "2cfcffa3c4859ea1ba51314d449bb9a1d070ce72150baee874f99d899b3d5017",
+      "09-time-receipt": "051b3971251ae941ee4cc84738a350f9c6b80c4737351ff18f8fa682964d5961",
+      "10-time-now": "1a6521c7ef7b60128b1f7bdbf2b3379e5d6c48dfdd7c721df473c78b76026e79",
+      "11-guidance": "f5811be2eef5b7d9325d6fb925cdde0aca2bf38890270c160ac813e286c763dc"
+    },
+    "captures": [
+      "01-editor",
+      "02-check",
+      "03-growth-receipt",
+      "04-eps-receipt",
+      "04b-eps-context",
+      "05-fix",
+      "06-correction-receipts",
+      "07-all-rechecked",
+      "08-time-cutoff",
+      "09-time-receipt",
+      "10-time-now",
+      "11-guidance"
+    ],
+    "routed_requests": [
+      "check:offline-verification-replay",
+      "fix:recorded-live-response",
+      "check:offline-verification-replay",
+      "check:offline-verification-replay",
+      "check:offline-verification-replay"
+    ],
+    "browser_errors": []
+  },
+  "product_brand": "NoCap",
+  "render_script_sha256": "a758ce2555ff4ccd02948569b81dec53909cd55843380af515318eb860cff2f6",
+  "format": "edited actual UI screenshots; captions burned in",
+  "voice": "Kokoro-82M af_heart, synthetic narration",
+  "narration": {
+    "model": "hexgrad/Kokoro-82M v1.0",
+    "voice": "af_heart",
+    "model_license": "Apache-2.0",
+    "runtime": "kokoro-onnx",
+    "runtime_license": "MIT",
+    "execution": "local CPU",
+    "new_provider_calls": 0,
+    "segments": [
+      {
+        "caption": "A financial draft can sound convincing while comparing the wrong quarters or mixing accounting bases.",
+        "spoken_text": "A financial draft can sound convincing while comparing the wrong quarters or mixing accounting bases.",
+        "phonemes": "\u0250 fa\u026an\u02c8\u00e6n\u0283\u0259l d\u0279\u02c8\u00e6ft k\u00e6n s\u02c8a\u028and k\u0259nv\u02c8\u026ans\u026a\u014b w\u02cca\u026al k\u0259mp\u02c8\u025b\u0279\u026a\u014b \u00f0\u0259 \u0279\u02c8\u0254\u014b kw\u02c8\u0254\u02d0\u0279\u027e\u025az \u0254\u02d0\u0279 m\u02c8\u026aks\u026a\u014b \u0250k\u02c8a\u028ant\u026a\u014b b\u02c8e\u026as\u1d7bz.",
+        "speech_sha256": "cdf294a2dc0107b780b6ce9ba15fa21b73d260ad991dca1b0efe175e3883d3e7",
+        "raw_duration_s": 6.526,
+        "tempo": 1.0876666666666666
+      },
+      {
+        "caption": "I built NoCap after seeing unreliable numbers in an earlier portfolio-agent project.",
+        "spoken_text": "I built No Cap after seeing unreliable numbers in an earlier portfolio-agent project.",
+        "phonemes": "a\u026a b\u02c8\u026alt n\u02c8o\u028a k\u02c8\u00e6p \u02c8\u00e6ft\u025a s\u02c8i\u02d0\u026a\u014b \u02cc\u028cn\u0279\u1d7bl\u02c8a\u026a\u0259b\u0259l n\u02c8\u028cmb\u025az \u026an \u0250n \u02c8\u025c\u02d0l\u026a\u025a p\u0254\u02d0\u0279tf\u02c8o\u028al\u026a\u02cco\u028a\u02c8e\u026ad\u0292\u0259nt p\u0279\u02c8\u0251\u02d0d\u0292\u025bkt.",
+        "speech_sha256": "a9f42b522d942530f2a88a07f139a2f8bc641a1806c3683674d082861c253fb5",
+        "raw_duration_s": 6.099333,
+        "tempo": 1.2840701052631578
+      },
+      {
+        "caption": "This is the verification layer I wanted before publishing.",
+        "spoken_text": "This is the verification layer I wanted before publishing.",
+        "phonemes": "\u00f0\u026as \u026az \u00f0\u0259 v\u02cc\u025b\u0279\u026af\u026ak\u02c8e\u026a\u0283\u0259n l\u02c8e\u026a\u025a\u0279 a\u026a w\u02c8\u0254nt\u1d7bd b\u1d7bf\u02cc\u0254\u02d0\u0279 p\u02c8\u028cbl\u026a\u0283\u026a\u014b.",
+        "speech_sha256": "19a2acaa264dd5a3a0e52b8ea536f8c316ae650da2701e4b7a16287608a27fdb",
+        "raw_duration_s": 3.786667,
+        "tempo": 1.0819048571428571
+      },
+      {
+        "caption": "Here is an NVIDIA earnings story with two planted errors.",
+        "spoken_text": "Here is an NVIDIA earnings story with two planted errors.",
+        "phonemes": "h\u02c8\u026a\u0279 \u026az \u0250n \u02c8\u025bnv\u02c8\u026adi\u0259 \u02c8\u025c\u02d0n\u026a\u014bz st\u02c8\u0254\u02d0\u0279i w\u026a\u00f0 t\u02c8u\u02d0 pl\u02c8\u00e6nt\u1d7bd \u02c8\u025b\u0279\u025az.",
+        "speech_sha256": "6f88e2d70dce41642c17bbf26a0063b486143c2764700a640df09e82951c0e95",
+        "raw_duration_s": 3.624667,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Muse Spark extracts the numeric claims. Deterministic code checks them against stored SEC filing evidence.",
+        "spoken_text": "Muse Spark extracts the numeric claims. Deterministic code checks them against stored S E C filing evidence.",
+        "phonemes": "mj\u02c8u\u02d0z sp\u02c8\u0251\u02d0\u0279k \u02c8\u025bkst\u0279\u00e6kts \u00f0\u0259 nu\u02d0m\u02c8\u025b\u0279\u026ak kl\u02c8e\u026amz. d\u026at\u02cc\u025c\u02d0m\u026an\u02c8\u026ast\u026ak k\u02c8o\u028ad t\u0283\u02c8\u025bks \u00f0\u02cc\u025bm \u0250\u0261\u02c8\u025bnst st\u02c8\u0254\u02d0\u0279d \u02c8\u025bs \u02c8i\u02d0 s\u02c8i\u02d0 f\u02c8a\u026al\u026a\u014b \u02c8\u025bv\u026ad\u0259ns.",
+        "speech_sha256": "a9839d7164868c36079afac93109546969655112e435f4af916b7e30bd8c7796",
+        "raw_duration_s": 7.433333,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Most numbers pass, two need correction, and the outlook stays unverifiable.",
+        "spoken_text": "Most numbers pass, two need correction, and the outlook stays unverifiable.",
+        "phonemes": "m\u02c8o\u028ast n\u02c8\u028cmb\u025az p\u02c8\u00e6s, t\u02c8u\u02d0 n\u02c8i\u02d0d k\u025a\u0279\u02c8\u025bk\u0283\u0259n, \u00e6nd \u00f0\u026a \u02c8a\u028atl\u028ak st\u02c8e\u026az \u028cnv\u02c8\u025b\u0279\u026af\u02cca\u026a\u0259b\u0259l.",
+        "speech_sha256": "b876baba16a66c2bbab52d0fef186325a9c821cf2b270bc2049a857a7f3977c0",
+        "raw_duration_s": 4.766667,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Eighteen percent is the quarter-over-quarter growth rate, but the draft says year over year.",
+        "spoken_text": "Eighteen percent is the quarter-over-quarter growth rate, but the draft says year over year.",
+        "phonemes": "\u02c8e\u026ati\u02d0n p\u025as\u02c8\u025bnt \u026az \u00f0\u0259 kw\u02c8\u0254\u02d0\u0279\u027e\u025a\u0279\u02cco\u028av\u025akw\u02c8\u0254\u02d0\u0279\u027e\u025a \u0261\u0279\u02c8o\u028a\u03b8 \u0279\u02c8e\u026at, b\u02cc\u028ct \u00f0\u0259 d\u0279\u02c8\u00e6ft s\u02c8\u025bz j\u02c8\u026a\u0279 \u02cco\u028av\u025a j\u02c8\u026a\u0279.",
+        "speech_sha256": "48df31edc60946fa97cf1a750a3c30624e8bca0258fbf631f376e502cd787809",
+        "raw_duration_s": 5.28,
+        "tempo": 1.0
+      },
+      {
+        "caption": "The receipt shows the comparison and the filing behind it.",
+        "spoken_text": "The receipt shows the comparison and the filing behind it.",
+        "phonemes": "\u00f0\u0259 \u0279\u1d7bs\u02c8i\u02d0t \u0283\u02c8o\u028az \u00f0\u0259 k\u0259mp\u02c8\u00e6\u0279\u026as\u0259n \u00e6nd \u00f0\u0259 f\u02c8a\u026al\u026a\u014b b\u1d7bh\u02c8a\u026and \u026at.",
+        "speech_sha256": "b120d966da4498941f1a553e3309abe778123cd2fa68e12bf475ee7b835de80e",
+        "raw_duration_s": 3.414,
+        "tempo": 1.0
+      },
+      {
+        "caption": "The EPS claim uses an adjusted number under a GAAP label.",
+        "spoken_text": "The E P S claim uses an adjusted number under a gap label.",
+        "phonemes": "\u00f0\u026a \u02c8i\u02d0 p\u02c8i\u02d0 \u02c8\u025bs kl\u02c8e\u026am j\u02c8u\u02d0s\u1d7bz \u0250n \u0250d\u0292\u02c8\u028cst\u1d7bd n\u02c8\u028cmb\u025a\u0279 \u02cc\u028cnd\u025a\u0279 \u0250 \u0261\u02c8\u00e6p l\u02c8e\u026ab\u0259l.",
+        "speech_sha256": "80afb4b52fdb3aa8bf67ca4ae99b7ccc04c4157d6cb877277419bfee657e51b6",
+        "raw_duration_s": 3.99,
+        "tempo": 1.0
+      },
+      {
+        "caption": "The filed GAAP figure is two dollars and forty-six cents.",
+        "spoken_text": "The filed gap figure is two dollars and forty-six cents.",
+        "phonemes": "\u00f0\u0259 f\u02c8a\u026ald \u0261\u02c8\u00e6p f\u02c8\u026a\u0261j\u025a\u0279 \u026az t\u02c8u\u02d0 d\u02c8\u0251\u02d0l\u025az \u00e6nd f\u02c8\u0254\u02d0\u0279\u027eis\u02c8\u026aks s\u02c8\u025bnts.",
+        "speech_sha256": "db077596054f69e016208505f9bdfb44864da1f18a2a2a39988219ad9ad18519",
+        "raw_duration_s": 3.604625,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Fix with receipts asks Muse Wonder to propose numeric substitutions.",
+        "spoken_text": "Fix with receipts asks Muse Wonder to propose numeric substitutions.",
+        "phonemes": "f\u02c8\u026aks w\u026a\u00f0 \u0279\u1d7bs\u02c8i\u02d0ts \u02c8\u00e6sks mj\u02c8u\u02d0z w\u02c8\u028cnd\u025a t\u0259 p\u0279\u0259p\u02c8o\u028az nu\u02d0m\u02c8\u025b\u0279\u026ak s\u02cc\u028cbst\u026at\u02c8u\u02d0\u0283\u0259nz.",
+        "speech_sha256": "7171b158d0da1d532e6cbe660e286855f7178430faa06ab8414da1eb4a590eb8",
+        "raw_duration_s": 4.512,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Code restricts those edits, checks each candidate, then extracts and verifies the whole revised draft again.",
+        "spoken_text": "Code restricts those edits, checks each candidate, then extracts and verifies the whole revised draft again.",
+        "phonemes": "k\u02c8o\u028ad \u0279\u1d7bst\u0279\u02c8\u026akts \u00f0o\u028az \u02c8\u025bd\u026ats, t\u0283\u02c8\u025bks \u02c8i\u02d0t\u0283 k\u02c8\u00e6nd\u1d7bd\u02cce\u026at, \u00f0\u02c8\u025bn \u025bkst\u0279\u02c8\u00e6kts \u00e6nd v\u02c8\u025b\u0279\u1d7bf\u02cca\u026az \u00f0\u0259 h\u02c8o\u028al \u0279\u1d7bv\u02c8a\u026azd d\u0279\u02c8\u00e6ft \u0250\u0261\u02c8\u025bn.",
+        "speech_sha256": "3ec03e335db64ff15bf72a3e21789c9ce4341bf0a25d7c9c664139c050fd86f7",
+        "raw_duration_s": 6.952667,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Here both original errors are resolved. The two guidance figures still have question marks.",
+        "spoken_text": "Here both original errors are resolved. The two guidance figures still have question marks.",
+        "phonemes": "h\u02c8\u026a\u0279 b\u02c8o\u028a\u03b8 \u025a\u0279\u02c8\u026ad\u0292\u026an\u0259l \u02c8\u025b\u0279\u025az \u0251\u02d0\u0279 \u0279\u1d7bz\u02c8\u0251\u02d0lvd. \u00f0\u0259 t\u02c8u\u02d0 \u0261\u02c8a\u026ad\u0259ns f\u02c8\u026a\u0261j\u025az st\u02c8\u026al h\u00e6v kw\u02c8\u025bst\u0283\u0259n m\u02c8\u0251\u02d0\u0279ks.",
+        "speech_sha256": "0c1ec17bc4fdc07ad24d29b3e2fb275e38f6c984a191e31d96db106bf67aa14a",
+        "raw_duration_s": 5.748,
+        "tempo": 1.0
+      },
+      {
+        "caption": "I can review the changes and copy the draft with its correction receipts.",
+        "spoken_text": "I can review the changes and copy the draft with its correction receipts.",
+        "phonemes": "a\u026a k\u00e6n \u0279\u1d7bvj\u02c8u\u02d0 \u00f0\u0259 t\u0283\u02c8e\u026and\u0292\u1d7bz \u00e6nd k\u02c8\u0251\u02d0pi \u00f0\u0259 d\u0279\u02c8\u00e6ft w\u026a\u00f0 \u026ats k\u025a\u0279\u02c8\u025bk\u0283\u0259n \u0279\u1d7bs\u02c8i\u02d0ts.",
+        "speech_sha256": "30f4d4b5f7fcf7fa773de0a71d025072b06918c78524b2c127cbe9089ac0f4fa",
+        "raw_duration_s": 4.073958,
+        "tempo": 1.0
+      },
+      {
+        "caption": "The right number can still be unavailable at a historical cutoff.",
+        "spoken_text": "The right number can still be unavailable at a historical cutoff.",
+        "phonemes": "\u00f0\u0259 \u0279\u02c8a\u026at n\u02c8\u028cmb\u025a k\u00e6n st\u02c8\u026al bi\u02d0 \u028cn\u0250v\u02c8e\u026al\u0259b\u0259l \u00e6\u027e\u0259 h\u026ast\u02c8\u0254\u02d0\u0279\u026ak\u0259l k\u02c8\u028c\u027e\u0251\u02d0f.",
+        "speech_sha256": "2087683d3f40224753eda92b0b44f0279ede84f3eafac6f32ce941df9c5ec633",
+        "raw_duration_s": 3.967292,
+        "tempo": 1.0
+      },
+      {
+        "caption": "At sixteen hundred UTC on July twenty-ninth, Microsoft had not filed. NoCap separates those claims from numeric mistakes.",
+        "spoken_text": "At sixteen hundred U T C on July twenty-ninth, Microsoft had not filed. No Cap separates those claims from numeric mistakes.",
+        "phonemes": "\u00e6t s\u02c8\u026aksti\u02d0n h\u02c8\u028cnd\u0279\u026ad j\u02c8u\u02d0 t\u02c8i\u02d0 s\u02c8i\u02d0 \u02cc\u0254n d\u0292u\u02d0l\u02c8a\u026a tw\u02c8\u025bntin\u02c8a\u026an\u03b8, m\u02c8a\u026ak\u0279\u0259s\u02cc\u0251\u02d0ft h\u00e6d n\u02cc\u0251\u02d0t f\u02c8a\u026ald. n\u02c8o\u028a k\u02c8\u00e6p s\u02c8\u025bp\u025a\u0279\u02cce\u026ats \u00f0o\u028az kl\u02c8e\u026amz f\u0279\u028cm nu\u02d0m\u02c8\u025b\u0279\u026ak m\u026ast\u02c8e\u026aks.",
+        "speech_sha256": "f3c6c4f9550c75f92db788ca51a41ef9f568a033df17683094f6e29336c35272",
+        "raw_duration_s": 8.841333,
+        "tempo": 1.045280748768473
+      },
+      {
+        "caption": "Switching to the latest filings makes those two figures verifiable.",
+        "spoken_text": "Switching to the latest filings makes those two figures verifiable.",
+        "phonemes": "sw\u02c8\u026at\u0283\u026a\u014b t\u0259 \u00f0\u0259 l\u02c8e\u026a\u027e\u026ast f\u02c8a\u026al\u026a\u014bz m\u02cce\u026aks \u00f0o\u028az t\u02c8u\u02d0 f\u02c8\u026a\u0261j\u025az v\u02c8\u025b\u0279\u026af\u02cca\u026a\u0259b\u0259l.",
+        "speech_sha256": "e47fe53aeb33c30638d93264795c666d80865730c31efa609615be51b3370d9c",
+        "raw_duration_s": 4.190667,
+        "tempo": 1.0
+      },
+      {
+        "caption": "That cutoff describes EDGAR availability, not every possible public channel.",
+        "spoken_text": "That cutoff describes EDGAR availability, not every possible public channel.",
+        "phonemes": "\u00f0\u00e6t k\u02c8\u028c\u027e\u0251\u02d0f d\u1d7bsk\u0279\u02c8a\u026abz \u02c8\u025bd\u0261\u025a\u0279 \u0250v\u02cce\u026al\u0259b\u02c8\u026al\u1d7b\u027ei, n\u02cc\u0251\u02d0t \u02c8\u025bv\u0279i p\u02c8\u0251\u02d0s\u1d7bb\u0259l p\u02c8\u028cbl\u026ak t\u0283\u02c8\u00e6n\u0259l.",
+        "speech_sha256": "2cc3f6dccc721c30c63d42d8a3dfc08b56ec349f3368e6d96f83008f3a3eac51",
+        "raw_duration_s": 4.841958,
+        "tempo": 1.0193595789473684
+      },
+      {
+        "caption": "Same seeded figures, refreshed NoCap branding. This replays the original image response.",
+        "spoken_text": "Same seeded figures, refreshed No Cap branding. This replays the original image response.",
+        "phonemes": "s\u02c8e\u026am s\u02c8i\u02d0d\u1d7bd f\u02c8\u026a\u0261j\u025az, \u0279\u1d7bf\u0279\u02c8\u025b\u0283t n\u02c8o\u028a k\u02c8\u00e6p b\u0279\u02c8\u00e6nd\u026a\u014b. \u00f0\u026as \u0279\u02c8i\u02d0ple\u026az \u00f0\u026a \u025a\u0279\u02c8\u026ad\u0292\u026an\u0259l \u02c8\u026am\u026ad\u0292 \u0279\u1d7bsp\u02c8\u0251\u02d0ns.",
+        "speech_sha256": "0cb6f515636417276b970b0557ec792143d0b2057080f6c429f3d300b0a24ac4",
+        "raw_duration_s": 5.982667,
+        "tempo": 1.0404638260869565
+      },
+      {
+        "caption": "SAM returned no region here, so Spark supplied the region and read the values.",
+        "spoken_text": "SAM returned no region here, so Spark supplied the region and read the values.",
+        "phonemes": "\u02cc\u025bs\u02cce\u026a\u02c8\u025bm \u0279\u1d7bt\u02c8\u025c\u02d0nd n\u02c8o\u028a \u0279\u02c8i\u02d0d\u0292\u0259n h\u02c8\u026a\u0279, s\u02cco\u028a sp\u02c8\u0251\u02d0\u0279k s\u0259pl\u02c8a\u026ad \u00f0\u0259 \u0279\u02c8i\u02d0d\u0292\u0259n \u00e6nd \u0279\u02c8i\u02d0d \u00f0\u0259 v\u02c8\u00e6lju\u02d0z.",
+        "speech_sha256": "cf71dc41472cd729887fa3d87c97566d19b48232dc30f44d17ed47535209261d",
+        "raw_duration_s": 5.246,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Code caught both planted errors against SEC evidence. The image itself is not proof.",
+        "spoken_text": "Code caught both planted errors against S E C evidence. The image itself is not proof.",
+        "phonemes": "k\u02c8o\u028ad k\u02c8\u0254\u02d0t b\u02c8o\u028a\u03b8 pl\u02c8\u00e6nt\u1d7bd \u02c8\u025b\u0279\u025az \u0250\u0261\u02c8\u025bnst \u02c8\u025bs \u02c8i\u02d0 s\u02c8i\u02d0 \u02c8\u025bv\u026ad\u0259ns. \u00f0\u026a \u02c8\u026am\u026ad\u0292 \u026ats\u02c8\u025blf \u026az n\u02cc\u0251\u02d0t p\u0279\u02c8u\u02d0f.",
+        "speech_sha256": "a07475a3b3adc3ce784dc22634653c204d2403a6d9ac8902dbf19cf4a32e3bc8",
+        "raw_duration_s": 5.823292,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Spark extracts claims and helps map earnings tables. Wonder proposes corrections and generated adversarial drafts.",
+        "spoken_text": "Spark extracts claims and helps map earnings tables. Wonder proposes corrections and generated adversarial drafts.",
+        "phonemes": "sp\u02c8\u0251\u02d0\u0279k \u02c8\u025bkst\u0279\u00e6kts kl\u02c8e\u026amz \u00e6nd h\u02c8\u025blps m\u02c8\u00e6p \u02c8\u025c\u02d0n\u026a\u014bz t\u02c8e\u026ab\u0259lz. w\u02c8\u028cnd\u025a p\u0279\u0259p\u02c8o\u028az\u1d7bz k\u025a\u0279\u02c8\u025bk\u0283\u0259nz \u00e6nd d\u0292\u02c8\u025bn\u025a\u0279\u02cce\u026a\u027e\u1d7bd \u02cc\u00e6dv\u025as\u02c8\u025b\u0279\u026a\u0259l d\u0279\u02c8\u00e6fts.",
+        "speech_sha256": "f00de0735549e08a91f111612ad3dca8ace60167888d8cb03392149e707867cf",
+        "raw_duration_s": 7.700625,
+        "tempo": 1.0
+      },
+      {
+        "caption": "The evidence store covers ten companies across eight quarters.",
+        "spoken_text": "The evidence store covers ten companies across eight quarters.",
+        "phonemes": "\u00f0\u026a \u02c8\u025bv\u026ad\u0259ns st\u02c8\u0254\u02d0\u0279 k\u02c8\u028cv\u025az t\u02c8\u025bn k\u02c8\u028cmp\u0259niz \u0259k\u0279\u02cc\u0251\u02d0s \u02c8e\u026at kw\u02c8\u0254\u02d0\u0279\u027e\u025az.",
+        "speech_sha256": "525046bfc7b0c3ccc3f83854215418ea42a8aab186e455394e30463bf3682d7c",
+        "raw_duration_s": 3.66,
+        "tempo": 1.0
+      },
+      {
+        "caption": "We also validated Muse Spark Open through Fireworks, using the same extraction and verification interface.",
+        "spoken_text": "We also validated Muse Spark Open through Fireworks, using the same extraction and verification interface.",
+        "phonemes": "wi\u02d0 \u02c8\u0254\u02d0lso\u028a v\u02c8\u00e6l\u1d7bd\u02cce\u026a\u027e\u1d7bd mj\u02c8u\u02d0z sp\u02c8\u0251\u02d0\u0279k \u02c8o\u028ap\u0259n \u03b8\u0279u\u02d0 f\u02c8a\u026a\u025aw\u025c\u02d0ks, j\u02c8u\u02d0z\u026a\u014b \u00f0\u0259 s\u02c8e\u026am \u025bkst\u0279\u02c8\u00e6k\u0283\u0259n \u00e6nd v\u02cc\u025b\u0279\u026af\u026ak\u02c8e\u026a\u0283\u0259n \u02c8\u026ant\u025af\u02cce\u026as.",
+        "speech_sha256": "c48ef83c68374e9630ab835a80a13f365759bf2f40affd0a0ca748129d94cec1",
+        "raw_duration_s": 7.177333,
+        "tempo": 1.0
+      },
+      {
+        "caption": "Our seeded development set caught one hundred and four of one hundred and nine planted errors.",
+        "spoken_text": "Our seeded development set caught one hundred and four of one hundred and nine planted errors.",
+        "phonemes": "\u02cca\u028a\u025a s\u02c8i\u02d0d\u1d7bd d\u026av\u02c8\u025bl\u0259pm\u0259nt s\u02c8\u025bt k\u02c8\u0254\u02d0t w\u02c8\u028cn h\u02c8\u028cnd\u0279\u026ad \u00e6nd f\u02c8\u0254\u02d0\u0279 \u028cv w\u02c8\u028cn h\u02c8\u028cnd\u0279\u026ad \u00e6nd n\u02c8a\u026an pl\u02c8\u00e6nt\u1d7bd \u02c8\u025b\u0279\u025az.",
+        "speech_sha256": "8c76d2429ab9e11f2818b8c96989051a71b5f9709585f3f76f726c6ca9b5907e",
+        "raw_duration_s": 5.609958,
+        "tempo": 1.0
+      },
+      {
+        "caption": "No false alarms across one hundred and seven original items. Twenty percent of true claims remained unverifiable.",
+        "spoken_text": "No false alarms across one hundred and seven original items. Twenty percent of true claims remained unverifiable.",
+        "phonemes": "n\u02c8o\u028a f\u02c8\u0254ls \u0250l\u02c8\u0251\u02d0\u0279mz \u0259k\u0279\u02cc\u0251\u02d0s w\u02c8\u028cn h\u02c8\u028cnd\u0279\u026ad \u00e6nd s\u02c8\u025bv\u0259n \u025a\u0279\u02c8\u026ad\u0292\u026an\u0259l \u02c8a\u026a\u027e\u0259mz. tw\u02c8\u025bnti p\u025as\u02c8\u025bnt \u028cv t\u0279\u02c8u\u02d0 kl\u02c8e\u026amz \u0279\u1d7bm\u02c8e\u026and \u028cnv\u02c8\u025b\u0279\u026af\u02cca\u026a\u0259b\u0259l.",
+        "speech_sha256": "a3a69d0b03179805f73a29b8c03928b710f64964016a288d6040d6fd088ddfc3",
+        "raw_duration_s": 7.700625,
+        "tempo": 1.126920731707317
+      },
+      {
+        "caption": "These small development sets guided implementation. They do not guarantee accuracy on arbitrary financial writing.",
+        "spoken_text": "These small development sets guided implementation. They do not guarantee accuracy on arbitrary financial writing.",
+        "phonemes": "\u00f0i\u02d0z sm\u02c8\u0254\u02d0l d\u026av\u02c8\u025bl\u0259pm\u0259nt s\u02c8\u025bts \u0261\u02c8a\u026ad\u1d7bd \u02cc\u026ampl\u026am\u0259nt\u02c8e\u026a\u0283\u0259n. \u00f0e\u026a du\u02d0n\u02cc\u0251\u02d0t \u0261\u02cc\u00e6\u0279\u0259nt\u02c8i\u02d0 \u02c8\u00e6kj\u028a\u0279\u0259si \u02cc\u0254n \u02c8\u0251\u02d0\u0279b\u026at\u0279\u02cc\u025b\u0279i fa\u026an\u02c8\u00e6n\u0283\u0259l \u0279\u02c8a\u026a\u027e\u026a\u014b.",
+        "speech_sha256": "e4a8a9cf1418a0e543630d322ca83ecfa36937d7c2a4ebcafc27c8180212c74b",
+        "raw_duration_s": 7.423292,
+        "tempo": 1.2372153333333333
+      },
+      {
+        "caption": "NoCap gives an editor numbers to review and evidence to inspect.",
+        "spoken_text": "No Cap gives an editor numbers to review and evidence to inspect.",
+        "phonemes": "n\u02c8o\u028a k\u02c8\u00e6p \u0261\u02c8\u026avz \u0250n \u02c8\u025bd\u026a\u027e\u025a n\u02c8\u028cmb\u025az t\u0259 \u0279\u1d7bvj\u02c8u\u02d0 \u00e6nd \u02c8\u025bv\u026ad\u0259ns t\u028a \u026ansp\u02c8\u025bkt.",
+        "speech_sha256": "93be9487dc0067e6850978d551e563426e3161c2c5cce7fba609a8e9a2035526",
+        "raw_duration_s": 4.064,
+        "tempo": 1.0487741935483872
+      },
+      {
+        "caption": "Built during this hackathon by Team NoCap. Research and fact-checking, not investment advice.",
+        "spoken_text": "Built during this hackathon by Team No Cap. Research and fact-checking, not investment advice.",
+        "phonemes": "b\u02c8\u026alt d\u02c8\u028a\u0279\u0279\u026a\u014b \u00f0\u026as h\u02c8\u00e6k\u0259\u03b8\u0259n ba\u026a t\u02c8i\u02d0m n\u02c8o\u028a k\u02c8\u00e6p. \u0279\u1d7bs\u02c8\u025c\u02d0t\u0283 \u00e6nd f\u02c8\u00e6ktt\u0283\u02c8\u025bk\u026a\u014b, n\u02cc\u0251\u02d0t \u026anv\u02c8\u025bstm\u0259nt \u0250dv\u02c8a\u026as.",
+        "speech_sha256": "bc672349fd693fab7ca1d05cccef2438d97e6de54f6876b24792f1a27349e948",
+        "raw_duration_s": 6.035333,
+        "tempo": 1.3049368648648647
+      }
+    ],
+    "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "runtime_version": "0.6.1",
+    "onnxruntime_version": "1.31.1",
+    "phonemizer_version": "3.4.0",
+    "soundfile_version": "0.14.0",
+    "model_source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "export_source": "https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.1",
+    "voice_tensor_sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b"
+  },
+  "new_model_spend_usd": 0,
+  "slide_segment": true,
+  "frames": [
+    {
+      "kind": "title",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-01.png",
+      "sha256": "28a6b2c634cab10c8b05692453bbd83482f0e8583a41471368a6f9da9338183d",
+      "start_s": 0,
+      "duration_s": 6.25,
+      "caption": "A financial draft can sound convincing while comparing the wrong quarters or mixing accounting bases."
+    },
+    {
+      "kind": "title",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-02.png",
+      "sha256": "383e6ffa9f73a296b183025fb7e25a81740208e51a055c3e6bc01048184c1b6c",
+      "start_s": 6.25,
+      "duration_s": 5.0,
+      "caption": "I built NoCap after seeing unreliable numbers in an earlier portfolio-agent project."
+    },
+    {
+      "kind": "title",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-03.png",
+      "sha256": "c19b1d95bd3d49c82b849400c2c731a5c8c59ecbfc6d9e7492d5fca3a4a1400d",
+      "start_s": 11.25,
+      "duration_s": 3.75,
+      "caption": "This is the verification layer I wanted before publishing."
+    },
+    {
+      "kind": "check",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-04.png",
+      "sha256": "e6dcbbed1b6144795f5c38816961bc63cde808edfb431742dadc2b44c2300bd1",
+      "start_s": 15.0,
+      "duration_s": 5.541666666666667,
+      "caption": "Here is an NVIDIA earnings story with two planted errors."
+    },
+    {
+      "kind": "check",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-05.png",
+      "sha256": "356ec22d8ae27a0aaf85c97c03d57ea486afc6655f4c7b5d6a6291f0c37c0197",
+      "start_s": 20.541666666666668,
+      "duration_s": 8.333333333333334,
+      "caption": "Muse Spark extracts the numeric claims. Deterministic code checks them against stored SEC filing evidence."
+    },
+    {
+      "kind": "check",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-06.png",
+      "sha256": "95762856b426a42c032dd0e43f196f7bf7adc2f3b7eeb41f1fd072573c9e7b06",
+      "start_s": 28.875,
+      "duration_s": 6.125,
+      "caption": "Most numbers pass, two need correction, and the outlook stays unverifiable."
+    },
+    {
+      "kind": "growth",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-07.png",
+      "sha256": "8614e4e69f4c72cc9d9d82fbe93a8e0e4effa150409518bf7b3b07820af5eb0d",
+      "start_s": 35.0,
+      "duration_s": 7.0,
+      "caption": "Eighteen percent is the quarter-over-quarter growth rate, but the draft says year over year."
+    },
+    {
+      "kind": "growth",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-08.png",
+      "sha256": "bfb5f373e9771036317e9ecf2386876245362674e2f15b135725ffd648bf1bb5",
+      "start_s": 42.0,
+      "duration_s": 5.0,
+      "caption": "The receipt shows the comparison and the filing behind it."
+    },
+    {
+      "kind": "eps",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-09.png",
+      "sha256": "07a617652c84c85f2a899f6e6e314e339b1a0316abc901b8b4ba820fffbe9410",
+      "start_s": 47.0,
+      "duration_s": 5.75,
+      "caption": "The EPS claim uses an adjusted number under a GAAP label."
+    },
+    {
+      "kind": "eps",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-10.png",
+      "sha256": "8b56cda0f78e4c80b3f865e1d849f2cf56009b5fd3786503bd241ea12acf8bef",
+      "start_s": 52.75,
+      "duration_s": 5.25,
+      "caption": "The filed GAAP figure is two dollars and forty-six cents."
+    },
+    {
+      "kind": "fix",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-11.png",
+      "sha256": "0bedec117a8844e875001d935d63cf3095af206ce24587a43b43712b88759154",
+      "start_s": 58.0,
+      "duration_s": 5.75,
+      "caption": "Fix with receipts asks Muse Wonder to propose numeric substitutions."
+    },
+    {
+      "kind": "fix",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-12.png",
+      "sha256": "d272d19f80fa99e9e6622577cb692d0ea1e9c150ad5797cad54fe8669b2f5550",
+      "start_s": 63.75,
+      "duration_s": 9.25,
+      "caption": "Code restricts those edits, checks each candidate, then extracts and verifies the whole revised draft again."
+    },
+    {
+      "kind": "recheck",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-13.png",
+      "sha256": "7c5c7356f3877376653a784d415ee1122c12810c08a99e6a915fdd22db9e0708",
+      "start_s": 73.0,
+      "duration_s": 6.208333333333333,
+      "caption": "Here both original errors are resolved. The two guidance figures still have question marks."
+    },
+    {
+      "kind": "recheck",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-14.png",
+      "sha256": "06ec7f49b96d46be7b91d6c65952fd2b78ae4bf5af33419aae90afb68610299d",
+      "start_s": 79.20833333333333,
+      "duration_s": 5.791666666666667,
+      "caption": "I can review the changes and copy the draft with its correction receipts."
+    },
+    {
+      "kind": "cutoff",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-15.png",
+      "sha256": "4d558b891edc5b25132b21d2b2e02081f8baa81709dc36ccfce1e79b764f67a2",
+      "start_s": 85.0,
+      "duration_s": 5.291666666666667,
+      "caption": "The right number can still be unavailable at a historical cutoff."
+    },
+    {
+      "kind": "cutoff",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-16.png",
+      "sha256": "a5a1f0efa733394ec0791d53ba90771e420579c5278385a7cfb719de7f790683",
+      "start_s": 90.29166666666667,
+      "duration_s": 8.708333333333334,
+      "caption": "At sixteen hundred UTC on July twenty-ninth, Microsoft had not filed. NoCap separates those claims from numeric mistakes."
+    },
+    {
+      "kind": "now",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-17.png",
+      "sha256": "f099be2a222bb6d487eef3a07a5e853ee5067c60b13bce73a02fd538ea4d7aaf",
+      "start_s": 99.0,
+      "duration_s": 5.0,
+      "caption": "Switching to the latest filings makes those two figures verifiable."
+    },
+    {
+      "kind": "now",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-18.png",
+      "sha256": "2afdf9db5640049803fa8d0e2104e5aaaa9cc56fee498e4445ad81c23e6cd0be",
+      "start_s": 104.0,
+      "duration_s": 5.0,
+      "caption": "That cutoff describes EDGAR availability, not every possible public channel."
+    },
+    {
+      "kind": "slide",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-19.png",
+      "sha256": "627bcf55faf14b601750d5fa2e56aa8e8e27339a9b62dc2e4b3b01fd1bdc969e",
+      "start_s": 109.0,
+      "duration_s": 6.0,
+      "caption": "Same seeded figures, refreshed NoCap branding. This replays the original image response."
+    },
+    {
+      "kind": "slide",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-20.png",
+      "sha256": "31d3bda8c6886a717f89a609d74278c446b24167f34da0c37fb670fb5836f9ff",
+      "start_s": 115.0,
+      "duration_s": 7.0,
+      "caption": "SAM returned no region here, so Spark supplied the region and read the values."
+    },
+    {
+      "kind": "slide",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-21.png",
+      "sha256": "1924c55c694fdaba44a8ebfb4665c249a5a27cfc5df7a6e048b1b33673b7cd9f",
+      "start_s": 122.0,
+      "duration_s": 7.0,
+      "caption": "Code caught both planted errors against SEC evidence. The image itself is not proof."
+    },
+    {
+      "kind": "architecture",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-22.png",
+      "sha256": "8cd652d6124d9e4fa856590127a8795117fcd37aab4f8edac628bb015daa6f5d",
+      "start_s": 129.0,
+      "duration_s": 8.458333333333334,
+      "caption": "Spark extracts claims and helps map earnings tables. Wonder proposes corrections and generated adversarial drafts."
+    },
+    {
+      "kind": "architecture",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-23.png",
+      "sha256": "76b2362f9cb1925f0cd79a7e85b40ff08bdb1ed42f8c0051e237bd9624f652bb",
+      "start_s": 137.45833333333334,
+      "duration_s": 5.083333333333333,
+      "caption": "The evidence store covers ten companies across eight quarters."
+    },
+    {
+      "kind": "architecture",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-24.png",
+      "sha256": "5741ed558b0f0ea29928d2ecff0807bf272632982a6a3ca016fc6cf18bafd55e",
+      "start_s": 142.54166666666669,
+      "duration_s": 8.458333333333334,
+      "caption": "We also validated Muse Spark Open through Fireworks, using the same extraction and verification interface."
+    },
+    {
+      "kind": "metrics",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-25.png",
+      "sha256": "caa1f72921c36df7ef1ee7a2f7dfbb46eb9347291b05f95a7bb937ff088289a8",
+      "start_s": 151.00000000000003,
+      "duration_s": 6.666666666666667,
+      "caption": "Our seeded development set caught one hundred and four of one hundred and nine planted errors."
+    },
+    {
+      "kind": "metrics",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-26.png",
+      "sha256": "f43883d0711f004569c3dbd6326a7a1a106a157c22c692a0cea7c7084d961e55",
+      "start_s": 157.66666666666669,
+      "duration_s": 7.083333333333333,
+      "caption": "No false alarms across one hundred and seven original items. Twenty percent of true claims remained unverifiable."
+    },
+    {
+      "kind": "metrics",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-27.png",
+      "sha256": "f9a0161aac3b592669b46a743805aca78793873673447953feda80a3f2b54617",
+      "start_s": 164.75000000000003,
+      "duration_s": 6.25,
+      "caption": "These small development sets guided implementation. They do not guarantee accuracy on arbitrary financial writing."
+    },
+    {
+      "kind": "closing",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-28.png",
+      "sha256": "5941f43adf7008d57950c2f39ce8d443fb9e6524379052d730690e6de5759ba6",
+      "start_s": 171.00000000000003,
+      "duration_s": 4.125,
+      "caption": "NoCap gives an editor numbers to review and evidence to inspect."
+    },
+    {
+      "kind": "closing",
+      "frame": "data/eval_runs/demo_capture/render-kokoro/frame-29.png",
+      "sha256": "375efbf99f06a7014f100b6ca58bf8547bbca44fa50b5e601c8a91bddf5efadb",
+      "start_s": 175.12500000000003,
+      "duration_s": 4.875,
+      "caption": "Built during this hackathon by Team NoCap. Research and fact-checking, not investment advice."
+    }
+  ],
+  "slide_source": {
+    "new_model_spend_usd": 0,
+    "model_post_requests_intercepted": true,
+    "source_url": "http://localhost:3111",
+    "product_brand": "NoCap",
+    "mode": "actual NoCap UI; branding-only display image; recorded response for the original live input",
+    "browser_errors": [],
+    "description": "Original live slide input before the NoCap branding refresh. New display bytes must not be presented as a newly live-checked image.",
+    "original_live_input_path": "examples/slides/nvda-draft.png",
+    "original_live_input_git_commit": "cb033c56c50ba9d599d45d9d61d1c030396a83c0",
+    "original_live_input_sha256": "7de51244baf4b71e59dcdffd18a78373b0eea05b94234b110f3486f37183bcc0",
+    "original_html_sha256": "dfca084890815cc84cbe549ea09cf373acde706b11fc4e0dc6e6b86f619f2f0a",
+    "recorded_response_path": "data/eval_runs/slide_live/nvda-draft-events.json",
+    "recorded_response_sha256": "ba5b37e879e3bfae61cb4cb3ea106b525b6cd21dd2b194fe04433634a8ae8af5",
+    "allowed_html_substitution": {
+      "before": "Receipts demo",
+      "after": "NoCap demo"
+    },
+    "new_branded_input_live_checked": false,
+    "financial_claims_and_layout_changed": false,
+    "branded_display_input_sha256": "7e93576180457003522abf1c46a4cfb4889869d476cc9a735d72d81545fa7c7c",
+    "input_relation": "Branding-only display refresh; original live-input response replay. Financial values and layout unchanged.",
+    "response_sha256": "ba5b37e879e3bfae61cb4cb3ea106b525b6cd21dd2b194fe04433634a8ae8af5",
+    "branded_display_input": "examples/slides/nvda-draft.png",
+    "screenshot_sha256": "b53241379018cbcf457da139a285df88dc3978203d3daf24f6eb6f05a6229a20",
+    "screenshot_health": "11,175 facts; refreshed from the actual evidence snapshot",
+    "capture": "actual NoCap UI with original-input response replay; 2 verified, 2 wrong",
+    "region_source": "SAM returned zero regions; Spark fallback region"
+  },
+  "video_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio"
+      }
+    ],
+    "format": {
+      "duration": "179.937663",
+      "size": "5295052"
+    }
+  },
+  "gif_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "gif",
+        "codec_type": "video",
+        "width": 960,
+        "height": 540
+      }
+    ],
+    "format": {
+      "duration": "20.000000",
+      "size": "304543"
+    }
+  },
+  "asset_sha256": {
+    "receipts-demo.mp4": "a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602",
+    "receipts-demo.gif": "377407e49462b4e9dbfb654b47ae2005e9090108d256d0fa18409f3e7704f767",
+    "receipts-demo.en.srt": "b3ec47eb651b0d2e7911205d59745a40084efd3dacebae8a7c5d1c10e7c86158"
+  }
+}

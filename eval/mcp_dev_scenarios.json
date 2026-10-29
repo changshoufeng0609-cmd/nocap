@@ -1,0 +1,345 @@
+{
+  "scope": "Deterministic MCP workflow development checks; no LLM agent evaluation or held-out data.",
+  "scenarios": [
+    {
+      "id": "nvidia_match",
+      "question": "Find NVIDIA revenue receipts for the quarter ending 2026-07-26, preserve their distinct filing versions, and verify the draft rounded to $96.2 billion. Return the verifier reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_match",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$96.2 billion",
+          "value": 96.2,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q2 FY2027",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA Q2 FY2027 revenue was $96.2 billion.",
+          "span_end": 43
+        },
+        "as_of": null
+      },
+      "expected_status": "verified",
+      "expected_reason": "match"
+    },
+    {
+      "id": "nvidia_value",
+      "question": "Search the NVIDIA quarter ending 2026-07-26, compare the source with a draft reporting $90.2 billion in revenue, and verify the draft without silently replacing its figure. Return the reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_value",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$90.2 billion",
+          "value": 90.2,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q2 FY2027",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA Q2 FY2027 revenue was $90.2 billion.",
+          "span_end": 43
+        },
+        "as_of": null
+      },
+      "expected_status": "wrong",
+      "expected_reason": "value_mismatch"
+    },
+    {
+      "id": "nvidia_scale",
+      "question": "Find the units and amount of NVIDIA revenue for Q2 FY2027. A draft says $96.2 million; type the quotation faithfully and check it. Return the reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_scale",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$96.2 million",
+          "value": 96.2,
+          "unit": "USD",
+          "scale": "millions",
+          "period_text": "Q2 FY2027",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA Q2 FY2027 revenue was $96.2 million.",
+          "span_end": 43
+        },
+        "as_of": null
+      },
+      "expected_status": "wrong",
+      "expected_reason": "scale_mismatch"
+    },
+    {
+      "id": "nvidia_basis",
+      "question": "Compare GAAP and non-GAAP diluted EPS evidence for NVIDIA Q2 FY2027, then verify a draft labeling $2.22 as GAAP. Return the reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "eps_diluted",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_basis",
+          "metric": "eps_diluted",
+          "metric_text": "diluted earnings per share",
+          "value_text": "$2.22",
+          "value": 2.22,
+          "unit": "USD/share",
+          "scale": "units",
+          "period_text": "Q2 FY2027",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA Q2 FY2027 GAAP diluted earnings per share were $2.22.",
+          "span_end": 60
+        },
+        "as_of": null
+      },
+      "expected_status": "wrong",
+      "expected_reason": "basis_mismatch"
+    },
+    {
+      "id": "nvidia_growth",
+      "question": "Look up NVIDIA revenue across the periods needed to distinguish sequential and annual growth for Q2 FY2027, then verify the claim that revenue grew 18% year over year. Return the reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_growth",
+          "metric": "revenue_growth",
+          "metric_text": "revenue growth",
+          "value_text": "18%",
+          "value": 18.0,
+          "unit": "%",
+          "scale": "units",
+          "period_text": "Q2 FY2027",
+          "period_type": "quarter",
+          "comparison": "YoY",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA Q2 FY2027 revenue grew 18% year over year.",
+          "span_end": 49
+        },
+        "as_of": null
+      },
+      "expected_status": "wrong",
+      "expected_reason": "period_mismatch"
+    },
+    {
+      "id": "nvidia_cutoff",
+      "question": "Search NVIDIA Q2 FY2027 revenue receipts with an as-of cutoff of 2026-08-26T20:00:00Z, then verify the $96.2 billion claim at the same cutoff. Return the reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "as_of": "2026-08-26T20:00:00Z",
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_cutoff",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$96.2 billion",
+          "value": 96.2,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q2 FY2027",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA Q2 FY2027 revenue was $96.2 billion.",
+          "span_end": 43
+        },
+        "as_of": "2026-08-26T20:00:00Z"
+      },
+      "expected_status": "wrong",
+      "expected_reason": "look_ahead"
+    },
+    {
+      "id": "nvidia_guidance",
+      "question": "Compare available NVIDIA revenue evidence with the sentence expecting $108.0 billion in Q3 FY2027. Preserve its forward-looking meaning when verifying. Return the reason code.",
+      "search": {
+        "entity": "NVIDIA",
+        "metric": "revenue",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "nvidia_guidance",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$108.0 billion",
+          "value": 108,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q3 FY2027",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": true,
+          "entity": "NVIDIA",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "NVIDIA expects Q3 FY2027 revenue of $108.0 billion.",
+          "span_end": 51
+        },
+        "as_of": null
+      },
+      "expected_status": "unverifiable",
+      "expected_reason": "forward_looking"
+    },
+    {
+      "id": "tesla_revenue",
+      "question": "Find Tesla revenue for the quarter ending 2026-09-30 and its filing acceptance time, then check the draft value $28.046 billion. Return the reason code.",
+      "search": {
+        "entity": "Tesla",
+        "metric": "revenue",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "tesla_revenue",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$28.046 billion",
+          "value": 28.046,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q3 FY2026",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "Tesla",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "Tesla Q3 FY2026 revenue was $28.046 billion.",
+          "span_end": 44
+        },
+        "as_of": null
+      },
+      "expected_status": "verified",
+      "expected_reason": "match"
+    },
+    {
+      "id": "tesla_cutoff",
+      "question": "At 2026-10-22T00:12:40Z search Tesla revenue for Q3 FY2026 and verify $28.046 billion. Account for the earlier 8-K having no stored revenue cell and the 10-Q arriving one second later. Return the reason code.",
+      "search": {
+        "entity": "Tesla",
+        "metric": "revenue",
+        "as_of": "2026-10-22T00:12:40Z",
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "tesla_cutoff",
+          "metric": "revenue",
+          "metric_text": "revenue",
+          "value_text": "$28.046 billion",
+          "value": 28.046,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q3 FY2026",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "Tesla",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "Tesla Q3 FY2026 revenue was $28.046 billion.",
+          "span_end": 44
+        },
+        "as_of": "2026-10-22T00:12:40Z"
+      },
+      "expected_status": "unverifiable",
+      "expected_reason": "no_evidence"
+    },
+    {
+      "id": "tesla_ocf",
+      "question": "Search Tesla operating-cash-flow evidence for the quarter ending 2026-09-30, distinguish a derived quarter from a year-to-date amount, then verify $6.263 billion for Q3 FY2026. Return the reason code.",
+      "search": {
+        "entity": "Tesla",
+        "metric": "operating_cash_flow",
+        "as_of": null,
+        "limit": 5
+      },
+      "verify": {
+        "claim": {
+          "id": "tesla_ocf",
+          "metric": "operating_cash_flow",
+          "metric_text": "operating cash flow",
+          "value_text": "$6.263 billion",
+          "value": 6.263,
+          "unit": "USD",
+          "scale": "billions",
+          "period_text": "Q3 FY2026",
+          "period_type": "quarter",
+          "comparison": "none",
+          "basis": "GAAP",
+          "forward_looking": false,
+          "entity": "Tesla",
+          "segment": null,
+          "span_start": 0,
+          "span_text": "Tesla Q3 FY2026 operating cash flow was $6.263 billion.",
+          "span_end": 55
+        },
+        "as_of": null
+      },
+      "expected_status": "verified",
+      "expected_reason": "match"
+    }
+  ]
+}

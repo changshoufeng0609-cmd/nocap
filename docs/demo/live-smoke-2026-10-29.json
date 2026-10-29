@@ -1,0 +1,76 @@
+{
+  "budget_usd": 1,
+  "ledger": "local SQLite only",
+  "image_sha256": "7e93576180457003522abf1c46a4cfb4889869d476cc9a735d72d81545fa7c7c",
+  "runs": [
+    {
+      "operation": "ask",
+      "status": 200,
+      "terminal": "result",
+      "cost_usd": 0.006007,
+      "model_calls": 1,
+      "cost_is_estimate": false,
+      "answer": "NVDA GAAP revenue for Q2 FY2027 was $96221000000. [1][2]",
+      "resolved_query": {
+        "entity": "NVIDIA CORP",
+        "metrics": [
+          "revenue"
+        ],
+        "fiscal_year": 2027,
+        "fiscal_period": "Q2",
+        "basis": "GAAP",
+        "segment": null,
+        "unsupported": false
+      }
+    },
+    {
+      "operation": "slide",
+      "status": 200,
+      "terminal": "done",
+      "cost_usd": 0.012618,
+      "model_calls": 3,
+      "cost_is_estimate": false,
+      "counts": {
+        "verified": 2,
+        "wrong": 2,
+        "unverifiable": 0,
+        "approximate": 0
+      },
+      "warnings": [
+        "Vision can misread labels or omit figures. Confirm the highlighted readings against the image; the uploaded image is not filing evidence.",
+        "Slide-wide numeric completeness is not measured. Unmarked figures have not been checked."
+      ],
+      "reading_audit": {
+        "raw_readings": 4,
+        "unique_readings": 4,
+        "duplicates_removed": 0,
+        "conflicting_readings": 0,
+        "image_completeness_measured": false
+      }
+    }
+  ],
+  "http_attempts": 4,
+  "settled_usd": 0.018625,
+  "recorded_at": "2026-10-29T07:01:07Z",
+  "scope": "One seeded Ask and one branding-refreshed planted-error slide. Not a benchmark of general accuracy.",
+  "sdk_retries": 0,
+  "response_sha256": {
+    "ask-events.json": "37b7b194bba7c7e4a5c3180d8a6a6bff407c2255542c77c2c5161cd50d407cc2",
+    "slide-events.json": "e2f529929611f52e8effb823a00b5ae5d3d0ec1a9f826101b94c65dff1ccff04"
+  },
+  "input": "examples/slides/nvda-draft.png",
+  "video_changed": false,
+  "slide_regions": [
+    {
+      "id": "r1",
+      "label": "Earnings summary draft table",
+      "box": [
+        60,
+        304,
+        941,
+        731
+      ],
+      "source": "spark"
+    }
+  ]
+}

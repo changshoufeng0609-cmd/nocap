@@ -1,0 +1,9 @@
+{
+  "exported_on": "2026-10-29",
+  "development_began": "2026-10-27",
+  "source_private_commit": "386bfb9fd3117dc866527953becaa68e65810638",
+  "source_private_branch": "wip/day3-handoff",
+  "source_archive_sha256": "5612ecec218e7a06527aa1924c196ecc8d13fbbd8054e5dc70a0557def786584",
+  "public_history": "Clean release export; private incremental history retained and not rewritten. Legacy restricted narration is excluded.",
+  "public_video_sha256": "a21a91487a1c96b2134f1dfd8d612fd2de2c1cfa0a094544550e0f9dc84ab602"
+}

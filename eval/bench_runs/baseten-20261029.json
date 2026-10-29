@@ -1,0 +1,738 @@
+{
+  "purpose": "First bounded live Baseten Muse Spark Open benchmark; dev only, no deployment or default-backend change.",
+  "source_commit": "d2dcc7058bbe7e76a057411ca76a4f24869c0a87",
+  "benchmark_record_sha256": "35c954b6856782de3752e1dcf841cda9277b8802feabd85f78a81a53fe3a0370",
+  "benchmark_record": {
+    "ran_at": "20261029T050710Z",
+    "budget_usd": 0.75,
+    "spent_usd": 0.109237,
+    "runs": [
+      {
+        "target": "spark-open-baseten",
+        "label": "Muse Spark Open · Baseten (open weights)",
+        "backend": "baseten",
+        "model": "meta-models/muse-spark-open-1026",
+        "hosting": "Baseten Model APIs (partner inference)",
+        "open_weights": true,
+        "self_hosted": false,
+        "base_url": "https://inference.baseten.co/v1",
+        "ran_at": "2026-10-29T05:06:50+00:00",
+        "notes": [],
+        "gold": {
+          "passages": 10,
+          "failed_passages": 0,
+          "context": "NVIDIA, second quarter ended July 26, 2026",
+          "fresh_calls": 10,
+          "raw": {
+            "claims": 23,
+            "wrong": 0,
+            "by_reason": {},
+            "verbatim_spans": 23,
+            "schema_rejected": 0,
+            "failed_calls": 0,
+            "examples": []
+          },
+          "raw_label_errors": 0,
+          "shipped_claims": 28,
+          "strict_matched": 27,
+          "value_matched": 27,
+          "recall": 1.0,
+          "precision": 0.9642857142857143,
+          "verdicts": {
+            "verified": 12,
+            "unverifiable": 15,
+            "approximate": 1
+          },
+          "unmatched": [
+            {
+              "value_text": "50 basis points",
+              "metric": "guidance_tolerance",
+              "basis": "non-GAAP",
+              "period_text": "second quarter ended July 26, 2026",
+              "verdict": "unverifiable",
+              "reason": "forward_looking"
+            }
+          ],
+          "unflagged_errors": 0,
+          "uncovered_numbers": [],
+          "wall_s": 5.05,
+          "wall_from": "this run",
+          "call_latency_p50_s": 3.99,
+          "call_latency_max_s": 5.05,
+          "tokens": {
+            "input_tokens": 23654,
+            "cached_tokens": 21760,
+            "output_tokens": 8728,
+            "reasoning_tokens": 5877
+          },
+          "cost_per_check_usd": 0.042725,
+          "spent_usd": 0.042725,
+          "gpu_cost_estimate_usd": null
+        },
+        "dev": {
+          "items": 13,
+          "ran": 13,
+          "skipped_budget": [],
+          "skip_reasons": {},
+          "errors": 0,
+          "raw": {
+            "claims": 30,
+            "wrong": 0,
+            "verbatim_spans": 30,
+            "schema_rejected": 0,
+            "failed_calls": 0
+          },
+          "mutants": 6,
+          "caught": 6,
+          "reason_ok": 6,
+          "missed_marked_verified": 0,
+          "missed_unverifiable": 0,
+          "target_not_extracted": 0,
+          "originals": 6,
+          "false_alarm_items": 0,
+          "controls": 1,
+          "controls_all_unverifiable": 1,
+          "call_latency_p50_s": 3.49,
+          "spent_usd": 0.066512,
+          "rows": [
+            {
+              "item_id": "v0-MSFT-FY2026Q2-s002843",
+              "mutator": "none",
+              "ticker": "MSFT",
+              "n_claims": 2,
+              "statuses": {
+                "unverifiable": 2
+              },
+              "error": null,
+              "latency_s": 6.26,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-NFLX-FY2026Q3-s013638-value",
+              "mutator": "value",
+              "ticker": "NFLX",
+              "n_claims": 2,
+              "statuses": {
+                "wrong": 1,
+                "verified": 1
+              },
+              "error": null,
+              "latency_s": 2.77,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "value_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-BAC-FY2026Q2-s002519",
+              "mutator": "none",
+              "ticker": "BAC",
+              "n_claims": 1,
+              "statuses": {
+                "verified": 1
+              },
+              "error": null,
+              "latency_s": 3.42,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-BAC-FY2025Q3-s002429-period",
+              "mutator": "period",
+              "ticker": "BAC",
+              "n_claims": 1,
+              "statuses": {
+                "wrong": 1
+              },
+              "error": null,
+              "latency_s": 2.85,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "period_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-NFLX-FY2026Q1-s016451",
+              "mutator": "none",
+              "ticker": "NFLX",
+              "n_claims": 2,
+              "statuses": {
+                "verified": 2
+              },
+              "error": null,
+              "latency_s": 5.36,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-AAPL-FY2026Q1-s000277-scale",
+              "mutator": "scale",
+              "ticker": "AAPL",
+              "n_claims": 2,
+              "statuses": {
+                "wrong": 1,
+                "verified": 1
+              },
+              "error": null,
+              "latency_s": 4.28,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "scale_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-AMZN-FY2025Q3-s000212",
+              "mutator": "none",
+              "ticker": "AMZN",
+              "n_claims": 3,
+              "statuses": {
+                "verified": 3
+              },
+              "error": null,
+              "latency_s": 4.23,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-MSFT-FY2026Q2-s000578-basis",
+              "mutator": "basis",
+              "ticker": "MSFT",
+              "n_claims": 5,
+              "statuses": {
+                "verified": 2,
+                "wrong": 2,
+                "unverifiable": 1
+              },
+              "error": null,
+              "latency_s": 8.86,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "basis_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-NVDA-FY2026Q3-s000525",
+              "mutator": "none",
+              "ticker": "NVDA",
+              "n_claims": 2,
+              "statuses": {
+                "verified": 2
+              },
+              "error": null,
+              "latency_s": 2.8,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-NVDA-FY2026Q3-s000142-look_ahead",
+              "mutator": "look_ahead",
+              "ticker": "NVDA",
+              "n_claims": 3,
+              "statuses": {
+                "wrong": 3
+              },
+              "error": null,
+              "latency_s": 3.49,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "look_ahead",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-AAPL-FY2026Q3-s000498",
+              "mutator": "none",
+              "ticker": "AAPL",
+              "n_claims": 3,
+              "statuses": {
+                "verified": 2,
+                "unverifiable": 1
+              },
+              "error": null,
+              "latency_s": 3.18,
+              "cached": false,
+              "outcome": "ok"
+            },
+            {
+              "item_id": "v0-AMZN-FY2026Q1-s000206-entity",
+              "mutator": "entity",
+              "ticker": "AMZN",
+              "n_claims": 3,
+              "statuses": {
+                "wrong": 3
+              },
+              "error": null,
+              "latency_s": 3.58,
+              "cached": false,
+              "match": "value_text+span",
+              "target_status": "wrong",
+              "target_reason": "entity_mismatch",
+              "outcome": "caught"
+            },
+            {
+              "item_id": "v0-NFLX-FY2026Q1-s004131",
+              "mutator": "forward_looking_control",
+              "ticker": "NFLX",
+              "n_claims": 2,
+              "statuses": {
+                "unverifiable": 2
+              },
+              "error": null,
+              "latency_s": 2.87,
+              "cached": false,
+              "outcome": "ok"
+            }
+          ]
+        },
+        "spent_usd": 0.109237
+      }
+    ],
+    "allow_self_hosted": false,
+    "offline": false,
+    "dev_item_ids": [
+      "v0-MSFT-FY2026Q2-s002843",
+      "v0-NFLX-FY2026Q3-s013638-value",
+      "v0-BAC-FY2026Q2-s002519",
+      "v0-BAC-FY2025Q3-s002429-period",
+      "v0-NFLX-FY2026Q1-s016451",
+      "v0-AAPL-FY2026Q1-s000277-scale",
+      "v0-AMZN-FY2025Q3-s000212",
+      "v0-MSFT-FY2026Q2-s000578-basis",
+      "v0-NVDA-FY2026Q3-s000525",
+      "v0-NVDA-FY2026Q3-s000142-look_ahead",
+      "v0-AAPL-FY2026Q3-s000498",
+      "v0-AMZN-FY2026Q1-s000206-entity",
+      "v0-NFLX-FY2026Q1-s004131"
+    ]
+  },
+  "independent_sdk_metering": {
+    "target": "spark-open-baseten",
+    "ran_at": "2026-10-29T05:06:50.616070+00:00",
+    "fresh": true,
+    "budget_estimate_usd": 0.75,
+    "max_attempts": 23,
+    "spent_usd": 0.1092367,
+    "calls": 23,
+    "estimated_calls": 0,
+    "tokens": {
+      "input_tokens": 54330,
+      "cached_tokens": 48128,
+      "output_tokens": 22180,
+      "reasoning_tokens": 15787
+    },
+    "attempts": [
+      {
+        "attempt": 1,
+        "started": true,
+        "estimate_usd": 0.065217,
+        "charge_usd": 0.0068226499999999995,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2426,
+          "output_tokens": 1455,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 728
+        }
+      },
+      {
+        "attempt": 2,
+        "started": true,
+        "estimate_usd": 0.064922,
+        "charge_usd": 0.0039724,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2349,
+          "output_tokens": 807,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 523
+        }
+      },
+      {
+        "attempt": 3,
+        "started": true,
+        "estimate_usd": 0.065005,
+        "charge_usd": 0.0048278999999999996,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2367,
+          "output_tokens": 1003,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 785
+        }
+      },
+      {
+        "attempt": 4,
+        "started": true,
+        "estimate_usd": 0.065134,
+        "charge_usd": 0.0035084,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2379,
+          "output_tokens": 689,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 397
+        }
+      },
+      {
+        "attempt": 5,
+        "started": true,
+        "estimate_usd": 0.064949,
+        "charge_usd": 0.00462365,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2360,
+          "output_tokens": 957,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 800
+        }
+      },
+      {
+        "attempt": 6,
+        "started": true,
+        "estimate_usd": 0.064955,
+        "charge_usd": 0.0037206500000000003,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2355,
+          "output_tokens": 746,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 503
+        }
+      },
+      {
+        "attempt": 7,
+        "started": true,
+        "estimate_usd": 0.064889,
+        "charge_usd": 0.0046584,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2347,
+          "output_tokens": 969,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 705
+        }
+      },
+      {
+        "attempt": 8,
+        "started": true,
+        "estimate_usd": 0.064855,
+        "charge_usd": 0.0028841500000000003,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2342,
+          "output_tokens": 553,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 359
+        }
+      },
+      {
+        "attempt": 9,
+        "started": true,
+        "estimate_usd": 0.064924,
+        "charge_usd": 0.00372665,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2353,
+          "output_tokens": 748,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 415
+        }
+      },
+      {
+        "attempt": 10,
+        "started": true,
+        "estimate_usd": 0.065143,
+        "charge_usd": 0.0039806500000000005,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2376,
+          "output_tokens": 801,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 662
+        }
+      },
+      {
+        "attempt": 11,
+        "started": true,
+        "estimate_usd": 0.064902,
+        "charge_usd": 0.0062929,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2349,
+          "output_tokens": 1353,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 1167
+        }
+      },
+      {
+        "attempt": 12,
+        "started": true,
+        "estimate_usd": 0.064909,
+        "charge_usd": 0.00377565,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2365,
+          "output_tokens": 756,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 474
+        }
+      },
+      {
+        "attempt": 13,
+        "started": true,
+        "estimate_usd": 0.064965,
+        "charge_usd": 0.00298965,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2355,
+          "output_tokens": 574,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 444
+        }
+      },
+      {
+        "attempt": 14,
+        "started": true,
+        "estimate_usd": 0.06488,
+        "charge_usd": 0.0032679000000000002,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2343,
+          "output_tokens": 643,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 511
+        }
+      },
+      {
+        "attempt": 15,
+        "started": true,
+        "estimate_usd": 0.064923,
+        "charge_usd": 0.005852899999999999,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2371,
+          "output_tokens": 1243,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 970
+        }
+      },
+      {
+        "attempt": 16,
+        "started": true,
+        "estimate_usd": 0.064927,
+        "charge_usd": 0.0044024,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2353,
+          "output_tokens": 907,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 727
+        }
+      },
+      {
+        "attempt": 17,
+        "started": true,
+        "estimate_usd": 0.064967,
+        "charge_usd": 0.0047306499999999994,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2364,
+          "output_tokens": 981,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 620
+        }
+      },
+      {
+        "attempt": 18,
+        "started": true,
+        "estimate_usd": 0.065013,
+        "charge_usd": 0.010848100000000001,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2376,
+          "output_tokens": 2450,
+          "cached_tokens": 2304,
+          "reasoning_tokens": 1880
+        }
+      },
+      {
+        "attempt": 19,
+        "started": true,
+        "estimate_usd": 0.064918,
+        "charge_usd": 0.00548275,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2353,
+          "output_tokens": 598,
+          "cached_tokens": 0,
+          "reasoning_tokens": 456
+        }
+      },
+      {
+        "attempt": 20,
+        "started": true,
+        "estimate_usd": 0.064928,
+        "charge_usd": 0.005360149999999999,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2361,
+          "output_tokens": 1130,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 785
+        }
+      },
+      {
+        "attempt": 21,
+        "started": true,
+        "estimate_usd": 0.064977,
+        "charge_usd": 0.00450365,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2366,
+          "output_tokens": 927,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 577
+        }
+      },
+      {
+        "attempt": 22,
+        "started": true,
+        "estimate_usd": 0.06497,
+        "charge_usd": 0.0057913999999999995,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2366,
+          "output_tokens": 1230,
+          "cached_tokens": 2176,
+          "reasoning_tokens": 869
+        }
+      },
+      {
+        "attempt": 23,
+        "started": true,
+        "estimate_usd": 0.064895,
+        "charge_usd": 0.0032131,
+        "cost_is_estimate": false,
+        "status": "completed",
+        "usage": {
+          "input_tokens": 2354,
+          "output_tokens": 660,
+          "cached_tokens": 2304,
+          "reasoning_tokens": 430
+        }
+      }
+    ]
+  },
+  "task_cost_usd_from_usage": 0.1092367,
+  "cost_basis": {
+    "input_per_million_usd": 1.25,
+    "cached_input_per_million_usd": 0.15,
+    "output_per_million_usd": 4.25,
+    "source": "https://www.baseten.co/library/muse-spark-open/",
+    "checked_on": "2026-10-29",
+    "reasoning_tokens_included_in_output": true
+  },
+  "input_sha256": {
+    "spikes/inputs/gold_text.txt": "6eb8cb0e0eefd0968a17239861f5094820185bf0065e541de13c997a7456f602",
+    "spikes/inputs/gold_claims.json": "489ff2c278c632c619fdb56e67a8abbd2d577c673b8d19f3135f56ed7b5a79a0",
+    "eval/corpus/v0_dev.jsonl": "08a1b772921acbf6b91c05b21be17fbd09567ebaf02f74057c7f5b3b0ba2a4f4"
+  },
+  "request_settings": {
+    "response_format": "schema in prompt; no response_format parameter",
+    "reasoning_effort": "low",
+    "max_tokens": 12000,
+    "gold_concurrency": 10,
+    "dev_concurrency": 4,
+    "fresh_local_response_cache": true
+  },
+  "run_guard": {
+    "scope": "process-local wrapper around RequestUsage.call; not a tracked production-code change",
+    "budget_estimate_usd": 0.75,
+    "max_attempts": 23,
+    "pre_attempt_estimate": "UTF-8 request byte count plus 1024 input tokens and full configured output limit; no cache discount",
+    "unknown_usage_or_post_dispatch_failure": "retain reserved estimate",
+    "pre_dispatch_failure": "refund",
+    "offline_stub_checks_passed": 9,
+    "wrapper_sha256": "b06d4ca6e942e5a3721b33f632a26e28926bed6486356e1bf08fa1e376c0aa70",
+    "provider_billing_hard_cap": false
+  },
+  "earlier_user_reported_cli_smoke": {
+    "independently_metered_here": false,
+    "included_in_task_cost": false,
+    "calls": 5,
+    "cached_calls": 0,
+    "wall_s": 3.8,
+    "displayed_cost_usd": 0.0265,
+    "verdict_counts": {
+      "verified": 7,
+      "wrong": 2,
+      "unverifiable": 2
+    }
+  },
+  "regression_validation": {
+    "python_tests_passed": 905,
+    "dev_items": 224,
+    "dev_caught": "104/109",
+    "dev_reason_correct": "97/109",
+    "dev_false_alarms": "0/107",
+    "trap_dev_drafts": 15,
+    "trap_caught": "40/40",
+    "trap_reason_correct": "36/40",
+    "trap_false_alarm_figures": "0/112",
+    "trap_false_alarm_sentences": "0/58",
+    "model_calls": 0,
+    "cost_usd": 0,
+    "held_out_split_run": false
+  },
+  "audit_notes": [
+    "All 23 attempts completed with valid usage; no retry, failure, schema rejection, gold uncovered number, dev error or budget skip.",
+    "The extra non-GAAP 50 basis points guidance claim is basis expansion of one raw claim. The source explicitly mentions GAAP and non-GAAP, while the provisional gold set has one tolerance record. It remains forward_looking and unverifiable. Gold labels and 27/28 precision were retained.",
+    "Gold labels await independent human review. Some guidance gold labels have no period; full recall does not validate every period field.",
+    "Gold verdicts: 12 verified, 15 unverifiable, 1 approximate. No unmatched claim was verified.",
+    "Input hashes and 13 dev item IDs match the retained Fireworks run. Both quality results match on this small subset, not on a full 224-item partner-backend evaluation.",
+    "The two provider runs used different dates, endpoints, model IDs, response-format settings, output lengths and prompt-cache usage. Local fresh mode bypasses application response caches, not provider prompt caches. This is not a controlled latency or cost ranking.",
+    "Meta comparison rows use earlier cached measurements. No new Meta or Fireworks calls were made for this benchmark.",
+    "Usage-priced total is not provider invoicing or a remaining-credit query. The runner rounds passage costs; independent usage pricing totals $0.10923670.",
+    "The earlier user-reported CLI smoke is recorded separately and excluded from this task spend. No cloud backend switch, deployment or held-out split was run."
+  ],
+  "usage_priced_costs_usd": {
+    "gold": 0.0427255,
+    "dev": 0.0665112,
+    "total": 0.1092367
+  },
+  "independent_replay_audit": {
+    "model_client_creation_forbidden": true,
+    "sqlite_read_only": true,
+    "gold_and_dev_quality_reproduced": true,
+    "cache_files_unchanged": true,
+    "new_model_calls": 0,
+    "new_cost_usd": 0
+  }
+}
