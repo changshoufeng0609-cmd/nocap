@@ -447,6 +447,63 @@ deployed snapshot, and export `MODEL_API_KEY` in the shell first:
 Report that run the way v1's is reported, failures and abstentions included,
 beside v1 and not pooled with it. It is not rerun to improve its score.
 
-## Results of the one live run
+## Results of the one live run (November 2, 2026)
 
-To be filled after the one live run.
+**Run.** 2026-11-01 16:46:36–16:50:14 UTC (November 2, 00:46 Taipei), `live:meta:muse-spark-1.3`, [result record](spot500_runs/v2-live-20261102.json).
+
+**Code and evidence measured.**
+- The deployed November 2 release: private `f22e56c`, public `1de7b7b`, Production `dpl_EAfhreQrZdaWr3HJg4q3jHuuVVsR`.
+- That release includes every wording and false-alarm fix merged after v1.
+- The runner checked that `receipts/` and `data/snapshot` equal the exported commit, and the input hashes were identical before and after (`inputs_unchanged: true`).
+- v2 is a different sample from v1 (more financials and balance-sheet items, fewer diluted-EPS items), so the two runs are not a before/after comparison of one item set.
+
+**Completed.** 74/74 items, with 0 errors, 0 budget skips and 0 missing records. 69 model calls; measured usage cost **$0.38824965** against the $0.37 estimate and the $0.95 cap.
+
+**Planted errors.**
+- **27/35 caught (77%)** as ✗, or ◷ for look-ahead.
+- 22/35 caught with the expected reason.
+- **1/35 was marked ✓**; the other 7 returned `?`.
+- The ✓ is a period mutant: "diluted EPS increased 8 percent compared to first quarter of 2025".
+  - The verifier ignored the stated comparison base and checked year-over-year growth, which is 8.5%.
+  - The extraction also took the item context's quarter.
+
+**False alarms.** **2/34 original items, and 4/75 true figures marked ✗.** Two sentences account for all four:
+- *"Gross margin of 33.4% increased 668 basis points compared to 26.7%."* The 26.7% names no period. The verifier read it as the current quarter and called it a Q2 2025 value. This one sentence appears in three items: the original, plus the direction and value mutants, where it is an unchanged true figure.
+- CenterPoint's *"compared to $0.45 per diluted share in the comparable period of 2025"*. The verifier resolved "the comparable period of 2025" as the full year and compared the figure with annual EPS. This claim was extracted with a span the matcher counts as an extra claim (`extra_wrong` 1), and it is also its item's one false alarm.
+
+**True figures.**
+- **48/75 verified (64%)**, **21/75 returned `?` (28%)**, and 4/75 were marked ✗.
+- 7 true figures were not extracted as matching claims; the six net-income figures and the non-GAAP misses are among them.
+- **Guidance marked verified: 0/9.** 4 returned `?` as forward-looking, and 5 were not extracted as matching claims.
+
+**Overall.** Status correct for 79/119 gold claims; status and reason correct for 74/119. There were 13 extra claims (1 marked ✗, the CenterPoint figure above), 12 missing claims and 0 duplicate or conflicting matches.
+
+| Mutator | Planted | Caught (✗/◷) | Expected reason | Marked ✓ | `?` |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `basis` | 5 | 2 | 1 | 0 | 3 |
+| `direction` | 5 | 5 | 5 | 0 | 0 |
+| `entity` | 5 | 4 | 0 | 0 | 1 |
+| `look_ahead` (◷) | 5 | 4 | 4 | 0 | 1 |
+| `period` | 5 | 2 | 2 | 1 | 2 |
+| `scale` | 5 | 5 | 5 | 0 | 0 |
+| `value` | 5 | 5 | 5 | 0 | 0 |
+
+Selected overlapping source features count every claim in the items that carry the feature. Do not sum them.
+
+| Feature | True verified | True marked ✗ | Planted caught |
+| --- | ---: | ---: | ---: |
+| `revenue` | 23/32 | 0 | 14/17 |
+| `growth` | 27/33 | 0 | 11/15 |
+| `eps_diluted` | 13/17 | 1 | 6/9 |
+| `balance_sheet` | 4/5 | 0 | 4/4 |
+| `bank` | 6/7 | 0 | 3/6 |
+| `margin_change` | 5/9 | 3 | 2/2 |
+| `non_gaap` | 2/11 | 0 | 2/5 |
+| `net_income` | 2/8 | 1 | 0/1 |
+
+**Reading v1 and v2 together.**
+- Both runs caught 27 of 35 planted errors.
+- v1, on the November 1 code, marked no planted error ✓ and no true figure ✗.
+- v2, on the November 2 code and a fresh sample, found one false ✓ and two false-alarm sentences. All three involve a figure's comparison base: an unlabelled "compared to X", "the comparable period of <year>", and an explicit earlier base quarter.
+- Non-GAAP figures and the extraction of some net-income and EPS figures remain the largest sources of `?` and misses.
+- Both sets are small, correlated and machine-labelled. Neither is rerun, and their results are not pooled.

@@ -1268,3 +1268,289 @@ def test_extraction_keeps_a_comparable_basis_after_a_quoted_figure(snapshot):
                                  comparison="YoY"))
     assert c.span_text.endswith("on a comparable basis")
     assert unread(verify(c, snapshot))
+
+
+# --- Round 6. A comparison base with no period of its own is checked in the base period -------------------------
+# Intel Q2 2026 gross margin 40.40% against 27.50% in Q2 2025 (release 8-K); Target revenue Q2 FY2026 $26,539M, Q1
+# FY2026 $25,443M, Q2 FY2025 $25,211M (10-Qs). Extraction may give such a base no period ("") or the context's; the
+# figure is then checked in the period the sentence implies (a year earlier unless it says sequential), never as a
+# current-period figure, and with no comparison words only a match there counts.
+
+INTC_CONTEXT = "Intel, second quarter of 2026"
+TGT_CONTEXT = "Target, second quarter of fiscal 2026"
+
+
+def based(span, value_text, value, *, entity="Target", period_text="", metric="revenue", metric_text="revenue"):
+    unit, scale = ("%", "units") if value_text.endswith("%") else ("USD", "billions")
+    return claim(span, value_text, value, metric=metric, metric_text=metric_text, unit=unit, scale=scale,
+                 entity=entity, period_text=period_text)
+
+
+def margin_base(span, value_text, value, period_text=""):
+    return based(span, value_text, value, entity="Intel", period_text=period_text, metric="gross_margin",
+                 metric_text="gross margin")
+
+
+@pytest.mark.parametrize("c,context,filed,period", [
+    (margin_base("Gross margin of 40.4% increased 1,282 basis points compared to 27.5%.", "27.5%", 27.5),
+     INTC_CONTEXT, 27.5, "Q2 2025"),
+    (margin_base("Gross margin of 40.4% increased 1,282 basis points compared to 27.5%.", "27.5%", 27.5,
+                 "second quarter of 2026"), INTC_CONTEXT, 27.5, "Q2 2025"),
+    (margin_base("Gross margin of 40.4% compared to a gross margin of 27.5%.", "27.5%", 27.5), INTC_CONTEXT, 27.5,
+     "Q2 2025"),
+    (based("Revenue of $26.5 billion increased 5.3% compared to $25.2 billion.", "$25.2 billion", 25.2),
+     TGT_CONTEXT, 25.211e9, "Q2 FY2025"),
+    (based("Revenue of $26.5 billion increased 5.3% compared to $25.2 billion.", "$25.2 billion", 25.2,
+           period_text="second quarter of fiscal 2026"), TGT_CONTEXT, 25.211e9, "Q2 FY2025"),
+    (based("Revenue rose 5.3% to $26.5 billion from $25.2 billion.", "$25.2 billion", 25.2), TGT_CONTEXT, 25.211e9,
+     "Q2 FY2025"),
+    (based("Revenue increased from $25.2 billion to $26.5 billion.", "$25.2 billion", 25.2), TGT_CONTEXT, 25.211e9,
+     "Q2 FY2025"),
+    (based("Revenue was $26.5 billion, compared to $25.2 billion.", "$25.2 billion", 25.2), TGT_CONTEXT, 25.211e9,
+     "Q2 FY2025"),
+    (based("Revenue rose 4.3% sequentially to $26.5 billion from $25.4 billion.", "$25.4 billion", 25.4), TGT_CONTEXT,
+     25.443e9, "Q1 FY2026"),
+    (based("Revenue in the second quarter of fiscal 2026 was $26.5 billion, compared to $25.2 billion.",
+           "$25.2 billion", 25.2, period_text="second quarter of fiscal 2026"), None, 25.211e9, "Q2 FY2025"),
+])
+def test_an_unlabelled_comparison_base_is_checked_in_the_period_it_implies(snapshot, c, context, filed, period):
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("verified", "match"), v.explanation
+    assert period in v.explanation and "the comparison period the sentence implies" in v.explanation
+    assert any(f.value == pytest.approx(filed) for f in v.evidence)
+
+
+@pytest.mark.parametrize("c,context,expected,period", [
+    (margin_base("Gross margin of 40.4% increased 1,282 basis points year over year compared to 29.0%.", "29.0%",
+                 29.0), INTC_CONTEXT, 27.5, "Q2 2025"),
+    (based("Revenue rose 5.3% year over year to $26.5 billion from $24.0 billion.", "$24.0 billion", 24.0),
+     TGT_CONTEXT, 25.211, "Q2 FY2025"),
+    (based("Revenue rose 4.3% sequentially to $26.5 billion from $25.2 billion.", "$25.2 billion", 25.2),
+     TGT_CONTEXT, 25.443, "Q1 FY2026"),
+])
+def test_a_wrong_base_is_wrong_against_the_period_the_sentence_names(snapshot, c, context, expected, period):
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("wrong", "value_mismatch"), v.explanation
+    assert period in v.explanation and v.expected_value == pytest.approx(expected)
+
+
+@pytest.mark.parametrize("c,context", [
+    (margin_base("Gross margin of 40.4% increased 1,282 basis points compared to 29.0%.", "29.0%", 29.0),
+     INTC_CONTEXT),
+    (based("Revenue of $26.5 billion increased 10% compared to $24.0 billion.", "$24.0 billion", 24.0), TGT_CONTEXT),
+    (based("Revenue was $26.5 billion, compared to analysts' estimates of $26.1 billion.", "$26.1 billion", 26.1),
+     TGT_CONTEXT),
+])
+def test_a_base_that_misses_the_implied_period_without_comparison_words_is_unread(snapshot, c, context):
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous"), v.explanation
+
+
+@pytest.mark.parametrize("c,context,status", [
+    (margin_base("Gross margin of 40.4% increased 1,282 basis points compared to 27.5%.", "40.4%", 40.4),
+     INTC_CONTEXT, "verified"),
+    (margin_base("Gross margin of 40.4% increased 1,282 basis points compared to 27.5% a year ago.", "27.5%", 27.5),
+     INTC_CONTEXT, "verified"),
+    (based("Revenue was $26.5 billion, compared to $25.2 billion in the second quarter of fiscal 2025.",
+           "$25.2 billion", 25.2, period_text="second quarter of fiscal 2025"), TGT_CONTEXT, "verified"),
+    (based("Revenue was $27.0 billion.", "$27.0 billion", 27.0), TGT_CONTEXT, "wrong"),
+])
+def test_other_figures_in_a_comparison_keep_their_check(snapshot, c, context, status):
+    v = verify(c, snapshot, context=context)
+    assert v.status == status, v.explanation
+
+
+@pytest.mark.parametrize("span,value_text", [
+    ("Revenue rose 5%, with revenue from continuing operations of $27.0 billion.", "$27.0 billion"),
+    ("Intel's gross margin of 40.4% versus AMD's 53.8%.", "53.8%"),
+    ("Revenue from $25.2 billion of orders was recognized.", "$25.2 billion"),
+    ("Revenue was $26.5 billion, compared to $25.2 billion a year earlier.", "$25.2 billion"),
+    ("Revenue was $26.5 billion, compared to $25.2 billion in 2025.", "$25.2 billion"),
+])
+def test_a_source_a_peer_or_a_dated_amount_is_not_an_unlabelled_base(span, value_text):
+    assert verifier._unlabelled_base(based(span, value_text, 1.0)) is None
+
+
+def test_a_figure_with_no_period_of_its_own_never_gets_a_period_error(snapshot):
+    c = based("Revenue was $25.2 billion.", "$25.2 billion", 25.2)
+    v = verify(c, snapshot, context=TGT_CONTEXT)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous") and "names no period" in v.explanation
+    dated = c.model_copy(update={"period_text": "second quarter of fiscal 2026"})
+    assert verify(dated, snapshot, context=TGT_CONTEXT).reason == "period_mismatch"  # a period the draft gave
+
+
+@pytest.mark.parametrize("text,quote,value_text,value,metric,metric_text,unit,scale,entity,context", [
+    ("Intel's gross margin of 40.4% increased 1,282 basis points compared to 27.5%.", "27.5%", "27.5%", 27.5,
+     "gross_margin", "gross margin", "%", "units", "Intel", INTC_CONTEXT),
+    ("Target's revenue rose 5.3% to $26.5 billion from $25.2 billion.", "$25.2 billion", "$25.2 billion", 25.2,
+     "revenue", "revenue", "USD", "billions", "Target", TGT_CONTEXT),
+])
+def test_extraction_keeps_the_comparison_a_quoted_base_belongs_to(snapshot, text, quote, value_text, value, metric,
+                                                                   metric_text, unit, scale, entity, context):
+    [c] = located(text, proposal(quote, value_text, value, metric=metric, metric_text=metric_text, unit=unit,
+                                 scale=scale, entity=entity, period_text=""))
+    assert c.span_text.startswith(entity)
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("verified", "match"), (c.span_text, v.explanation)
+
+
+# --- Round 6. "The comparable period of 2025" is that year's quarter -----------------------------------------------
+# Pfizer diluted EPS: Q1 2026 $0.47, Q1 2025 $0.52, full year 2025 $1.36. Carrier: Q2 2026 $0.60, Q2 2025 $0.68, full
+# year 2025 $1.72. Target (fiscal year ending January): Q2 FY2025 revenue $25,211M.
+
+PFE_CONTEXT = "Pfizer, first quarter of 2026"
+PFE_SENTENCE = ("Pfizer reported $0.47 per diluted share for the first quarter of 2026, compared to $0.52 per diluted "
+                "share in the comparable period of 2025.")
+
+
+def comparable_eps(span, value, period_text, entity="Pfizer", period_type="quarter"):
+    c = claim(span, f"${value:.2f}", value, metric="eps_diluted", metric_text="per diluted share", entity=entity,
+              period_text=period_text)
+    return c.model_copy(update={"period_type": period_type})
+
+
+@pytest.mark.parametrize("c,context,filed,period", [
+    (comparable_eps(PFE_SENTENCE, 0.52, "in the comparable period of 2025"), PFE_CONTEXT, 0.52, "Q1 2025"),
+    (comparable_eps(PFE_SENTENCE, 0.52, "in the comparable period of 2025"), None, 0.52, "Q1 2025"),
+    (comparable_eps("Pfizer earned $0.47 per diluted share, compared to $0.52 per diluted share in the same quarter "
+                    "of 2025.", 0.52, "in the same quarter of 2025"), PFE_CONTEXT, 0.52, "Q1 2025"),
+    (comparable_eps("Pfizer earned $0.47 per diluted share, compared to $0.52 per diluted share in the corresponding "
+                    "period of 2025.", 0.52, "in the corresponding period of 2025"), PFE_CONTEXT, 0.52, "Q1 2025"),
+    (comparable_eps("Carrier earned $0.60 per diluted share in the second quarter of 2026, compared to $0.68 in the "
+                    "same period of 2025.", 0.68, "in the same period of 2025", entity="Carrier"), None, 0.68,
+     "Q2 2025"),
+    (based("Target's revenue was $26.5 billion, compared to $25.2 billion in the comparable period of 2025.",
+           "$25.2 billion", 25.2, period_text="in the comparable period of 2025"), TGT_CONTEXT, 25.211e9,
+     "Q2 FY2025"),
+])
+def test_the_comparable_period_of_a_year_is_that_years_quarter(snapshot, c, context, filed, period):
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("verified", "match"), v.explanation
+    assert period in v.explanation and any(f.value == pytest.approx(filed) for f in v.evidence)
+
+
+def test_a_wrong_figure_for_the_comparable_period_is_wrong_against_that_quarter(snapshot):
+    v = verify(comparable_eps(PFE_SENTENCE.replace("$0.52", "$0.55"), 0.55, "in the comparable period of 2025"),
+               snapshot, context=PFE_CONTEXT)
+    assert (v.status, v.reason) == ("wrong", "value_mismatch") and "Q1 2025" in v.explanation, v.explanation
+    assert v.expected_value == pytest.approx(0.52)
+
+
+@pytest.mark.parametrize("c,context", [
+    (based("Target's revenue was $26.5 billion, compared to $25.2 billion in the comparable period of 2025.",
+           "$25.2 billion", 25.2, period_text="in the comparable period of 2025"), "Target, second quarter of 2026"),
+    (based("Target's revenue for the first quarter of fiscal 2026 was $25.4 billion; in the second quarter it was $26.5 "
+           "billion, compared to $25.2 billion in the comparable period of 2025.", "$25.2 billion", 25.2,
+           period_text="in the comparable period of 2025"), TGT_CONTEXT),
+])
+def test_a_comparable_period_that_names_no_one_quarter_stays_unread(snapshot, c, context):
+    # a calendar year on a January fiscal year, or two quarters in the sentence: no quarter to take
+    assert verify(c, snapshot, context=context).status == "unverifiable"
+
+
+@pytest.mark.parametrize("value,period_type,status", [(0.52, "quarter", "unverifiable"), (1.36, "quarter", "verified"),
+                                                      (1.36, "annual", "verified"), (0.52, "annual", "wrong")])
+def test_a_quarterly_figure_whose_period_reads_as_a_year_is_never_wrong(snapshot, value, period_type, status):
+    c = comparable_eps(f"Pfizer earned ${value:.2f} per diluted share in 2025.", value, "in 2025",
+                       period_type=period_type)
+    v = verify(c, snapshot)
+    assert v.status == status, v.explanation
+    if status == "unverifiable":
+        assert v.reason == "ambiguous" and "quarterly figure" in v.explanation
+
+
+@pytest.mark.parametrize("period_text,span,context,expected", [
+    ("in the comparable period of 2025", PFE_SENTENCE, None, "first quarter of 2025"),
+    ("in the same quarter of 2025", "EPS was $0.52 in the same quarter of 2025.", PFE_CONTEXT, "first quarter of 2025"),
+    ("the corresponding period of fiscal 2025", "EPS was $0.52 in the corresponding period of fiscal 2025.",
+     "Target, second quarter of fiscal 2026", "second quarter of fiscal 2025"),
+    ("in 2025", "EPS was $0.52 in 2025.", PFE_CONTEXT, None),
+    ("in the comparable period of 2025", "EPS was $0.52 in the comparable period of 2025.", "Pfizer, 2026", None),
+])
+def test_the_comparable_period_reading(period_text, span, context, expected):
+    c = comparable_eps(span, 0.52, period_text)
+    assert verifier._comparable_period_text(c, context) == expected
+
+
+# --- Round 6. A change measured against a stated base period is checked against that period ----------------------
+# Carrier diluted EPS: Q2 2026 $0.60, Q1 2026 $0.28, Q2 2025 $0.68, Q1 2025 $0.47 (10-Qs): -11.8% year over year and
+# +114.3% sequentially in Q2 2026, -40.4% year over year in Q1 2026. Target revenue grew 5.27% year over year in Q2
+# FY2026. Before, a change with no comparison typed was checked year over year or sequentially even when its own words
+# named another base period ("compared to first quarter of 2025" verified the -11.8%).
+
+CARR_CONTEXT = "Carrier, second quarter of 2026"
+
+
+def eps_change(span, value, comparison="none", period_text="second quarter of 2026"):
+    return claim(span, f"{value} percent", value, metric="other", metric_text="diluted EPS", unit="%",
+                 entity="Carrier", period_text=period_text, comparison=comparison)
+
+
+@pytest.mark.parametrize("c,context", [
+    (eps_change("Diluted EPS decreased 12 percent compared to first quarter of 2025.", 12), CARR_CONTEXT),
+    (eps_change("Diluted EPS decreased 12 percent compared to first quarter of 2025.", 12, comparison="YoY"),
+     CARR_CONTEXT),
+    (eps_change("Diluted EPS decreased 12 percent from Q1 2025.", 12), CARR_CONTEXT),
+    (claim("Revenue rose 5.3% compared to the first quarter of fiscal 2025.", "5.3%", 5.3, metric="revenue_growth",
+           metric_text="revenue", unit="%", entity="Target", period_text="second quarter of fiscal 2026",
+           comparison="none"), TGT_CONTEXT),
+])
+def test_a_change_against_another_stated_base_is_never_assumed_year_over_year(snapshot, c, context):
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous"), v.explanation
+    assert "neither the year-earlier period nor the prior quarter" in v.explanation
+
+
+@pytest.mark.parametrize("c,context,said", [
+    (eps_change("Diluted EPS decreased 12 percent compared to the second quarter of 2025.", 12), CARR_CONTEXT,
+     "fell 11.8% year over year"),
+    (eps_change("Diluted EPS increased 114 percent compared to the first quarter of 2026.", 114, comparison="YoY"),
+     CARR_CONTEXT, "114.3%"),
+    (eps_change("In the first quarter of 2026, diluted EPS decreased 40 percent compared to the first quarter of "
+                "2025.", 40, period_text="first quarter of 2026"), CARR_CONTEXT, "fell 40.4% year over year"),
+    (claim("Revenue rose 5.3% compared to the second quarter of fiscal 2025.", "5.3%", 5.3, metric="revenue_growth",
+           metric_text="revenue", unit="%", entity="Target", period_text="second quarter of fiscal 2026",
+           comparison="none"), TGT_CONTEXT, "grew 5.27% year over year"),
+])
+def test_a_change_against_the_year_earlier_or_prior_quarter_base_is_checked_against_it(snapshot, c, context, said):
+    v = verify(c, snapshot, context=context)
+    assert (v.status, v.reason) == ("verified", "match"), v.explanation
+    assert said in v.explanation
+
+
+def test_a_wrong_change_against_a_stated_base_is_wrong(snapshot):
+    v = verify(eps_change("Diluted EPS decreased 20 percent compared to the second quarter of 2025.", 20), snapshot,
+               context=CARR_CONTEXT)
+    assert (v.status, v.reason) == ("wrong", "value_mismatch"), v.explanation
+    assert "fell 11.8% year over year" in v.explanation and "quarter over quarter" not in v.explanation
+
+
+def test_a_change_its_own_words_date_to_another_quarter_is_unread(snapshot):
+    c = eps_change("In the first quarter of 2026, diluted EPS decreased 40 percent compared to the first quarter of "
+                   "2025.", 40)  # the period came from the context line, the sentence says Q1 2026
+    v = verify(c, snapshot, context=CARR_CONTEXT)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous") and "Q1 2026" in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("span,value,expected", [
+    ("Diluted EPS decreased 12 percent compared to first quarter of 2025.", 12, "first quarter of 2025"),
+    ("Diluted EPS decreased 12 percent from Q1 2025.", 12, "Q1 2025"),
+    ("Compared with the second quarter of 2025, diluted EPS decreased 12 percent.", 12, "second quarter of 2025"),
+    ("Diluted EPS decreased 12 percent from a year ago.", 12, None),
+    ("Diluted EPS decreased 12 percent over the prior-year period.", 12, None),
+    ("Diluted EPS decreased 12 percent, from $0.68 in the second quarter of 2025.", 12, None),
+])
+def test_the_stated_base_period_reading(span, value, expected):
+    assert verifier._stated_base_period(eps_change(span, value)) == expected
+
+
+@pytest.mark.parametrize("text,status", [
+    ("Carrier's diluted EPS decreased 12 percent compared to first quarter of 2025.", "unverifiable"),
+    ("Carrier's diluted EPS decreased 12 percent compared to the second quarter of 2025.", "verified"),
+])
+def test_extraction_keeps_a_stated_base_period_after_a_quoted_change(snapshot, text, status):
+    [c] = located(text, proposal("diluted EPS decreased 12 percent", "12 percent", 12, metric="other",
+                                 metric_text="diluted EPS", unit="%", scale="units", entity="Carrier",
+                                 period_text="second quarter of 2026"))
+    assert "quarter of 2025" in c.span_text
+    assert verify(c, snapshot, context=CARR_CONTEXT).status == status

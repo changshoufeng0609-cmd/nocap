@@ -1376,6 +1376,36 @@ def _income_share_context(passage: str, value: tuple[int, int], c: ModelClaim, n
     return None if start is None else floor + start
 
 
+def _base_context(passage: str, value: tuple[int, int], c: ModelClaim, normalized: tuple[float, str, str],
+                  breaks: list[int]) -> Optional[int]:
+    """The sentence start, when the number is the comparison base of another figure in it with no period of its own:
+    "compared to 26.7%" of "Gross margin of 33.4% increased 668 basis points compared to 26.7%" (verify's
+    _unlabelled_base reads the base from the words before it). The model is asked for nothing new."""
+    from receipts.verify import _unlabelled_base
+
+    if c.forward_looking:
+        return None
+    floor, ceiling = _clause_window(breaks, value[0], len(passage))
+    return floor if _unlabelled_base(_probe_claim(c, normalized, passage, (floor, ceiling))) else None
+
+
+def _base_period_context(passage: str, value_end: int, breaks: list[int]) -> Optional[int]:
+    """Where an explicit base period right after a change ends: "compared to first quarter of 2025" of "EPS increased
+    8 percent compared to first quarter of 2025" (verify._stated_base_period reads it). None when another figure comes
+    first or no such period follows."""
+    from receipts import periods
+    from receipts.verify import _BASE_PERIOD_INTRO_RE, _without_period_phrases
+
+    tail = passage[value_end:_clause_window(breaks, value_end, len(passage))[1]]
+    for intro in _BASE_PERIOD_INTRO_RE.finditer(tail):
+        if scan_numbers(_without_period_phrases(tail[:intro.start()])):
+            return None  # another figure comes first: the period is its base, not this one's
+        rest = tail[intro.end():]
+        if (phrase := periods.find_period_phrase(rest)) and rest.startswith(phrase):
+            return value_end + intro.end() + len(phrase)
+    return None
+
+
 def _probe_claim(c: ModelClaim, normalized: tuple[float, str, str], passage: str,
                  span: tuple[int, int]) -> types.Claim:
     value, unit, scale = normalized
@@ -1399,9 +1429,11 @@ def _restore_source_context(passage: str, span: tuple[int, int], value: tuple[in
 
     down, lower = _direction_context(passage, value, breaks)
     starts = {span[0], *(min(span[0], s) for s in (_left_context(passage, span, value[0], c, normalized[1], breaks),
-                                                   down, _income_share_context(passage, value, c, normalized, breaks))
+                                                   down, _income_share_context(passage, value, c, normalized, breaks),
+                                                   _base_context(passage, value, c, normalized, breaks))
                          if s is not None)}
-    ends = {span[1], *(max(span[1], e) for e in (_right_context(passage, value[1], breaks), lower) if e is not None)}
+    ends = {span[1], *(max(span[1], e) for e in (_right_context(passage, value[1], breaks), lower,
+                                                 _base_period_context(passage, value[1], breaks)) if e is not None)}
     count = passage[span[0]:span[1]].count(c.value_text)
     # A restored span never repeats this value: the verifier must find it once.
     candidates = [(a, b) for a in sorted(starts) for b in sorted(ends)

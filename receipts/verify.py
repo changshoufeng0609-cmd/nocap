@@ -1597,6 +1597,76 @@ def _over_a_year(claim: Claim) -> Optional[str]:
     return " ".join(hit["words"].split()) if hit else None
 
 
+# A level figure introduced as the base of another figure's comparison, with no period words of its own: "Gross margin
+# of 33.4% increased 668 basis points compared to 26.7%", "Revenue rose 5.3% to $26.5 billion from $25.2 billion",
+# "Revenue increased from $25.2 billion to $26.5 billion". Its period is the base that comparison implies, the
+# year-earlier period unless the sentence says sequential or quarter-over-quarter; _Check._implied_base checks it there,
+# never against the current period. "Compared to" and "versus" may carry the figure's own metric words ("compared to
+# a gross margin of 26.7%"); "from" may not ("revenue from continuing operations of $26.5 billion" names a source).
+_BASE_INTRO_RE = re.compile(r"(?:\b(?:compared\s+(?:to|with)|versus|vs\.?)\s+"
+                            r"(?:(?:(?:an?|the)\s+)?(?:[A-Za-z][\w'’&/-]*\s+){0,3}of\s+)?|\bfrom\s+)$", re.I)
+_CHANGE_WORD_RE = re.compile(r"\b(?:increas\w*|decreas\w*|ris(?:e|es|ing)|rose|grew|grow\w*|up|down|declin\w*|fell"
+                             r"|fall\w*|expand\w*|contract\w*|improv\w*|jump\w*|climb\w*|dropp?\w*|gain\w*)\b", re.I)
+
+
+def _unlabelled_base(claim: Claim) -> Optional[str]:
+    """How a comparison-base figure with no period of its own is compared (see above): "YoY" or "QoQ" when the
+    sentence says so, "implied" when it doesn't (the year-earlier base, checked only for a match), "ambiguous" when it
+    says both; None when the figure is not such a base."""
+    pos = _value_pos(claim)
+    if pos is None or claim.comparison != "none":
+        return None
+    span = claim.span_text or ""
+    before = re.sub(r"(?:US\s*\$|USD\s*|\$)\s*$", "", span[:pos])
+    start = max(sentence_breaks(before), default=0)
+    intro = _BASE_INTRO_RE.search(before, start)
+    if intro is None:
+        return None
+    head = before[start:intro.start()]
+    if not _CHANGE_WORD_RE.search(head) and not any(
+            re.search(r"\d", m.group(0)) for m in _FIGURE_RE.finditer(_without_period_phrases(head))):
+        return None  # another figure's statement or change must lead into the comparison
+    own = periods.parse(before[intro.start():])
+    tail = _AFTER_CLAUSE_BREAK_RE.split(span[pos + len(claim.value_text):], maxsplit=1)[0]
+    tail_period = periods.parse(tail)
+    if (own.kind or own.shift or tail_period.kind or tail_period.shift or any(_comparison_period_after(claim))
+            or _over_a_year(claim) or _YEAR_AGO_RE.search(tail.lower()) or _PRIOR_Q_RE.search(tail.lower())):
+        return None  # the figure's own words name its period
+    words = _NAMED_QUARTER_RE.sub(lambda m: " " * len(m.group()), head)
+    kinds = {comparison for comparison, pattern in _GROWTH_COMPARISONS if pattern.search(words)}
+    return "ambiguous" if len(kinds) > 1 else next(iter(kinds)) if kinds else "implied"
+
+
+# An explicit base period a change names: "increased 8 percent compared to first quarter of 2025", "fell 12% from Q1
+# 2025", "Compared with the second quarter of 2025, EPS fell 12%". The change is measured against that period, so it
+# is the year-over-year or sequential change only when that period is the year-earlier period or the prior quarter of
+# the one checked; NoCap never assumes either over a stated base (_Check._stated_base).
+_BASE_PERIOD_INTRO_RE = re.compile(r"\b(?:compared\s+(?:to|with)|from|versus|vs\.?|over|than|against)\s+(?:the\s+)?",
+                                   re.I)
+
+
+def _period_phrases(text: str) -> list[str]:
+    """Every explicit period phrase in text (periods.find_period_phrase), in order."""
+    out = []
+    while phrase := periods.find_period_phrase(text):
+        out.append(phrase)
+        text = text.replace(phrase, " " * len(phrase), 1)
+    return out
+
+
+def _stated_base_period(claim: Claim) -> Optional[str]:
+    """The explicit base period a change's own words name, verbatim, or None (see above)."""
+    local = _value_comparison_context(claim)
+    if local is None:
+        return None
+    for part in (local[1], local[0]):
+        for intro in _BASE_PERIOD_INTRO_RE.finditer(part):
+            rest = part[intro.end():]
+            if (phrase := periods.find_period_phrase(rest)) and rest.startswith(phrase):
+                return phrase
+    return None
+
+
 def _comparison_period_after(claim: Claim) -> tuple[bool, bool]:
     """A year-ago / prior-quarter label directly after this amount ('$46.7 billion a year ago')."""
     local = _value_comparison_context(claim)
@@ -1664,14 +1734,15 @@ def span_reading(claim: Claim) -> tuple[Any, ...]:
     Extraction restores source wording a model quote left out, and keeps the
     shorter quote only when both give this same value, so the verdict cannot
     depend on which one is shown. Every span_text rule in this module must be
-    reflected here: interpret(), currency_neutral(), basis_conflict(), distinct_measure(), span_terms() and
-    _over_a_year().
+    reflected here: interpret(), currency_neutral(), basis_conflict(), distinct_measure(), span_terms(),
+    _over_a_year(), _unlabelled_base() and _stated_base_period().
     """
     if not math.isfinite(claim.value) or claim.forward_looking or claim.metric == "guidance_tolerance":
         return ("not_read",)
     reading = interpret(claim)
     return (reading, currency_neutral(claim), span_terms(claim, reading or Reading(claim.metric, None, None)),
-            basis_conflict(claim), distinct_measure(claim), _claim_measure_qualifiers(claim), _over_a_year(claim))
+            basis_conflict(claim), distinct_measure(claim), _claim_measure_qualifiers(claim), _over_a_year(claim),
+            _unlabelled_base(claim), _stated_base_period(claim))
 
 
 SPLIT_RATIOS =(2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 30, 40, 50, 100)
@@ -1886,6 +1957,37 @@ def context_entities(context: Optional[str], store: EvidenceStore) -> list[tuple
         if hit and hit[0] not in out:
             out[hit[0]] = (hit[0], hit[1], name)
     return list(out.values())
+
+
+# "The comparable / same / corresponding period (or quarter) of 2025" is the same fiscal quarter as the story's, in
+# that year: "$0.48 for the first quarter of 2026, compared to $0.45 in the comparable period of 2025" means Q1 2025,
+# not fiscal 2025 (the year alone read it as the full year) and not Q1 2026 ("the same quarter of 2025" lost its year).
+# The quarter is the one the claim's sentence names, else the context's; with neither, or several, nothing changes.
+_COMPARABLE_PERIOD_RE = re.compile(r"\b(?:the\s+)?(?:comparable|same|corresponding|equivalent|like)\s+(?:fiscal\s+)?"
+                                   r"(?:period|quarter|three[\s-]+months?(?:\s+period)?)\s+(?:of|in)\s+"
+                                   r"(?P<fiscal>fiscal\s+(?:year\s+)?)?(?P<year>(?:19|20)\d{2})\b", re.I)
+_QUARTER_NAME_RE = re.compile(r"\b(?P<ord>first|second|third|fourth|1st|2nd|3rd|4th)[\s-]+(?P<fiscal>fiscal[\s-]+)?"
+                              r"quarter\b|(?<![A-Za-z0-9])(?P<f>F)?Q(?P<q>[1-4])(?![0-9])", re.I)
+_QUARTER_ORDINALS = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3, "fourth": 4, "4th": 4}
+
+
+def _comparable_period_text(claim: Claim, context: Optional[str]) -> Optional[str]:
+    """claim.period_text with "the comparable period of <year>" as that year's quarter, or None (see above)."""
+    hit = _COMPARABLE_PERIOD_RE.search(claim.period_text or "")
+    if hit is None:
+        return None
+    span = _COMPARABLE_PERIOD_RE.sub(lambda m: " " * len(m.group()), claim.span_text or "")
+    named = {(_QUARTER_ORDINALS[m["ord"].lower()] if m["ord"] else int(m["q"]),
+              bool(m["fiscal"] or m["f"] or re.match(r"\s*(?:of\s+)?fiscal\b", span[m.end():], re.I)))
+             for m in _QUARTER_NAME_RE.finditer(span)}
+    if len({q for q, _ in named}) == 1:
+        quarter, fiscal = next(iter(named))[0], any(f for _, f in named)
+    elif not named and context and (cp := periods.parse(context)).kind == "quarter" and cp.quarter:
+        quarter, fiscal = cp.quarter, cp.fiscal
+    else:
+        return None
+    ordinal = ("first", "second", "third", "fourth")[quarter - 1]
+    return f"{ordinal} quarter of {'fiscal ' if fiscal or hit['fiscal'] else ''}{hit['year']}"
 
 
 def resolve_claim_entity(claim: Claim, store: EvidenceStore, context: Optional[str] = None) -> Optional[tuple[int, str]]:
@@ -2104,6 +2206,9 @@ class _Check:
         self.unpaired: dict[tuple[ResolvedPeriod, str], ResolvedPeriod] = {}
         self.gross_margin_base_missing: set[ResolvedPeriod] = set()
         self._allow_not_revenue_rows = False  # _diag_not_revenue_row only: the rows level() keeps out of revenue
+        self.rp: Optional[ResolvedPeriod] = None  # the period _run resolved for the claim
+        # the period words resolved: "the comparable period of 2025" as that year's quarter (_comparable_period_text)
+        self.period_words = _comparable_period_text(claim, self.context) or claim.period_text
 
     # -- verdicts ------------------------------------------------------------
     def verdict(self, status: str, reason: str, explanation: str, *, evidence: Iterable[Fact] = (),
@@ -2723,6 +2828,13 @@ class _Check:
     # -- the rules -------------------------------------------------------------
     def run(self) -> Verdict:
         verdict = self._run()
+        if (verdict.status == "wrong" and verdict.reason != "look_ahead" and self.c.period_type == "quarter"
+                and self.rp is not None and self.rp.fiscal_period == "FY"):
+            # a quarterly figure whose period words read as a full year ("in 2025"): never "✗" against the year
+            return self.verdict("unverifiable", "ambiguous",
+                                f"The draft gives {self.c.value_text} as a quarterly figure, but its period reads as "
+                                f"{self.plabel(self.rp)}, so NoCap can't tell which period to check it against.",
+                                evidence=verdict.evidence)
         if (verdict.status == "wrong" and verdict.reason != "look_ahead" and self.growth_base is None
                 and not any(_comparison_period_after(self.c)) and (over := _over_a_year(self.c))):
             # "compared to $25.2 billion over a year ago": a year-ago figure, or one from more than a year earlier
@@ -2752,13 +2864,16 @@ class _Check:
         if self.metric == "segment_revenue" and not self.segment:
             return self.verdict("unverifiable", "ambiguous", "The draft doesn't say which segment this revenue is for.")
         level_claim = self.growth_base is None
-        rp = periods.resolve_in_calendar(c.period_text, self.cal, context=self.context, period_type=c.period_type,
+        rp = periods.resolve_in_calendar(self.period_words, self.cal, context=self.context, period_type=c.period_type,
                                          comparison=c.comparison if level_claim else "YoY", as_of=self.as_of)
+        self.rp = rp
         if rp is None:
             said = c.period_text.strip() or "no period"
             return self.verdict("unverifiable", "ambiguous",
                                 periods.unresolved_reason(c.period_text, context=self.context, period_type=c.period_type) or
                                 f"Couldn't tell which {self.company} fiscal period \"{said}\" refers to.")
+        if self.growth_base and (stated := self._stated_base(rp)) is not None:
+            return stated
         if self.growth_base and (self.comparison == "none" or rp.fiscal_period == "FY"):
             return self._growth_unstated(rp)
         obs_all = self.observe(rp)
@@ -2785,7 +2900,7 @@ class _Check:
         hits = self.matches(pub)
         if hits:
             return self._verified(rp, hits)
-        for check in (self._approximate, self._comparison_base, self._alternative_reading):
+        for check in (self._approximate, self._comparison_base, self._implied_base, self._alternative_reading):
             v = check(rp, pub)
             if v is not None:
                 return v
@@ -3336,6 +3451,83 @@ class _Check:
                 evidence=[f for _, hits in matches for o in hits for f in o.facts])
         return None
 
+    def _stated_base(self, rp: ResolvedPeriod) -> Optional[Verdict]:
+        """A change whose own words name its base period (_stated_base_period): that period sets the comparison,
+        whatever extraction typed. "?" when it is neither the year-earlier period nor the prior quarter of rp, when it
+        can't be resolved, or when the change's own words date it to a period other than rp (a period taken from the
+        context). None otherwise, with self.comparison set."""
+        words = _stated_base_period(self.c)
+        if words is None:
+            return None
+        c = self.c
+        brp = periods.resolve_in_calendar(words, self.cal, as_of=self.as_of)
+        if brp is None:
+            return self.verdict("unverifiable", "ambiguous", f"Couldn't tell which {self.company} fiscal period "
+                                f"“{words}” refers to, the period the draft measures {c.value_text} against.")
+        local = _value_comparison_context(c) or ("", "")
+        for phrase in _period_phrases(" ".join(local).replace(words, " " * len(words), 1)):
+            own = periods.resolve_in_calendar(phrase, self.cal, as_of=self.as_of)
+            if own is not None and own[:2] != rp[:2]:
+                return self.verdict("unverifiable", "ambiguous",
+                                    f"The draft dates {c.value_text} to {self.plabel(own)}, while its period reads as "
+                                    f"{self.plabel(rp)}, so NoCap doesn't check it.")
+        yoy = periods.shift(rp, self.cal, years=-1)
+        qoq = periods.shift(rp, self.cal, quarters=-1) if rp.fiscal_period != "FY" else None
+        if yoy is not None and brp[:2] == yoy[:2]:
+            self.comparison = "YoY"
+        elif qoq is not None and brp[:2] == qoq[:2]:
+            self.comparison = "QoQ"
+        else:
+            return self.verdict("unverifiable", "ambiguous",
+                                f"The draft measures {c.value_text} against {self.plabel(brp)}, which is neither the "
+                                f"year-earlier period nor the prior quarter of {self.plabel(rp)}, so NoCap doesn't "
+                                f"check it.")
+        return None
+
+    def _implied_base(self, rp: ResolvedPeriod, pub: list[Obs]) -> Optional[Verdict]:
+        """A comparison base with no period of its own (_unlabelled_base): checked in the base period the sentence
+        implies, never in the current one. Without the sentence's own year-over-year or sequential words only a match
+        there counts ("✓"); anything else is "?", so a default never makes a figure "✗"."""
+        how = _unlabelled_base(self.c) if self.growth_base is None else None
+        if how is None or not self._names_current_period(rp):
+            return None
+        c = self.c
+        unclear = (f"{c.value_text} is the figure the sentence compares with, and the draft doesn't say which period "
+                   f"it is from")
+        if how == "ambiguous":
+            return self.verdict("unverifiable", "ambiguous", f"{unclear}: its wording reads both year-over-year and "
+                                f"sequential.")
+        quarterly = rp.fiscal_period != "FY"
+        srp = (periods.shift(rp, self.cal, quarters=-1) if quarterly else None) if how == "QoQ" else (
+            periods.shift(rp, self.cal, years=-1))
+        obs = [o for o in self.observe(srp) if self.public(o)] if srp is not None else []
+        if hits := self.accepts(obs):
+            return self._verified(srp, hits, note=", the comparison period the sentence implies")
+        if how == "implied" or not obs:
+            seen = (f"; {self.co_s} {self.mlabel()} for {self.plabel(srp)} was {self.fmt_observation(_current_obs(obs))}"
+                    if obs else "")
+            return self.verdict("unverifiable", "ambiguous", f"{unclear}{seen}.",
+                                evidence=[f for o in obs for f in o.facts])
+        actual = _current_obs(obs)
+        return self.wrong("value_mismatch", actual,
+                          f"{self.attribution(actual)}{self.statement(actual, srp, filed_precision=True)}, the "
+                          f"comparison period the sentence implies, not {c.value_text}.")
+
+    def _names_current_period(self, rp: ResolvedPeriod) -> bool:
+        """Whether rp is the period of the story rather than one the draft gave this figure: no period of its own, the
+        context line's period, or the period the sentence names before the comparison."""
+        c = self.c
+        if not (c.period_text or "").strip():
+            return True
+        if self.context:
+            ctx = periods.resolve_in_calendar("", self.cal, context=self.context, period_type=c.period_type,
+                                              comparison="none", as_of=self.as_of)
+            if ctx is not None and ctx[:2] == rp[:2]:
+                return True
+        pos = _value_pos(c)
+        said = " ".join(periods._norm(c.period_text).split())
+        return bool(said) and pos is not None and said in " ".join(periods._norm(c.span_text[:pos]).split())
+
     def _other_period_match(self, rp: ResolvedPeriod) -> Optional[tuple[ResolvedPeriod, Obs]]:
         """The same figure in a period a writer plausibly confuses with rp: another quarter of the same fiscal year,
         the adjacent quarter, or the same quarter (or year) one fiscal year off. A match two years away is more
@@ -3376,6 +3568,13 @@ class _Check:
         if hint is None:
             return None
         orp, o = hint
+        if not (c.period_text or "").strip():
+            # The draft gives the figure no period: the story's period is only the context's, so a figure that fits
+            # another period is "?", never a period "✗" against the current one
+            return self.verdict("unverifiable", "ambiguous",
+                                f"{c.value_text} is {self.co_s} {self.mlabel()} for {self.plabel(orp)}, and the draft "
+                                f"names no period for it; for {self.plabel(rp)} it was "
+                                f"{self.fmt_observation(actual)}.", evidence=[*o.facts, *actual.facts])
         return self.wrong("period_mismatch", actual,
                           f"{c.value_text} is {self.co_s} {self.mlabel()} for {self.plabel(orp)}; for "
                           f"{self.plabel(rp)} it was {self.fmt_observation(actual)}.", extra=o.facts)
@@ -3516,7 +3715,7 @@ class _Check:
             if ocik == self.cik or (self.context is None and not precise):
                 continue
             ocal = periods.calendar(self.store, ocik)
-            orp = periods.resolve_in_calendar(c.period_text, ocal, context=self.context, period_type=c.period_type,
+            orp = periods.resolve_in_calendar(self.period_words, ocal, context=self.context, period_type=c.period_type,
                                               comparison=c.comparison, as_of=self.as_of)
             if orp is None or orp.period_end is None:
                 orp = periods.nearest(ocal, rp)
