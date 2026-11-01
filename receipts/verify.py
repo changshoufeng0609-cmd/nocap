@@ -26,7 +26,11 @@ Rules (docs/adr-001-architecture.md, .claude/reference/project.md):
     the wording names ("Data Center revenue", "Google Cloud operating income") is never checked against the
     consolidated total, and wording that says more than a metric ("operating income from Reality Labs") is "?".
   * Readings (interpret): an untyped figure ("other") is checked only when its own description names one base
-    metric; unqualified "EPS" may be basic or diluted, and either match verifies it.
+    metric; unqualified "EPS" may be basic or diluted, and either match verifies it. A bare "per share" figure is EPS
+    only when attached to a net-income amount in its sentence ("net income of $362 million, or $1.28 per share");
+    "net income attributable to <the company itself>" is plain net income; "for the same quarter last year" after a
+    level amount labels its period as "a year ago" does; a bank's noninterest income is read only as a percent change,
+    from the NoninterestIncome term of the bank revenue the store serves.
   * Restatements: the store returns every version; a claim matching any version visible at as_of is
     verified, and a wrong claim is corrected with the latest visible version.
   * Stock splits (company_splits: the splits a company's XBRL reports, receipts.splits, and versions of one per-share
@@ -57,7 +61,7 @@ import re
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Iterable, NamedTuple, Optional, Sequence, get_args
+from typing import Any, Callable, Iterable, NamedTuple, Optional, Sequence, get_args
 
 from receipts import periods
 from receipts.periods import CalEntry, ResolvedPeriod
@@ -86,6 +90,10 @@ BANK_TICKERS = (
     "NTRS",                                         # Northern Trust: net interest income and revenue on an FTE basis
 )
 BASIS_SENSITIVE_AT_BANKS = frozenset({"revenue", "net_interest_income"})
+# The bank revenue receipts.ingest serves as net interest income plus noninterest income, as its locator writes it.
+_BANK_REVENUE_FORMULA_RE = re.compile(r"RevenuesNetOfInterestExpense = InterestIncomeExpenseNet "
+                                      r"(?P<nii>-?\d[\d,]*(?:\.\d+)?) \+ NoninterestIncome "
+                                      r"(?P<other>-?\d[\d,]*(?:\.\d+)?) \((?P<form>\S+) (?P<accession>\S+)\)")
 SCALE_SHIFTS = ((1e3, "1,000"), (1e-3, "1,000"), (1e6, "a million"), (1e-6, "a million"))
 SOURCE_RANK = {"xbrl": 0, "derived": 1, "press_release": 2}
 EARNINGS_RELEASE_WINDOW_DAYS = 100  # an Item 2.02 8-K this many days after a period end reports that period
@@ -101,6 +109,7 @@ METRIC_LABELS = {
     "cost_of_revenue": "cost of revenue", "research_and_development": "R&D expense",
     "operating_cash_flow": "operating cash flow", "free_cash_flow": "free cash flow",
     "net_interest_income": "net interest income", "operating_margin": "operating margin", "net_margin": "net margin",
+    "noninterest_income": "noninterest income",
 }
 GENERIC_ENTITIES = frozenset({"", "the company", "company", "we", "our", "us", "it", "the firm", "the group",
                               "management", "the business", "n/a", "none", "unknown"})
@@ -154,11 +163,16 @@ _CHANGE_RE = re.compile(r"\b(?:increas\w*|decreas\w*|grew|grow\w*|rose|rise|risi
                         r"|narrow\w*|widen\w*|improv\w*|change)\b|year[\s-]+over[\s-]+year|quarter[\s-]+over[\s-]+quarter|sequential\w*|\byoy\b"
                         r"|\bqoq\b|\by/y\b|\bq/q\b|\bfrom\s+(?:a\s+year\s+ago|the\s+(?:previous|prior)\s+quarter)", re.I)
 _MARGIN_RE = re.compile(r"\bmargins?\b|\bratio\b|\brate\b|\byield\b|\breturn\s+on\b|\bper\s+cent\s+of\b", re.I)
+_SHARE_OF_RE = re.compile(r"(?:%|\bpercent)\s+of\b|\bshare\s+of\b|\bproportion\b", re.I)
 _TO_COMMON_RE = re.compile(r"\b(?:available|applicable|attributable)\s+to\s+(?:common|class)", re.I)
 _COMMON_LINE_RE = re.compile(r"\b(?:available|applicable|attributable)\s+(?:to|for)\s+common\s+"
                              r"(?:stockholders|shareholders)\b", re.I)
 _INCLUDING_NCI_RE = re.compile(r"\bincluding\s+(?:non[ -]?controlling|minority)\s+interests?\b", re.I)
 _CONSOLIDATED_INCOME_RE = re.compile(r"\bconsolidated\s+(?=net\s+(?:income|earnings|profit|loss)\b)", re.I)
+# EPS is computed on income available to common, so that wording inside an EPS phrase names EPS itself: "net income
+# attributable to common stockholders per diluted share" is diluted EPS. Outside one, it stays a net-income line.
+_TO_COMMON_HOLDERS = (r"(?:\s+(?:available|attributable|applicable)\s+(?:to|for)\s+common\s+"
+                      r"(?:stockholders|shareholders))?")
 _INCOME_LINES = {
     "net_income_to_common": ("us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic",
                              "net income available to common stockholders"),
@@ -168,13 +182,16 @@ _INCOME_LINES = {
 # list stays untracked ("?"): "net income available to common stockholders" is not NetIncomeLoss.
 _BASE_METRIC_WORDS: tuple[tuple[str, re.Pattern[str]], ...] = tuple((m, re.compile(rx, re.I)) for m, rx in (
     ("eps_basic", r"\bbasic\s+(?:earnings|net\s+income|EPS)\b(?:\s+per\s+(?:common\s+)?share)?"
-                  r"|\b(?:earnings|net\s+income)\s+per\s+(?:common\s+)?basic\s+share\b"),
-    ("eps_diluted", r"\b(?:diluted\s+)?(?:earnings|net\s+income)\s+per\s+(?:common\s+)?(?:diluted\s+)?share\b"
-                    r"|\b(?:diluted\s+)?EPS\b"),
+                  rf"|\b(?:earnings|net\s+income){_TO_COMMON_HOLDERS}\s+per\s+(?:common\s+)?basic\s+share\b"),
+    ("eps_diluted", rf"\b(?:diluted\s+)?(?:earnings|net\s+income){_TO_COMMON_HOLDERS}\s+per\s+(?:common\s+)?"
+                    r"(?:diluted\s+)?share\b|\b(?:diluted\s+)?EPS\b"),
     ("free_cash_flow", r"\bfree\s+cash\s+flows?\b|\bFCF\b"),
     ("operating_cash_flow", r"\boperating\s+cash\s+flows?\b|\bcash\s+flows?\s+from\s+operati\w+"
                             r"|\bcash\s+provided\s+by\s+operating\s+activities\b"),
     ("net_interest_income", r"\bnet\s+interest\s+income\b|\bNII\b"),
+    # A bank's noninterest income: only its percent change is read, and only where the store holds the line
+    # (_Check._noninterest_income); its level is not a tracked base metric (not in USD_METRICS).
+    ("noninterest_income", r"\b(?:total\s+)?non[\s-]?interest\s+income\b"),
     ("operating_income", r"\boperating\s+(?:income|profit)\b|\bincome\s+from\s+operations\b"),
     ("gross_profit", r"\bgross\s+profit\b"),
     ("cost_of_revenue", r"\bcosts?\s+of\s+(?:revenues?|sales)\b"),
@@ -261,9 +278,11 @@ def tolerance(claim: Claim) -> float:
     return 0.5 * step
 
 
-def claimed_value(claim: Claim, *, change: Optional[bool] = None) -> float:
+def claimed_value(claim: Claim, *, change: Optional[bool] = None, loss_scope: bool = True) -> float:
     """The claim's value in full units (USD, not billions), signed by the draft's own words. change: the figure is
-    a percent change (default: metric revenue_growth); then decline wording signs it and loss wording doesn't."""
+    a percent change (default: metric revenue_growth); then decline wording signs it and loss wording doesn't.
+    loss_scope=False: any loss word in the span signs an income figure, as before its own clause was read
+    (_income_subject); verify uses that reading only to keep a figure it fits from becoming "✗"."""
     v = float(claim.value)
     if claim.unit in ("USD", "shares"):
         v *= SCALE_FACTOR.get(claim.scale, 1.0)
@@ -271,11 +290,105 @@ def claimed_value(claim: Claim, *, change: Optional[bool] = None) -> float:
     words = f"{claim.span_text} {claim.metric_text}".lower()
     if v > 0 and _NEGATIVE_RE.search(words):
         v = -v  # "free cash flow was negative $2.12 billion"
-    elif v > 0 and change and _DOWN_RE.search(words):
-        v = -v  # "revenue fell 5%"
-    elif v > 0 and not change and claim.metric in ("net_income", "operating_income") and _LOSS_RE.search(words):
-        v = -v  # "a net loss of $1.2 billion"
+    elif v > 0 and change and _DOWN_RE.search(f"{_change_clause(claim)} {claim.metric_text}".lower()):
+        v = -v  # "revenue fell 5%", but not "rose 5% versus a decline of 1%"
+    elif (v > 0 and not change and claim.metric in ("net_income", "operating_income") and _LOSS_RE.search(words)
+          and not (loss_scope and _income_subject(claim))):
+        v = -v  # "a net loss of $1.2 billion", but not "net income of $2.6 billion versus a net loss of $0.5 billion"
+    elif (v > 0 and not change and claim.metric in ("eps_diluted", "eps_basic")
+          and (bound := _income_per_share(claim)) is not None and bound.loss):
+        v = -v  # "a net loss of $50 million, or $0.25 per share"
     return v
+
+
+# A change's own clause, for its direction words. Backward it runs to a sentence break or clause connector, and across an
+# earlier figure only where the words between merely link two statements of the same change ("fell $1.3 billion, or
+# 5.3%", "from $26.5 billion to $25.2 billion, or 5.3%"). Forward it runs to the first comma, connector, clause boundary
+# or figure (a cause or concession: "despite lower traffic"), past the commas that enclose such a restatement
+# ("$1.3 billion, or 5.3%, lower"; "5.3%, or $1.3 billion, lower"). A fronted subordinate clause ("Despite lower costs,
+# revenue rose 5.3%") is not the figure's clause. "Revenue rose 5.3% versus a comparable sales decline of 1%" is a rise.
+_CLAUSE_CONNECTOR_RE = re.compile(r"\b(?:versus|vs\.?|compared|while|whereas|but|and)\b", re.I)
+_FIGURE_LINK_RE = re.compile(r"[\s,()]*(?:(?:or|to|from|by|of|at|an?)[\s,()]+)*", re.I)
+_RESTATED_AFTER_RE = re.compile(rf"\s*,?\s*(?:or\s+|\(\s*)(?:{_FIGURE_RE.pattern})\s*\)?\s*,?", re.I)
+_AFTER_CLAUSE_BREAK_RE = re.compile(r"[,;!?]|\.(?!\d)|\b(?:versus|vs\.?|compared|while|whereas|but|and|despite|although"
+                                    r"|though|as|amid|on|with|driven|due|reflecting|led|thanks|helped|boosted|fueled"
+                                    r"|fuelled|supported|including|primarily|mainly|largely|partly)\b", re.I)
+_FRONTED_CLAUSE_RE = re.compile(r"\s*(?:despite|although|though|while|whereas|as|amid|unlike|with|after"
+                                r"|even\s+(?:as|though))\b[^,;]*,", re.I)
+
+
+def _change_clause(claim: Claim) -> str:
+    """The words of this figure's own clause; the whole span when the figure can't be located in it."""
+    pos, span = _value_pos(claim), claim.span_text or ""
+    if pos is None:
+        return span
+    before = span[:pos]
+    start = max(sentence_breaks(before), default=0)
+    if fronted := _FRONTED_CLAUSE_RE.match(before, start):
+        start = fronted.end()
+    start = max([start, *(m.end() for m in _CLAUSE_CONNECTOR_RE.finditer(before, start))])
+    figures = [m for m in _FIGURE_RE.finditer(_without_period_phrases(before))
+               if re.search(r"\d", m.group(0)) and m.start() >= start]
+    end = pos
+    for figure in reversed(figures):
+        if not _FIGURE_LINK_RE.fullmatch(before[figure.end():end]):
+            start = figure.end()  # another statement's figure: this clause starts after it
+            break
+        end = figure.start()
+    after = span[pos + len(claim.value_text):]
+    if restated := _RESTATED_AFTER_RE.match(after):
+        after = after[restated.end():]  # "5.3%, or $1.3 billion, lower"
+    elif re.search(r"(?:,\s*or|\bor|\()\s*$", before):
+        after = re.sub(r"^\s*[,)]", "", after)  # "$1.3 billion, or 5.3%, lower"
+    after = _AFTER_CLAUSE_BREAK_RE.split(after, maxsplit=1)[0]
+    if figure := next((m for m in _FIGURE_RE.finditer(_without_period_phrases(after)) if re.search(r"\d", m.group(0))),
+                      None):
+        after = after[:figure.start()]
+    return f"{before[start:]} {after}"
+
+
+# An income figure's own subject. A loss word elsewhere in the span belongs to another figure: in "Net income was $2.6
+# billion, compared with a net loss of $0.5 billion a year earlier" only the $0.5 billion is a loss. A figure is read as
+# income only when its own clause names income and no loss. That clause runs back to a sentence break or clause
+# connector, past a fronted clause ("After a loss a year ago, net income was ...") and an aside on what the figure
+# includes ("Net income, which included a $0.3 billion loss on a sale, was ..."); a clause with no subject of its own
+# ("compared with $1.9 billion") takes its sentence's. Forward, to a clause break or "from"/"against", it must name no
+# loss, and no loss noun may follow the figure ("a $2.6 billion loss", "$2.6 billion, a loss"); nor may the claim's own
+# metric words name one. Otherwise a loss word anywhere in the span signs the figure, as it always did.
+_INCOME_NOUN_RE = re.compile(r"\b(?:net\s+(?:income|earnings|profits?)|operating\s+(?:income|profits?)"
+                             r"|income\s+from\s+operations|earnings|profits?)\b(?!\s+(?:per|before|tax))", re.I)
+_SUBJECT_ASIDE_RE = re.compile(r",\s*(?:(?:which|that)\s+(?:included?|includes|reflect(?:ed|s)?|exclud(?:ed|es|e))"
+                               r"|including|excluding|reflecting)\b[^;]*?,(?=\s*(?:was|were|is|are|came|totall?ed"
+                               r"|amounted|stood|reached)\b)", re.I)
+_LOSS_NOUN_AFTER_RE = re.compile(r"[\s,(]*(?:(?:an?|the|net|operating|pre-?tax|quarterly|gaap|adjusted|non-?gaap|in|of"
+                                 r"|total)\s+)*loss(?:es)?\b", re.I)
+_INCOME_CLAUSE_BREAK_RE = re.compile(rf"{_AFTER_CLAUSE_BREAK_RE.pattern}|\b(?:from|against)\b", re.I)
+
+
+def _income_subject(claim: Claim) -> bool:
+    """Whether an income figure's own clause reads it as income, whatever loss words the rest of its span has."""
+    if _LOSS_RE.search((claim.metric_text or "").lower()):
+        return False
+    pos, span = _value_pos(claim), claim.span_text or ""
+    if pos is None:
+        return False
+    before = span[:pos]
+    start = max(sentence_breaks(before), default=0)
+    if fronted := _FRONTED_CLAUSE_RE.match(before, start):
+        start = fronted.end()
+    head = _SUBJECT_ASIDE_RE.sub(lambda m: " " * len(m.group()), before[start:])
+    clause = head[max([0, *(m.end() for m in _CLAUSE_CONNECTOR_RE.finditer(head))]):]
+    own = clause if _LOSS_RE.search(clause.lower()) or _INCOME_NOUN_RE.search(clause) else head
+    if _LOSS_RE.search(own.lower()) or not _INCOME_NOUN_RE.search(own):
+        return False
+    after = span[pos + len(claim.value_text):]
+    if _LOSS_NOUN_AFTER_RE.match(after):
+        return False
+    after = _INCOME_CLAUSE_BREAK_RE.split(after, maxsplit=1)[0]
+    if figure := next((m for m in _FIGURE_RE.finditer(_without_period_phrases(after)) if re.search(r"\d", m.group(0))),
+                      None):
+        after = after[:figure.start()]
+    return not _LOSS_RE.search(after.lower())
 
 
 def within(a: float, b: float, tol: float) -> bool:
@@ -437,11 +550,41 @@ def _ambiguous_growth_endpoint(claim: Claim) -> bool:
                 and _FIGURE_RE.search(clause))
 
 
+# "FX-adjusted" (also "currency-adjusted", "adjusted for foreign exchange", "foreign exchange neutral") is
+# constant-currency wording too, but it mostly stands before its noun ("FX-adjusted revenue rose 10%"), so it
+# qualifies only a number whose own wording holds it (_own_wording), that it directly follows ("$10.0 billion,
+# FX-adjusted"), or whose sentence opens with it ("On an FX-adjusted basis, ..."): never the nearest number of another
+# clause ("Revenue rose 9%; FX-adjusted revenue rose 10%" leaves the 9% checked).
+_FX_ADJUSTED = (r"(?:\b(?:fx|f/x|currency|foreign[\s-]+exchange)[\s-]+adjusted\b|\badjusted\s+for\s+(?:the\s+)?"
+                r"(?:impact\s+of\s+)?(?:foreign[\s-]+)?(?:currenc(?:y|ies)|exchange(?:[\s-]+rates?)?|fx|f/x)\b"
+                r"|\bforeign[\s-]+exchange[\s-]+neutral\b)")
+_FX_ADJUSTED_RE = re.compile(_FX_ADJUSTED, re.I)
+_FX_ADJUSTED_AFTER_RE = re.compile(rf"[\s,(]*(?:(?:on|in)\s+an?\s+)?{_FX_ADJUSTED}", re.I)
+_FX_ADJUSTED_LEADING_RE = re.compile(rf"\W*(?:on|in)\s+an?\s+{_FX_ADJUSTED}\s+basis\b", re.I)
+
+
+def _fx_adjusted(claim: Claim) -> bool:
+    """FX-adjusted wording that qualifies this claim's own number (see above)."""
+    span = claim.span_text or ""
+    if _FX_ADJUSTED_RE.search(claim.metric_text or ""):
+        return True
+    if not _FX_ADJUSTED_RE.search(span):
+        return False
+    pos = _value_pos(claim)
+    if pos is None:
+        return True  # the number can't be located: any such wording counts, as for constant currency
+    before = span[:pos]
+    return bool(_FX_ADJUSTED_RE.search(_own_wording(claim))
+                or _FX_ADJUSTED_AFTER_RE.match(span, pos + len(claim.value_text))
+                or _FX_ADJUSTED_LEADING_RE.match(before, max(sentence_breaks(before), default=0)))
+
+
 def currency_neutral(claim: Claim) -> bool:
     """True when constant-currency / FX-neutral wording qualifies this claim's own number: it is in metric_text, or
     in the span next to this number rather than another one ("up 18% (up 17% in constant currency)" qualifies
-    the 17% only). When the number can't be located in the span, any such wording counts (the old, safe rule)."""
-    if _CURRENCY_NEUTRAL_RE.search(claim.metric_text or ""):
+    the 17% only). When the number can't be located in the span, any such wording counts (the old, safe rule).
+    FX-adjusted wording counts where _fx_adjusted binds it."""
+    if _CURRENCY_NEUTRAL_RE.search(claim.metric_text or "") or _fx_adjusted(claim):
         return True
     span = claim.span_text or ""
     words = list(_CURRENCY_NEUTRAL_RE.finditer(span))
@@ -592,6 +735,80 @@ _FRAME_WORDS = frozenset(
     "their our record reported posted delivered that which period periods".split())
 
 
+# An acronym in parentheses that defines the EPS phrase right before it is that phrase, not a second metric: 'GAAP
+# earnings per share ("EPS")', in any quote style or none. ("free cash flow (FCF)" is read by its alias.)
+_DEFINED_EPS_RE = re.compile(r"(\b(?:(?P<word>diluted|basic)\s+)?(?:earnings|net\s+income)\s+per\s+(?:common\s+)?"
+                             r"(?:(?:diluted|basic)\s+)?share)"
+                             r"(\s*\(\s*[\"'“”‘’]?\s*(?:(?P=word)\s+)?EPS\s*[\"'“”‘’]?\s*\))", re.I)
+
+
+def _without_defined_acronyms(text: str) -> str:
+    """Blank such a defining acronym, keeping offsets."""
+    return _DEFINED_EPS_RE.sub(lambda m: m.group(1) + " " * len(m.group(3)), text)
+
+
+# A comparison period named right after an amount ("compared to $33.6 billion for the same quarter last year", "in the
+# prior-year period", "the year-ago quarter") says which period the amount is for; it does not qualify the metric.
+# "same" must name a quarter or period of an earlier year: same-store, comparable or identical sales stay measures of
+# their own, and "the same quarter" with no year stays unread.
+_SAME_PERIOD_RE = re.compile(
+    r"same\s+(?:fiscal\s+)?(?:quarter|period)\s+(?:(?:of\s+)?(?:last|the\s+prior|the\s+previous)\s+(?:fiscal\s+)?year"
+    r"|a\s+year\s+(?:ago|earlier|before)|(?:of\s+)?(?:the\s+)?(?:prior|previous)[\s-]+year)\b"
+    r"|(?:prior|previous)[\s-]+(?:fiscal[\s-]+)?year\s+(?:quarter|period)\b|year[\s-]+ago\s+(?:quarter|period)\b", re.I)
+# As the label of a level amount (_comparison_period_after reads it), or as the base of a change.
+_LEVEL_PERIOD_LABEL_RE = re.compile(rf"[\s,()]*(?:(?:in|for|during|over)\s+)?(?:the\s+)?(?:{_SAME_PERIOD_RE.pattern})",
+                                    re.I)
+# "over the same quarter last year", "over the prior-year period": only a same-period label, never "over a year ago"
+_OVER_PERIOD_LABEL_RE = re.compile(rf"[\s,()]*over\s+(?:the\s+)?(?P<label>{_SAME_PERIOD_RE.pattern})", re.I)
+_CHANGE_PERIOD_LABEL_RE = re.compile(r"[\s,()]*(?:(?:from|over|than|in|for|during|since|versus|vs\.?"
+                                     rf"|compared\s+(?:with|to))\s+)?(?:the\s+)?(?:{_SAME_PERIOD_RE.pattern})", re.I)
+# Same-store, comparable (store) or identical sales and "comps" are measures of their own, never revenue: also where a
+# change's own words need not name its base ("Comps rose 5% from the same quarter last year").
+_DISTINCT_SALES_RE = re.compile(r"\bsame[\s-]+stores?\b|\bcomparable(?:[\s-]+stores?)?[\s-]+sales\b"
+                                r"|\bcomp(?:[\s-]+stores?)?[\s-]+sales\b|\bcomps\b"
+                                r"|\bidentical(?:[\s-]+stores?)?[\s-]+sales\b", re.I)
+
+
+# Where an amount's own words end: another clause or a cause ("driven by", "on", "as", ", including"). Words beyond
+# such a break describe something else: "Total revenue was $26.5 billion, driven by comparable sales growth of 2.1%".
+_CLAUSE_BREAK_RE = re.compile(r"[,;:()—–―]|\.(?!\d)|[!?]|\b(?:and|or|but|while|whereas|with|driven|due|on|as|including"
+                              r"|reflecting|led|thanks|helped|boosted|fueled|fuelled|supported|amid|despite|primarily"
+                              r"|mainly|largely|partly)\b", re.I)
+# The number's immediate description: "a 5% increase in comparable sales", "5% comparable sales growth", "up 5% in
+# same-store sales".
+_COMPARISON_WORDS = r"(?:year[\s-]+over[\s-]+year|yoy|y/y|quarter[\s-]+over[\s-]+quarter|q/q|sequential)"
+_DISTINCT_AFTER_RE = re.compile(rf"\s*(?:{_COMPARISON_WORDS}\s+)?(?:(?:increase|growth|gain|rise|jump|decline|decrease"
+                                r"|drop|change|improvement)s?\s+)?(?:(?:in|of)\s+)?(?:(?:the|its|our|their)\s+)?"
+                                rf"(?:{_DISTINCT_SALES_RE.pattern})"
+                                # "2.1% on a comparable-store basis": the basis names the measure (constant-currency and
+                                # organic wording are distinct measures of their own already); so does a plain "on a
+                                # comparable basis", the company's own comparable measure, right after the number
+                                rf"|\s*(?:{_COMPARISON_WORDS}[\s,]+)?[\s,(]*on\s+an?\s+(?:comparable|same|identical)"
+                                r"(?:[\s-]+stores?(?:[\s-]+sales)?|[\s-]+sales)\s+basis\b"
+                                rf"|\s*(?:{_COMPARISON_WORDS}[\s,]+)?[\s,(]*on\s+an?\s+comparable\s+basis\b", re.I)
+
+
+def _distinct_sales(claim: Claim) -> bool:
+    """Such a measure as this amount's own: named in metric_text, as the subject that leads straight into the number
+    ("Comps rose 5%", "comparable sales growth of 2.1%"), or as the number's immediate description ("a 5% increase in
+    comparable sales"). Only the amount's own words count, so a comps clause after a comma, a connector or another
+    figure never unreads a revenue figure; an amount that can't be located has only its metric_text."""
+    if _DISTINCT_SALES_RE.search(claim.metric_text or ""):
+        return True
+    pos, span = _value_pos(claim), claim.span_text or ""
+    if pos is None:
+        return False
+    before = span[:pos]
+    starts = [*sentence_breaks(before), *(m.end() for m in _CLAUSE_BREAK_RE.finditer(before)),
+              *(m.end() for m in _FIGURE_RE.finditer(_without_period_phrases(before)) if re.search(r"\d", m.group(0)))]
+    region = before[max(starts, default=0):]
+    leads = list(_DISTINCT_SALES_RE.finditer(region))
+    if leads and not _leftover_words(_without_period_phrases(region[leads[-1].end():]), (0, 0),
+                                     _company_words(claim), None):
+        return True  # the measure is the subject the number belongs to
+    return bool(_DISTINCT_AFTER_RE.match(span, pos + len(claim.value_text)))
+
+
 def _leftover_words(text: str, phrase: tuple[int, int], company: set[str], qualifier: Optional[str]) -> list[str]:
     """Words of a metric description outside its metric phrase that are not framing (change and comparison words,
     totals, bases, periods, the company, the qualifier taken as segment). Any left means the wording says more than
@@ -621,11 +838,11 @@ _LEVEL_METRIC_ALIASES = {
                            r"\s+operating\s+activities",
     "operating_expenses": r"total\s+expenses",
     "gross_margin": r"gross\s+(?:profit\s+)?margins?",
-    "net_margin": r"net\s+(?:profit\s+)?margins?",
+    "net_margin": r"net\s+(?:profit\s+|income\s+)?margins?",  # "net income margin" is net margin
     "operating_margin": r"operating\s+margins?",
     "eps_diluted": r"(?:diluted\s+(?:EPS|earnings)|(?:earnings|earned)?\s*per\s+(?:common\s+)?diluted\s+share)",
-    "eps_basic": r"(?:basic\s+(?:EPS|earnings)|EPS|(?:earnings|net\s+income)\s+per\s+(?:common\s+)?share"
-                 r"|(?:earnings|earned)?\s*per\s+(?:common\s+)?basic\s+share)",
+    "eps_basic": rf"(?:basic\s+(?:EPS|earnings)|EPS|(?:earnings|net\s+income){_TO_COMMON_HOLDERS}"
+                 r"\s+per\s+(?:common\s+)?share|(?:earnings|earned)?\s*per\s+(?:common\s+)?basic\s+share)",
     "net_income": r"net\s+loss(?:es)?",
     "operating_income": r"operating\s+loss(?:es)?",
     "research_and_development": r"(?:research\s+(?:and|&)\s+development|R&D)(?:\s+(?:expenses?|costs?))?",
@@ -718,18 +935,41 @@ def _trailing_qualifier(claim: Claim) -> str:
     comparison = "|".join(f"(?:{pattern.pattern})" for _, pattern in _GROWTH_COMPARISONS)
     income_tail = r"|including" if claim.metric == "net_income" else ""
     if not re.match(rf"^[\s,()]*(?:(?:{comparison})[\s,()]*)?\b(?:excluding|before|after|from|for|in|attributable"
-                    rf"|available|applicable{income_tail})\b", tail, re.I):
+                    rf"|available|applicable{income_tail})\b", tail, re.I) and not _OVER_PERIOD_LABEL_RE.match(tail):
         return ""
     conjunction = r"and"
     if claim.metric == "net_income":
         conjunction += (r"(?!\s+(?:excluding|including|before|after|from|for|in|attributable|available|applicable)\b)")
     tail = re.split(rf"[;.!?]|\b(?:{conjunction}|while|whereas|but|with)\b", tail, maxsplit=1, flags=re.I)[0]
-    return "" if _FIGURE_RE.search(_without_period_phrases(tail)) else tail
+    if _FIGURE_RE.search(_without_period_phrases(tail)):
+        return ""
+    # "for the same quarter last year" names the period: a change's base (its YoY wording decides the comparison), or a
+    # level amount's period when _comparison_period_after reads the same label, so the year-ago quarter is checked
+    # (_comparison_base, only for comparison "none"). Otherwise it stays a qualifier, never a check of another period.
+    change = claim.unit == "%" and _is_change(claim)
+    label = (_CHANGE_PERIOD_LABEL_RE if change else _LEVEL_PERIOD_LABEL_RE).match(tail)
+    if label and (change or (claim.comparison == "none" and _comparison_period_after(claim)[0])):
+        rest = tail[label.end():]
+        return " " * label.end() + rest if rest.strip(" ,()") else ""
+    return tail
+
+
+def _per_share_wording(claim: Claim) -> bool:
+    """An EPS claim whose net-income words sit inside its own EPS phrase ("net income attributable to common
+    stockholders per diluted share"): they name the numerator of EPS, not a net-income line."""
+    if claim.metric not in ("eps_diluted", "eps_basic"):
+        return False
+    text = claim.metric_text or ""
+    eps = _level_metric_phrases(claim.metric, text)
+    return bool(eps) and all(any(a <= start and end <= b for a, b in eps)
+                             for start, end in _level_metric_phrases("net_income", text))
 
 
 def _named_income_line(claim: Claim) -> Optional[str]:
     """Use the amount's own source wording; a model-added label cannot name a different filed line."""
     if claim.metric != "net_income" and not _level_metric_phrases("net_income", claim.metric_text):
+        return None
+    if _per_share_wording(claim):
         return None
     income = claim.model_copy(update={"metric": "net_income"})
     words = _local_level_description(income, growth=claim.unit == "%") or _trailing_qualifier(income)
@@ -752,6 +992,154 @@ def _income_reading_claim(claim: Claim) -> Claim:
         return text
     return claim.model_copy(update={"metric": "net_income", "metric_text": strip(claim.metric_text),
                                     "span_text": strip(claim.span_text)})
+
+
+# "Net income attributable to <the company itself>" is the parent line, us-gaap:NetIncomeLoss: plain net income. The
+# company is "the Company", its own name words, or (in verify(), with the store) any name or ticker of the claim's own
+# company. Every other attribution (common stockholders, noncontrolling interests, another company) stays as it is.
+_PARENT_ATTRIBUTION_RE = re.compile(r"\b(?:net\s+(?:income|earnings|profit|loss(?:es)?)|earnings)"
+                                    r"(\s+attributable\s+to\s+)", re.I)
+_NAME_WORD_RE = re.compile(r"[A-Za-z0-9][\w&.'’-]*")
+
+
+def _parent_name_end(text: str, start: int, company: set[str],
+                     is_company: Optional[Callable[[str], bool]]) -> Optional[int]:
+    """Where the claim's own company, named at text[start:], ends: the longest run of up to six words that is "the
+    Company", the company's name words (with a leading "the" or a closing legal suffix), or a name is_company
+    accepts."""
+    words: list[re.Match[str]] = []
+    for m in _NAME_WORD_RE.finditer(text, start):
+        if len(words) == 6 or text[(words[-1].end() if words else start):m.start()].strip():
+            break
+        words.append(m)
+    for k in range(len(words), 0, -1):
+        name = re.sub(r"(?:'s|’s)$", "", text[words[0].start():words[k - 1].end()])
+        keys = [re.sub(r"(?:'s|’s)$", "", w.group()).casefold().strip(".") for w in words[:k]]
+        if keys[:1] == ["the"]:
+            keys = keys[1:]
+        if len(keys) > 1 and keys[-1].replace(".", "") in _LEGAL_FORM_WORDS:
+            keys = keys[:-1]
+        if keys == ["company"] or (keys and all(w in company for w in keys)) or (is_company and is_company(name)):
+            return words[k - 1].end()
+    return None
+
+
+def _without_parent_attribution(claim: Claim, is_company: Optional[Callable[[str], bool]] = None) -> Claim:
+    """The claim with "attributable to <its own company>" after a net-income phrase removed (blanked in span_text, whose
+    offsets must hold), or the claim itself when it names no such attribution."""
+    company = _company_words(claim)
+
+    def strip(text: str) -> str:
+        for m in reversed(list(_PARENT_ATTRIBUTION_RE.finditer(text))):
+            end = _parent_name_end(text, m.end(1), company, is_company)
+            if end is not None:
+                text = text[:m.start(1)] + " " * (end - m.start(1)) + text[end:]
+        return text
+
+    span, metric_text = strip(claim.span_text or ""), strip(claim.metric_text or "")
+    if (span, metric_text) == (claim.span_text or "", claim.metric_text or ""):
+        return claim
+    return claim.model_copy(update={"span_text": span, "metric_text": " ".join(metric_text.split())})
+
+
+# A bare per-share amount bound to the net-income amount right before it in one sentence: "GAAP net income was $362
+# million, or $1.28 per share", "earnings of $362 million ($1.28 per share)", "..., or $1.28 a share".
+_BARE_PER_SHARE = r"(?:per|a)\s+(?:common\s+)?share\b"
+_INCOME_FIGURE_RE = re.compile(r"\bnet\s+(?:income|earnings|profit|loss(?:es)?)\b|\bearnings\b", re.I)
+_EPS_BASIS_WORDS_RE = re.compile(r"\b(?:non[\s-]?gaap|adjusted)\b", re.I)
+# The newswire verb form "<Company> earned $5.3 billion, or $2.65 a share" ("lost": a net loss); only an article or
+# basis word may stand between the verb and the amount. Its subject may name the company itself, "the company", "it"
+# or "we".
+_EARNED_RE = re.compile(r"\b(?P<verb>earned|lost)(?:\s+(?:an?|adjusted|non[\s-]?gaap|gaap))*\s*$", re.I)
+_SELF_WORDS = frozenset({"it", "we", "said"})
+
+
+class _IncomeShare(NamedTuple):
+    start: int   # where the net-income wording begins in span_text
+    loss: bool   # a net loss: the draft's per-share figure is negative
+
+
+def _income_per_share(claim: Claim) -> Optional[_IncomeShare]:
+    """The net-income amount a bare per-share figure ("per share", "a share") is attached to, or None. Only that binding
+    reads such a figure as EPS, with the usual basic/diluted alternatives: dividends, FFO, book value, cash flow,
+    distributable earnings, per-ADS figures and per-share impacts are never attached this way. The amount's own words
+    must be net income (or a net loss, or earnings) and nothing more, and their basis must agree with the claim's
+    ("adjusted net income" gives non-GAAP EPS; an adjusted amount read as GAAP is left unread)."""
+    if (claim.metric not in ("eps_diluted", "eps_basic") or claim.unit not in ("USD/share", "USD")
+            or claim.scale != "units" or (claim.segment or "").strip()
+            or not re.fullmatch(rf"\s*{_BARE_PER_SHARE}\s*", claim.metric_text or "", re.I)):
+        return None
+    claim = _without_parent_attribution(claim)
+    pos = _value_pos(claim)
+    if pos is None:
+        return None
+    span, company = claim.span_text, _company_words(claim)
+    words = re.match(rf"\s*{_BARE_PER_SHARE}", span[pos + len(claim.value_text):], re.I)
+    if words is None:
+        return None
+    # The per-share figure's own trailing qualification ("per share from continuing operations") leaves it unread, and
+    # so does a comparison period after it ("or $2.65 per share, a year ago"): the period check reads none there.
+    own = claim.model_copy(update={"value_text": span[pos:pos + len(claim.value_text) + words.end()]})
+    tail = _without_period_phrases(re.sub(r"(?:'s|’s)\b", "", _trailing_qualifier(own)))
+    if _leftover_words(tail, (0, 0), company, None):
+        return None
+    rest = re.split(r"[;.!?]|\b(?:and|while|whereas|but|with)\b", span[pos + len(own.value_text):], maxsplit=1,
+                    flags=re.I)[0]
+    if figure := next((m for m in _FIGURE_RE.finditer(_without_period_phrases(rest)) if re.search(r"\d", m.group(0))),
+                      None):
+        rest = rest[:figure.start()]
+    if _SAME_PERIOD_RE.search(rest) or any(pattern.search(rest) for _, pattern in _GROWTH_COMPARISONS):
+        return None
+    before = span[:pos]
+    figures = [m for m in _FIGURE_RE.finditer(_without_period_phrases(before)) if re.search(r"\d", m.group(0))]
+    if not figures:
+        return None
+    amount = figures[-1]
+    link = before[amount.end():]
+    if not claim.value_text.lstrip().startswith(("$", "US$", "USD")):
+        link = re.sub(r"(?:US\s*\$|\$)\s*$", "", link)
+    if (not re.fullmatch(r"\s*(?:,\s*or|or|\()\s*", link, re.I) or "%" in amount.group()
+            or not re.search(r"\$|USD", amount.group())):
+        return None
+    head = before[:amount.start()]
+    left = max([figures[-2].end() if len(figures) > 1 else 0, *sentence_breaks(head),
+                *(m.end() for m in re.finditer(r",\s*(?:and|but|while|whereas|as)\b", head, re.I))])
+    blank = lambda m: " " * len(m.group())  # noqa: E731 - offsets must hold
+    subject = _without_period_phrases(re.sub(r"(?:'s|’s)\b", blank, head[left:]))
+    hits = list(_INCOME_FIGURE_RE.finditer(subject))
+    verb = None if hits else _EARNED_RE.search(subject)
+    if ((len(hits) != 1 and verb is None)
+            or _INCLUDING_NCI_RE.search(subject) or _CONSOLIDATED_INCOME_RE.search(subject)
+            or _NON_GAAP_WORDS_RE.search(_EPS_BASIS_WORDS_RE.sub(" ", subject))  # managed, FTE, pro forma, organic...
+            or re.search(r"\bsegments?\b|\btrailing\b|\bttm\b|\bltm\b|\btwelve[\s-]+months?\b", subject, re.I)
+            or any(ch.isalpha() and not ch.isascii() for ch in subject)):
+        return None
+    if verb is not None:
+        # "<Company> earned $5.3 billion, or $2.65 a share" (newswire): the company itself must be the subject, and
+        # the amount has no metric noun of its own (the link right after it already rules out "earned $X in revenue")
+        who = subject[:verb.start()]
+        words = {w.casefold().strip(".") for w in re.findall(r"[A-Za-z][\w&'’.-]*", who)}
+        if _leftover_words(who, (0, 0), company | _SELF_WORDS, None) or not words & (company | {"company", "it", "we"}):
+            return None
+        loss = verb["verb"].casefold() == "lost"
+    else:
+        phrase = hits[0].span()
+        subject = _COMMON_LINE_RE.sub(blank, subject)  # EPS is computed on income available to common
+        if _leftover_words(_level_sentence_framing(subject, phrase), phrase, company, None):
+            return None
+        loss = bool(re.search(r"\bloss(?:es)?\b", hits[0].group(), re.I))
+    non_gaap = bool(_EPS_BASIS_WORDS_RE.search(subject))
+    gaap = bool(_GAAP_WORD_RE.search(_EPS_BASIS_WORDS_RE.sub(" ", subject)))
+    if (gaap and non_gaap) or (non_gaap and claim.basis == "GAAP") or (gaap and claim.basis == "non-GAAP"):
+        return None
+    return _IncomeShare(left + re.match(r"[\s,;:]*", subject).end(), loss)
+
+
+def income_share_start(claim: Claim) -> Optional[int]:
+    """Where, in claim.span_text, the net-income wording a bare per-share figure is bound to begins (_income_per_share),
+    or None. Shared with extraction's source-context recovery."""
+    bound = _income_per_share(claim)
+    return None if bound is None else bound.start
 
 
 _NOT_SENTENCE_END = frozenset("inc corp co ltd plc llc no vs approx est jan feb mar apr jun jul aug sep sept oct "
@@ -816,11 +1204,12 @@ def _level_reading(claim: Claim, company: set[str], segment: Optional[str], *, g
         descriptions.append(local)
     for index, text in enumerate(descriptions):
         text = re.sub(r"(?:'s|’s)\b", "", text)
-        text = _without_period_phrases(text)
+        text = _without_defined_acronyms(_without_period_phrases(text))
         phrases = _level_metric_phrases(claim.metric, text, segment)
         if growth and index == 0 and not phrases:
             continue  # a change's own wording ("increase", "segment grew") need not name its base again
-        if len(phrases) != 1 or _TO_COMMON_RE.search(text):
+        # To-common wording outside the phrase is another line; inside an EPS phrase it names EPS (_TO_COMMON_HOLDERS)
+        if len(phrases) != 1 or _TO_COMMON_RE.search(f"{text[:phrases[0][0]]} {text[phrases[0][1]:]}"):
             return None
         phrase = phrases[0]
         segment = segment or _qualifier_before(text, phrase[0], company)
@@ -841,6 +1230,11 @@ def _level_reading(claim: Claim, company: set[str], segment: Optional[str], *, g
             if why is not None and len(phrases) <= 1:
                 why.extend(leftover)
             return None
+    # Same-store, comparable or identical sales, or "comps", are never company revenue. Named as a segment ("Same-store
+    # revenues", a store-sales segment the release reports), they are checked against that segment's own facts.
+    if (claim.metric in ("revenue", "segment_revenue") and not segment and implied_segment(claim) is None
+            and _distinct_sales(claim)):
+        return None
     return Reading(claim.metric, None, segment, _eps_alternatives(claim.metric, claim))
 
 
@@ -982,7 +1376,12 @@ def interpret(claim: Claim, why: Optional[list[str]] = None) -> Optional[Reading
       figure must be named by metric_text itself, so "a favorable impact of $0.11" is never read as EPS.
     * metric_text "operating margin": operating income / revenue for the company (no segment wording).
 
+    * "net income attributable to <the company>" is plain net income; a bare "per share" figure attached to a net-income
+      amount ("net income of $362 million, or $1.28 per share") is EPS; "the same quarter last year" after an amount
+      names its period, not a qualifier; a bank's noninterest income is read only as a percent change.
+
     why, when given, receives the qualifying words that left a tracked metric unread."""
+    claim = _without_parent_attribution(claim)
     m, unit = claim.metric, claim.unit
     company = _company_words(claim)
     seg = (claim.segment or "").strip() or None
@@ -999,9 +1398,11 @@ def interpret(claim: Claim, why: Optional[list[str]] = None) -> Optional[Reading
         if _MARGIN_RE.search(claim.metric_text or "") or not _is_change(claim):
             return Reading(m, None, seg)  # a level metric written in percent: the unit check says "?"
         return _growth_reading(claim, m, company, seg, why)
+    if m in ("eps_diluted", "eps_basic") and _income_per_share(claim) is not None:
+        return Reading(m, None, None, _eps_alternatives(m, claim))  # "net income of $X, or $Y per share"
     if m != "other":
         return _level_reading(claim, company, seg, why=why)
-    mt = claim.metric_text or ""
+    mt = _without_defined_acronyms(claim.metric_text or "")
     if _TO_COMMON_RE.search(mt):
         return None
     if unit == "%" and re.fullmatch(r"\s*(?:(?:total|consolidated|gaap|non-gaap|adjusted)\s+)*operating\s+margins?\s*",
@@ -1036,6 +1437,8 @@ def interpret(claim: Claim, why: Optional[list[str]] = None) -> Optional[Reading
     if unit == "%":
         if not _is_change(claim):
             return None
+        if base == "noninterest_income" and _SHARE_OF_RE.search(claim.span_text or ""):
+            return None  # "noninterest income rose to 34% of revenue" is a share of revenue, not a change
         typed = claim if phrases else claim.model_copy(update={"metric_text": base.replace("_", " ")})
         return _growth_reading(typed, base, company, seg, why)
     if base in PER_SHARE_METRICS and unit in ("USD/share", "USD"):
@@ -1069,6 +1472,29 @@ def _long_quarter(f: Fact, rp: ResolvedPeriod, start: Optional[date]) -> bool:
 
 def _source_rank(f: Fact) -> int:
     return SOURCE_RANK.get(f.source, 3)
+
+
+# A release row whose own label names comparable, same-store or identical sales, or a constant-currency figure, is a
+# measure of its own, never the company's revenue, whatever metric extraction filed it under: Sysco's "Comparable sales
+# using a constant currency basis (Non-GAAP)". The label is the row text before the cell's value in its locator.
+_NOT_REVENUE_ROW_RE = re.compile(rf"\bcomparable\b|\bcomps?\b|\bsame[\s-]+stores?\b|\bidentical\b|{_CURRENCY_NEUTRAL_RE.pattern}"
+                                 r"|\b(?:fx|f/x|currency)[\s-]+adjusted\b|\bexcluding\b.*\bforeign[\s-]+(?:currenc|exchange)",
+                                 re.I)
+
+
+def _not_revenue_row(f: Fact) -> bool:
+    return bool(_NOT_REVENUE_ROW_RE.search((f.locator or "").split("|", 1)[0]))
+
+
+# A release row labelled organic or pro forma is a company-defined measure of its own as well, the row-side match of
+# distinct_measure: FactSet's "Organic revenues", Estee Lauder's "Organic Net Sales, Non-GAAP", Comcast's "Pro Forma
+# Consolidated Revenue". It is never the company's revenue either.
+_DISTINCT_MEASURE_ROW_RE = re.compile(r"\borganic(?:ally)?\b|\bpro[\s-]*forma\b", re.I)
+
+
+def _kept_out_of_revenue(f: Fact) -> bool:
+    """A release row level() never reads as company revenue: _not_revenue_row, or an organic or pro forma row."""
+    return _not_revenue_row(f) or bool(_DISTINCT_MEASURE_ROW_RE.search((f.locator or "").split("|", 1)[0]))
 
 
 def form_phrase(f: Fact) -> str:
@@ -1157,6 +1583,20 @@ def hedge_of(claim: Claim) -> Optional[Hedge]:
     return None
 
 
+# "over a year ago" right after a level amount: a year-ago label, or "more than a year ago". Unlike "over the same
+# quarter last year" (_OVER_PERIOD_LABEL_RE) it names no period, so the amount is checked only in its own period and a
+# mismatch is "?" (_Check.run), never a period or value "✗". Also "over last year", "over the prior year".
+_OVER_A_YEAR_RE = re.compile(r"[\s,()]*(?P<words>over\s+(?:a\s+year\s+(?:ago|earlier|before)|(?:the\s+)?(?:prior|previous"
+                             r"|last|past)[\s-]+year|(?:the\s+)?year[\s-]+(?:ago|earlier)))\b", re.I)
+
+
+def _over_a_year(claim: Claim) -> Optional[str]:
+    """The "over a year ago" wording directly after this claim's amount, or None."""
+    pos = _value_pos(claim)
+    hit = None if pos is None else _OVER_A_YEAR_RE.match(claim.span_text, pos + len(claim.value_text))
+    return " ".join(hit["words"].split()) if hit else None
+
+
 def _comparison_period_after(claim: Claim) -> tuple[bool, bool]:
     """A year-ago / prior-quarter label directly after this amount ('$46.7 billion a year ago')."""
     local = _value_comparison_context(claim)
@@ -1164,7 +1604,11 @@ def _comparison_period_after(claim: Claim) -> tuple[bool, bool]:
         return False, False
     # An intervening "up from", "to", or another amount does not belong to this amount.
     after = re.sub(r"^[\s,()]*(?:(?:in|for|during)\s+)?(?:the\s+)?", "", local[1].lower())
-    year_ago, prior_quarter = _YEAR_AGO_RE.match(after), _PRIOR_Q_RE.match(after)
+    # "for the same quarter last year" labels a year-ago amount as "a year ago" does (_SAME_PERIOD_RE)
+    year_ago, prior_quarter = _YEAR_AGO_RE.match(after) or _SAME_PERIOD_RE.match(after), _PRIOR_Q_RE.match(after)
+    if not (year_ago or prior_quarter) and (over := _OVER_PERIOD_LABEL_RE.match(local[1].lower())):
+        # "over the same quarter last year", "over the prior-year period"; never "over a year ago" (more than a year)
+        after, year_ago = local[1].lower()[over.start("label"):], _SAME_PERIOD_RE.match(over.group("label"))
     label = year_ago or prior_quarter
     # "..., a year ago it was $30B", "(a year ago: $30B)" and "prior-year revenue was $30B" label the next one.
     if label and _INTRODUCES_AMOUNT_RE.match(after, label.end()):
@@ -1220,13 +1664,14 @@ def span_reading(claim: Claim) -> tuple[Any, ...]:
     Extraction restores source wording a model quote left out, and keeps the
     shorter quote only when both give this same value, so the verdict cannot
     depend on which one is shown. Every span_text rule in this module must be
-    reflected here: interpret(), currency_neutral(), basis_conflict(), distinct_measure() and span_terms().
+    reflected here: interpret(), currency_neutral(), basis_conflict(), distinct_measure(), span_terms() and
+    _over_a_year().
     """
     if not math.isfinite(claim.value) or claim.forward_looking or claim.metric == "guidance_tolerance":
         return ("not_read",)
     reading = interpret(claim)
     return (reading, currency_neutral(claim), span_terms(claim, reading or Reading(claim.metric, None, None)),
-            basis_conflict(claim), distinct_measure(claim), _claim_measure_qualifiers(claim))
+            basis_conflict(claim), distinct_measure(claim), _claim_measure_qualifiers(claim), _over_a_year(claim))
 
 
 SPLIT_RATIOS =(2, 3, 4, 5, 6, 7, 8, 10, 15, 20, 25, 30, 40, 50, 100)
@@ -1492,6 +1937,8 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
         return plain("unverifiable", "ambiguous",
                      f"The wording “{wording}” puts {claim.value_text} on a non-GAAP basis, but it was read as GAAP. "
                      f"With its basis unclear, NoCap doesn't check it.")
+    # "attributable to <its own company>" is read as plain net income; the draft's own words stay for display
+    original, claim = claim, _without_parent_attribution(claim, _own_company_names(claim, store, context, entity))
     income_line = _named_income_line(claim)
     if income_line == "ambiguous":
         return plain("unverifiable", "ambiguous", "The draft names both consolidated and common-stockholder "
@@ -1499,7 +1946,8 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
     if income_line and (claim.unit == "%" or claim.basis == "non-GAAP"):
         return plain("unverifiable", "no_evidence", "NoCap's alternative net-income evidence covers GAAP "
                      "level amounts, not changes or non-GAAP versions of the named line.")
-    if not income_line and (claim.metric == "net_income" or _level_metric_phrases("net_income", claim.metric_text)):
+    if not income_line and not _per_share_wording(claim) and (
+            claim.metric == "net_income" or _level_metric_phrases("net_income", claim.metric_text)):
         income_claim = claim.model_copy(update={"metric": "net_income"})
         own_words = _local_level_description(income_claim, growth=claim.unit == "%") or claim.metric_text
         if _TO_COMMON_RE.search(own_words):
@@ -1517,10 +1965,11 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
         # equivalents", "total assets", "total debt", "shares outstanding"), read from its own words and checked at a
         # balance-sheet date by receipts.balance_sheet; None leaves it untracked. Imported here: it imports this module.
         from receipts import balance_sheet
-        if (balance := balance_sheet.check(claim, store, as_of=as_of_dt, context=context, entity=entity)) is not None:
-            return _visible_money_correction(claim, balance)
+        balance = balance_sheet.check(original, store, as_of=as_of_dt, context=context, entity=entity)
+        if balance is not None:
+            return _visible_money_correction(original, balance)
         # --- end of the balance-sheet hook
-        what = f" ({claim.metric_text})" if claim.metric_text else ""
+        what = f" ({original.metric_text})" if original.metric_text else ""
         if qualifiers:
             return plain("unverifiable", "no_evidence",
                          f"The wording “{' '.join(qualifiers)}” qualifies this figure{what} in a way NoCap can't "
@@ -1530,8 +1979,33 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
     entity = entity or resolve_claim_entity(claim, store, context)
     if entity is None:
         return unresolved_entity(claim, store, as_of_dt)
-    return _visible_money_correction(
-        claim, _Check(claim, store, (int(entity[0]), str(entity[1])), as_of_dt, context, reading, named).run())
+    own = (int(entity[0]), str(entity[1]))
+    verdict = _Check(claim, store, own, as_of_dt, context, reading, named).run()
+    if (verdict.status == "wrong" and verdict.reason != "look_ahead" and claim.unit != "%"
+            and claimed_value(claim, change=False) != claimed_value(claim, change=False, loss_scope=False)):
+        # Its own clause reads the figure as income while a loss word elsewhere in its span would read it as a loss
+        # (_income_subject). The figure stays "✗" only when that loss reading is wrong too.
+        loss = _Check(claim, store, own, as_of_dt, context, reading, named, loss_scope=False).run()
+        if loss.status == "unverifiable":
+            verdict = loss
+        elif loss.status != "wrong" or loss.reason == "look_ahead":
+            verdict = plain("unverifiable", "ambiguous",
+                            f"Read as income, as its own words say, {claim.value_text} doesn't match the filing; "
+                            f"read as a loss, as other words in the same text say, it fits. NoCap can't tell which "
+                            f"the draft means.").model_copy(update={"evidence": loss.evidence})
+    return _visible_money_correction(claim, verdict)
+
+
+def _own_company_names(claim: Claim, store: EvidenceStore, context: Optional[str],
+                       entity: Optional[tuple[int, str]]) -> Optional[Callable[[str], bool]]:
+    """For _without_parent_attribution, with the store: whether a name or ticker ("MPC", "The Walt Disney Company")
+    resolves to the claim's own company. None when the claim names no attribution or its company is unknown."""
+    if not any(_PARENT_ATTRIBUTION_RE.search(text or "") for text in (claim.span_text, claim.metric_text)):
+        return None
+    own = entity or resolve_claim_entity(claim, store, context)
+    if own is None:
+        return None
+    return lambda name: (hit := _resolve(store, name)) is not None and hit[0] == int(own[0])
 
 
 def _join(names: list[str]) -> str:
@@ -1586,7 +2060,7 @@ def unresolved_entity(claim: Claim, store: EvidenceStore, as_of: Optional[dateti
 class _Check:
     def __init__(self, claim: Claim, store: EvidenceStore, entity: tuple[int, str], as_of: Optional[datetime],
                  context: Optional[str], reading: Optional[Reading] = None,
-                 named: Optional[Sequence[tuple[int, str, str]]] = None):
+                 named: Optional[Sequence[tuple[int, str, str]]] = None, *, loss_scope: bool = True):
         self.c, self.store, self.as_of, self.context = claim, store, as_of, context
         self.named = list(named or ())
         self.cik, self.ticker = entity
@@ -1617,7 +2091,7 @@ class _Check:
         self.metric = terms.metric
         self.basis_stated = claim.basis is not None
         self.basis = terms.basis
-        self.claimed = claimed_value(claim, change=self.growth_base is not None)
+        self.claimed = claimed_value(claim, change=self.growth_base is not None, loss_scope=loss_scope)
         if self.margin_unit:
             self.claimed = _margin_claimed_value(claim)
         self.tol = tolerance(claim)
@@ -1629,6 +2103,7 @@ class _Check:
         # (period, comparison) -> base period of a change whose two figures no single filing reports together
         self.unpaired: dict[tuple[ResolvedPeriod, str], ResolvedPeriod] = {}
         self.gross_margin_base_missing: set[ResolvedPeriod] = set()
+        self._allow_not_revenue_rows = False  # _diag_not_revenue_row only: the rows level() keeps out of revenue
 
     # -- verdicts ------------------------------------------------------------
     def verdict(self, status: str, reason: str, explanation: str, *, evidence: Iterable[Fact] = (),
@@ -1743,6 +2218,8 @@ class _Check:
               segment: Optional[str] = None) -> list[Obs]:
         if rp is None or rp.period_end is None:
             return []
+        if metric == "noninterest_income":
+            return self._noninterest_income(cik, rp, basis, segment)
         want = "instant" if metric in INSTANT_METRICS else "annual" if rp.fiscal_period == "FY" else "quarter"
         # The calendar's own start for this quarter, for a 16- or 17-week quarter (only the company's own calendar)
         start = next((e.start for e in self.cal if (e.fiscal_year, e.fiscal_period) == (rp.fiscal_year, rp.fiscal_period)),
@@ -1751,6 +2228,9 @@ class _Check:
         for f in self._store_facts(cik, metric, rp.period_end, segment):
             if f.cik != cik or f.metric != metric or f.period_end != rp.period_end:
                 continue
+            if (metric == "revenue" and segment is None and f.source == "press_release" and _kept_out_of_revenue(f)
+                    and not self._allow_not_revenue_rows):
+                continue  # a comparable, same-store, constant-currency, organic or pro forma row is not revenue
             if basis == "non-GAAP":
                 if f.basis != "non-GAAP" or f.source != "press_release":
                     continue  # non-GAAP figures come only from press releases
@@ -1772,6 +2252,27 @@ class _Check:
             out.append(Obs(float(f.value), (f,)))
         if metric in PER_SHARE_METRICS and len(out) > 1:
             out = self._split_consistent(out)
+        return out
+
+    def _noninterest_income(self, cik: int, rp: ResolvedPeriod, basis: Optional[str],
+                            segment: Optional[str]) -> list[Obs]:
+        """A bank's noninterest income as its filing tags it: the NoninterestIncome term of the revenue the store serves
+        as net interest income plus noninterest income (receipts.ingest.BANK_REVENUE), cited from that revenue fact,
+        whose locator shows both terms. GAAP, company-wide, one filing's own figure only; a bank whose revenue is
+        tagged directly holds no such line, so its noninterest income stays "?"."""
+        if basis == "non-GAAP" or segment:
+            return []
+        out = []
+        for o in self.level(cik, "revenue", rp, basis):
+            f = o.primary
+            hit = _BANK_REVENUE_FORMULA_RE.fullmatch(f.locator or "")
+            if (hit is None or f.source != "derived" or f.concept != "us-gaap:RevenuesNetOfInterestExpense"
+                    or (hit["form"], hit["accession"]) != (f.form, f.accession)
+                    or list(f.derived_from) != [f.accession]):
+                continue
+            nii, other = (float(hit[name].replace(",", "")) for name in ("nii", "other"))
+            if math.isfinite(other) and math.isclose(nii + other, f.value, rel_tol=0.0, abs_tol=0.5):
+                out.append(Obs(other, (f,)))
         return out
 
     def _split_consistent(self, obs: list[Obs]) -> list[Obs]:
@@ -1842,7 +2343,8 @@ class _Check:
             metric = "segment_revenue"
         cur, prev = self.level(cik, metric, rp, basis, segment), self.level(cik, metric, base, basis, segment)
         pairs = [(c, p) for c in cur for p in prev if _filings(p) <= _filings(c)]
-        if not pairs and cur and prev:
+        # Noninterest income is a term of a revenue fact's locator: only one filing's own pair is read for it.
+        if not pairs and cur and prev and metric != "noninterest_income":
             pairs = self._unrestated_pairs(cik, metric, cal, rp, cur, prev, basis, segment)
         if not pairs and base is not None and any(p.value > 0 for p in prev) and cur:
             self.unpaired[(rp, comparison)] = base
@@ -2220,6 +2722,17 @@ class _Check:
 
     # -- the rules -------------------------------------------------------------
     def run(self) -> Verdict:
+        verdict = self._run()
+        if (verdict.status == "wrong" and verdict.reason != "look_ahead" and self.growth_base is None
+                and not any(_comparison_period_after(self.c)) and (over := _over_a_year(self.c))):
+            # "compared to $25.2 billion over a year ago": a year-ago figure, or one from more than a year earlier
+            return self.verdict("unverifiable", "ambiguous",
+                                f"“{over}” after {self.c.value_text} can mean a year earlier or more than a year "
+                                f"earlier, so NoCap can't tell which period the figure is for.",
+                                evidence=verdict.evidence)
+        return verdict
+
+    def _run(self) -> Verdict:
         c = self.c
         if self.comparison_ambiguous:
             return self.verdict("unverifiable", "ambiguous",
@@ -2285,7 +2798,8 @@ class _Check:
             return direction
         if measure := self._non_gaap_measure_mismatch(actual):
             return measure
-        for diagnose in (self._diag_split, self._diag_split_basis, self._diag_bank, self._diag_period, self._diag_scale,
+        for diagnose in (self._diag_not_revenue_row, self._diag_split, self._diag_split_basis, self._diag_bank,
+                         self._diag_period, self._diag_scale,
                          self._diag_basis, self._diag_entity):
             v = diagnose(rp, actual)
             if v is not None:
@@ -2906,6 +3420,32 @@ class _Check:
             f"{self.co_s} {form_phrase(fact)} reports {row} of {self.fmt(actual.value)}; "
             f"the draft's {self.c.metric_text or self.mlabel(False)} may be a different non-GAAP measure.",
             evidence=actual.facts)
+
+    def _diag_not_revenue_row(self, rp: ResolvedPeriod, actual: Obs) -> Optional[Verdict]:
+        """A figure that matches only with a release row level() keeps out of revenue (a comparable-sales,
+        constant-currency, organic or pro forma row): "?", never "✗", since the draft may mean that measure. A figure
+        stated as GAAP can't."""
+        uses_revenue = self.metric in ("revenue", "revenue_growth", *_MARGIN_METRICS) or self.derived is not None
+        if (self.basis_stated and self.basis == "GAAP") or self.segment or not uses_revenue:
+            return None
+        self._allow_not_revenue_rows = True
+        try:
+            hits = [o for o in self.matches(self.observe(rp, basis="non-GAAP")) if self.public(o)
+                    and any(f.metric == "revenue" and f.source == "press_release" and _kept_out_of_revenue(f)
+                            for f in o.facts)]
+        finally:
+            self._allow_not_revenue_rows = False
+        if not hits:
+            return None
+        best = _best_obs(hits)
+        row = next(f for f in best.facts if f.metric == "revenue" and _kept_out_of_revenue(f))
+        label = (row.locator or "").split("|", 1)[0].strip()
+        reported = ("reported revenue" if self.metric == "revenue" and not self.growth_base
+                    else f"the {self.mlabel()} on reported revenue")
+        return self.verdict("unverifiable", "ambiguous",
+                            f"{self.c.value_text} matches a figure from {self.co_s} release row “{label}” for "
+                            f"{self.plabel(rp)}, a measure other than revenue, while {reported} is "
+                            f"{self.fmt_observation(actual)}.", evidence=[*best.facts, *actual.facts])
 
     def _diag_basis(self, rp: ResolvedPeriod, actual: Obs) -> Optional[Verdict]:
         other = "GAAP" if self.basis == "non-GAAP" else "non-GAAP"

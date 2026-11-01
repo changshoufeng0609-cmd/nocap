@@ -1,0 +1,637 @@
+"""Freeze an independent, source-only 500-company spot check. Never calls NoCap.
+
+python eval/build_spot500.py --data-root /path/to/Meta/data            # v1 (frozen; rebuilds identically)
+python eval/build_spot500.py --data-root /path/to/Meta/data --set v2   # v2: new seed, v1 companies excluded
+"""
+from __future__ import annotations
+
+import argparse
+from collections import Counter, defaultdict
+from contextlib import contextmanager
+from dataclasses import asdict, dataclass
+from datetime import date
+import hashlib
+import json
+from pathlib import Path
+import random
+import re
+import sys
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path = [p for p in sys.path if Path(p).resolve() != Path(__file__).parent]
+sys.path.insert(0, str(ROOT))
+from eval import build_corpus as base
+
+SEED = 20261101
+COMMIT = "30336129d119addf94440be6e082cad2c4fe315f"
+EXCLUDED = frozenset("AAPL AMD AMZN BAC GOOGL JPM META MSFT NFLX NVDA TSLA".split())
+IRREGULAR = frozenset("COST KR DPZ PEP AZO".split())
+MUTATORS = (*base.MUTATORS, "direction")
+REASONS = {**base.EXPECTED_REASON, "direction": "value_mismatch"}
+DIRECTION_PAIRS = {
+    "rose": "fell", "fell": "rose", "increased": "decreased", "decreased": "increased",
+    "increase": "decrease", "decrease": "increase", "grew": "declined", "declined": "grew",
+    "expanded": "contracted", "contracted": "expanded", "expansion": "contraction",
+    "contraction": "expansion", "up": "down", "down": "up", "higher": "lower", "lower": "higher",
+}
+DIRECTION_RE = re.compile(r"\b(" + "|".join(DIRECTION_PAIRS) + r")\b", re.I)
+# The 30 companies sampled by the frozen v1 set (eval/spot500_manifest.json).
+V1_COMPANIES = frozenset("A ABNB AMT APTV AZO BBY CFG CHD CIEN DIS FE FLEX FOXA HAL HCA IP IVZ JBHT KR "
+                         "MLM MPC MTD NRG PLTR PNC PWR TKO TWLO WELL WFC".split())
+BUILDER_FILES = ('eval/build_spot500.py', 'eval/spot500_sources.py', 'eval/build_corpus.py')
+
+
+@dataclass(frozen=True)
+class SpotSet:
+    """One frozen spot-check version. Every set runs the same procedure; only
+    the seed, the companies excluded before sampling, and a quota that those
+    exclusions leave unfillable may differ."""
+    name: str
+    seed: int
+    commit: str
+    commit_role: str
+    corpus: str
+    manifest: str
+    extra_excluded: frozenset = frozenset()
+    extra_excluded_from: str | None = None
+    # Five named companies form the variable-week stratum. Excluding an earlier
+    # set's picks can exhaust it; such a set reserves all eligible ones left.
+    variable_week_cap: bool = False
+    # The builder file that froze a set is provenance, not something a later
+    # builder edit can recompute. v1 keeps the hash of its freezing builder, the
+    # git blob eval/build_spot500.py at 050be2e5fe97f9920308e9d63643b7ee8c9771c7.
+    frozen_builder_hashes: tuple = ()
+
+    @property
+    def version(self):
+        return f"spot500_{self.name}"
+
+    @property
+    def excluded(self):
+        return EXCLUDED | self.extra_excluded
+
+
+SETS = {
+    'v1': SpotSet('v1', SEED, COMMIT, 'worktree source baseline; uncommitted new evaluation files',
+                  'corpus/spot500_v1.jsonl', 'spot500_manifest.json',
+                  frozen_builder_hashes=(('eval/build_spot500.py',
+                                          '9b4c79e938ac9cb061a6b06876dc0a09ea31de920b0d79c54b6647d50e64c033'),)),
+    'v2': SpotSet('v2', 20261102, '6099dc974adf4c934d4732c4bb01d18ee1b622d6',
+                  'worktree source baseline; uncommitted builder parameterization and new evaluation files',
+                  'corpus/spot500_v2.jsonl', 'spot500_v2_manifest.json',
+                  extra_excluded=V1_COMPANIES, extra_excluded_from='v1', variable_week_cap=True),
+}
+
+
+def canonical(value):
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def targetable(n):
+    return (n["role"] == "current" and n["screen"] == "ok" and not n["approx"]
+            and not n["fx_adjusted"] and not n["is_range"] and not n["qualifier"])
+
+
+def mutate_direction(sentence, doc, company_rows):
+    """Flip exactly one local change word, preserving every numeric character.
+
+    Only an XBRL-screened, nonzero change is eligible. A shared change verb for
+    multiple figures is rejected, as are level statements such as 'rose to 25%'.
+    """
+    text, nums = sentence["text"], sentence["numbers"]
+    for i, n in enumerate(nums):
+        if not targetable(n) or not n["growth"] or n["kind"] not in ("pct", "pp", "bps") or not n["value"]:
+            continue
+        exact = re.search(r"xbrl=([-+\d.eE]+)", n.get("screen_detail") or "")
+        if exact is None or float(exact.group(1)) * n["sign"] <= 0:
+            continue
+        left = nums[i - 1]["end"] if i else 0
+        matches = list(DIRECTION_RE.finditer(text, left, n["start"]))
+        if not matches:
+            continue
+        match = matches[-1]
+        between = text[match.end():n["start"]]
+        if len(between) > 45 or re.search(r"\b(?:to|from)\b|[;.!?]", between, re.I):
+            continue
+        # A following number that inherits this verb would also change meaning.
+        if i + 1 < len(nums) and nums[i + 1]["growth"]:
+            clause = text[n["end"]:nums[i + 1]["start"]]
+            if not DIRECTION_RE.search(clause) and not re.search(r"[;.!?]", clause):
+                continue
+        word = DIRECTION_PAIRS[match.group().lower()]
+        if match.group().isupper():
+            word = word.upper()
+        elif match.group()[0].isupper():
+            word = word.capitalize()
+        shift = len(word) - len(match.group())
+        return base.Mutation(
+            mutator="direction", text=base._replace(text, match.start(), match.end(), word),
+            context=doc["context"], as_of=None, target_value_text=n["text"],
+            target_span=(n["start"] + shift, n["end"] + shift), original_value_text=n["text"],
+            expected_value=n["sign"] * n["value"], affected_value_texts=[n["text"]],
+            edit={"start": match.start(), "end": match.end(), "before": match.group(), "after": word},
+            screen="xbrl", detail={"metric": n["metric"], "from": match.group(), "to": word})
+    return None
+
+
+def mutate_single_basis(sentence, doc, companies):
+    """Stage-2 basis swap for a single explicitly adjusted figure.
+
+    The existing pair mutator is attempted first. This extension changes one
+    basis token and requires a different, available companyfacts GAAP value.
+    """
+    old = base.mutate_basis(sentence, doc, companies)
+    if old:
+        return old
+    nums = sentence["numbers"]
+    if len(nums) != 1:
+        return None
+    n = nums[0]
+    if n["basis"] != "non-GAAP" or n["qualifier"] or n["growth"] or n["role"] != "current" or n["is_range"]:
+        return None
+    # An adjustment amount, excluded cost, or EPS impact is not the level of
+    # the adjusted measure. Replacing one of two basis labels is not a swap.
+    if re.search(r"\b(?:both|includ\w*|exclud\w*|impact|reduc\w*|benefit|costs?|charges?|tax|"
+                 r"chang\w*|increas\w*|decreas\w*|grew|growth|result\w*|retrospective|"
+                 r"compar\w*|prior|previous|favorable|unfavorable)\b|reported and",
+                 sentence["text"], re.I):
+        return None
+    if n["metric"] == "eps_diluted" and n["scale"] != "units":
+        return None
+    if len(re.findall(r"\b(?:non-GAAP|adjusted)\b", sentence["text"], re.I)) != 1:
+        return None
+    years = {int(m.group()) for m in base.YEAR_RE.finditer(sentence['text'])}
+    if years - {doc['fy'], date.fromisoformat(doc['period_end']).year}:
+        return None
+    if not re.search(r"\b(?:was|were|of|at|is)\s*$|:\s*$", sentence['text'][:n['start']], re.I):
+        return None
+    token = re.search(r"\b(?:non-GAAP|adjusted)\b", sentence["text"][:n["start"]], re.I)
+    if not token:
+        return None
+    series = companies[sentence["ticker"]]["series"].get(n["metric"], {})
+    actual = base.series_at(series, date.fromisoformat(doc["period_end"]))
+    if actual is None:
+        return None
+    actual /= base.SCALE_FACTOR[n["scale"]] if n["kind"] == "money" else 1
+    if not base._clearly_apart(actual, n["sign"] * n["value"], n["decimals"]):
+        return None
+    shift = 4 - len(token.group())
+    return base.Mutation(
+        mutator="basis", text=base._replace(sentence["text"], token.start(), token.end(), "GAAP"),
+        context=doc["context"], as_of=None, target_value_text=n["text"],
+        target_span=(n["start"] + shift, n["end"] + shift), original_value_text=n["text"],
+        expected_value=actual, affected_value_texts=[n["text"]],
+        edit={"start": token.start(), "end": token.end(), "before": token.group(), "after": "GAAP"},
+        screen="xbrl", detail={"metric": n["metric"], "target_basis": "GAAP",
+                               "true_basis_of_number": "non-GAAP", "stated_basis": "GAAP"})
+
+
+@contextmanager
+def mutation_environment(companies, seed=SEED):
+    """Reuse legacy pure mutators without changing their module or frozen corpora."""
+    adapted = {}
+    for ticker, c in companies.items():
+        names = {c["name"], c.get("sec_title", c["name"]), ticker}
+        adapted[ticker] = base.Company(ticker, c["name"], tuple(sorted(names, key=lambda s: (-len(s), s))),
+                                       "NYSE", "bank" if is_bank(c) else "tech")
+    from eval.spot500_sources import expected_for, within_tolerance
+    with patch.multiple(base, SEED=seed, COMPANIES=adapted, TICKERS=tuple(sorted(companies)), targetable=targetable,
+                        expected_for=expected_for, within_tolerance=within_tolerance):
+        yield
+
+
+def is_bank(company):
+    # The GICS "Asset Management & Custody Banks" bucket also holds asset
+    # managers. Only these two explicit bank groups satisfy the bank quota.
+    return company.get("sub_industry") in ("Diversified Banks", "Regional Banks")
+
+
+def is_utility_reit(company):
+    return bool(re.search(r"REIT|utilities|utility", company.get("sub_industry", ""), re.I))
+
+
+def mutation_sentence_safe(s):
+    if re.search(r"\b(?:surpass\w*|exceed\w*|topp\w*|at (?:least|most)|up to|"
+                 r"more than|less than|nearly|almost|approximately|about|"
+                 r"exclud\w*|includ\w*|impact|adjustments?|retrospective)\b|"
+                 r"\b(?:over|under)\s+\$?\d", s['text'], re.I):
+        return False
+    return not (any(n['metric'] == 'capital_returned' for n in s['numbers']) and re.search(
+        r"\b(?:through|via|in)\s+(?:cash\s+)?(?:dividends|repurchases|share buybacks)\b", s['text'], re.I))
+
+
+def mutation_candidates(sentences, docs, companies, *, seed=SEED):
+    by_label = defaultdict(dict)
+    for d in docs.values():
+        by_label[d["ticker"]][(d["fy"], d["fp"])] = d
+    candidates = defaultdict(list)
+    with mutation_environment(companies, seed):
+        for s in sorted(sentences, key=lambda s: s["sentence_id"]):
+            if s["kind"] == "forward_looking":
+                continue
+            d = docs[s["doc_id"]]
+            # Bounds must not become supposedly false by changing a threshold
+            # that is still below/above the actual value.
+            if not mutation_sentence_safe(s):
+                continue
+            for mut in MUTATORS:
+                # A context/time edit must affect only one numeric claim.
+                if mut in ("entity", "look_ahead") and len(s["numbers"]) != 1:
+                    continue
+                if mut == "direction":
+                    m = mutate_direction(s, d, companies)
+                elif mut == "basis":
+                    m = mutate_single_basis(s, d, companies)
+                elif mut == "entity":
+                    # A context swap is safe only for company-free prose.
+                    # Explicit names not in the S&P aliases can otherwise
+                    # survive it (e.g. 'Deckers' vs 'Deckers Outdoor').
+                    name = companies[s['ticker']]['name']
+                    first = re.split(r"[\s,.]+", name)[0]
+                    if re.search(r"\b" + re.escape(first) + r"\b", s['text'], re.I) and not base._entity_mentions(s['text'], base.COMPANIES[s['ticker']]):
+                        continue
+                    if not base._entity_mentions(s['text'], base.COMPANIES[s['ticker']]):
+                        if len(s['text']) > 160 or re.search(r"\b(?!company[’']s)[A-Za-z]+[’']s\b", s['text'], re.I):
+                            continue
+                        if not re.match(r"(?:Net|Total|Record|First|Second|Third|Fourth|GAAP|Revenues?|Sales|Operating|Gross|Diluted|Earnings|Cash|The Company)\b", s['text'], re.I):
+                            continue
+                    m = base.mutate_entity(s, d, companies, by_label)
+                elif mut == "look_ahead":
+                    first = min(d["accepted_at"], d.get("tenq_accepted_at", d["accepted_at"]))
+                    m = base.mutate_look_ahead(s, {**d, "accepted_at": first}, companies)
+                else:
+                    m = getattr(base, f"mutate_{mut}")(s, d, companies)
+                if m and m.screen != "assumed" and len(m.affected_value_texts) == 1:
+                    candidates[mut].append((s, m))
+    return candidates
+
+
+def features(sentence, company, doc):
+    out = set()
+    for n in sentence["numbers"]:
+        metric = n["metric"]
+        if metric in ("gross_margin", "operating_margin", "net_margin"):
+            out.add(metric)
+            if n["kind"] in ("pp", "bps") and n["growth"]:
+                out.add("margin_change")
+        elif metric in ("cash_and_equivalents", "total_assets", "total_debt", "shares_outstanding"):
+            out.update(("balance_sheet", metric))
+        else:
+            out.add(metric or "other")
+        if n["growth"] and n["kind"] == "pct":
+            out.add("growth")
+        if n["basis"] == "non-GAAP":
+            out.add("non_gaap")
+    if is_bank(company):
+        out.add("bank")
+        if any(n["metric"] == "revenue" for n in sentence["numbers"]):
+            out.add("bank_revenue")
+    if is_utility_reit(company):
+        out.add("reit_or_utility")
+    if sentence["ticker"] in IRREGULAR:
+        out.add("variable_week_company")
+    if doc.get("quarter_days", 0) >= 110:
+        out.add("16_or_17_week_quarter")
+    if sentence["kind"] == "forward_looking":
+        out.add("guidance")
+    return sorted(out)
+
+
+def make_item(s, d, company, mutation=None, *, version="spot500_v1"):
+    oid = version.replace("_", "-") + "-" + s["sentence_id"]
+    control = s["kind"] == "forward_looking"
+    mut = mutation.mutator if mutation else ("forward_looking_control" if control else "none")
+    text = mutation.text if mutation else s["text"]
+    context = mutation.context if mutation else d["context"]
+    as_of = mutation.as_of if mutation else None
+    gold = []
+    target_found = False
+    for n in s["numbers"]:
+        span, vt = [n["start"], n["end"]], n["text"]
+        if mutation and mutation.edit:
+            e = mutation.edit
+            shift = len(e["after"]) - (e["end"] - e["start"])
+            if span[0] >= e["end"]:
+                span = [x + shift for x in span]
+            elif span[0] <= e["start"] and e["end"] <= span[1]:
+                span[1] += shift
+        is_target = bool(mutation and vt == mutation.original_value_text
+                         and span == list(mutation.target_span) and not target_found)
+        if is_target:
+            span, vt = list(mutation.target_span), mutation.target_value_text
+            target_found = True
+        gold.append({"value_text": vt, "span": span, "metric": n["metric"],
+                     "basis": mutation.detail.get("target_basis", n["basis"]) if is_target else n["basis"],
+                     "role": "target" if is_target else "guidance" if control else "true",
+                     "expected_status": "wrong" if is_target else "unverifiable" if control else "verified",
+                     "expected_reason": REASONS[mut] if is_target else "forward_looking" if control else "match",
+                     "source_screen": n["screen"], "source_screen_detail": n["screen_detail"]})
+    if mutation and not target_found:
+        raise ValueError("Mutation target absent")
+    for g in gold:
+        assert text[slice(*g["span"])] == g["value_text"], (s["sentence_id"], g)
+    return {"item_id": oid + ("-" + mut if mutation else ""), "corpus_version": version,
+            "ticker": s["ticker"], "text": text, "context": context, "as_of": as_of,
+            "item_hash": base.item_hash(text, as_of, context), "original_item_id": oid if mutation else None,
+            "mutator": mut, "features": features(s, company, d), "gold_claims": gold,
+            "expected_status": "wrong" if mutation else "unverifiable" if control else "verified",
+            "expected_reason": REASONS[mut] if mutation else "forward_looking" if control else "match",
+            "target_span": list(mutation.target_span) if mutation else None,
+            "target_value_text": mutation.target_value_text if mutation else None,
+            "mutation": asdict(mutation) if mutation else None,
+            "source": {"doc_id": s["doc_id"], "sentence_id": s["sentence_id"],
+                       "original_text": s["text"], "sentence_sha256": digest(s["text"].encode()),
+                       "period_end": d["period_end"], "fiscal_year": d["fy"], "fiscal_period": d["fp"]}}
+# Explicit grouping of the archived S&P record's GICS sub-industry strings.
+# This is selection metadata only, not an inference from financial outcomes.
+SECTOR_GROUPS = {
+    'Communication Services': '''Advertising|Broadcasting|Cable & Satellite|Integrated Telecommunication Services|Interactive Home Entertainment|Interactive Media & Services|Movies & Entertainment|Publishing|Wireless Telecommunication Services''',
+    'Consumer Discretionary': '''Apparel Retail|Apparel, Accessories & Luxury Goods|Automobile Manufacturers|Automotive Parts & Equipment|Automotive Retail|Broadline Retail|Casinos & Gaming|Computer & Electronics Retail|Distributors|Footwear|Home Improvement Retail|Homebuilding|Homefurnishing Retail|Hotels, Resorts & Cruise Lines|Leisure Products|Other Specialty Retail|Restaurants|Specialized Consumer Services''',
+    'Consumer Staples': '''Agricultural Products & Services|Consumer Staples Merchandise Retail|Distillers & Vintners|Food Distributors|Food Retail|Household Products|Packaged Foods & Meats|Personal Care Products|Soft Drinks & Non-alcoholic Beverages|Tobacco''',
+    'Energy': '''Integrated Oil & Gas|Oil & Gas Equipment & Services|Oil & Gas Exploration & Production|Oil & Gas Refining & Marketing|Oil & Gas Storage & Transportation''',
+    'Financials': '''Asset Management & Custody Banks|Consumer Finance|Diversified Banks|Financial Exchanges & Data|Insurance Brokers|Investment Banking & Brokerage|Life & Health Insurance|Multi-Sector Holdings|Multi-line Insurance|Property & Casualty Insurance|Regional Banks|Reinsurance|Transaction & Payment Processing Services''',
+    'Health Care': '''Biotechnology|Health Care Distributors|Health Care Equipment|Health Care Facilities|Health Care Services|Health Care Supplies|Health Care Technology|Life Sciences Tools & Services|Managed Health Care|Pharmaceuticals''',
+    'Industrials': '''Aerospace & Defense|Agricultural & Farm Machinery|Air Freight & Logistics|Building Products|Cargo Ground Transportation|Construction & Engineering|Construction Machinery & Heavy Transportation Equipment|Data Processing & Outsourced Services|Diversified Support Services|Electrical Components & Equipment|Environmental & Facilities Services|Heavy Electrical Equipment|Human Resource & Employment Services|Industrial Conglomerates|Industrial Machinery & Supplies & Components|Passenger Airlines|Passenger Ground Transportation|Rail Transportation|Research & Consulting Services|Trading Companies & Distributors''',
+    'Information Technology': '''Application Software|Communications Equipment|Consumer Electronics|Electronic Components|Electronic Equipment & Instruments|Electronic Manufacturing Services|IT Consulting & Other Services|Internet Services & Infrastructure|Semiconductor Materials & Equipment|Semiconductors|Systems Software|Technology Distributors|Technology Hardware, Storage & Peripherals''',
+    'Materials': '''Commodity Chemicals|Construction Materials|Copper|Fertilizers & Agricultural Chemicals|Gold|Industrial Gases|Metal, Glass & Plastic Containers|Paper & Plastic Packaging Products & Materials|Specialty Chemicals|Steel''',
+    'Real Estate': '''Data Center REITs|Health Care REITs|Hotel & Resort REITs|Industrial REITs|Multi-Family Residential REITs|Office REITs|Other Specialized REITs|Real Estate Services|Retail REITs|Self-Storage REITs|Single-Family Residential REITs|Telecom Tower REITs|Timber REITs''',
+    'Utilities': '''Electric Utilities|Gas Utilities|Independent Power Producers & Energy Traders|Multi-Utilities|Water Utilities''',
+}
+SECTOR_BY_INDUSTRY = {industry: sector for sector, values in SECTOR_GROUPS.items() for industry in values.split('|')}
+FEATURE_PRIORITIES = ('net_margin', 'margin_change', 'bank_revenue', 'cash_and_equivalents',
+                      'total_assets', 'total_debt', 'shares_outstanding',
+                      'gross_margin', 'operating_margin', '16_or_17_week_quarter')
+
+
+def select_companies(companies, docs, sentences, *, count=30, seed=SEED, excluded=EXCLUDED,
+                     variable_week_cap=False):
+    """Seeded, coverage-constrained sector sample; consult source tags only.
+
+    Excluded companies leave the eligible pool before any reservation, so
+    every quota and the sector fill draw only from the remaining companies.
+    With variable_week_cap, the variable-week quota of two is lowered to the
+    number of eligible variable-week companies left; otherwise it is strict.
+    """
+    rng = random.Random(seed)
+    historical = defaultdict(list)
+    for sentence in sorted(sentences, key=lambda s: s['sentence_id']):
+        if sentence['kind'] != 'forward_looking':
+            historical[sentence['ticker']].append(sentence)
+    eligible = sorted(set(historical) - excluded)
+    pools = {ticker: set(f for s in historical[ticker]
+                         for f in features(s, companies[ticker], docs[s['doc_id']])) for ticker in eligible}
+    chosen, reservations = [], []
+
+    def reserve(name, candidates, minimum):
+        pool = sorted(candidates)
+        needed = max(0, minimum - len(set(pool) & set(chosen)))
+        available = [t for t in pool if t not in chosen]
+        if len(available) < needed:
+            raise ValueError(f'Insufficient source companies for {name}: {len(pool)}')
+        picks = rng.sample(available, needed)
+        chosen.extend(picks)
+        reservations.append({'constraint': name, 'minimum': minimum, 'selected': picks})
+
+    reserve('banks', [t for t in eligible if is_bank(companies[t])], 3)
+    reserve('REITs or utilities', [t for t in eligible if is_utility_reit(companies[t])], 2)
+    variable_week = [t for t in eligible if t in IRREGULAR]
+    reserve('variable-week companies', variable_week, min(2, len(variable_week)) if variable_week_cap else 2)
+    basis_companies = [t for t in eligible if any(mutate_single_basis(s, docs[s['doc_id']], companies)
+                                                for s in historical[t])]
+    # Basis needs explicit printed labels, so reserve its feasible source stratum.
+    if basis_companies:
+        reserve('basis-supporting companies', basis_companies, min(5, len(basis_companies)))
+    with mutation_environment(companies, seed):
+        period_companies = [t for t in eligible if any(
+            mutation_sentence_safe(s) and (m := base.mutate_period(s, docs[s['doc_id']], companies))
+            and m.screen != 'assumed' for s in historical[t])]
+    if period_companies:
+        reserve('period-supporting companies', period_companies, min(5, len(period_companies)))
+    guidance_tickers = {s['ticker'] for s in sentences if s['kind'] == 'forward_looking'}
+    guidance_companies = [t for t in eligible if t in guidance_tickers]
+    if guidance_companies:
+        reserve('guidance-supporting companies', guidance_companies, min(5, len(guidance_companies)))
+    margin_directions = [t for t in eligible if any(
+        (m := mutate_direction(s, docs[s['doc_id']], companies)) and m.detail['metric'].endswith('margin')
+        for s in historical[t])]
+    if margin_directions:
+        reserve('screened margin direction', margin_directions, 1)
+    for feature in FEATURE_PRIORITIES:
+        candidates = [t for t in eligible if feature in pools[t]]
+        if candidates:
+            reserve(feature, candidates, 1)
+    strata = defaultdict(list)
+    for ticker in eligible:
+        sector = SECTOR_BY_INDUSTRY[companies[ticker]['sub_industry']]
+        strata[sector].append(ticker)
+    for sector in sorted(strata):
+        rng.shuffle(strata[sector])
+    # Fill the least-represented broad sector first; ties use sorted GICS names.
+    while len(chosen) < count:
+        counts = Counter(SECTOR_BY_INDUSTRY[companies[t]['sub_industry']] for t in chosen)
+        available = [sector for sector in strata if any(t not in chosen for t in strata[sector])]
+        if not available:
+            raise ValueError('Not enough eligible companies')
+        sector = min(available, key=lambda k: (counts[k], k))
+        chosen.append(next(t for t in strata[sector] if t not in chosen))
+    if len(chosen) > count:
+        raise ValueError('Coverage reservations exceed company target')
+    return sorted(chosen), {'reservations': reservations, 'eligible_company_count': len(eligible),
+                            'eligible_by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[t]['sub_industry']]
+                                                                     for t in eligible).items()))}
+
+
+def build_items(companies, docs, sentences, spot=None):
+    """Pure source-to-items transform. No extraction, store facts, or verifier calls."""
+    spot = spot or SETS['v1']
+    selected, selection = select_companies(companies, docs, sentences, seed=spot.seed, excluded=spot.excluded,
+                                           variable_week_cap=spot.variable_week_cap)
+    companies = {t: companies[t] for t in selected}
+    docs = {k: d for k, d in docs.items() if d['ticker'] in companies}
+    sentences = sorted((s for s in sentences if s['ticker'] in companies), key=lambda s: s['sentence_id'])
+    candidates = mutation_candidates(sentences, docs, companies, seed=spot.seed)
+    rng = random.Random(spot.seed)
+    for mutator in MUTATORS:
+        rng.shuffle(candidates[mutator])
+    selected_sentences, mutants, used = {}, [], Counter()
+    # Scarce mutation types get first choice. A source can produce at most two mutants.
+    for mutator in sorted(MUTATORS, key=lambda m: (len(candidates[m]), m)):
+        taken_companies = set()
+        for _ in range(5):
+            options = [(s, m) for s, m in candidates[mutator] if used[s['sentence_id']] < 2
+                       and not any(old_s['sentence_id'] == s['sentence_id'] and old_m.mutator == mutator
+                                   for old_s, old_m in mutants)]
+            if not options:
+                raise ValueError(f'Need five source-screened {mutator} mutations; found {len(candidates[mutator])}')
+            represented = {s['ticker'] for s in selected_sentences.values()}
+            s, m = min(options, key=lambda pair: (
+                mutator == 'direction' and _ == 0 and not pair[1].detail['metric'].endswith('margin'),
+                pair[0]['ticker'] in taken_companies,
+                pair[0]['sentence_id'] not in selected_sentences and pair[0]['ticker'] in represented,
+                pair[0]['sentence_id'] not in selected_sentences,
+            ))
+            selected_sentences[s['sentence_id']] = s
+            mutants.append((s, m))
+            used[s['sentence_id']] += 1
+            taken_companies.add(s['ticker'])
+    for ticker in selected:
+        if any(s['ticker'] == ticker for s in selected_sentences.values()):
+            continue
+        options = [s for s in sentences if s['ticker'] == ticker and s['kind'] != 'forward_looking']
+        rng.shuffle(options)
+        covered = {f for s in selected_sentences.values() for f in features(s, companies[s['ticker']], docs[s['doc_id']])}
+        chosen = min(options, key=lambda s: (
+            -len(set(features(s, companies[ticker], docs[s['doc_id']])) & (set(FEATURE_PRIORITIES) - covered)),
+            -sum(n['screen'] == 'ok' for n in s['numbers']),
+        ))
+        selected_sentences[chosen['sentence_id']] = chosen
+    # Cover available newer features even if mutation carriers did not mention them.
+    for feature in FEATURE_PRIORITIES:
+        covered = {f for s in selected_sentences.values() for f in features(s, companies[s['ticker']], docs[s['doc_id']])}
+        options = [s for s in sentences if s['kind'] != 'forward_looking'
+                   and feature in features(s, companies[s['ticker']], docs[s['doc_id']])]
+        if feature not in covered and options:
+            chosen = rng.choice(options)
+            selected_sentences[chosen['sentence_id']] = chosen
+    controls = [s for s in sentences if s['kind'] == 'forward_looking']
+    rng.shuffle(controls)
+    chosen_controls = []
+    for s in controls:
+        if s['ticker'] not in {r['ticker'] for r in chosen_controls}:
+            chosen_controls.append(s)
+        if len(chosen_controls) == 5:
+            break
+    if len(chosen_controls) != 5:
+        raise ValueError('Need five guidance controls at distinct sampled companies')
+    originals = sorted(selected_sentences.values(), key=lambda s: s['sentence_id'])
+    items = [make_item(s, docs[s['doc_id']], companies[s['ticker']], version=spot.version) for s in originals]
+    items += [make_item(s, docs[s['doc_id']], companies[s['ticker']], mutation=m, version=spot.version)
+              for s, m in sorted(mutants, key=lambda pair: (pair[1].mutator, pair[0]['sentence_id']))]
+    items += [make_item(s, docs[s['doc_id']], companies[s['ticker']], version=spot.version)
+              for s in sorted(chosen_controls, key=lambda s: s['sentence_id'])]
+    if not 60 <= len(items) <= 80:
+        raise ValueError(f'Outside preregistered size range: {len(items)}')
+    if len({it['item_hash'] for it in items}) != len(items):
+        raise ValueError('Duplicate item inputs')
+    selection.update(selected_companies=selected, mutation_candidate_counts={m: len(candidates[m]) for m in MUTATORS},
+                     selected_sentence_ids=sorted([*selected_sentences, *(s['sentence_id'] for s in chosen_controls)]))
+    return items, selection
+
+
+def encode_jsonl(items):
+    return b''.join(canonical(item) + b'\n' for item in items)
+
+
+def build(data_root, spot=None):
+    from eval.spot500_sources import load_sources
+    return build_from_sources(*load_sources(data_root, progress=True), spot=spot)
+
+
+def builder_hashes(spot):
+    frozen = dict(spot.frozen_builder_hashes)
+    return {p: frozen.get(p) or digest((ROOT / p).read_bytes()) for p in BUILDER_FILES}
+
+
+def reference_set(spot):
+    """Check a later set's extra exclusions against the frozen earlier set (read-only)."""
+    earlier = SETS[spot.extra_excluded_from]
+    manifest_bytes = (ROOT / 'eval' / earlier.manifest).read_bytes()
+    corpus_bytes = (ROOT / 'eval' / earlier.corpus).read_bytes()
+    frozen = json.loads(manifest_bytes)
+    if frozen['version'] != earlier.version or frozen['corpus_sha256'] != digest(corpus_bytes):
+        raise ValueError(f'Frozen {earlier.version} files changed')
+    if frozenset(frozen['selection']['selected_companies']) != spot.extra_excluded:
+        raise ValueError(f'Extra exclusions differ from the frozen {earlier.version} companies')
+    return {'version': earlier.version, 'seed': frozen['seed'],
+            'manifest': f'eval/{earlier.manifest}', 'manifest_sha256': digest(manifest_bytes),
+            'corpus': f'eval/{earlier.corpus}', 'corpus_sha256': frozen['corpus_sha256']}
+
+
+def build_from_sources(companies, docs, sentences, provenance, *, spot=None):
+    from eval.eval import DEFAULT_EST_COST_PER_ITEM
+    spot = spot or SETS['v1']
+    reference = reference_set(spot) if spot.extra_excluded_from else None
+    items, selection = build_items(companies, docs, sentences, spot)
+    selected = set(selection['selected_companies'])
+    chosen_sids = set(selection['selected_sentence_ids'])
+    source_records = ([{'kind': 'company', 'id': t, 'sha256': digest(canonical(companies[t]))} for t in sorted(selected)]
+                      + [{'kind': 'document', 'id': k, 'sha256': digest(canonical(d))}
+                         for k, d in sorted(docs.items()) if d['ticker'] in selected]
+                      + [{'kind': 'sentence', 'id': s['sentence_id'], 'sha256': digest(canonical(s))}
+                         for s in sentences if s['sentence_id'] in chosen_sids])
+    raw = encode_jsonl(items)
+    counts = {'companies': len(selected), 'items': len(items), 'gold_claims': sum(len(it['gold_claims']) for it in items),
+              'by_company': dict(sorted(Counter(it['ticker'] for it in items).items())),
+              'by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[t]['sub_industry']] for t in selected).items())),
+              'by_mutator': dict(sorted(Counter(it['mutator'] for it in items).items())),
+              'by_feature': dict(sorted(Counter(f for it in items for f in it['features']).items()))}
+    # Persist only source inputs. The full pool fingerprint detects selection-frame changes.
+    manifest = {'version': spot.version, 'seed': spot.seed, 'commit': spot.commit, 'commit_role': spot.commit_role,
+                'procedure': {'selection': f'Python Random({spot.seed}), sorted source pools; reserve banks/REIT-utilities/variable-week and available new features; fill least represented GICS sector to 30; source-only mutation feasibility',
+                              'quarters': 'latest two stored release/10-Q pairs; no 10-K-only Q4; numeric companyfacts screening',
+                              'items': 'five per mutator; at most two mutants per original; fill one original per sampled company and newer-feature gaps; five distinct-company guidance controls',
+                              'outputs_used_for_selection': False, 'human_review': False},
+                'excluded_tickers': sorted(spot.excluded), 'company_list': [
+                    {'ticker': t, 'name': companies[t]['name'], 'sector': SECTOR_BY_INDUSTRY[companies[t]['sub_industry']],
+                     'sub_industry': companies[t]['sub_industry']} for t in sorted(selected)],
+                'selection': selection, 'counts': counts, 'corpus_sha256': digest(raw),
+                'items': [{'item_id': it['item_id'], 'sha256': digest(canonical(it))} for it in items],
+                'source_records': source_records, 'source_pool_sha256': digest(canonical([companies, docs, sentences])),
+                'sources': {**provenance, 'records': [r for r in provenance['records'] if r['ticker'] in selected],
+                            'screen_counts': {k: v for k, v in provenance['screen_counts'].items() if docs[k]['ticker'] in selected}},
+                'builder_hashes': builder_hashes(spot),
+                'cost_estimate': {'per_item_usd': DEFAULT_EST_COST_PER_ITEM, 'total_usd': len(items) * DEFAULT_EST_COST_PER_ITEM,
+                                  'source': 'eval/eval.py DEFAULT_EST_COST_PER_ITEM', 'live_budget_usd': 0.95}}
+    if reference:
+        # Only the seed and the excluded companies differ from the earlier set,
+        # plus any quota the exclusions leave unfillable.
+        changes = [f"seed {reference['seed']} -> {spot.seed}",
+                   f"excluded before sampling: the original {len(EXCLUDED)} plus the {len(spot.extra_excluded)} "
+                   f"companies sampled by {reference['version']}"]
+        quota = next(r for r in selection['reservations'] if r['constraint'] == 'variable-week companies')
+        if quota['minimum'] < 2:
+            changes.append(f"variable-week quota lowered from 2 to {quota['minimum']}, the number of eligible "
+                           f"variable-week companies left after the exclusions")
+        manifest['procedure']['changes_from_' + reference['version']] = changes
+        manifest['exclusions'] = {
+            'original': sorted(EXCLUDED), reference['version'] + '_companies': sorted(spot.extra_excluded),
+            'applied_to': 'the eligible company pool, before every reservation and the sector fill; '
+                          'the sampling frame and source screening are unchanged'}
+        manifest['reference_set'] = reference
+    return raw, json.dumps(manifest, sort_keys=True, indent=2, ensure_ascii=False).encode() + b'\n'
+
+
+def write_frozen(path, raw):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        if path.read_bytes() != raw:
+            raise ValueError(f'Refusing changed frozen output: {path}')
+        return
+    with path.open('xb') as handle:
+        handle.write(raw)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--data-root', type=Path, required=True)
+    parser.add_argument('--output-dir', type=Path, default=ROOT / 'eval')
+    parser.add_argument('--set', dest='spot_set', choices=sorted(SETS), default='v1',
+                        help='frozen set to build; v1 (the default) may only be rebuilt byte for byte')
+    args = parser.parse_args(argv)
+    spot = SETS[args.spot_set]
+    raw, manifest = build(args.data_root, spot)
+    write_frozen(args.output_dir / spot.corpus, raw)
+    write_frozen(args.output_dir / spot.manifest, manifest)
+    print(json.dumps({'corpus_sha256': digest(raw), 'manifest_sha256': digest(manifest),
+                      'counts': json.loads(manifest)['counts']}))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

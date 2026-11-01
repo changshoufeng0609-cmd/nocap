@@ -8,7 +8,7 @@ A comment above each post gives its length and the source of each figure, with l
 
 Keeps the opener and adds the coverage. It links the live product, because the attached X cut is the demo.
 
-<!-- 279 as typed, X count 271. Hackathon: README.md:7. Checks the numbers in an earnings draft against SEC filings, and every ✓ or ✗ comes with a receipt: README.md:3. All 500 S&P 500 companies: README.md:20, :139. Muse Spark, Muse Wonder, SAM 3.1: README.md:30-36. Live product: README.md:17. -->
+<!-- 279 as typed, X count 271. Hackathon: README.md:7. Checks the numbers in an earnings draft against SEC filings, and every ✓ or ✗ comes with a receipt: README.md:3. All 500 S&P 500 companies: README.md:20, :140. Muse Spark, Muse Wonder, SAM 3.1: README.md:30-36. Live product: README.md:17. -->
 
 ```text
 Meet NoCap, built for the Meta Global AI Developer Hackathon: it checks the numbers in an earnings draft against SEC filings for all 500 S&P 500 companies, with a receipt for every ✓ or ✗. Powered by Muse Spark, Muse Wonder and SAM 3.1.
@@ -24,7 +24,7 @@ Alternatives to the main post, not extra posts. The form takes one post URL ([su
 
 Opens like the full walkthrough's stakes card.
 
-<!-- 278 as typed, X count 270. "One wrong number. One public correction.": docs/demo/video-script.md:16. All 500 S&P 500 companies: README.md:20, :139. A receipt for every ✓ or ✗: README.md:3. Models: README.md:30-36. Hackathon: README.md:7. -->
+<!-- 278 as typed, X count 270. "One wrong number. One public correction.": docs/demo/video-script.md:16. All 500 S&P 500 companies: README.md:20, :140. A receipt for every ✓ or ✗: README.md:3. Models: README.md:30-36. Hackathon: README.md:7. -->
 
 ```text
 One wrong number. One public correction.
@@ -38,7 +38,7 @@ https://receipts-nocap.vercel.app
 
 Spells out the two errors the X cut opens on.
 
-<!-- 274 as typed, X count 264. "up 18% from a year ago" and "GAAP earnings per diluted share were $2.22": examples/nvda_q2_fy2027.txt:1, :5. Filed year-over-year growth of 105.85%: README.md:11. $2.22 is non-GAAP diluted EPS and the GAAP figure is $2.46: README.md:114; "adjusted EPS": docs/demo/video-script.md:56. "AI-drafted", "two planted errors", "NoCap flags both": docs/demo/video-script.md:49. All 500 S&P 500 companies: README.md:20; the X cut's end card says the same. -->
+<!-- 274 as typed, X count 264. "up 18% from a year ago" and "GAAP earnings per diluted share were $2.22": examples/nvda_q2_fy2027.txt:1, :5. Filed year-over-year growth of 105.85%: README.md:11. $2.22 is non-GAAP diluted EPS and the GAAP figure is $2.46: README.md:115; "adjusted EPS": docs/demo/video-script.md:56. "AI-drafted", "two planted errors", "NoCap flags both": docs/demo/video-script.md:49. All 500 S&P 500 companies: README.md:20; the X cut's end card says the same. -->
 
 ```text
 An AI-drafted NVIDIA earnings story, two planted errors:
@@ -57,7 +57,7 @@ Alternative B leaves the hackathon and the Meta models to the video's title and 
 
 Replies under whichever opener you post, in this order.
 
-<!-- 220 as typed, X count 220. GAAP versus adjusted EPS, year-over-year versus quarter-over-quarter growth: README.md:5. Muse Spark 1.3 extracts the claims: README.md:30. Code checks values, periods and basis: README.md:125. Ambiguity returns ?: README.md:51. -->
+<!-- 220 as typed, X count 220. GAAP versus adjusted EPS, year-over-year versus quarter-over-quarter growth: README.md:5. Muse Spark 1.3 extracts the claims: README.md:30. Code checks values, periods and basis: README.md:126. Ambiguity returns ?: README.md:51. -->
 
 ```text
 1/4 A plausible earnings draft can mix GAAP with adjusted EPS or confuse year-over-year and quarter-over-quarter growth. Muse Spark 1.3 extracts the claims; code checks filed values, periods and basis. Ambiguity stays ?.
@@ -69,13 +69,13 @@ Replies under whichever opener you post, in this order.
 2/4 Coverage: all 500 S&P 500 companies. On Oct 31, Muse Spark 1.3 mapped the latest four earnings releases of 467 of them in one day: 1,969 calls, $42.97. Code kept a cell only when its own parse matched, behind an XBRL gate. Three QA rounds spot-checked the new data.
 ```
 
-<!-- 274 as typed, X count 274. 44/48, 1/47, 22/110, 20/20, 0/52: README.md:61-64. Frozen source, run once on October 29, small correlated sets: README.md:71. S&P 500 expansion on October 31: README.md:139. -->
+<!-- 274 as typed, X count 274. 44/48, 1/47, 22/110, 20/20, 0/52: README.md:61-64. Frozen source, run once on October 29, small correlated sets: README.md:72. S&P 500 expansion on October 31: README.md:140. -->
 
 ```text
 3/4 Frozen held-out test: NoCap caught 44/48 planted errors, with 1 false alarm in 47 unmodified sentences; 22/110 true figures stayed ?. Trap drafts: 20/20 caught, 0/52 true figures flagged. Small seeded tests, run Oct 29 before the S&P 500 expansion; not general accuracy.
 ```
 
-<!-- 252 as typed, X count 214. Live through 2026-11-17 16:00 UTC: README.md:17. 2:52 walkthrough with recorded runs and a synthetic voice: README.md:13. Time travel: docs/demo/video-script.md:26. Meta's whole 10-K in one Muse Spark request: README.md:69. --> <!-- verify-at-release -->
+<!-- 252 as typed, X count 214. Live through 2026-11-17 16:00 UTC: README.md:17. 2:52 walkthrough with recorded runs and a synthetic voice: README.md:13. Time travel: docs/demo/video-script.md:26. Meta's whole 10-K in one Muse Spark request: README.md:70. --> <!-- verify-at-release -->
 
 ```text
 4/4 Live checks run through Nov 17. The full 2:52 walkthrough adds time travel and Meta's whole 10-K in one Muse Spark request (recorded runs, synthetic voice): https://receipts-nocap.vercel.app/demo
@@ -85,6 +85,14 @@ Code: https://github.com/changshoufeng0609-cmd/nocap
 ## Ready replies
 
 Post one only when a reply calls for it.
+
+When someone asks how accurate the 500-company version is:
+
+<!-- 214 as typed, X count 215. One-shot spot check of the deployed version on Nov 1, 27/35 caught, none marked ✓, 0/72 true figures wrong, 18/72 left ?: README.md:65, :72; eval/spot500_methods.md. Small seeded test, run once, not general accuracy: eval/spot500_methods.md (Limits). -->
+
+```text
+Fresh one-shot spot check of the deployed 500-company version (Nov 1): 27/35 planted errors caught, none marked ✓; 0/72 true figures flagged wrong; 18/72 left ?. A small seeded test, run once, not general accuracy.
+```
 
 When the $5 daily cap has been reached:
 

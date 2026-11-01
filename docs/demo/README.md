@@ -113,14 +113,22 @@ The v2 capture's API process started at 16:00:14 (+0800), three minutes before c
 the development branch. An in-process replay with `4bd6f4c` reproduced both captured Check responses byte for byte, so the
 footage matches the committed verifier.
 
-**Not claimed:** human listening (narration or music), editorial approval or playback on the deployed site.
-A person should watch and listen to both MP4s before release.
+**Not claimed:** human listening (narration or music) or editorial approval. Deployed playback is covered only
+by the automated start, duration, caption and hash checks in the November 1 release record. A person should
+watch and listen to both MP4s before the submission.
 
 ## Public player
 
 `web/public/demo/` holds byte-identical v2.1 copies of the MP4 and VTT. The page text in
-`web/app/demo/page.tsx` describes v2.1. Nothing is deployed yet; on October 30, Production deployment
-`dpl_DWzZqy43YFywgeQTrW5S9REN9jz3` (public source `9db6cfc`) still served v1. <!-- verify-at-release -->
+`web/app/demo/page.tsx` describes v2.1.
+
+Since November 1, Production deployment `dpl_2vPGGu27yA9Lx29ovmucC3BTwCvW` (public source `c99c9a0`) serves it. The anonymous production acceptance confirmed four things on desktop and on 390px mobile:
+- v2.1 plays;
+- it runs 171.88 s;
+- it loads 26 English captions;
+- the browser-downloaded MP4 and VTT match their SHA-256 hashes.
+
+The [release record](../public-release-2026-11-01.json) has the details. <!-- verify-at-release -->
 
 ## Reproduce
 

@@ -1332,16 +1332,17 @@ def _qualifier_end(tail: str, lead: re.Match[str], figures: list[dict[str, Any]]
 def _right_context(passage: str, value_end: int, breaks: list[int]) -> Optional[int]:
     """Where a qualification or comparison directly after this number ends ('excluding stock compensation',
     'a year ago', 'year over year excluding China', '(non-GAAP)'), or None when none follows."""
-    from receipts.verify import _GROWTH_COMPARISONS, _INTRODUCES_AMOUNT_RE, _without_period_phrases
+    from receipts.verify import _GROWTH_COMPARISONS, _INTRODUCES_AMOUNT_RE, _SAME_PERIOD_RE, _without_period_phrases
 
     tail = passage[value_end:_clause_window(breaks, value_end, len(passage))[1]]
     figures = [t for t in scan_numbers(_without_period_phrases(tail)) if t["ignored"] is None]
     endpoint = re.match(r"\s*,?\s*(?:from|compared\s+(?:with|to)|versus|vs\.?)\s+", tail, re.I)
     if endpoint and figures and figures[0]["start"] == endpoint.end():
         return value_end + figures[0]["end"]  # "up to $96.2B from $46.7B": the start decides what "up to" means
+    # A whole same-period label first ("over the prior-year period", not just "prior-year"), as the verifier reads it
     comparison = re.match(
         r"\s*,?\s*(?:(?:from|over|than|in|for|during|since|versus|vs\.?|compared\s+(?:with|to))\s+)?(?:the\s+)?"
-        rf"(?:{'|'.join(f'(?:{p.pattern})' for _, p in _GROWTH_COMPARISONS)})", tail, re.I)
+        rf"(?:(?:{_SAME_PERIOD_RE.pattern})|{'|'.join(f'(?:{p.pattern})' for _, p in _GROWTH_COMPARISONS)})", tail, re.I)
     if comparison and _INTRODUCES_AMOUNT_RE.match(tail, comparison.end()):
         return None  # ", a year ago it was $30B": the label belongs to the next amount
     if comparison:
@@ -1359,6 +1360,20 @@ def _direction_context(passage: str, value: tuple[int, int], breaks: list[int]) 
     before = _DIRECTION_BEFORE.search(passage, floor, value[0])
     after = _DIRECTION_AFTER.match(passage, value[1], ceiling)
     return (before.start() if before else None), (after.end() if after else None)
+
+
+def _income_share_context(passage: str, value: tuple[int, int], c: ModelClaim, normalized: tuple[float, str, str],
+                          breaks: list[int]) -> Optional[int]:
+    """Where the net-income amount a bare per-share quote is attached to begins: "GAAP net income was $362 million, or
+    $1.28 per share" for the quote "or $1.28 per share". The verifier binds the two (verify.income_share_start) within
+    the number's sentence; the model is asked for nothing new."""
+    from receipts.verify import income_share_start
+
+    if c.metric not in ("eps_diluted", "eps_basic") or c.forward_looking:
+        return None
+    floor, ceiling = _clause_window(breaks, value[0], len(passage))
+    start = income_share_start(_probe_claim(c, normalized, passage, (floor, ceiling)))
+    return None if start is None else floor + start
 
 
 def _probe_claim(c: ModelClaim, normalized: tuple[float, str, str], passage: str,
@@ -1384,7 +1399,8 @@ def _restore_source_context(passage: str, span: tuple[int, int], value: tuple[in
 
     down, lower = _direction_context(passage, value, breaks)
     starts = {span[0], *(min(span[0], s) for s in (_left_context(passage, span, value[0], c, normalized[1], breaks),
-                                                   down) if s is not None)}
+                                                   down, _income_share_context(passage, value, c, normalized, breaks))
+                         if s is not None)}
     ends = {span[1], *(max(span[1], e) for e in (_right_context(passage, value[1], breaks), lower) if e is not None)}
     count = passage[span[0]:span[1]].count(c.value_text)
     # A restored span never repeats this value: the verifier must find it once.

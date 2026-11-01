@@ -1,24 +1,35 @@
-# Deploy and run NoCap (updated 2026-10-31)
+# Deploy and run NoCap (updated 2026-11-01)
 
 ## Current deployment state
 
-[NoCap](https://receipts-nocap.vercel.app), the [2:45 demo](https://receipts-nocap.vercel.app/demo)
-and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public. <!-- verify-at-release -->
-The [current acceptance record](public-release-fix-2026-10-30.json) <!-- verify-at-release --> binds the source, deployment,
-real browser checks and file hashes. The [October 29 record](public-release-update-2026-10-29.json)
-remains for the previous deployment.
+[NoCap](https://receipts-nocap.vercel.app), the [2:52 demo](https://receipts-nocap.vercel.app/demo)
+and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public, and live checks are open for judging. <!-- verify-at-release -->
+The [current acceptance record](public-release-2026-11-01.json) <!-- verify-at-release --> binds several things together:
+- the source and the deployment;
+- the real browser checks;
+- the consented live smoke;
+- the file hashes.
+
+The [October 30 record](public-release-fix-2026-10-30.json) remains for the previous deployment.
 
 | Setting | Current state |
 |---|---|
 | Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
-| Production deployment | `dpl_DWzZqy43YFywgeQTrW5S9REN9jz3`, READY, about 27-second build; previous `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` kept for rollback <!-- verify-at-release --> |
-| Deployed public source | `9db6cfcd058d81c59b87e165caaedaaf8f2f381d` (review fixes; private `04e5450`) <!-- verify-at-release --> |
+| Production deployment | `dpl_2vPGGu27yA9Lx29ovmucC3BTwCvW`, READY, 56-second build from the GitHub commit; previous `dpl_DWzZqy43YFywgeQTrW5S9REN9jz3` kept for rollback <!-- verify-at-release --> |
+| Deployed public source | `c99c9a0e68a65be47c91296107cdddbc0ed48515` (all 500 S&P 500 companies; private `42d48aa`) <!-- verify-at-release --> |
 | Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
-| Live access | Paused. Saved examples, recorded demo and benchmark inspection are available. <!-- verify-at-release --> |
-| Shared admission | Existing free Neon primary, namespace `nocap`, $1 per UTC admission day; no configuration or allowance reset in this release <!-- verify-at-release --> |
-| Model-quality evidence | [One-time held-out results](../eval/heldout_results.md) and [separate four-model Q&A](../eval/qa_results.md) |
+| Live access | Check, Fix, Slide and Ask are open until 2026-11-17 16:00 UTC (Nov 18 00:00 Taipei). Saved examples, recordings and benchmark inspection stay at $0. <!-- verify-at-release --> |
+| Shared admission | Existing free Neon primary, namespace `nocap`, US$5 per UTC admission day. Preview is paused with `RECEIPTS_LIVE_REQUESTS_ENABLED=false`, and the allowance was not reset <!-- verify-at-release --> |
+| Model-quality evidence | [One-time held-out results](../eval/heldout_results.md), [separate four-model Q&A](../eval/qa_results.md) and the [one-shot 500-company spot check](../eval/spot500_methods.md) |
 | Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
+
+**This deployment (November 1, all 500 companies).**
+- **Health:** 291,112 facts for 500 companies, snapshot 2026-11-01. The first health response after READY took 1.36 s.
+- **Anonymous browser acceptance:** passed 49 checks on desktop and 390px mobile with 0 provider calls. The three saved examples replayed 7/2/2, 5/3/0 and 6/1/2◷. The 2:52 video and its 26 captions matched their hashes.
+- **Live smoke:** the consented run passed 50 checks. One live Check, Fix, Slide and Ask cost $0.0483 in 9 model calls.
+- **Balance-sheet Check:** one live check, $0.0058, judged NVIDIA's total assets ✓, an inflated cash figure ✗ and stockholders' equity ✓.
+- **Whole-filing question:** a repeated 10-K question reused 101,105 cached prompt tokens and cost $0.0186, against $0.1293 uncached.
 
 **Previous deployment (October 29 media and benchmark update).** The base release `de534ca` / `dpl_CNhaupwwUJDBGcvsDxhpD6ML7UCe` passed six saved-example
 checks, two zero-call Check/Ask pause responses, SEC receipt inspection, unavailable Private/whole-filing

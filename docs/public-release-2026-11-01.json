@@ -1,0 +1,147 @@
+{
+  "date": "2026-11-01",
+  "status": "passed",
+  "scope": "Website release of all 500 S&P 500 companies (November 1 snapshot) with the live judging window opened. GitHub main was updated while the repository stays private until the final latest-quarter top-up on November 4.",
+  "public_repository": "https://github.com/changshoufeng0609-cmd/nocap",
+  "repository_visibility": "private on November 1; made public after the November 4 top-up",
+  "public_product": "https://receipts-nocap.vercel.app",
+  "public_demo": "https://receipts-nocap.vercel.app/demo",
+  "public_benchmarks": "https://receipts-nocap.vercel.app/benchmarks",
+  "deployed_public_commit": "c99c9a0e68a65be47c91296107cdddbc0ed48515",
+  "reviewed_export_commit": "eab3e698ab1a27bfb6e2505996669ec6ca88db85",
+  "reviewed_export_tree": "db32ce052ad36b7e61b20fd9d6a7affdea276319",
+  "previous_public_main": "3e67d7834e5e14335bafb2d4839a240299bb928d",
+  "source_private_commit": "42d48aae8722ee632efc5b45d2eb90d4987f1a2a",
+  "source_archive_sha256": "2cbf47839c3032c5781801a03dbe361dfc11690bf9f3accbe3765077cfbf346a",
+  "export": {
+    "files": 2464,
+    "removed_from_public_tree": 0,
+    "largest_file_bytes": 46940160,
+    "credential_scan": "Known local credential values, the SEC User-Agent, the Modal endpoint, Gmail addresses and token patterns: no undisclosed matches; the exact documented DUMMY_KEY fixture digest is excluded. This is not a guarantee that every unknown credential is detectable.",
+    "push": "Four commits under the release identity (two media commits, the evidence database, then the rest) because a single HTTPS push timed out on a slow uplink; the last three went over SSH. The pushed tree equals the reviewed export tree."
+  },
+  "deployment": {
+    "id": "dpl_2vPGGu27yA9Lx29ovmucC3BTwCvW",
+    "target": "production",
+    "source": "Vercel REST API deployment from the GitHub commit (gitSource with the exact sha; repository Git auto-deployments are disabled)",
+    "triggered_by": "Owner-run script in the operator session after explicit approval (data/eval_runs/prod_deploy_20261101.sh, local, gitignored)",
+    "ready": true,
+    "build_seconds": 56.0,
+    "aliases": [
+      "receipts-nocap.vercel.app",
+      "receipts-nocap-changshoufeng0609-cmds-projects.vercel.app",
+      "receipts-nocap-git-main-changshoufeng0609-cmds-projects.vercel.app"
+    ],
+    "environment_changes": "Production only: RECEIPTS_LIVE_REQUESTS_ENABLED=true, RECEIPTS_LIVE_UNTIL=2026-11-17T16:00:00Z, RECEIPTS_DAILY_BUDGET_USD=5. The other five Production variables are unchanged; Preview stays paused.",
+    "previous_production_for_rollback": "dpl_DWzZqy43YFywgeQTrW5S9REN9jz3 (public source 9db6cfc)"
+  },
+  "gate0_preview": "A protected CLI-uploaded Preview passed the size, cold-start and pause checks before the export. The CLI's default ignore list omitted data/snapshot/pr_facts/CVS (92 facts) from that upload; the Git-sourced Production build includes them (health counts 291,112 facts at runtime).",
+  "health": {
+    "live_requests_paused": false,
+    "live_until": "2026-11-17T16:00:00Z",
+    "draft_cache_policy": "snapshot_only",
+    "companies": 500,
+    "facts": 291112,
+    "data_snapshot": "2026-11-01",
+    "snapshot_fingerprint": "1381a6507b55e7322c8b369e",
+    "first_response_after_ready_ttfb_seconds": 1.36,
+    "second_response_ttfb_seconds": 1.1
+  },
+  "anonymous_browser": {
+    "harness": "data/eval_runs/release_acceptance_20261101.py (local, gitignored)",
+    "evidence": "data/eval_runs/release-acceptance-20261101-1707-production/result.json (local, gitignored)",
+    "evidence_sha256": "c8a5a0db5320916017700994f25dbae6ed6b1778d9c2ee76038191a0e6df1387",
+    "started_utc": "2026-11-01T09:07:20Z",
+    "finished_utc": "2026-11-01T09:10:55Z",
+    "authentication_supplied": false,
+    "mock_responses": "Only the labelled UI fixtures (synthetic budget refusals and pause probes), fulfilled in the browser and never sent upstream",
+    "checks_passed": 49,
+    "items_passed": [
+      "health",
+      "saved_examples",
+      "recorded_samples",
+      "demo",
+      "benchmarks",
+      "link_preview",
+      "ui_behaviour",
+      "hygiene"
+    ],
+    "layout_states": 27,
+    "saved_examples": {
+      "nvda-ai-story": "7 verified / 2 wrong / 2 unverifiable; 10/10 number coverage",
+      "meta-ai-story": "5 verified / 3 wrong; 8/8 number coverage",
+      "q2-roundup-look-ahead": "6 verified / 1 wrong / 2 not yet public (look-ahead); 9/9 number coverage"
+    },
+    "recorded_samples": "Slide (Bank of America): 32 readings, 5 verified / 27 unverifiable; Ask filing quotes (META 10-K): 4 exact quotations; Private: 1 verified / 1 wrong; all replayed at $0",
+    "media": "171.88-second v2.1 video with 26 English cues; browser-downloaded MP4 and VTT match SHA-256 9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897 and cd4a5ccf352e37d8...",
+    "benchmarks": "All 200 model records match the committed JSON",
+    "page_errors": 0,
+    "console_errors": 0,
+    "http_errors": 0,
+    "external_requests": 0,
+    "cached_posts": 15,
+    "provider_calls": 0,
+    "new_spend_usd": 0
+  },
+  "live_smoke": {
+    "consent": "Owner consent on 2026-11-01 to a post-release live smoke of about $0.20 that includes a balance-sheet sentence",
+    "acceptance_with_live_smoke": {
+      "evidence": "data/eval_runs/release-acceptance-20261101-1713-production-live/result.json (local, gitignored)",
+      "evidence_sha256": "8298dcb544e70c8cfc025f058a9d2ced1dbb027f0272b989f149fc9807126c11",
+      "checks_passed": 50,
+      "runs": {
+        "check": "done; 6 verified / 3 wrong / 2 unverifiable; $0.005291; 1 model call",
+        "fix": "corrected; 9 verified / 0 wrong / 2 unverifiable after the fix; $0.028698; 4 model calls",
+        "slide": "done; 2 verified / 2 wrong; $0.012595; 3 model calls",
+        "ask": "result; $0.001708; 1 model call"
+      },
+      "reported_cost_usd": 0.048292,
+      "model_calls": 9,
+      "earlier_attempt": "release-acceptance-20261101-1711-production-live stopped before any live request: the harness counted the caption track while Chromium was still parsing it (25 of 26 cues; the deployed VTT has 26 and matches its hash). The harness now waits for the track element to load; the 26-cue assertion is unchanged."
+    },
+    "balance_sheet_check": {
+      "evidence": "data/eval_runs/prod-deploy-20261101/live-balance-sheet-probe.json (local, gitignored)",
+      "evidence_sha256": "03d9a3aac9b99a363d49e63454ac973e303a41d59784a6965382fd2aa0719c3e",
+      "draft": "NVIDIA ended the second quarter of fiscal 2027 with total assets of $320.3 billion. Cash and cash equivalents stood at $24.7 billion as of July 26, 2026. Stockholders' equity reached $229.0 billion.",
+      "verdicts": "Total assets verified (us-gaap:Assets, $320.272 billion); cash wrong (us-gaap:CashAndCashEquivalentsAtCarryingValue, $22.443 billion); stockholders' equity verified (us-gaap:StockholdersEquity, $228.984 billion); all from 10-Q 0001045810-26-000075",
+      "cost_usd": 0.005836,
+      "model_calls": 1
+    },
+    "whole_filing_prompt_cache": {
+      "evidence": "data/eval_runs/prod-deploy-20261101/live-grounding-cache.json (local, gitignored)",
+      "evidence_sha256": "37408be90c35c21d8f6bc60f56f899d5c75e04a636f87d01076205171339fd7e",
+      "filing": "META-0001628280-26-003942",
+      "first_question": "$0.12929; 101,123 input tokens, 0 cached; 5 quotations",
+      "second_question": "$0.018642; 101,122 input tokens, 101,105 cached; 3 quotations"
+    },
+    "total_reported_cost_usd": 0.20206,
+    "shared_ledger_readback": {
+      "utc_day": "2026-11-01",
+      "namespace": "nocap",
+      "cap_usd": 5.0,
+      "charged_usd": 0.202061,
+      "pending": 0,
+      "method": "Owner-run read-only SELECT on the shared Neon ledger (data/eval_runs/read_ledger_20261101.py, local, gitignored); the database URL was never printed",
+      "reconciliation": "Equals the server-reported live smoke total of $0.20206; the one-shot spot500 run uses its own local attempt ledger and is not part of this row"
+    }
+  },
+  "spot500": "One-shot 500-company spot check on the deployed code and evidence, run once on November 1: eval/spot500_methods.md. 27/35 planted errors caught and none marked verified; 0/72 true figures marked wrong; 54/72 true figures verified; $0.3736.",
+  "deployment_protection": {
+    "production_alias_anonymous_get": 200,
+    "production_demo_anonymous_get": 200,
+    "new_generated_deployment_anonymous_get": 302
+  },
+  "operating_policy": {
+    "live_requests_enabled": true,
+    "live_until": "2026-11-17T16:00:00Z",
+    "daily_cap_usd": 5,
+    "namespace": "nocap",
+    "preview_live_requests": "paused",
+    "budget_or_namespace_reset": false,
+    "heldout_rerun": false
+  },
+  "limitations": [
+    "Playback-start, metadata and file-hash checks are not full human viewing or listening review.",
+    "The live smoke sends one request per operation: it shows the live path works, not its accuracy across drafts."
+  ]
+}
