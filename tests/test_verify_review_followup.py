@@ -275,3 +275,33 @@ def test_number_first_quote_keeps_its_trailing_qualification(snapshot, span):
 def test_trailing_metric_or_period_wording_is_not_a_qualification(span, metric, metric_text, value_text, value):
     claim = proposal(span, value_text, value, metric=metric, metric_text=metric_text)
     assert interpret(claim) is not None
+
+
+# The October 30 judging pass: a qualified figure stays "?", and its explanation names the qualification instead
+# of claiming the metric itself (revenue, verified elsewhere on the same page) is untracked.
+@pytest.mark.parametrize("claim,wording", [
+    (growth("Excluding acquisitions, revenue rose 106%."), "Excluding acquisitions"),
+    (growth("Revenue rose 106% excluding acquisitions."), "excluding acquisitions"),
+    (proposal("Revenue excluding acquisitions was $96.221 billion."), "excluding acquisitions"),
+])
+def test_qualified_figure_explanation_names_the_qualification(snapshot, claim, wording):
+    verdict = verify(claim, snapshot)
+    assert (verdict.status, verdict.reason) == ("unverifiable", "no_evidence")
+    assert f"“{wording}”" in verdict.explanation
+    assert "doesn't track" not in verdict.explanation
+
+
+def test_constant_currency_explanation_wins_when_the_wording_also_blocks_the_reading(snapshot):
+    claim = growth("Revenue rose 106% in constant currency.")
+    assert interpret(claim) is None
+    verdict = verify(claim, snapshot)
+    assert (verdict.status, verdict.reason) == ("unverifiable", "no_evidence")
+    assert "constant-currency (FX-neutral)" in verdict.explanation
+
+
+def test_untracked_figure_keeps_the_untracked_explanation(snapshot):
+    claim = proposal("A favorable impact of $0.11 per share.", "$0.11", 0.11, metric="other",
+                     metric_text="favorable impact", unit="USD/share", scale="units")
+    verdict = verify(claim, snapshot)
+    assert (verdict.status, verdict.reason) == ("unverifiable", "no_evidence")
+    assert "doesn't track this kind of figure (favorable impact)" in verdict.explanation

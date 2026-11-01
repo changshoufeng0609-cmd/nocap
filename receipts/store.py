@@ -24,11 +24,13 @@ import re
 import sqlite3
 import threading
 import unicodedata
+from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Iterable, Mapping, Optional
+from typing import Iterable, Mapping, NamedTuple, Optional
 
+from receipts.fiscal_labels import is_long
 from receipts.types import Basis, Fact, Metric
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +38,7 @@ DB_PATH = ROOT / "data" / "facts.sqlite"
 PR_DIR = ROOT / "data" / "pr_facts"
 SCHEMA_VERSION = "1"
 ANY_SEGMENT = "*"
+PR_CACHE_FILES = 64  # parsed releases retained per Store; older files reload on demand
 
 
 def default_data_dir(env: Optional[Mapping[str, str]] = None, *, root: Optional[Path] = None) -> Path:
@@ -84,7 +87,11 @@ METRIC_CONCEPTS: dict[str, MetricSpec] = {
         "NoninterestExpense",             # banks: "Total noninterest expense" (JPM, BAC)
     ), "USD", True),
     "operating_income": MetricSpec(("OperatingIncomeLoss",), "USD", True),
-    "net_income": MetricSpec(("NetIncomeLoss",), "USD", True),
+    "net_income": MetricSpec((
+        "NetIncomeLoss",
+        "ProfitLoss",  # AVGO tags only consolidated net income; ingest uses it only where the filing reports no
+                       # noncontrolling interest for that period, so it equals NetIncomeLoss (see receipts.ingest)
+    ), "USD", True),
     "eps_basic": MetricSpec(("EarningsPerShareBasic", "EarningsPerShareBasicAndDiluted"), "USD/shares", False),
     "eps_diluted": MetricSpec(("EarningsPerShareDiluted", "EarningsPerShareBasicAndDiluted"), "USD/shares", False),
     "operating_cash_flow": MetricSpec((
@@ -120,15 +127,50 @@ ALIASES: dict[str, list[str]] = {
     "AMD": ["AMD", "Advanced Micro Devices", "Advanced Micro Devices, Inc."],
     "NFLX": ["Netflix", "Netflix, Inc."],
     "TSLA": ["Tesla", "Tesla, Inc.", "Tesla Motors", "Tesla Motors, Inc."],
+    "AVGO": ["Broadcom", "Broadcom Inc."],
+    "ORCL": ["Oracle", "Oracle Corporation"],
+    "CRM": ["Salesforce", "Salesforce, Inc."],
+    "ADBE": ["Adobe", "Adobe Inc.", "Adobe Systems"],
+    "INTC": ["Intel", "Intel Corporation"],
+    "QCOM": ["Qualcomm", "Qualcomm Incorporated"],
+    # SEC titles the registrant since its 2026 holding-company reorganization "ExxonMobil Holdings Corp" (CIK 2115436,
+    # stitched to CIK 34088 by receipts.ingest.PREDECESSOR_CIKS); people write Exxon Mobil, ExxonMobil or Exxon
+    "XOM": ["Exxon Mobil", "ExxonMobil", "Exxon Mobil Corporation", "Exxon"],
+    "CSCO": ["Cisco", "Cisco Systems", "Cisco Systems, Inc."],
+    "IBM": ["IBM", "International Business Machines", "International Business Machines Corporation"],
+    "PLTR": ["Palantir", "Palantir Technologies", "Palantir Technologies Inc."],
+    "UBER": ["Uber", "Uber Technologies", "Uber Technologies, Inc."],
+    "WMT": ["Walmart", "Walmart Inc.", "Wal-Mart", "Wal-Mart Stores"],
+    "COST": ["Costco", "Costco Wholesale", "Costco Wholesale Corporation"],
+    "DIS": ["Disney", "Walt Disney", "The Walt Disney Company"],
+    "NKE": ["Nike", "Nike, Inc."],
+    "MCD": ["McDonald's", "McDonalds", "McDonald's Corporation"],
+    "KO": ["Coca-Cola", "The Coca-Cola Company", "Coca Cola"],  # not "Coke": COKE is Coca-Cola Consolidated
+    "LLY": ["Eli Lilly", "Lilly", "Eli Lilly and Company"],
+    "UNH": ["UnitedHealth", "UnitedHealth Group", "UnitedHealth Group Incorporated", "United Health"],
+    "JNJ": ["Johnson & Johnson", "J&J", "Johnson and Johnson"],
+    "GS": ["Goldman Sachs", "Goldman", "The Goldman Sachs Group", "Goldman Sachs Group", "GS"],
+    "GM": ["General Motors", "GM"],
+    "MS": ["Morgan Stanley", "MS"],
+    "HPE": ["Hewlett Packard Enterprise", "HP Enterprise"],  # the longer name must win before the short "HP"
+    "WFC": ["Wells Fargo", "Wells Fargo & Company"],
 }
 
 _SUFFIXES = {"inc", "incorporated", "corp", "corporation", "co", "company", "ltd", "limited", "plc",
              "llc", "de", "and", "the"}
 
 
+def fold(text: str) -> str:
+    """NFKC, then accents dropped (NFKD without its combining marks): "Estée" -> "Estee", "ＮＶＩＤＩＡ" -> "NVIDIA".
+    Without the second step an accented letter would split a name ("Estée" -> "est e"). ASCII text is unchanged."""
+    s = unicodedata.normalize("NFKD", unicodedata.normalize("NFKC", text or ""))
+    return "".join(ch for ch in s if not unicodedata.combining(ch))
+
+
 def normalize_entity(name: str) -> str:
-    """'JPMorgan Chase & Co.' -> 'jpmorgan chase'; "Nvidia's" -> 'nvidia'; 'Apple Inc. (AAPL)' -> 'apple'."""
-    s = unicodedata.normalize("NFKC", name).lower().replace("’", "'")
+    """'JPMorgan Chase & Co.' -> 'jpmorgan chase'; "Nvidia's" -> 'nvidia'; 'Apple Inc. (AAPL)' -> 'apple';
+    'Estée Lauder' -> 'estee lauder'."""
+    s = fold(name).lower().replace("’", "'")
     s = re.sub(r"\([^)]*\)", " ", s)
     s = re.sub(r"'s\b", "", s)
     s = s.replace("&", " and ").replace(".", "").replace("'", "")
@@ -271,18 +313,491 @@ def replace_company(conn: sqlite3.Connection, company: dict, filings: Iterable[d
                          f"({', '.join('?' * len(_FACT_COLUMNS))})", [fact_row(f, k) for f, k in facts])
 
 
+# "KEYCORP /NEW/", "QUALCOMM INC/DE", "WELLS FARGO & COMPANY/MN", "US BANCORP \DE\"
+_SEC_NAME_TAG = re.compile(r"\s*[/\\][A-Za-z]{2,3}[/\\]?\s*$")
+
+# Common names from the S&P 500 constituents' "Security" column (Wikipedia list, read 2026-10-30) that the SEC names
+# miss: "Marsh McLennan" for MARSH & MCLENNAN COMPANIES, "Verizon" for VERIZON COMMUNICATIONS. Each normalizes to the
+# Security name's key: at least two words, or one distinctive word that is not an English word (plural and possessive
+# forms included), a common first name or surname, a US place name or a market index. "Moody's", "Lowe's" and "DuPont"
+# are lookup keys but sit in WORD_NAMES, so running text never counts them; "Estée Lauder" is the Security name without
+# "Companies (The)". Every allow and block decision, with its reason, is in
+# eval/evidence_expansion/sp500-aliases-20261031.json; tests/test_entity_scale.py fails if any key names two of the 499
+# companies. Like ALIASES, these are added when the alias index is built, so a stored database needs no re-ingest; the
+# first one is the company's display name.
+SECURITY_ALIASES: dict[str, tuple[str, ...]] = {
+    "AOS": ("A. O. Smith",), "APD": ("Air Products",), "MO": ("Altria",), "BNY": ("BNY Mellon",),
+    "BG": ("Bunge Global",), "CHRW": ("C.H. Robinson",), "COF": ("Capital One",), "CF": ("CF Industries",),
+    "CRL": ("Charles River Laboratories",), "SCHW": ("Charles Schwab",), "CI": ("Cigna",), "COIN": ("Coinbase",),
+    "CRWD": ("CrowdStrike",), "DECK": ("Deckers Brands",), "DLR": ("Digital Realty",), "DHI": ("D. R. Horton",),
+    "DD": ("DuPont",), "EME": ("Emcor",), "EL": ("Estée Lauder",), "EXPD": ("Expeditors International",),
+    "FDS": ("FactSet",), "FDXF": ("FedEx Freight",), "BEN": ("Franklin Resources",), "GE": ("GE Aerospace",),
+    "GEHC": ("GE HealthCare",), "GNRC": ("Generac",), "HLT": ("Hilton Worldwide",), "HON": ("Honeywell Technologies",),
+    "IBKR": ("Interactive Brokers",), "IQV": ("IQVIA",), "JBHT": ("J.B. Hunt",), "JCI": ("Johnson Controls",),
+    "LHX": ("L3Harris",), "LH": ("Labcorp",), "LDOS": ("Leidos",), "LOW": ("Lowe's",), "LITE": ("Lumentum",),
+    "LYB": ("LyondellBasell",), "MRSH": ("Marsh McLennan",), "MTD": ("Mettler Toledo",), "MGM": ("MGM Resorts",),
+    "MCO": ("Moody's",), "NXPI": ("NXP Semiconductors",), "ORLY": ("O'Reilly Automotive",),
+    "PKG": ("Packaging Corporation of America",), "PYPL": ("PayPal",), "PNC": ("PNC Financial Services",),
+    "RCL": ("Royal Caribbean Group", "Royal Caribbean"), "SLB": ("Schlumberger",), "STX": ("Seagate Technology",),
+    "SJM": ("J.M. Smucker",), "SMCI": ("Supermicro",), "TROW": ("T. Rowe Price",), "TTWO": ("Take-Two Interactive",),
+    "VZ": ("Verizon",), "VRTX": ("Vertex Pharmaceuticals",), "VRT": ("Vertiv",), "WRB": ("W. R. Berkley",),
+    "GWW": ("W. W. Grainger",), "WAB": ("Wabtec",), "ZBH": ("Zimmer Biomet",),
+    # Short names: the Security name without generic trailing words (Laboratories, Scientific, Motor(s), Company,
+    # Companies, Corporation, Corp, Incorporated, Inc, Co, Group, Holdings, Holding, plc, Ltd, US), when that leaves two
+    # words or more that no other company uses
+    "ACGL": ("Arch Capital",), "CFG": ("Citizens Financial",), "NCLH": ("Norwegian Cruise Line",),
+    "SPG": ("Simon Property",), "TMUS": ("T-Mobile",), "TMO": ("Thermo Fisher",), "UAL": ("United Airlines",),
+    "WEC": ("WEC Energy",),
+    # Common names the S&P 500 QA (2026-10-31, G4) found missing, which neither rule above yields: two words that no
+    # other company uses (Truist and Lockheed, one word each, are lookup-only SHORT_NAMES)
+    "MLM": ("Martin Marietta",),
+}
+
+# Lookup-only names: a claim's company (or the company an Ask lookup proposes) resolves by them, but running text never
+# counts them (they are in WORD_NAMES): one-word short names ("Ford" for Ford Motor Company, "Abbott" for Abbott
+# Laboratories), the earlier one-word blocks Ball, Casey's, Cognizant, Domino's and Flex, short names that are also
+# ordinary phrases or places ("Charles River", "principal financial officer"), and the one-word common names the S&P 500
+# QA found missing ("Truist" for Truist Financial, "Lockheed" for Lockheed Martin). Dow stays out (the Dow index), so
+# does "Boston" (Boston Scientific: a city). Decisions and reasons: eval/evidence_expansion/sp500-aliases-20261031.json.
+SHORT_NAMES: dict[str, tuple[str, ...]] = {
+    "ABT": ("Abbott",), "BKNG": ("Booking",), "COO": ("Cooper",), "CSGP": ("CoStar",), "EG": ("Everest",),
+    "EXPE": ("Expedia",), "F": ("Ford",), "IDXX": ("Idexx",), "OMC": ("Omnicom",), "TDG": ("TransDigm",),
+    "TRV": ("Travelers",), "WMB": ("Williams",),
+    "BALL": ("Ball",), "CASY": ("Casey's", "Caseys"), "CTSH": ("Cognizant", "Cognizant Technology"),
+    "DPZ": ("Domino's", "Dominos"), "FLEX": ("Flex",),
+    "CRL": ("Charles River",), "PFG": ("Principal Financial",), "PEG": ("Public Service Enterprise",),
+    "TFC": ("Truist",), "LMT": ("Lockheed",),
+    # Fourth round: the names people use for the 499 companies (COMMON_NAMES), when they are English words,
+    # surnames, first names, places or phrases, or shorter than six letters
+    "ADM": ("Archer Daniels",), "AJG": ("Gallagher",), "ALGN": ("Align",), "AMD": ("Advanced Micro",),
+    "ANET": ("Arista",), "APO": ("Apollo", "Apollo Global"), "ARE": ("Alexandria",), "ATO": ("Atmos",),
+    "AVY": ("Avery",), "AWK": ("American Water",), "AXP": ("Amex",), "BAX": ("Baxter",), "BE": ("Bloom",),
+    "BG": ("Bunge",), "BRK-B": ("Berkshire",), "C": ("Citi",), "CAH": ("Cardinal",), "CARR": ("Carrier",),
+    "CDNS": ("Cadence", "Cadence Design"), "CFG": ("Citizens",), "CHTR": ("Charter",), "CL": ("Colgate",),
+    "CPT": ("Camden",), "D": ("Dominion",), "DAL": ("Delta",), "DECK": ("Deckers",), "DGX": ("Quest",),
+    "DHI": ("Horton",), "DRI": ("Darden",), "DUK": ("Duke",), "DVN": ("Devon",), "ED": ("ConEd", "Con Ed"),
+    "EMR": ("Emerson",), "ESS": ("Essex",), "EW": ("Edwards",), "EXR": ("Extra Space",), "FANG": ("Diamondback",),
+    "FERG": ("Ferguson",), "FITB": ("Fifth Third",), "FIX": ("Comfort Systems",), "FRT": ("Federal Realty",),
+    "GILD": ("Gilead",), "HIG": ("Hartford Insurance",), "HLT": ("Hilton",), "HRL": ("Hormel",),
+    "HST": ("Host Hotels",), "IFF": ("International Flavors",), "ISRG": ("Intuitive",), "ITW": ("Illinois Tool",),
+    "J": ("Jacobs",), "JKHY": ("Jack Henry",), "KDP": ("Keurig",), "KIM": ("Kimco",), "LII": ("Lennox",),
+    "LOW": ("Lowes",), "LRCX": ("Lam",), "LUV": ("Southwest",), "LVS": ("Sands",), "LYV": ("Live Nation",),
+    "MAA": ("Mid-America Apartment",), "MAR": ("Marriott",), "MCHP": ("Microchip",), "MNST": ("Monster",),
+    "MPC": ("Marathon",), "MPWR": ("Monolithic Power",), "MSI": ("Motorola",), "MU": ("Micron",),
+    "NCLH": ("Norwegian Cruise",), "NOC": ("Northrop",), "NSC": ("Norfolk",), "NXPI": ("NXP",),
+    "ORLY": ("O'Reilly", "O Reilly"), "OXY": ("Occidental",), "P": ("Pure Storage",), "PANW": ("Palo Alto",),
+    "PEP": ("Pepsi",),  # five-letter brand name: lookup-only, never a running-text company mention
+    "PH": ("Parker",), "PM": ("Philip Morris",), "PNW": ("Pinnacle West",), "PRU": ("Prudential",), "PWR": ("Quanta",),
+    "Q": ("Qnity",), "REG": ("Regency",), "RF": ("Regions",), "RJF": ("Raymond James",), "ROK": ("Rockwell",),
+    "ROP": ("Roper",), "ROST": ("Ross",), "SCHW": ("Schwab",), "SMCI": ("Super Micro",), "SPG": ("Simon",),
+    "SW": ("Smurfit",), "SYF": ("Synchrony",), "TRGP": ("Targa",), "TROW": ("T. Rowe",), "TSN": ("Tyson",),
+    "TT": ("Trane",), "TTWO": ("Take-Two",), "TYL": ("Tyler",), "UHS": ("Universal Health",),
+    "UPS": ("United Parcel",), "VEEV": ("Veeva",), "VMC": ("Vulcan",), "VRTX": ("Vertex",), "WRB": ("Berkley",),
+    "WST": ("West Pharmaceutical",), "WTW": ("Willis",), "XEL": ("Xcel",), "ZBH": ("Zimmer",), "ZBRA": ("Zebra",),
+}
+
+
+# Fourth round (2026-10-31): the names people use for each of the 499 companies, derived the same way for all of them:
+# the Security and SEC names without "The", Inc., Corp., Co., Company, Companies, Holdings, Group, Ltd., plc, "& Co.",
+# N.V. and S.A., and their first one or two words where that is how the company is known ("Valero", "Huntington
+# Ingalls", "Bristol Myers"), plus a few such names that are not first words ("Con Edison", "P&G"). Distinctive ones are
+# ordinary aliases here; English words, surnames, first names, places and phrases are lookup-only SHORT_NAMES; a name
+# that starts another company's name ("Huntington": HBAN and HII), or is generic, is blocked. Never display names: an
+# explanation keeps "Procter & Gamble". Every decision and reason: eval/evidence_expansion/sp500-aliases-20261031.json.
+COMMON_NAMES: dict[str, tuple[str, ...]] = {
+    "A": ("Agilent",), "AKAM": ("Akamai",), "AMP": ("Ameriprise",), "BMY": ("Bristol Myers",),
+    "BR": ("Broadridge", "Broadridge Financial"), "CBOE": ("Cboe Global",), "CMG": ("Chipotle",),
+    "CNP": ("CenterPoint",), "DOC": ("Healthpeak",), "ED": ("Con Edison",), "ELV": ("Elevance",),
+    "ES": ("Eversource",), "EXPD": ("Expeditors",), "FDS": ("FactSet Research",), "HII": ("Huntington Ingalls",),
+    "HOOD": ("Robinhood",), "HWM": ("Howmet",), "KEYS": ("Keysight",), "LNT": ("Alliant",), "LULU": ("Lululemon",),
+    "LYB": ("LyondellBasell Industries",), "MDLZ": ("Mondelez",), "MRSH": ("Marsh & McLennan",), "MRVL": ("Marvell",),
+    "MTB": ("M&T",), "NEE": ("NextEra",), "PG": ("P&G",), "PNC": ("PNC Financial",), "REGN": ("Regeneron",),
+    "STX": ("Seagate",), "SWKS": ("Skyworks",), "TDY": ("Teledyne",), "VLO": ("Valero",), "VMRK": ("Vivmark",),
+    "VRSK": ("Verisk",),
+}
+
+
+def known_names(ticker: str) -> list[str]:
+    """A ticker's hand-made ALIASES, its constituent SECURITY_ALIASES and COMMON_NAMES, and its lookup-only SHORT_NAMES,
+    as written."""
+    t = (ticker or "").upper()
+    return [*ALIASES.get(t, []), *SECURITY_ALIASES.get(t, ()), *COMMON_NAMES.get(t, ()), *SHORT_NAMES.get(t, ())]
+
+
+_SUFFIX_CASE = {"INC": "Inc", "CORP": "Corp", "CO": "Co", "LTD": "Ltd", "PLC": "plc"}
+_SMALL_WORDS = frozenset({"and", "of", "the", "for", "de"})
+_SHORT_WORDS = frozenset({"oil", "gas", "air", "new", "one", "two", "sun", "sea", "bay", "top"})
+
+
+def _title_word(word: str, first: bool) -> str:
+    """One word of an SEC name written in capitals: 'MCLENNAN' -> 'Mclennan', "O'REILLY" -> "O'Reilly", "MCDONALD'S" ->
+    "Mcdonald's", 'INC.' -> 'Inc.', 'OF' -> 'of'. Likely acronyms keep their capitals: words of three letters or fewer
+    ('TJX', 'AES') and short words without a vowel ('CVS'), and anything with '&' ('AT&T', 'M&T')."""
+    core = word.strip(",.")
+    if not re.search(r"[A-Z]{2}", core) or re.search(r"[a-z]", core):
+        return word
+    if core in _SUFFIX_CASE:
+        return word.replace(core, _SUFFIX_CASE[core])
+    if core.lower() in _SMALL_WORDS:
+        return word.lower() if not first else word[:1] + word[1:].lower()
+    if "&" in core or (len(core) <= 3 and core.lower() not in _SHORT_WORDS) or (
+            len(core) <= 4 and not re.search(r"[AEIOUY]", core)):
+        return word
+    parts = re.split(r"([-'/])", word.lower())
+    return "".join(p if p in "-'/" or (i and parts[i - 1] == "'" and p in ("s", "s.", "s,")) else p[:1].upper() + p[1:]
+                   for i, p in enumerate(parts))
+
+
+def display_name(ticker: str, sec_name: str) -> str:
+    """How explanations name a company: its first ALIASES or SECURITY_ALIASES name ("NVIDIA", "Marsh McLennan"), else
+    its SEC name without a registrant tag and with words in capitals title-cased: "KEYCORP /NEW/" -> "Keycorp",
+    "FLEX LTD." -> "Flex Ltd.", "EXPAND ENERGY Corp" -> "Expand Energy Corp". Never a lookup-only short name: an
+    explanation says "Booking Holdings", not "Booking"."""
+    t = (ticker or "").upper()
+    names = [*ALIASES.get(t, []), *SECURITY_ALIASES.get(t, ())]
+    if names:
+        return names[0]
+    name = " ".join(_SEC_NAME_TAG.sub("", sec_name or "").split()) or (ticker or "")
+    return " ".join(_title_word(w, i == 0) for i, w in enumerate(name.split()))
+
+
 def company_aliases(ticker: str, *names: str) -> set[str]:
-    keys = {normalize_entity(a) for a in [ticker, *ALIASES.get(ticker.upper(), []), *names] if a}
+    """Alias keys stored at ingest: the ticker, ALIASES, SECURITY_ALIASES and each name, also without a trailing SEC
+    registrant tag."""
+    forms = [n for name in names if name for n in dict.fromkeys((name, _SEC_NAME_TAG.sub("", name)))]
+    keys = {normalize_entity(a) for a in [ticker, *known_names(ticker), *forms] if a}
     return {k for k in keys if k}
+
+
+# ----------------------------------------------------------------------------- entity safety
+# A ticker that is an everyday English word, or has two letters or fewer, never names a company by itself: "T", "A",
+# "IT", "ON", "ALL", "NOW", "COST" and "KEY" are words in a draft long before they are AT&T, Agilent, Gartner, onsemi,
+# Allstate, ServiceNow, Costco or KeyCorp. Each company still resolves by its name ("AT&T", "Allstate"). Running text
+# already counts a bare ticker only as that word in capitals ("NVDA", not "nvda"); this list is for tickers that are
+# also written in capitals, or as a name, with another meaning: "APP", "DOC", "USB", "CMS", "PSA", "Ben", "Lin".
+WORD_TICKERS = frozenset({
+    "all", "amp", "are", "ball", "carr", "cat", "coin", "coo", "cop", "cost", "dash", "deck", "dow", "echo",
+    "fang", "fast", "fix", "flex", "fox", "gen", "gild", "has", "hood", "hum", "ice", "key", "keys", "lite", "low",
+    "mar", "mas", "met", "now", "peg", "pep", "pool", "reg", "tap", "tech", "wat", "well",
+    # S&P 500, approved 2026-10-31 (eval/evidence_expansion/sp500-aliases-20261031.json)
+    "amt", "app", "ben", "cms", "cnc", "doc", "emr", "erie", "ess", "gis", "hal", "hon", "iex", "kim", "len", "lin",
+    "luv", "mlm", "mmm", "msi", "nee", "pru", "rok", "tel", "uri", "usb",
+    "bro", "day", "peak", "psa", "ste",  # "tech bro", "D-DAY", "PEAK season", "Groupe PSA", "STE 200"; HOLX is left
+                                         # out: not a word, and nothing else in capitals
+    "dal", "exe", "mos",  # also in capitals: the DAL airport code, an .EXE file, "12 MOS", a MOS transistor
+})
+# Single words that are company names but also ordinary prose. A free-text scan (a draft's own text, an Ask question)
+# never treats them as naming the company, also not in capitals; a claim whose extracted company is "Target" or "FICO"
+# still resolves. Written with a legal suffix ("Chevron Corp.", "Merck & Co.") they count again.
+WORD_NAMES = WORD_TICKERS | frozenset({
+    "ball", "block", "carnival", "coherent", "dover", "dow", "flex", "fox", "mosaic", "news", "southern", "tapestry",
+    "target", "visa", "workday",
+    # S&P 500, approved 2026-10-31: ordinary words, surnames, places and indexes
+    "albemarle", "chevron", "corning", "dupont", "eaton", "hershey", "loews", "lowe", "mccormick", "merck", "moody",
+    "nasdaq", "progressive", "rollins", "stryker", "waters",
+    # and tickers that are also something else in capitals: "start-ups", "FICO score", "MSCI index", "RTX 5090",
+    # "AES encryption", "APA style", "PTC" (a production tax credit), "TKO", "OXY", "MGM" studios
+    "aes", "apa", "fico", "lulu", "mgm", "msci", "otis", "oxy", "ptc", "rtx", "tko", "ups", "wynn", "yum",
+}) | frozenset(normalize_entity(n) for names in SHORT_NAMES.values() for n in names)  # lookup-only, also phrases
+
+
+def is_word_ticker(ticker: str) -> bool:
+    key = normalize_entity(ticker or "")
+    return len(re.sub(r"[^0-9a-z]", "", key)) <= 2 or key in WORD_TICKERS
+
+
+def name_keys(ticker: str, name: str) -> set[str]:
+    """Keys a company's names produce (ALIASES, SECURITY_ALIASES and its SEC name, with and without a registrant tag),
+    as opposed to its bare ticker."""
+    names = [*known_names(ticker), name, _SEC_NAME_TAG.sub("", name or "")]
+    return {k for k in (normalize_entity(a) for a in names if a) if k}
+
+
+def lookup_keys(ticker: str, name: str, aliases: Iterable[str]) -> set[str]:
+    """The stored alias keys an entity lookup may use: all but a bare word ticker. That holds even when the company's
+    own name normalizes to the same word ("Dow Inc." -> "dow"): the string can't tell the ticker from the name. The
+    exceptions are explicit ALIASES ("GS", "GM", "MS") and lookup-only SHORT_NAMES ("Ball", "Flex"): a claim whose
+    company is written that way resolves, while running text still never counts a two-letter or word ticker."""
+    keys = set(aliases)
+    if is_word_ticker(ticker):
+        bare = normalize_entity(ticker)
+        explicit = (*ALIASES.get((ticker or "").upper(), ()), *SHORT_NAMES.get((ticker or "").upper(), ()))
+        if bare not in {normalize_entity(a) for a in explicit}:
+            keys.discard(bare)
+    return keys
+
+
+def ticker_only_key(ticker: str, name: str, aliases: Iterable[str]) -> Optional[str]:
+    """The bare ticker's key when no name or alias produces it too ("nvda", but not "meta" or "ibm"): running text
+    counts it only as the ticker written in capitals."""
+    key = normalize_entity(ticker or "")
+    return key if key and key in set(aliases) and key not in name_keys(ticker, name) else None
+
+
+def scan_keys(ticker: str, name: str, aliases: Iterable[str]) -> set[str]:
+    """Name keys a free-text scan matches in any case: lookup_keys without single words of two letters or fewer,
+    ordinary words and lookup-only names (WORD_NAMES) and the bare ticker (matched only in capitals, see
+    EntityIndex.tickers)."""
+    bare = ticker_only_key(ticker, name, aliases)
+    return {k for k in lookup_keys(ticker, name, aliases)
+            if k != bare and k not in WORD_NAMES and (" " in k or len(k) > 2)}
+
+
+_LEGAL_SUFFIXES = frozenset({"inc", "incorporated", "corp", "corporation", "co", "company", "ltd", "limited", "plc",
+                             "llc", "nv", "sa", "ag", "se"})
+
+
+def has_legal_suffix(name: str) -> bool:
+    """'Flex Ltd.', 'Ball Corporation', 'Dow Inc.': a company name written out, not a bare word."""
+    words = _tokens(name)
+    return len(words) > 1 and words[-1] in _LEGAL_SUFFIXES
+
+
+# A legal suffix says a name is written as a company's legal name, so it must be the covered company's own (code review
+# H1, 2026-10-31): "Prudential plc" is the UK insurer, not Prudential Financial, Inc., and "Citizens, Inc." (NYSE: CIA)
+# is not Citizens Financial Group. A lookup-only name (WORD_NAMES) counts with a suffix only as the company's own legal
+# name with a suffix that fits it ("Ball Corp.", "Merck & Co.", "The Southern Company", "Eaton Corp." for Eaton Corp
+# plc); any other name only with a suffix that fits the company ("Nvidia Corp.", never "Nvidia plc"). A suffix fits when
+# it is of the same kind as the company's own, or starts it. The kinds: the US forms (Inc., Corp., Co., Company, LLC)
+# are one; plc, Ltd., N.V., S.A., AG and SE are one each. A legal name without a suffix ("Abbott Laboratories",
+# "KeyCorp") is of the US kind.
+_FORM_KIND = {"inc": "us", "incorporated": "us", "corp": "us", "corporation": "us", "co": "us", "company": "us",
+              "llc": "us", "plc": "plc", "ltd": "ltd", "limited": "ltd", "nv": "nv", "sa": "sa", "ag": "ag", "se": "se"}
+_FORM_SPELLING = {"incorporated": "inc", "corporation": "corp", "company": "co", "limited": "ltd"}
+_CONNECTORS = frozenset({"and", "the", "de"})  # normalize_entity drops them at the end of a name, as in "& Co."
+LegalName = tuple[tuple[str, ...], tuple[str, ...]]
+
+
+def legal_form(name: str) -> LegalName:
+    """(name words, legal-form words) of a name as written: "Merck & Co., Inc." -> (("merck",), ("co", "inc")), "The
+    Southern Company" -> (("southern",), ("co",)), "MOODYS CORP /DE/" and "Moody's Corp." -> (("moodys",), ("corp",)),
+    "Nvidia" -> (("nvidia",), ()). A registrant tag, a parenthetical, a leading "the" and a closing possessive are
+    dropped, and an apostrophe inside a word, but not its "s": SEC names write "MOODYS" and "LOWES"."""
+    s = fold(_SEC_NAME_TAG.sub("", name or "")).lower().replace("’", "'")
+    s = re.sub(r"'s?$", "", re.sub(r"\([^)]*\)", " ", s).strip())  # "Ball Corp.'s"
+    words = re.sub(r"[^0-9a-z]+", " ", s.replace("&", " and ").replace(".", "").replace("'", "")).split()
+    while words and words[0] == "the":
+        words.pop(0)
+    while len(words) > 1 and words[-1] in _CONNECTORS:  # "Nvidia plc and": no name ends in a connector
+        words.pop()
+    forms: list[str] = []
+    while len(words) > 1 and (words[-1] in _FORM_KIND or (words[-1] == "and" and forms)):  # "& Co."
+        word = words.pop()
+        if word != "and":
+            forms.insert(0, _FORM_SPELLING.get(word, word))
+    return tuple(words), tuple(forms)
+
+
+def _form_kind(forms: tuple[str, ...]) -> str:
+    return _FORM_KIND[forms[-1]] if forms else "us"
+
+
+def legal_base_key(name: str) -> str:
+    """normalize_entity without any closing legal suffix, also those it keeps: "NXP Semiconductors N.V." -> "nxp
+    semiconductors", "Zoetis S.A." -> "zoetis"."""
+    words = normalize_entity(name).split()
+    while len(words) > 1 and (words[-1] in _LEGAL_SUFFIXES or words[-1] in _SUFFIXES):
+        words.pop()
+    return " ".join(words)
+
+
+def legal_fit(legal: Mapping[Company, tuple[LegalName, ...]], written: str, key: str,
+              hits: Iterable[Company]) -> set[Company]:
+    """The companies of `hits` (those `key`, the normalized `written`, names) that `written`, a name with a legal
+    suffix, can be: for a lookup-only key (WORD_NAMES) one of the company's own legal names with a suffix that fits it,
+    for any other key any name with a suffix that fits the company. `legal`: EntityIndex.legal."""
+    words, forms = legal_form(written)
+    own_name_only = key in WORD_NAMES
+    return {c for c in hits
+            if any((not own_name_only or own_words == words)
+                   and (forms == own_forms[:len(forms)] or _form_kind(forms) == _form_kind(own_forms))
+                   for own_words, own_forms in legal.get(c, ()))}
+
+
+_TOKEN_RE = re.compile(r"[0-9A-Za-z.']+|&")
+
+
+def scan_tokens(text: str) -> tuple[str, list[tuple[str, int, int]]]:
+    """(fold(text), its words as (word, start, end)), case kept: "'s" dropped, "&" read as "and", dots and apostrophes
+    removed ("J.P." -> "JP", "O'Reilly" -> "OReilly"). Lowercased, the words are _tokens(text)."""
+    s = fold(text).replace("’", "'")
+    out = []
+    for m in _TOKEN_RE.finditer(s):
+        word = "and" if m.group() == "&" else re.sub(r"'[sS](?![0-9A-Za-z])", "", m.group()).replace(".", "").replace("'", "")
+        if word:
+            out.append((word, m.start(), m.end()))
+    return s, out
+
+
+def _tokens(text: str) -> list[str]:
+    """normalize_entity's tokenization, without dropping suffixes or parentheses: for scanning running text."""
+    return [word.lower() for word, _, _ in scan_tokens(text)[1]]
+
+
+# A period ends a sentence unless it closes an abbreviation, an initial or a dotted name ("Inc.", "T. Rowe", "J.P.",
+# "U.S."): the same rule as receipts.verify.sentence_breaks.
+_NOT_SENTENCE_END = frozenset("inc corp co ltd plc llc no vs approx est jan feb mar apr jun jul aug sep sept oct nov dec "
+                              "st jr sr mr mrs ms dr bros cos".split())
+
+
+def sentence_joins(s: str, tokens: list[tuple[str, int, int]]) -> list[bool]:
+    """joins[i]: whether words i and i+1 of scan_tokens may be read as one name, i.e. no sentence ends between them, so
+    "... return on capital. One analyst said" never reads as Capital One, nor does 'stressed "return on capital." One'
+    (a period before a closing quote or bracket ends the sentence too: code review L6)."""
+    out = []
+    for (_, a0, a1), (_, b0, _) in zip(tokens, tokens[1:]):
+        between = s[a0:b0]
+        cut = bool(re.search(r"[!?;]|\n\s*\n", s[a1:b0]))  # a paragraph break too; one newline may just wrap a name
+        for m in re.finditer(r"\.[\"'”’)\]]*(?=\s)", between):
+            # Only the token's tail is needed; an uncapped dotted token makes this search quadratic (review L15).
+            tail = between[max(0, m.start() - 32):m.start()]
+            word = re.search(r"[A-Za-z][A-Za-z.]*$", tail)
+            if not (word and ("." in word.group() or word.group().casefold() in _NOT_SENTENCE_END
+                              or (len(word.group()) == 1 and not tail[max(0, word.start() - 1):word.start()].isdigit()))):
+                cut = True
+        out.append(not cut)
+    return out
+
+
+# An all-caps passage ("TECH BRO CULTURE", "THE APP STORE") says nothing about tickers: there a ticker-shaped word is just
+# a word in capitals. A run is the word next to another all-caps word of three or more letters, separated only by spaces
+# or dashes. GAAP, EPS and NON (as in NON-GAAP) are written in capitals anyway, so they don't start a run: "NVDA GAAP".
+_CAPS_WORD = re.compile(r"[A-Z]{3,}")
+_RUN_GAP = re.compile(r"[ \t\u00a0\-\u2010-\u2015]+")
+_ALWAYS_CAPITALS = frozenset({"GAAP", "EPS", "NON"})
+
+
+def in_caps_run(s: str, tokens: list[tuple[str, int, int]], i: int) -> bool:
+    for j in (i - 1, i + 1):
+        if 0 <= j < len(tokens):
+            gap = s[tokens[min(i, j)][2]:tokens[max(i, j)][1]]
+            word = tokens[j][0]
+            if _RUN_GAP.fullmatch(gap) and _CAPS_WORD.fullmatch(word) and word not in _ALWAYS_CAPITALS:
+                return True
+    return False
+
+
+Company = tuple[int, str]  # (cik, ticker)
+
+
+class EntityIndex(NamedTuple):
+    """Keys of every covered company, built once per Store (the companies table is read-only)."""
+    lookup: dict[str, set[Company]]       # every key resolve_entity may use
+    scan: dict[str, set[Company]]         # name keys running text matches in any case
+    rows: list[tuple]                     # (cik, ticker, name, aliases) by ticker
+    words: dict[str, set[Company]]        # bare word tickers that are also the company's own name ("dow" for Dow Inc.)
+    tickers: dict[str, set[Company]]      # "NVDA": a bare ticker running text matches only as that all-caps word
+    suffixed: dict[str, set[Company]]     # one-word WORD_NAMES names that count before a legal suffix ("Chevron Corp.")
+    word_names: dict[str, set[Company]]   # WORD_NAMES names of 3+ letters other than the bare ticker ("Visa", "Charles
+                                          # River"): an Ask question counts them only for the company the lookup proposed
+    own_tickers: dict[str, set[Company]]  # "UPS", "FICO", "MSCI": a ticker that is also the company's WORD_NAMES name;
+                                          # an Ask question counts it in capitals, only for the proposed company
+    legal: dict[Company, tuple[LegalName, ...]]  # legal_form of the SEC name and of each known name with a legal suffix
+                                                 # ("The Coca-Cola Company"): what a name with a suffix must fit
+
+
+def build_entity_index(rows: Iterable[tuple]) -> EntityIndex:
+    """rows: (cik, ticker, name, aliases), aliases a JSON list of stored keys (or None). ALIASES, SECURITY_ALIASES,
+    COMMON_NAMES and SHORT_NAMES are added here, so a stored database picks up new aliases without a re-ingest."""
+    idx = EntityIndex({}, {}, [], {}, {}, {}, {}, {}, {})
+    for cik, ticker, name, aliases in rows:
+        stored = json.loads(aliases) if isinstance(aliases, str) else list(aliases or ())
+        idx.rows.append((cik, ticker, name, aliases))
+        c = (cik, ticker)
+        sec = legal_form(name or "")
+        idx.legal[c] = tuple(dict.fromkeys([sec, *(f for f in map(legal_form, known_names(ticker)) if f[1])]))
+        keys = set(stored or company_aliases(ticker, name)) | {normalize_entity(a) for a in known_names(ticker)}
+        keys.discard("")
+        bare = ticker_only_key(ticker, name, keys)
+        tkey = normalize_entity(ticker)
+        for k in lookup_keys(ticker, name, keys):
+            idx.lookup.setdefault(k, set()).add(c)
+            single = " " not in k
+            if k in WORD_NAMES:  # never in running text; a one-word name counts before a legal suffix
+                if single:
+                    idx.suffixed.setdefault(k, set()).add(c)
+                if len(k) > 2 and k != tkey:
+                    idx.word_names.setdefault(k, set()).add(c)
+                elif k == tkey and not is_word_ticker(ticker) and ticker.isalpha():
+                    idx.own_tickers.setdefault(ticker.upper(), set()).add(c)
+            elif k == bare:
+                if ticker.isalpha():
+                    idx.tickers.setdefault(ticker.upper(), set()).add(c)
+            elif k in {"3m", "hp"}:  # short company names, in capitals: not "3m" metres or "hp" horsepower
+                idx.tickers.setdefault(k.upper(), set()).add(c)
+            elif not single or len(k) > 2:
+                idx.scan.setdefault(k, set()).add(c)
+        if is_word_ticker(ticker) and tkey in name_keys(ticker, name):
+            idx.words.setdefault(tkey, set()).add(c)
+            idx.suffixed.setdefault(tkey, set()).add(c)
+    return idx
+
+
+def find_mentions(s: str, tokens: list[tuple[str, int, int]], index: EntityIndex, *, max_words: int = 6,
+                  proposed: Optional[int] = None, joins: Optional[list[bool]] = None) -> list[tuple[int, int, set[Company]]]:
+    """Every company mention in running text, as (first word, end word, companies), longest phrase first at each word.
+    A name key matches in any case; a bare ticker only as that word in capitals outside an all-caps run, never when it
+    is in WORD_TICKERS or WORD_NAMES; a WORD_NAMES name only as the company's own legal name ("Chevron Corp."). A name
+    with a legal suffix counts only where the suffix fits the company (legal_fit); one that fits none ("Prudential plc",
+    "Nvidia plc") is another company's legal name, a mention of no covered company (an empty set), and no shorter
+    phrase inside it is tried. With `proposed` (an Ask lookup's company), that company also counts by its own WORD_NAMES
+    name ("Visa", "Ford", "Charles River") and by a ticker that is its WORD_NAMES name, written in capitals ("UPS",
+    "FICO"), and never any other company that way. A phrase two companies share stays a mention of both: callers decide
+    (a draft records neither, an Ask question refuses). No mention starts inside an earlier one: "Norfolk Southern
+    Corp." is Norfolk Southern, never also Southern Co. by its "Southern Corp." joins[i] says whether words i and i+1
+    may be read as one name (default: always)."""
+    out = []
+    covered = 0  # words before this one belong to the last mention found
+    for i in range(len(tokens)):
+        if i < covered:
+            continue
+        for n in range(min(max_words, len(tokens) - i), 0, -1):
+            if joins is not None and not all(joins[i:i + n - 1]):
+                continue
+            words = [w.lower() for w, _, _ in tokens[i:i + n]]
+            if n > 1 and words[-1] in _CONNECTORS:
+                continue  # no name ends in "and" ("Nvidia plc and" would normalize to Nvidia past its suffix)
+            phrase = " ".join(words)
+            hits = index.scan.get(phrase)
+            if not hits:
+                key = normalize_entity(phrase)
+                hits = index.scan.get(key)
+                if n > 1 and words[-1] in _LEGAL_SUFFIXES:  # written as a legal name
+                    if not hits:
+                        key = legal_base_key(phrase)  # "Zoetis N.V." -> "zoetis"
+                        hits = index.scan.get(key) or (index.suffixed.get(key) if " " not in key else None)
+                        # suffixed: "Merck & Co.", "Flex Ltd.", the WORD_NAMES name written out
+                    if hits:
+                        hits = legal_fit(index.legal, s[tokens[i][1]:tokens[i + n - 1][2]], key, hits)
+                        if not hits:  # another company's legal name: "Prudential plc" is not Prudential Financial
+                            out.append((i, i + n, set()))
+                            covered = i + n
+                            break
+            if not hits and n == 1:
+                caps = index.tickers.get(tokens[i][0])
+                hits = caps if caps and not in_caps_run(s, tokens, i) else None
+                if not hits and proposed is not None:
+                    own = index.own_tickers.get(tokens[i][0])
+                    if own and not in_caps_run(s, tokens, i):
+                        hits = {c for c in own if c[0] == proposed} or None
+            if not hits and proposed is not None:
+                hits = {c for c in index.word_names.get(phrase, ()) if c[0] == proposed} or None
+            if hits:
+                out.append((i, i + n, set(hits)))
+                covered = i + n
+                break
+    return out
 
 
 # --------------------------------------------------------------------------- the store
 def _duration_ok(f: Fact) -> bool:
-    """Press-release facts: keep instants, quarters and years (not YTD columns), like the SQLite side."""
+    """Press-release facts: keep instants, quarters and years (not YTD columns), like the SQLite side, plus a 16- or
+    17-week quarter that carries its fiscal label (Costco's Q4, Kroger's Q1), as receipts.press_release.is_served does."""
     if f.period_start is None:
         return True
     days = (f.period_end - f.period_start).days
-    return 80 <= days <= 100 or 350 <= days <= 380
+    return 80 <= days <= 100 or 350 <= days <= 380 or (
+        f.fiscal_period in ("Q1", "Q2", "Q3", "Q4") and is_long(f.period_start, f.period_end))
 
 
 def _segment_ok(fact_segment: Optional[str], wanted: Optional[str]) -> bool:
@@ -315,7 +830,8 @@ class Store:
         self._conn = sqlite3.connect(uri, uri=True, check_same_thread=False, timeout=30)
         self._conn.row_factory = sqlite3.Row
         self._lock = threading.RLock()
-        self._pr_cache: dict[Path, tuple[tuple[int, int], list[Fact]]] = {}
+        self._pr_cache: OrderedDict[Path, tuple[tuple[int, int], list[Fact]]] = OrderedDict()
+        self._alias_index: Optional[EntityIndex] = None
 
     def close(self) -> None:
         self._conn.close()
@@ -328,13 +844,86 @@ class Store:
     def resolve_entity(self, name: str) -> Optional[tuple[int, str]]:
         """Exact match on normalized ticker, SEC name or alias. No prefix or fuzzy matching on purpose:
         "Amazon Web Services" or "Google Cloud" must stay unresolved ("?"), not become the parent whose
-        total revenue would then contradict a segment figure."""
+        total revenue would then contradict a segment figure. A name written with a legal suffix resolves only where
+        the suffix fits the company (legal_fit: "Prudential plc" is not Prudential Financial, Inc.), and a lookup-only
+        name (WORD_NAMES) only bare, never after "the"."""
         key = normalize_entity(name or "")
         if not key:
             return None
-        hits = {(r["cik"], r["ticker"]) for r in self._rows("SELECT cik, ticker, aliases FROM companies")
-                if key in json.loads(r["aliases"])}
-        return hits.pop() if len(hits) == 1 else None  # none, or two companies share it: unresolved
+        index = self._index()
+        hits = index.lookup.get(key, set())
+        if legal_form(name)[1]:  # written as a legal name: only a suffix that fits the company counts (legal_fit)
+            if not hits:  # "LyondellBasell N.V."; "Dow Inc." names the company even though "Dow" alone never does
+                key = legal_base_key(name)
+                hits = index.lookup.get(key) or index.words.get(key, set())
+            hits = legal_fit(index.legal, name, key, hits)  # "Prudential plc" is not Prudential Financial, Inc.
+        elif key in WORD_NAMES and _tokens(name)[:1] == ["the"]:
+            return None  # a lookup-only name only bare: "the carrier" is a carrier, not Carrier Global
+        return next(iter(hits)) if len(hits) == 1 else None  # none, or two companies share it: unresolved
+
+    def word_name(self, name: str) -> Optional[tuple[int, str, str]]:
+        """(cik, ticker, display name) when `name` is, by itself, a covered company's everyday-word name ("Dow"); "Dow
+        plc" is a legal name, not the word."""
+        if legal_form(name or "")[1]:
+            return None
+        hits = self._index()[3].get(normalize_entity(name or ""), set())
+        if len(hits) != 1:
+            return None
+        cik, ticker = next(iter(hits))
+        return next((c for c in self.companies_list() if c[0] == cik), (cik, ticker, ticker))
+
+    def by_ticker(self, ticker: str) -> Optional[tuple[int, str]]:
+        """(cik, ticker) of the company stored under exactly this ticker, or None. For code that already holds a ticker
+        from the store itself (an Ask fact, a packaged filing): there "COST" or "T" is a ticker, whereas a draft's
+        words go through resolve_entity, where a bare word ticker may not name a company."""
+        rows = self._rows("SELECT cik, ticker FROM companies WHERE ticker = ?", ((ticker or "").strip().upper(),))
+        return (int(rows[0]["cik"]), str(rows[0]["ticker"])) if rows else None
+
+    def suggestion(self, name: str) -> Optional[tuple[int, str, str]]:
+        """(cik, ticker, display name) of the one covered company `name` most likely meant: the company whose bare
+        ticker it is ("GS"), else the only one whose SEC name begins with it as whole words ("Marathon" -> MARATHON
+        PETROLEUM). For an explanation's "did you mean" only, never a lookup: "Marathon" must not become MPC."""
+        key = normalize_entity(name or "")
+        if not key:
+            return None
+        rows = self._index()[2]
+        hits = [r for r in rows if normalize_entity(r[1]) == key]
+        if not hits:
+            hits = [r for r in rows if f"{normalize_entity(_SEC_NAME_TAG.sub('', r[2]))} ".startswith(f"{key} ")]
+        if len(hits) != 1:
+            return None
+        return next(c for c in self.companies_list() if c[0] == hits[0][0])
+
+    def _index(self) -> EntityIndex:
+        """The entity keys of every company (EntityIndex), built once: the companies table is read-only. [0] is the
+        lookup index, [1] the free-text scan index, [2] the company rows, [3] the word names ("dow" for Dow Inc.)."""
+        with self._lock:
+            if self._alias_index is None:
+                self._alias_index = build_entity_index(
+                    tuple(r) for r in self._rows("SELECT cik, ticker, name, aliases FROM companies ORDER BY ticker"))
+            return self._alias_index
+
+    def entity_index(self) -> EntityIndex:
+        return self._index()
+
+    def names_in_text(self, text: str, max_words: int = 6) -> list[tuple[int, str, str]]:
+        """Companies a piece of running text names, as (cik, ticker, display name), in order of first mention
+        (find_mentions): a name in any case, a bare ticker only in capitals outside an all-caps run, never a word ticker
+        or an ordinary word ("target", "now") unless a legal suffix follows it. A phrase two companies share names
+        neither, and no shorter phrase inside it is tried instead. No name runs across the end of a sentence."""
+        display = {cik: name for cik, _, name in self.companies_list()}
+        s, tokens = scan_tokens(text)
+        found: dict[int, tuple[int, str, str]] = {}
+        for _, _, hits in find_mentions(s, tokens, self._index(), max_words=max_words,
+                                        joins=sentence_joins(s, tokens)):
+            if len(hits) == 1:
+                cik, ticker = next(iter(hits))
+                found.setdefault(cik, (cik, ticker, display.get(cik, ticker)))
+        return list(found.values())
+
+    def companies_list(self) -> list[tuple[int, str, str]]:
+        """(cik, ticker, display name) of every company (display_name)."""
+        return [(cik, ticker, display_name(ticker, name)) for cik, ticker, name, _ in self._index()[2]]
 
     def facts(self, cik: int, metric: Metric, *, basis: Optional[Basis] = None,
               segment: Optional[str] = None, period_end: Optional[date] = None,
@@ -412,6 +1001,9 @@ class Store:
                 if cached is None or cached[0] != stamp:
                     cached = (stamp, _load_jsonl(path))
                     self._pr_cache[path] = cached
+                self._pr_cache.move_to_end(path)
+                while len(self._pr_cache) > PR_CACHE_FILES:
+                    self._pr_cache.popitem(last=False)
                 out.extend(f for f in cached[1] if f.cik == int(cik) or f.ticker.upper() == info["ticker"])
         return out
 

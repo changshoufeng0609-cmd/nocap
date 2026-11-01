@@ -1,4 +1,4 @@
-# NoCap API contract (updated 2026-10-29)
+# NoCap API contract (updated 2026-10-31)
 
 The frontend (`web/`) and the Python API (`receipts/api.py`) are built in parallel against this contract. Change it only through the main session.
 
@@ -25,15 +25,20 @@ The number-coverage fields below were included in that protected Preview. Missin
 | `meta` | `{"draft_hash": str, "cached": bool, "passages": int, "as_of": str or null}` |
 | `claim` | `{"claim": Claim}`. `Claim` is `receipts.types.Claim.model_dump(mode="json")`. `span_start` and `span_end` index into the request `text`. |
 | `verdict` | `{"claim_id": str, "verdict": Verdict}`. `Verdict` is `receipts.types.Verdict.model_dump(mode="json")`, and `evidence` holds the full Fact receipts. |
-| `done` | `{"counts": {"verified": n, "wrong": n, "unverifiable": n, "approximate": n}, "latency_s": float, "cost_usd": float, "cost_is_estimate": bool, "model_calls": int, "model": "muse-spark-1.3"}` |
-| `error` | `{"message": str, "retryable": bool}` plus the available cost tuple described below. |
+| `done` | `{"counts": {"verified": n, "wrong": n, "not_public": n, "unverifiable": n, "approximate": n}, "latency_s": float, "cost_usd": float, "cost_is_estimate": bool, "model_calls": int, "model": "muse-spark-1.3"}` |
+| `error` | `{"message": str, "retryable": bool}` plus the available cost tuple described below, and `reason` when the request was refused before any model call ([errors](#errors)). |
 
 **Behavior:**
-- **Status display:** ✓ verified, ✗ wrong, ? unverifiable, ≈ approximate.
+- **Status display:** ✓ verified, ✗ wrong, ◷ not public yet, ? unverifiable, ≈ approximate. ◷ is a verdict with
+  `reason: "look_ahead"`: its evidence was accepted after `as_of`. It keeps its `status` (`wrong`, or `unverifiable`
+  for a slide's axis estimate) and is counted under `counts.not_public`, never under `wrong`; each verdict is
+  counted exactly once (`receipts.types.count_key`). Check, Fix, Slide and Private `counts` use the same buckets, as
+  do the web UI and the CLI. Streams recorded before 2026-10-31 omit `not_public` and count ◷ under its status;
+  clients accept both forms.
 - **Reasons:** `verdict.reason` is one of the ReasonCode values in `receipts/types.py`.
-- **Explanation:** `verdict.explanation` is one plain English sentence the UI can show verbatim.
+- **Explanation:** `verdict.explanation` is plain English the UI can show verbatim. Derived net margins and margin changes name their input figures, periods and filing accessions.
 - **Cache:** enabled recorded caches use `sha256(text + as_of + context)`. A cached response replays the same event sequence, with `cached: true`. Vercel defaults to reading committed snapshot caches only; ordinary drafts create no new extraction/event-cache files. Local persistence remains enabled by default. See [retention policy](deploy.md#draft-cache-policy-and-retention).
-- **Limits:** text of at most 6,000 characters and a 64 KiB JSON body, a per-instance per-IP rate limit, and durable estimated spend admission. The body is read incrementally; the application rejects before retaining a chunk that exceeds the limit and stops consuming the remainder. SQLite coordinates processes sharing its file; optional PostgreSQL coordinates instances sharing the primary database and namespace. Vercel requires a shared ledger by default and rejects paid work when it is unavailable; cached examples remain usable. Unknown attempt usage retains conservative charges. These are admission controls, not a provider billing ceiling; see [spend protection](spend-protection.md).
+- **Limits:** text of at most 12,000 characters and a 64 KiB JSON body, a per-instance per-IP rate limit, and durable estimated spend admission. Blank-line passages longer than 6,000 characters are split with source offsets preserved; extraction keeps at most 10 passage calls in flight, with the existing output limit and deadline. Admission reserves every passage's request-size estimate and allowed attempts before dispatch, so long or highly fragmented drafts can be refused by the daily budget. The body is read incrementally; the application rejects before retaining a chunk that exceeds the limit and stops consuming the remainder. SQLite coordinates processes sharing its file; optional PostgreSQL coordinates instances sharing the primary database and namespace. Vercel requires a shared ledger by default and rejects paid work when it is unavailable; cached examples remain usable. Unknown attempt usage retains conservative charges. These are admission controls, not a provider billing ceiling; see [spend protection](spend-protection.md).
 
 All six paid routes perform synchronous ledger admission in a worker thread. Cancellation while admission
 is running prevents model dispatch by that route but cannot stop a transaction already committing;
@@ -74,6 +79,24 @@ priced at configured rates, not independently reconciled billing. Unknown or inv
 Errors carry available accounting, including explicit zero when the application knows no call started.
 Transport/platform failures or older recordings can omit accounting; omission never means $0.
 
+### Errors
+
+An `error` event always has `message` (one sentence the UI can show verbatim) and `retryable`. An admission
+refusal, which starts no model call and carries `cost_usd: 0`, `cost_is_estimate: false` and `model_calls: 0`,
+also names its `reason`, so a client can offer the $0 saved examples and recorded samples instead of a retry:
+
+| `reason` | Meaning | `retryable` |
+|---|---|---|
+| `live_paused` | The operator's live window is closed. | false |
+| `budget_unavailable` | The spending ledger (or the whole-filing count) cannot be read; paid work fails closed. | true |
+| `daily_budget` | Today's cap cannot hold this request's reservation. Slide, Ask and whole-filing reservations must also leave `RECEIPTS_CHECK_FIX_RESERVE_USD` (default $1.50) for Check and Fix. | false |
+| `filing_question_limit` | Today's `RECEIPTS_FILING_QUESTIONS_PER_DAY` (default 5) new whole-filing questions are used; recorded sample questions still replay. | false |
+| `rate_limited` | Too many live requests from this network in the rate window. | true |
+
+Other errors (invalid input, unavailable evidence, provider failures) omit `reason`; clients must not infer one.
+The Private route does not emit `reason` yet. Limits and storage are described in
+[spend protection](spend-protection.md#daily-sub-caps).
+
 The UI accepts error accounting only as a complete tuple: finite nonnegative cost, boolean estimate flag and
 nonnegative safe-integer call count. Missing/malformed tuples display **Model cost unavailable**. It preserves
 estimate labels on successful and failed checks. Old Check/Fix successes remain readable without the optional
@@ -101,7 +124,7 @@ The same text, time and context limits as `/api/check` apply. Extra fields are r
   changes: [{claim_id, before, after, start, end, explanation, evidence: Fact[]}],
   remaining: [{claim_id, reason, explanation}],
   results: [{claim: Claim, verdict: Verdict}],
-  counts: {verified, wrong, unverifiable, approximate},
+  counts: {verified, wrong, not_public, unverifiable, approximate},
   cost_usd: number,
   cost_is_estimate: boolean,
   model_calls: number,
@@ -119,7 +142,8 @@ Wonder proposes replacements for numeric fragments only. Code preserves the comp
 
 Fixes share the check rate limit and ledger. Before work, a durable reservation covers both extraction passes,
 the bounded Wonder request and additional room for numeric edits. Each SDK attempt must pass the reservation's
-dispatch gate. Unknown usage retains at least the reservation; known costs above it increase the debit.
+dispatch gate. An attempt with unknown usage settles at its own conservative estimate; only an attempt missing
+from the request's accounting retains the whole reservation. Known costs above the reservation increase the debit.
 Original/revised extraction follows the same cache policy as Check: Vercel defaults to committed snapshot
 reads only; persistent ordinary extraction caches require opt-in on Vercel. Wonder proposals and final fix results are not cached.
 A user retry can incur new charges. The extraction backend remains selectable; Wonder always uses Meta
@@ -193,6 +217,11 @@ Ask uses `GET /api/ask/options` and `POST /api/ask`; exact quotation search uses
 bounded inputs, SSE terminal records, question binding, provenance and accounting semantics.
 Private extraction uses `GET /api/private/status` and `POST /api/private/check`; see
 [Private mode](private-mode.md) for its no-fallback/no-response-cache boundary and operational limits.
+The status also returns `recorded_samples: [{"sample_id": str, "recorded_utc": str or null}]`, the public
+samples whose recorded Modal run this server replays (empty when recordings are off; older servers omit it).
+A check request that exactly matches one (text, normalized context and canonical `as_of`) replays before the
+live gate at $0: `meta` adds `cached: true` and `recorded_utc`; claims, verdicts and the `done` accounting are
+the original run's. Every other private check has `meta.cached: false` and is never served from a cache.
 
 All six paid workflows respect the operator live-window policy documented in
 [deployment controls](deploy.md#public-release-controls-2026-10-29).

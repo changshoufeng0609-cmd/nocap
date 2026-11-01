@@ -23,6 +23,10 @@ proposes, code decides:
      exactly; checks the period against the header text, the fiscal calendar and quarter labels; applies
      the scale code read from the unit header (the model's scale must agree); and builds a Fact whose
      locator is the verbatim row label plus cell text.
+  5. xbrl_gate(): once the paired 10-Q/10-K is filed, a served GAAP fact that its XBRL contradicts for the same
+     metric and period (other than a documented restatement) is dropped, so it can never cause a false ✓ or ✗. A
+     file whose columns were read with swapped durations, or with two or more unexplained mismatches in one period
+     column, is quarantined whole as <accession>.jsonl.quarantined, which the store never reads.
 
 Output: data/pr_facts/<TICKER>/<accession>.jsonl, one types.Fact JSON per line (read by receipts.store),
 and a sidecar <accession>.report.json listing every rejected column, row and cell with its reason.
@@ -59,10 +63,12 @@ from typing import Any, Callable, Literal, Optional, get_args
 from bs4 import BeautifulSoup, Comment, NavigableString
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from receipts.fiscal_labels import FilingPeriod, is_long, label_periods
 from receipts.types import SCALE_FACTOR, Fact, Metric
 
 ROOT = Path(__file__).resolve().parents[1]
 PR_FACTS_DIR = ROOT / "data" / "pr_facts"
+FACTS_DB = ROOT / "data" / "facts.sqlite"
 SPARK_CACHE_DIR = ROOT / "data" / "cache" / "spark"
 DOTENV_PATH = ROOT / ".env"
 
@@ -128,7 +134,7 @@ _FALLBACK_CONCEPTS: dict[str, tuple[tuple[str, ...], str]] = {
                                   "ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost"), "USD"),
     "operating_expenses": (("OperatingExpenses", "CostsAndExpenses", "NoninterestExpense"), "USD"),
     "operating_income": (("OperatingIncomeLoss",), "USD"),
-    "net_income": (("NetIncomeLoss",), "USD"),
+    "net_income": (("NetIncomeLoss", "ProfitLoss"), "USD"),
     "eps_basic": (("EarningsPerShareBasic", "EarningsPerShareBasicAndDiluted"), "USD/shares"),
     "eps_diluted": (("EarningsPerShareDiluted", "EarningsPerShareBasicAndDiluted"), "USD/shares"),
     "operating_cash_flow": (("NetCashProvidedByUsedInOperatingActivities",
@@ -386,17 +392,37 @@ def _colspan(value: Any) -> int:
 
 
 def _grid_rows(el: Any) -> list[list[list[Any]]]:
+    """Each row of the table (not of a table nested in it) as merge_cells() of its cells, placed on the table's grid
+    of columns as HTML lays them out: a cell takes `colspan` grid columns from the first one that no cell above still
+    holds through its `rowspan`. A spanned cell's text stays in its first row. Exxon's "Dollars in millions" label
+    spans its two header rows; read row by row, the year row below it slid one cell left, so the first "2025" fell
+    in the label column and every column read its neighbour's year."""
     rows = []
+    held: dict[int, int] = {}  # grid column -> rows below this one that a rowspan cell still holds it for
+    previous_group = None
     for tr in el.find_all("tr"):
         if tr.find_parent("table") is not el:
             continue
+        group = tr.find_parent(["thead", "tbody", "tfoot", "table"])
+        if group is not previous_group:
+            # HTML clips rowspan at the row-group boundary, including between separate tbody elements.
+            held.clear()
+            previous_group = group
         tds = tr.find_all(["td", "th"], recursive=False) or [
             c for c in tr.find_all(["td", "th"]) if c.find_parent("tr") is tr]
-        col, cells = 0, []
+        col, cells, spans = 0, [], []
         for td in tds:
+            while col in held:
+                col += 1
             span = _colspan(td.get("colspan"))
             cells.append((clean_text(td.get_text(" ", strip=True)), col, col + span - 1))
+            if (down := _colspan(td.get("rowspan"))) > 1:
+                spans.append((col, span, down - 1))
             col += span
+        held = {c: n - 1 for c, n in held.items() if n > 1}
+        for start, span, below in spans:
+            for c in range(start, start + span):
+                held[c] = max(held.get(c, 0), below)
         rows.append(merge_cells(cells))
     return rows
 
@@ -639,14 +665,47 @@ def _months_back(end: date, months: int) -> date:
     return date(year, month, last if is_month_end else min(end.day, last))
 
 
-class FiscalCalendar:
-    """Period ends with fiscal labels and exact period starts, from 10-Q/10-K facts in companyfacts."""
+def stored_fiscal_periods(cik: int, db: Path = FACTS_DB) -> list[tuple[int, str, date, date]]:
+    """The fiscal calendar receipts.ingest stored for a company, read-only: (fiscal year, period, start, end).
+    Empty when the database or the company is missing."""
+    if not db.exists():
+        return []
+    import sqlite3
+    con = sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)
+    try:
+        rows = con.execute("SELECT fiscal_year, fiscal_period, period_start, period_end FROM fiscal_periods "
+                           "WHERE cik = ? ORDER BY period_end", (int(cik),)).fetchall()
+    except sqlite3.DatabaseError:
+        return []
+    finally:
+        con.close()
+    return [(int(fy), fp, date.fromisoformat(s), date.fromisoformat(e)) for fy, fp, s, e in rows]
 
-    def __init__(self, companyfacts: Optional[dict] = None):
-        self.quarters: dict[date, date] = {}           # end -> start of 80-100 day periods
+
+class FiscalCalendar:
+    """Period ends with fiscal labels and exact period starts, from 10-Q/10-K facts in companyfacts.
+
+    Labels come from the fiscal calendar receipts.ingest stored (`stored`, data/facts.sqlite fiscal_periods) for
+    every period it has, and otherwise from the same receipts.fiscal_labels rules ingest uses, so a release fact
+    and the XBRL fact for the same period always carry the same label.
+
+    A quarter's start comes from a filing that tags that very 3-month period, else from the same calendar's fiscal
+    quarter (`fiscal_quarters`), else from the period end before it. The calendar is what knows a 16-week quarter: no
+    filing tags Costco's, PepsiCo's, Domino's or AutoZone's fourth quarter (the 10-K reports the year) or Kroger's
+    first (its 10-Q reports 16 weeks), and three months back from the end, the old fallback, put those quarters' starts
+    three to four weeks late, so the label gate (receipts.release_gates.label_conflict) dropped them. On earnings day,
+    before the store has the quarter, a 16- or 17-week span after the last labelled end is a quarter when the same
+    fiscal quarter was that long a year or two earlier (_long_quarter_after)."""
+
+    def __init__(self, companyfacts: Optional[dict] = None,
+                 stored: Optional[list[tuple[int, str, date, date]]] = None):
+        self.quarters: dict[date, date] = {}           # end -> start of 80-100 day periods a 10-Q/10-K tags
         self.years: dict[date, date] = {}              # end -> start of 350-380 day periods
         self.labels: dict[date, tuple[int, str]] = {}  # report end -> (fiscal year, Q1|Q2|Q3|FY)
+        self.fiscal_quarters: dict[tuple[int, str], tuple[date, date]] = {}  # (fiscal year, Q1-Q4) -> (start, end)
         self.filed: dict[date, date] = {}              # report end -> first filing date
+        self.covered: set[date] = set()                # ends a 10-Q or 10-K reports as its own period
+        self.warnings: list[str] = []
         filings: dict[str, dict] = {}
         gaap = (companyfacts or {}).get("facts", {}).get("us-gaap", {})
         for concept in _CAL_CONCEPTS:
@@ -665,12 +724,31 @@ class FiscalCalendar:
                     rec = filings.setdefault(f["accn"], {"fy": f.get("fy"), "fp": f.get("fp"), "form": f["form"],
                                                          "filed": f.get("filed"), "end": end})
                     rec["end"] = max(rec["end"], end)
-        for rec in sorted(filings.values(), key=lambda r: (r["form"].endswith("/A"), r["filed"] or "")):
-            if rec["fy"] and rec["fp"] in _FP_ORDER:
-                self.labels.setdefault(rec["end"], (int(rec["fy"]), rec["fp"]))
-                if rec["filed"]:
-                    filed = date.fromisoformat(rec["filed"])
-                    self.filed[rec["end"]] = min(self.filed.get(rec["end"], filed), filed)
+        periods = []
+        for accn, rec in filings.items():
+            if rec["form"] not in ("10-Q", "10-K"):
+                continue  # amendments restate an original: they never label a period
+            start = (self.years if rec["form"] == "10-K" else self.quarters).get(rec["end"])
+            if start is not None:
+                fy = rec["fy"] if isinstance(rec["fy"], int) else None
+                periods.append(FilingPeriod(accn, rec["form"], rec["filed"] or "", start, rec["end"], fy, rec["fp"]))
+        self.covered = {p.end for p in periods}
+        for lab in label_periods(periods, self.warnings):
+            if lab.fiscal_period != "FY":
+                self.fiscal_quarters[(lab.fiscal_year, lab.fiscal_period)] = (lab.start, lab.end)
+            if lab.fiscal_period != "Q4":  # a Q4 ends on its FY's end: fiscal() reads that end's FY label as Q4
+                self.labels[lab.end] = (lab.fiscal_year, lab.fiscal_period)
+        for fy, fp, start, end in stored or ():
+            self.covered.add(end)
+            if fp != "FY":
+                self.fiscal_quarters[(int(fy), fp)] = (start, end)
+            if fp in _FP_ORDER:
+                self.labels[end] = (int(fy), fp)
+        self._quarter_start = {end: start for start, end in self.fiscal_quarters.values()}
+        for rec in filings.values():
+            if rec["end"] in self.labels and rec["filed"]:
+                filed = date.fromisoformat(rec["filed"])
+                self.filed[rec["end"]] = min(self.filed.get(rec["end"], filed), filed)
 
     def ends(self) -> list[date]:
         return sorted(set(self.labels) | set(self.quarters) | set(self.years))
@@ -682,11 +760,39 @@ class FiscalCalendar:
         want = (fiscal_year, "FY" if quarter == 4 else f"Q{quarter}")
         return next((e for e, lab in self.labels.items() if lab == want), None)
 
+    def _next_label(self, e0: date, n: int) -> tuple[int, str]:
+        fy, fp = self.labels[e0]
+        i = _FP_ORDER.index(fp) + n
+        return fy + i // 4, _FP_ORDER[i % 4]
+
+    def _long_quarter_after(self, end: date) -> Optional[date]:
+        """The latest labelled end before `end` when the span after it is a 16- or 17-week quarter that the same fiscal
+        quarter a year or two earlier also was (within a week: Costco's Q4 runs 16 weeks, 17 in a 53-week year), so the
+        span is that quarter on earnings day, before any filing has it; None otherwise. Only a company whose calendar
+        shows such a quarter (Costco, Kroger) ever gets one."""
+        prior = [e for e in self.labels if 0 < (end - e).days <= 400]
+        if not prior:
+            return None
+        e0 = max(prior)
+        if not is_long(e0 + timedelta(days=1), end):
+            return None
+        fy, fp = self._next_label(e0, 1)
+        quarter = "Q4" if fp == "FY" else fp
+        for k in (1, 2):
+            then = self.fiscal_quarters.get((fy - k, quarter))
+            if then and is_long(*then) and abs((end - e0).days - ((then[1] - then[0]).days + 1)) <= 7:
+                return e0
+        return None
+
     def label(self, end: date) -> Optional[tuple[int, str]]:
         """(fiscal year, Q1|Q2|Q3|FY) of a report end, inferred from the nearest earlier labeled end
-        when no filing covers it yet (earnings day, before the 10-Q)."""
+        when no filing covers it yet (earnings day, before the 10-Q). A period a 10-Q or 10-K covers but the
+        receipts.fiscal_labels rules left unlabelled stays unlabelled: inferring it would put back a label the
+        rules rejected."""
         if end in self.labels:
             return self.labels[end]
+        if any(abs((end - e).days) <= 3 for e in self.covered):
+            return None
         prior = [e for e in self.labels if 0 < (end - e).days <= 400]
         if not prior:
             return None
@@ -694,17 +800,22 @@ class FiscalCalendar:
         days = (end - e0).days
         n = round(days / 91.31)
         if n < 1 or abs(days - n * 91.31) > 12:
-            return None
-        fy, fp = self.labels[e0]
-        i = _FP_ORDER.index(fp) + n
-        return fy + i // 4, _FP_ORDER[i % 4]
+            if self._long_quarter_after(end) != e0:
+                return None
+            n = 1
+        return self._next_label(e0, n)
 
     def period_start(self, end: date, duration: str) -> date:
         if duration == "quarter":
-            if end in self.quarters:
+            if end in self.quarters:  # a filing tags this very 3-month period
                 return self.quarters[end]
+            if end in self._quarter_start:  # the calendar's fiscal quarter: a 16-week Q4 starts the day after Q3
+                return self._quarter_start[end]
             prev = [e for e in self.ends() if 80 <= (end - e).days <= 100]
-            return max(prev) + timedelta(days=1) if prev else _months_back(end, 3) + timedelta(days=1)
+            if prev:
+                return max(prev) + timedelta(days=1)
+            after = self._long_quarter_after(end)
+            return after + timedelta(days=1) if after else _months_back(end, 3) + timedelta(days=1)
         if duration == "ytd":
             prev = [e for e in self.fy_ends() if 0 < (end - e).days < 370]
             if prev:
@@ -729,9 +840,14 @@ class FiscalCalendar:
         return None, None
 
     def context_lines(self, before: Optional[datetime], n: int = 6) -> list[str]:
-        """The latest fiscal labels from filings accepted before `before` (no look-ahead)."""
+        """The latest fiscal labels from filings accepted before `before` (no look-ahead). A 16-week first quarter,
+        which the calendar knows only from its fiscal year and second quarter (receipts.fiscal_labels
+        add_long_first_quarters), is left out as it always was, so every earlier mapping request, and its cached
+        response, stays the same."""
         cutoff = before.date() if before else None
-        known = sorted((e for e in self.labels if cutoff is None or self.filed.get(e, e) < cutoff), reverse=True)
+        long_q1 = {q[1] for (_, fp), q in self.fiscal_quarters.items() if fp != "Q4" and is_long(*q)}
+        known = sorted((e for e in self.labels if (cutoff is None or self.filed.get(e, e) < cutoff)
+                        and e not in long_q1), reverse=True)
         out = []
         for e in known[:n]:
             fy, fp = self.labels[e]
@@ -1447,6 +1563,10 @@ class FilingJob:
     # holds the revenue-by-market-platform table the press release lacks. Each part has its own context,
     # requests and table maps; decide_job() merges and dedupes the facts of all parts.
     secondary: list["FilingJob"] = field(default_factory=list)
+    # The XBRL gate's decision (xbrl_gate), once the paired report is filed: dropped facts, or the whole file held back.
+    gate: Optional["GateResult"] = None
+    held: list[Fact] = field(default_factory=list)  # facts of a quarantined file: kept for review, never evidence
+    replay: list[dict] = field(default_factory=list)  # replay_job(): each recorded call and whether today's is the same
 
     def parts(self) -> list["FilingJob"]:
         return [self, *self.secondary]
@@ -1645,12 +1765,22 @@ def write_job(job: FilingJob, out_dir: Path = PR_FACTS_DIR) -> Optional[Path]:
     folder = out_dir / job.ticker.upper()
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / f"{job.ctx.accession}.jsonl"
+    held = folder / f"{job.ctx.accession}{QUARANTINE_SUFFIX}"
     outcomes = [o for part in job.parts() for o in part.outcomes]
     complete = all(o["status"] == "ok" for o in outcomes) and bool(outcomes)
-    if job.facts or complete:  # never overwrite earlier facts with an empty, failed run
+    if job.gate is not None and job.gate.quarantine:
+        # held back for review under a name the store and the snapshot never read (they load *.jsonl only)
+        tmp = held.with_name(held.name + ".tmp")
+        tmp.write_text("".join(f.model_dump_json() + "\n" for f in job.held))
+        os.replace(tmp, held)
+        path.unlink(missing_ok=True)
+        path = held
+    elif job.facts or complete:  # never overwrite earlier facts with an empty, failed run
         tmp = path.with_suffix(".jsonl.tmp")
         tmp.write_text("".join(f.model_dump_json() + "\n" for f in job.facts))
         os.replace(tmp, path)
+        if job.gate is not None:
+            held.unlink(missing_ok=True)  # the gate no longer holds this file back
     report = {
         "ticker": job.ticker, "cik": job.cik, "accession": job.ctx.accession, "exhibit": job.ctx.exhibit,
         "url": job.ctx.url, "accepted_at": job.ctx.accepted_at.isoformat(),
@@ -1663,6 +1793,7 @@ def write_job(job: FilingJob, out_dir: Path = PR_FACTS_DIR) -> Optional[Path]:
         "model_calls": outcomes, "facts": len(job.facts),
         "rejections": job.rejections, "rejection_counts": dict(Counter(r["reason"] for r in job.rejections)),
         "conflicts": job.conflicts,
+        "xbrl_gate": job.gate.summary() if job.gate is not None else None,
     }
     (folder / f"{job.ctx.accession}.report.json").write_text(json.dumps(report, indent=1, default=str))
     return path
@@ -1670,6 +1801,75 @@ def write_job(job: FilingJob, out_dir: Path = PR_FACTS_DIR) -> Optional[Path]:
 
 def load_facts(path: Path) -> list[Fact]:
     return [Fact.model_validate_json(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def stored_map(cache_dir: Path = SPARK_CACHE_DIR) -> Callable[[str], Optional[ExhibitMap]]:
+    """The model's table maps by request hash, from the response cache SparkMapper writes; None when not cached or
+    unreadable (SparkMapper.map treats such an entry as a miss too)."""
+    def read(h: str) -> Optional[ExhibitMap]:
+        try:
+            return ExhibitMap.model_validate_json(json.loads((cache_dir / f"{h}.json").read_text())["output_text"])
+        except (OSError, ValueError, KeyError, TypeError, ValidationError):
+            return None
+    return read
+
+
+def replay_job(report: dict[str, Any], calendar: FiscalCalendar, exhibit_html: Callable[[str], Optional[bytes]],
+               maps: Callable[[str], Optional[ExhibitMap]], *, company: str = "",
+               effort: str = "minimal") -> FilingJob:
+    """The release a mapping report (<accession>.report.json) records, decided again by today's code and `calendar`,
+    offline: each exhibit from exhibit_html(url), the candidate tables the report lists, and the model's table maps
+    from maps(request_hash) for the calls it records, assigned to the tables each call carried. No SEC request and no
+    model call; every cell is parsed again and checked against the stored map as decide_table always does. job.error
+    says why a release cannot be replayed (an exhibit or a stored map missing, or tables that no longer line up with
+    the recorded calls); job.replay records each call and whether today's request is the recorded one byte for byte
+    (it differs when the calendar's labels or the company name changed since)."""
+    eightk = {"accessionNumber": report["accession"], "acceptanceDateTime": report["accepted_at"]}
+    tenq = {"accessionNumber": report["tenq"], "form": report.get("paired_form")} if report.get("tenq") else None
+    job = FilingJob(report["ticker"], int(report["cik"]), company, eightk, tenq)
+    parts = [(job, report["url"], report["exhibit"], report["candidates"], report.get("tables"))]
+    for s in report.get("secondary") or []:
+        part = FilingJob(job.ticker, job.cik, company, eightk, tenq)
+        job.secondary.append(part)
+        parts.append((part, s["url"], s["exhibit"], s["candidates"], s.get("tables")))
+    calls = list(report.get("model_calls") or [])
+    for part, url, exhibit, wanted, count in parts:
+        html = exhibit_html(url)
+        if html is None:
+            job.error = f"exhibit not archived: {url}"
+            return job
+        tables = parse_tables(html)
+        by_index = {t.index: t for t in tables}
+        if (count is not None and len(tables) != count) or any(i not in by_index for i in wanted):
+            job.error = f"{url}: {len(tables)} tables parsed, the report lists {count} with candidates {wanted}"
+            return job
+        part.tables, part.candidates = tables, [by_index[i] for i in wanted]
+        part.ctx = _context_for(job.ticker, job.cik, company, eightk, {"url": url, "type": exhibit},
+                                part.candidates, calendar)
+        plan_requests(part, effort=effort)
+        for request, idx in part.requests:
+            call = calls.pop(0) if calls else None
+            if call is None or call.get("tables") != idx:
+                job.error = f"{url}: the recorded model calls do not carry tables {idx}"
+                return job
+            part.outcomes.append(call)
+            job.replay.append({"exhibit": exhibit, "tables": idx, "request_hash": call.get("request_hash"),
+                               "status": call.get("status"),
+                               "same_request": request_hash(request) == call.get("request_hash")})
+            if call.get("status") != "ok":
+                continue
+            stored = maps(call["request_hash"])
+            if stored is None:
+                job.error = f"{url}: no stored map for request {call['request_hash']}"
+                return job
+            for tm in stored.tables:
+                if tm.table in idx and tm.table not in part._maps:
+                    part._maps[tm.table] = tm
+    if calls:
+        job.error = f"{len(calls)} recorded model calls left over"
+        return job
+    decide_job(job)
+    return job
 
 
 # --------------------------------------------------------------------------------------------------
@@ -1812,6 +2012,203 @@ def validate(jobs: list[FilingJob], companyfacts: dict[int, dict]) -> dict[str, 
 
 
 # --------------------------------------------------------------------------------------------------
+# XBRL gate: a served press-release GAAP fact that the filed 10-Q/10-K contradicts never becomes evidence
+# --------------------------------------------------------------------------------------------------
+QUARANTINE_SUFFIX = ".jsonl.quarantined"  # a held-back file: the store and the snapshot read *.jsonl only
+SAME_COLUMN_LIMIT = 2  # unexplained mismatches in one period column that discredit the whole file
+
+
+def _span_days(f: Fact) -> Optional[int]:
+    return None if f.period_start is None else (f.period_end - f.period_start).days
+
+
+def is_served(f: Fact) -> bool:
+    """receipts.store serves instants, quarters (80-100 days) and years (350-380 days); a year-to-date column is never
+    evidence. Kept in step with receipts.store._duration_ok, and a step ahead of it for a 16- or 17-week quarter that
+    carries a fiscal label (Costco's Q4, Kroger's Q1), which the gates check as any served quarter."""
+    d = _span_days(f)
+    return d is None or 80 <= d <= 100 or 350 <= d <= 380 or long_quarter(f)
+
+
+def long_quarter(f: Fact) -> bool:
+    """A 16- or 17-week fiscal quarter with its label (receipts.fiscal_labels.is_long)."""
+    return (f.period_start is not None and f.fiscal_period in ("Q1", "Q2", "Q3", "Q4")
+            and is_long(f.period_start, f.period_end))
+
+
+def column_swap(gaap: dict, fact: Fact, concepts: dict[str, tuple[tuple[str, ...], str]]) -> Optional[str]:
+    """What a mismatching figure really is when the release's columns were read with swapped durations: a quarterly
+    figure that equals the year-to-date XBRL value ending the same day, or a year-to-date figure that equals the
+    quarter's. None when it is no such value."""
+    d = _span_days(fact)
+    if d is None or fact.metric not in concepts:
+        return None
+    names, unit = concepts[fact.metric]
+    for concept in names:
+        for x in gaap.get(concept, {}).get("units", {}).get(unit, []):
+            if (x.get("form") not in _PERIODIC_FORMS or not x.get("start")
+                    or x.get("end") != fact.period_end.isoformat()):
+                continue
+            xd = (date.fromisoformat(x["end"]) - date.fromisoformat(x["start"])).days
+            swapped = (80 <= d <= 100 and 170 <= xd <= 285) or (170 <= d <= 285 and 80 <= xd <= 100)
+            if swapped and abs(x["val"] - fact.value) <= _tolerance(fact):
+                return f"equals {concept} for {x['start']}..{x['end']} ({x['form']} {x['accn']})"
+    return None
+
+
+@dataclass
+class GateResult:
+    quarantine: Optional[str] = None                    # why the whole file is held back, if it is
+    findings: list[dict] = field(default_factory=list)  # every unexplained GAAP mismatch, served or not
+    dropped: list[dict] = field(default_factory=list)   # the served findings removed from a file that stays
+    drop_facts: list[Fact] = field(default_factory=list)
+    facts_before: int = 0
+    facts_after: int = 0
+
+    def summary(self) -> dict[str, Any]:
+        return {"quarantine": self.quarantine, "facts_before": self.facts_before, "facts_after": self.facts_after,
+                "dropped": self.dropped, "findings": self.findings}
+
+
+StoreValues = dict[tuple[str, date, date], list[tuple[float, Optional[int]]]]
+
+
+def store_values(cik: int, db: Path = FACTS_DB) -> StoreValues:
+    """(metric, start, end) -> the company-level figures data/facts.sqlite serves for the period (XBRL and derived,
+    with their decimals), read-only. They are receipts.ingest's choice, which the paired filing's first tagged concept
+    need not be: ProfitLoss less the noncontrolling interest where a filing tags no NetIncomeLoss, a comparison total
+    or a bank's net interest income plus noninterest income that the company's releases confirm as its revenue, net
+    income after preferred dividends where its releases report it. Empty when the database or company is missing."""
+    if not db.exists():
+        return {}
+    import sqlite3
+    con = sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)
+    try:
+        rows = con.execute("SELECT metric, period_start, period_end, value, decimals FROM facts WHERE cik = ? AND "
+                           "segment IS NULL AND source IN ('xbrl', 'derived') AND period_start IS NOT NULL",
+                           (int(cik),)).fetchall()
+    except sqlite3.DatabaseError:
+        return {}
+    finally:
+        con.close()
+    out: StoreValues = {}
+    for metric, start, end, value, decimals in rows:
+        out.setdefault((metric, date.fromisoformat(start), date.fromisoformat(end)), []).append(
+            (float(value), None if decimals is None else int(decimals)))
+    return out
+
+
+def store_agrees(fact: Fact, served: Optional[StoreValues]) -> Optional[float]:
+    """The figure the store serves for the fact's metric and period that equals it within both precisions, if any."""
+    for v, decimals in (served or {}).get((fact.metric, fact.period_start, fact.period_end), ()):
+        if abs(fact.value - v) <= _tolerance(fact) + (0.5 * 10.0 ** -decimals if decimals is not None else 0.0):
+            return v
+    return None
+
+
+def xbrl_gate(job: FilingJob, gaap: dict,
+              concepts: Optional[dict[str, tuple[tuple[str, ...], str]]] = None,
+              served: Optional[StoreValues] = None) -> GateResult:
+    """Code's last word on a release once its paired 10-Q/10-K is filed: a misread table never yields a false ✓ or ✗.
+
+    Each GAAP, company-level fact is compared exactly as validate() compares it: with the paired report's XBRL for the
+    same metric and period, else with the latest 10-Q/10-K's. A figure that differs from that XBRL but equals the one
+    the store serves for the period (`served`, store_values) agrees with the evidence a claim meets: AEP's Q2 2025
+    attributable net income of $1,226M is its ProfitLoss less the noncontrolling interest, not the ProfitLoss its
+    10-Q tags first. A disagreement with both whose cause is not a documented restatement, recast or stock split
+    (RESTATEMENT_REASONS) is unexplained. The whole file is quarantined when a figure shows its columns were read
+    with swapped durations (column_swap), or when one period column holds SAME_COLUMN_LIMIT or more unexplained
+    mismatches: its non-GAAP and segment rows come from the same misread tables and XBRL can't check them. Otherwise
+    each served fact with an unexplained mismatch is dropped; a year-to-date one is recorded and left alone, because
+    the store never serves it. The job is not modified (apply_xbrl_gate does it).
+    """
+    concepts = concepts or xbrl_concepts()
+    result = GateResult(facts_before=len(job.facts), facts_after=len(job.facts))
+    paired = job.tenq["accessionNumber"] if job.tenq else None
+    found: list[tuple[Fact, dict]] = []
+    for f in job.facts:
+        if f.basis != "GAAP" or f.segment or f.metric not in concepts or f.period_start is None:
+            continue
+        hit, scope = match_xbrl(gaap, f, concepts, accession=paired), "paired"
+        if hit is None:
+            hit, scope = match_xbrl(gaap, f, concepts), "latest"
+        if hit is None:
+            continue
+        concept, x = hit
+        if abs(f.value - x["val"]) <= _tolerance(f) or store_agrees(f, served) is not None:
+            continue
+        cause = _mismatch_reason(gaap, f, concept, x, paired, concepts)
+        if cause.startswith(RESTATEMENT_REASONS):
+            continue  # the release was right when it was published
+        found.append((f, {"metric": f.metric, "period": f"{f.period_start}..{f.period_end}", "scope": scope,
+                          "press_release": f.value, "xbrl": x["val"], "concept": concept, "xbrl_accession": x["accn"],
+                          "locator": f.locator, "cause": cause, "column_swap": column_swap(gaap, f, concepts),
+                          "served": is_served(f)}))
+    result.findings = [r for _, r in found]
+    swaps = [r for r in result.findings if r["column_swap"]]
+    per_column = Counter(r["period"] for r in result.findings)
+    crowded = sorted(p for p, n in per_column.items() if n >= SAME_COLUMN_LIMIT)
+    if swaps:
+        s = swaps[0]
+        result.quarantine = (f"column swap: {s['metric']} {s['period']} {s['column_swap']}"
+                             + (f" (+{len(swaps) - 1} more)" if len(swaps) > 1 else ""))
+    elif crowded:
+        result.quarantine = (f"{per_column[crowded[0]]} unexplained GAAP mismatches in the {crowded[0]} column"
+                             + (f" (+{len(crowded) - 1} more columns)" if len(crowded) > 1 else ""))
+    if result.quarantine:
+        result.facts_after = 0
+        return result
+    result.drop_facts = [f for f, r in found if r["served"]]
+    result.dropped = [r for _, r in found if r["served"]]
+    result.facts_after = len(job.facts) - len(result.drop_facts)
+    return result
+
+
+def apply_xbrl_gate(jobs: list[FilingJob], companyfacts: dict[int, dict],
+                    served: Optional[dict[int, StoreValues]] = None) -> dict[str, Any]:
+    """xbrl_gate() for every decided job, applied in place: dropped facts leave job.facts and a quarantined file's
+    facts move to job.held (write_job keeps them out of the evidence). Each company's figures the store serves come
+    from `served` by CIK, else from data/facts.sqlite (store_values). Returns the run's counts, every quarantined file
+    and every dropped fact."""
+    concepts = xbrl_concepts()
+    served = dict(served or {})
+    out: dict[str, Any] = {"files": 0, "facts_before": 0, "facts_after": 0, "served_before": 0, "served_after": 0,
+                           "quarantined": [], "dropped": []}
+    for job in jobs:
+        if job.ctx is None:
+            continue
+        gaap = companyfacts.get(job.cik, {}).get("facts", {}).get("us-gaap", {})
+        if job.cik not in served:
+            served[job.cik] = store_values(job.cik)
+        g = job.gate = xbrl_gate(job, gaap, concepts, served[job.cik])
+        out["files"] += 1
+        out["facts_before"] += len(job.facts)
+        out["served_before"] += sum(map(is_served, job.facts))
+        if g.quarantine:
+            job.held, job.facts = job.facts, []
+            out["quarantined"].append({"ticker": job.ticker, "accession": job.ctx.accession, "reason": g.quarantine,
+                                       "facts_held": len(job.held), "findings": g.findings})
+        elif g.drop_facts:
+            gone = {id(f) for f in g.drop_facts}
+            job.facts = [f for f in job.facts if id(f) not in gone]
+            out["dropped"] += [{"ticker": job.ticker, "accession": job.ctx.accession, **r} for r in g.dropped]
+        out["facts_after"] += len(job.facts)
+        out["served_after"] += sum(map(is_served, job.facts))
+    return out
+
+
+def print_gate(gate: dict[str, Any]) -> None:
+    print(f"\nXBRL gate: {gate['files']} files; facts {gate['facts_before']} -> {gate['facts_after']}, served "
+          f"{gate['served_before']} -> {gate['served_after']}; {len(gate['quarantined'])} files quarantined, "
+          f"{len(gate['dropped'])} served facts dropped")
+    for q in gate["quarantined"]:
+        print(f"  QUARANTINED {q['ticker']} {q['accession']} ({q['facts_held']} facts): {q['reason']}")
+    for d in gate["dropped"]:
+        print(f"  DROPPED {d['ticker']} {d['accession']} {d['metric']} {d['period']}: press release "
+              f"{d['press_release']:,} vs {d['concept']} {d['xbrl']:,} -> {d['cause']}")
+
+
+# --------------------------------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------------------------------
 def _pct(x: Optional[float]) -> str:
@@ -1853,6 +2250,10 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     p.add_argument("--no-secondary", action="store_true",
                    help="map only the primary exhibit (skip further EX-99 exhibits such as a CFO commentary)")
     p.add_argument("--dry-run", action="store_true", help="parse and pick tables, print the plan; no model calls")
+    p.add_argument("--no-xbrl-gate", action="store_true",
+                   help="diagnostics only: write every decided fact, even ones the paired 10-Q/10-K contradicts")
+    p.add_argument("--validation-out", type=Path, default=PR_FACTS_DIR / "_validation.json",
+                   help="where --validate writes its report (default data/pr_facts/_validation.json)")
     args = p.parse_args(argv)
     args.tickers = [t.strip().upper() for raw in args.tickers for t in raw.split(",") if t.strip()]
     if not 1 <= args.quarters <= 8:
@@ -1876,7 +2277,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         except EdgarError as e:
             print(f"{ticker}: EDGAR error: {e}")
             continue
-        calendar = FiscalCalendar(companyfacts[cik])
+        calendar = FiscalCalendar(companyfacts[cik], stored=stored_fiscal_periods(cik))
         pairs = earnings_pairs(filings, args.quarters)
         if not pairs:
             print(f"{ticker}: no earnings 8-K paired with a filed 10-Q or 10-K since {since}")
@@ -1910,13 +2311,19 @@ def main(argv: Optional[list[str]] = None) -> int:
     run_model(jobs, mapper, concurrency=args.concurrency)
     for job in jobs:
         decide_job(job)
+    before = validate(jobs, companyfacts) if args.validate else None
+    gate = None if args.no_xbrl_gate else apply_xbrl_gate(jobs, companyfacts)  # before anything is written
+    for job in jobs:
         path = write_job(job)
         outcomes = [o for p in job.parts() for o in p.outcomes]
         calls = Counter(o["status"] + ("(cached)" if o["cached"] else "") for o in outcomes)
         rej = Counter(r["reason"] for r in job.rejections)
+        g = job.gate
+        gated = ("" if g is None else f"  QUARANTINED ({g.quarantine})" if g.quarantine
+                 else f"  gate dropped {len(g.dropped)}" if g.dropped else "")
         print(f"{job.ticker:<6} {job.eightk['accessionNumber']}  facts {len(job.facts):>3}  "
               f"(GAAP {sum(f.basis == 'GAAP' for f in job.facts)}, non-GAAP {sum(f.basis == 'non-GAAP' for f in job.facts)}, "
-              f"segment {sum(bool(f.segment) for f in job.facts)})  calls {dict(calls)}  rejected {dict(rej)}"
+              f"segment {sum(bool(f.segment) for f in job.facts)})  calls {dict(calls)}  rejected {dict(rej)}{gated}"
               + (f"  -> {path.relative_to(ROOT)}" if path else "") + (f"  ERROR {job.error}" if job.error else ""))
         for o in outcomes:
             if o["status"] != "ok":
@@ -1924,11 +2331,15 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"Spark: live calls {mapper.live_calls}, cached {mapper.cached_calls}, spend this run ${mapper.spent_run:.4f}, "
           f"ledger total ${mapper.total_spent:.4f} (cap ${args.budget_usd:.2f}); wall {time.monotonic() - t0:.1f}s")
     print(f"SEC: live requests {ed.live_requests}, cache hits {ed.cache_hits}")
+    if gate is not None:
+        print_gate(gate)
     if args.validate:
-        report = validate(jobs, companyfacts)
+        report = validate(jobs, companyfacts)  # the facts that were written: what the gate kept
+        report["xbrl_gate"] = gate
+        report["before_gate"] = {"overall": before["overall"], "mismatches": before["mismatches"]} if before else None
         print_validation(report)
-        PR_FACTS_DIR.mkdir(parents=True, exist_ok=True)
-        (PR_FACTS_DIR / "_validation.json").write_text(json.dumps(report, indent=1, default=str))
+        args.validation_out.parent.mkdir(parents=True, exist_ok=True)
+        args.validation_out.write_text(json.dumps(report, indent=1, default=str))
     return 0
 
 

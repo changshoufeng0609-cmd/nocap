@@ -11,6 +11,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from bs4 import BeautifulSoup
 
 from receipts import press_release as pr
 from receipts.types import Fact
@@ -252,6 +253,40 @@ def test_header_shift_aligns_offset_headers():
     assert pr._header_shift([pr.merge_cells([("", 0, 0), ("Second Quarter 2026", 1, 3), ("", 4, 6),
                                              ("First Quarter 2026", 7, 9)])], [(6, 6), (12, 12)], 0) != 0
     assert [t.column_text(c) for c in range(2)] == ["Second Quarter 2026", "First Quarter 2026"]
+
+
+def test_a_label_cell_spanning_two_header_rows_keeps_the_year_row_under_its_own_numbers():
+    """Exxon-shaped: the unit label spans both header rows (rowspan=2), so the year row starts after it. Read row by
+    row, the first "2025" fell in the label column and every column took its neighbour's year."""
+    spanned = ('<td colspan="3" rowspan="2">Dollars in millions (unless otherwise noted)</td>'
+               + td("Three Months Ended September 30,", 6) + td("Nine Months Ended September 30,", 6))
+    years = td("2025", 3) + td("2024", 3) + td("2025", 3) + td("2024", 3)
+    body = td("Total revenues and other income", 3) + "".join(td(n, 3) for n in ("85,294", "90,016", "249,930",
+                                                                                   "266,159"))
+    t = only_table(table_html(["CONDENSED CONSOLIDATED STATEMENT OF INCOME"], [spanned, years],
+                              [body, body.replace("Total revenues and other income", "Sales and other revenue")]))
+    assert [t.column_text(c) for c in range(len(t.columns))] == [
+        "Three Months Ended September 30, / 2025", "Three Months Ended September 30, / 2024",
+        "Nine Months Ended September 30, / 2025", "Nine Months Ended September 30, / 2024"]
+    assert t.rows[0].cells == {0: "85,294", 1: "90,016", 2: "249,930", 3: "266,159"}
+    assert t.scale == "millions" and "2025" not in t.title
+    # the spanned cell holds its columns in the next row only: the row after the years starts at grid column 0
+    grid = pr._grid_rows(BeautifulSoup(table_html([], [spanned, years], [body]), "lxml").find("table"))
+    assert [(c[0], c[1]) for c in grid[1]] == [("2025", 3), ("2024", 6), ("2025", 9), ("2024", 12)]
+    assert grid[2][0][:2] == ["Total revenues and other income", 0]
+
+
+def test_an_ordinary_header_is_placed_as_before():
+    """No cell spans rows (or one spans a single row): every cell sits where its colspans put it."""
+    t = only_table(INCOME_STATEMENT)
+    assert [t.column_text(c) for c in range(2)] == ["Three Months Ended / June 30, 2026",
+                                                    "Three Months Ended / June 30, 2025"]
+    assert t.rows[0].cells == {0: "96,221", 1: "46,743"} and t.rows[1].cells == {0: "(1,234)", 1: "567"}
+    one_row = '<td rowspan="1">(In millions)</td>' + td("Q2 FY26", 3) + td("Q1 FY26", 3)
+    grid = pr._grid_rows(BeautifulSoup(table_html([], [one_row], [money_row("Revenue", ("96,221", ""),
+                                                                             ("81,615", ""))]), "lxml").find("table"))
+    assert [(c[0], c[1], c[2]) for c in grid[0]] == [("(In millions)", 0, 0), ("Q2 FY26", 1, 3), ("Q1 FY26", 4, 6)]
+    assert [(c[0], c[1]) for c in grid[1]] == [("Revenue", 0), ("96,221", 2), ("81,615", 5)]
 
 
 def test_dedupe_keeps_the_precise_repeat_and_drops_contradictions():
@@ -509,3 +544,104 @@ def test_validation_explains_restatements_and_split_recasts():
     reasons = {m["metric"]: m["reason"] for m in report["mismatches"]}
     assert reasons["revenue"].startswith("restated") and reasons["eps_diluted"].startswith("stock split")
     assert report["overall"]["mismatches_unexplained"] == 0
+
+
+# ------------------------------------------------------------------------------------------ XBRL gate
+TENQ = "0000000001-26-000020"
+Q2_26, Q2_25, H1_26 = ("2026-04-01", "2026-06-30"), ("2025-04-01", "2025-06-30"), ("2026-01-01", "2026-06-30")
+
+
+def _pr(metric: str, period: tuple[str, str], value: float, *, basis: str = "GAAP", segment=None,
+        unit: str = "USD") -> Fact:
+    return Fact(cik=1, ticker="EXMP", metric=metric, basis=basis, segment=segment, value=value, unit=unit,
+                period_start=date.fromisoformat(period[0]), period_end=date.fromisoformat(period[1]),
+                source="press_release", form="8-K", accession="0000000001-26-000019", accepted_at=ACCEPTED,
+                url="https://example.invalid/ex99-1.htm", locator=f"{metric} | {value}", decimals=-6)
+
+
+def _xbrl(concept: str, period: tuple[str, str], value: float, accn: str = TENQ, unit: str = "USD"):
+    return _fact(concept, period[0], period[1], value, 2026, "Q2", "10-Q", accn, "2026-07-31", unit=unit)
+
+
+def _gate_job(facts: list[Fact]) -> pr.FilingJob:
+    ctx = ctx_for([only_table(INCOME_STATEMENT)])
+    return pr.FilingJob(ticker="EXMP", cik=1, company=ctx.company, eightk={"accessionNumber": ctx.accession},
+                        tenq={"accessionNumber": TENQ}, ctx=ctx, facts=list(facts))
+
+
+def test_gate_drops_a_served_fact_the_paired_10q_contradicts_and_keeps_the_rest():
+    facts = [_pr("revenue", Q2_26, 96_221e6), _pr("revenue", Q2_25, 46_743e6),
+             _pr("operating_income", Q2_26, -1_234e6, basis="non-GAAP"),
+             _pr("segment_revenue", Q2_26, 10_000e6, segment="Cloud")]
+    cf = companyfacts(*CALENDAR_FACTS, _xbrl("Revenues", Q2_26, 96_221e6), _xbrl("Revenues", Q2_25, 46_000e6))
+    job = _gate_job(facts)
+    gate = pr.apply_xbrl_gate([job], {1: cf})
+    assert job.gate.quarantine is None and gate["quarantined"] == []
+    (drop,) = gate["dropped"]
+    assert (drop["metric"], drop["period"], drop["press_release"], drop["xbrl"]) == (
+        "revenue", "2025-04-01..2025-06-30", 46_743e6, 46_000e6)
+    assert drop["scope"] == "paired" and drop["cause"] == "value or definition differs"
+    assert facts[1] not in job.facts and [f for f in facts if f is not facts[1]] == job.facts  # non-GAAP, segment stay
+    assert (gate["served_before"], gate["served_after"]) == (4, 3)
+
+
+def test_gate_keeps_a_documented_restatement():
+    facts = [_pr("revenue", Q2_25, 46_743e6)]
+    cf = companyfacts(*CALENDAR_FACTS,
+                      _xbrl("Revenues", Q2_25, 46_743e6, accn="0000000001-25-000020"),  # as first reported
+                      _xbrl("Revenues", Q2_25, 47_000e6))                               # restated by the 10-Q
+    job = _gate_job(facts)
+    gate = pr.apply_xbrl_gate([job], {1: cf})
+    assert gate["dropped"] == [] and gate["quarantined"] == [] and job.facts == facts
+
+
+def test_gate_quarantines_a_file_with_two_unexplained_mismatches_in_one_column():
+    facts = [_pr("revenue", Q2_25, 46_743e6), _pr("net_income", Q2_25, 9_000e6),
+             _pr("segment_revenue", Q2_25, 5_000e6, segment="Cloud")]
+    cf = companyfacts(*CALENDAR_FACTS, _xbrl("Revenues", Q2_25, 46_000e6), _xbrl("NetIncomeLoss", Q2_25, 8_500e6))
+    job = _gate_job(facts)
+    gate = pr.apply_xbrl_gate([job], {1: cf})
+    (q,) = gate["quarantined"]
+    assert q["reason"].startswith("2 unexplained GAAP mismatches in the 2025-04-01..2025-06-30 column")
+    assert job.facts == [] and job.held == facts and gate["dropped"] == []  # the segment row goes with its table
+
+
+def test_gate_quarantines_a_file_whose_columns_were_read_with_swapped_durations():
+    facts = [_pr("operating_income", Q2_26, 5_676e6)]  # the six-month figure, filed as the quarter
+    cf = companyfacts(*CALENDAR_FACTS, _xbrl("OperatingIncomeLoss", Q2_26, 2_309e6),
+                      _xbrl("OperatingIncomeLoss", H1_26, 5_676e6))
+    job = _gate_job(facts)
+    gate = pr.apply_xbrl_gate([job], {1: cf})
+    (q,) = gate["quarantined"]
+    assert q["reason"].startswith("column swap: operating_income 2026-04-01..2026-06-30 equals OperatingIncomeLoss "
+                                  "for 2026-01-01..2026-06-30")
+    assert job.facts == []
+
+
+def test_gate_records_but_keeps_an_unexplained_mismatch_the_store_never_serves():
+    facts = [_pr("net_income", H1_26, 19_000e6)]  # a year-to-date column: stored, never evidence
+    cf = companyfacts(*CALENDAR_FACTS, _xbrl("NetIncomeLoss", H1_26, 18_500e6))
+    job = _gate_job(facts)
+    gate = pr.apply_xbrl_gate([job], {1: cf})
+    assert gate["dropped"] == [] and job.facts == facts
+    (finding,) = job.gate.findings
+    assert finding["served"] is False and not pr.is_served(facts[0])
+
+
+def test_quarantined_file_is_written_where_the_store_never_reads(tmp_path: Path):
+    facts = [_pr("revenue", Q2_25, 46_743e6), _pr("net_income", Q2_25, 9_000e6)]
+    cf = companyfacts(*CALENDAR_FACTS, _xbrl("Revenues", Q2_25, 46_000e6), _xbrl("NetIncomeLoss", Q2_25, 8_500e6))
+    job = _gate_job(facts)
+    active = tmp_path / "EXMP" / f"{job.ctx.accession}.jsonl"
+    active.parent.mkdir(parents=True)
+    active.write_text("stale facts from an ungated run\n")
+    pr.apply_xbrl_gate([job], {1: cf})
+    path = pr.write_job(job, tmp_path)
+    assert path.name == f"{job.ctx.accession}.jsonl.quarantined" and not active.exists()
+    assert pr.load_facts(path) == facts and sorted(p.name for p in (tmp_path / "EXMP").glob("*.jsonl")) == []
+    report = json.loads((tmp_path / "EXMP" / f"{job.ctx.accession}.report.json").read_text())
+    assert report["xbrl_gate"]["quarantine"].startswith("2 unexplained GAAP mismatches")
+    job.gate = pr.xbrl_gate(job, {}, None)  # nothing to check against: the file is released again
+    job.facts, job.held = facts, []
+    pr.write_job(job, tmp_path)
+    assert active.exists() and not path.exists()

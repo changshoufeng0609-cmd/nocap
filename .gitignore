@@ -25,7 +25,9 @@ data/*
 spikes/out/
 
 # Company slide images from SEC filings are third-party assets: keep them local and
-# re-fetch with spikes/c_edgar_slides.py (the .source.json metadata is committed)
+# re-fetch with spikes/c_edgar_slides.py (the .source.json metadata is committed).
+# The one exception is web/public/samples/bac-2q26-net-interest-income.jpg, published
+# deliberately and unmodified with the attribution in README.md (Data, media and licences).
 spikes/inputs/slides/*.jpg
 spikes/inputs/slides/*.png
 spikes/inputs/slides/*.pdf

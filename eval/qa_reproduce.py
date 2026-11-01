@@ -31,6 +31,27 @@ def checked_relative(name: str) -> Path:
     return path
 
 
+def pinned_snapshot_bytes(name: str, expected: str, *, root: Path, records: Path) -> tuple[bytes, str]:
+    """One pinned evidence file and where it came from ("live" or "archive").
+
+    The live data/snapshot copy is used while its digest equals the pin. Once a later evidence top-up has changed
+    (or removed) it, only the same-named copy archived with the run, records/evidence/<name>, may stand in, and it is
+    held to the same pin: the frozen benchmark keeps reading the October 29 evidence it was scored on."""
+    relative = checked_relative(name)
+    live = root / "data/snapshot" / relative
+    if live.is_file():
+        raw = live.read_bytes()
+        if digest(raw) == expected:
+            return raw, "live"
+    archived = records / "evidence" / relative
+    if not archived.is_file():
+        raise ValueError(f"Public snapshot bytes differ: {name} (and no archived copy in evidence/)")
+    raw = archived.read_bytes()
+    if digest(raw) != expected:
+        raise ValueError(f"Archived snapshot bytes differ: {name}")
+    return raw, "archive"
+
+
 def prepare_scratch(run_id: str, destination: Path, *, root: Path = ROOT) -> dict:
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", run_id):
         raise ValueError("Invalid run ID")
@@ -45,12 +66,17 @@ def prepare_scratch(run_id: str, destination: Path, *, root: Path = ROOT) -> dic
         raise ValueError("Question manifest differs from the source bundle")
     manifest = json.loads(manifest_bytes)
     # Copy just publicly committed evidence bytes, verified before import/scoring.
+    archived = []
     for name, expected in manifest["snapshot_hashes"].items():
         relative = checked_relative(name)
-        source = bundle / "data/snapshot/manifest.json" if name == "manifest.json" else root / "data/snapshot" / relative
-        raw = source.read_bytes()
-        if digest(raw) != expected:
-            raise ValueError(f"Public snapshot bytes differ: {name}")
+        if name == "manifest.json":
+            raw = (bundle / "data/snapshot/manifest.json").read_bytes()
+            if digest(raw) != expected:
+                raise ValueError(f"Public snapshot bytes differ: {name}")
+        else:
+            raw, source = pinned_snapshot_bytes(name, expected, root=root, records=records)
+            if source == "archive":
+                archived.append(name)
         target = destination / "data/snapshot" / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
@@ -80,7 +106,7 @@ def prepare_scratch(run_id: str, destination: Path, *, root: Path = ROOT) -> dic
             raise ValueError(f"Original response records differ: {target}")
         (local_records / path.name).write_bytes(raw)
     return {"manifest_sha256": index["manifest_sha256"], "bundle_sha256": BUNDLE_SHA256,
-            "sensitivity_sha256": digest(sensitivity_bytes)}
+            "sensitivity_sha256": digest(sensitivity_bytes), "archived_evidence": archived}
 
 
 def offline_worker(scratch: Path, run_id: str) -> dict:

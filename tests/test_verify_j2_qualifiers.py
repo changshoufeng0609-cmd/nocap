@@ -64,6 +64,14 @@ def test_supported_net_income_wording_keeps_its_real_receipt(snapshot, descripti
     assert any(f.value == 59_688_000_000 and f.metric == "net_income" for f in verdict.evidence)
 
 
+def test_consolidated_name_uses_net_income_where_no_separate_consolidated_figure_is_stored(snapshot):
+    # NVIDIA reports no noncontrolling interests, so no separate consolidated figure is stored: its net income is its
+    # consolidated net income, and the true amount keeps its ✓ (a regression the owner caught on Nov 1).
+    verdict = verify(proposal("total consolidated net income"), snapshot)
+    assert (verdict.status, verdict.reason) == ("verified", "match"), verdict.explanation
+    assert "no separate consolidated net income" in verdict.explanation
+
+
 @pytest.mark.parametrize("metric,description,value_text,value,unit,scale", [
     ("revenue", "revenue excluding China", "$96.221 billion", 96.221, "USD", "billions"),
     ("operating_income", "operating income from discontinued operations", "$63.734 billion", 63.734, "USD", "billions"),

@@ -15,7 +15,7 @@ def sources(tmp_path):
     body = f"<html><body>{TEXT}</body></html>".encode()
     row["source_sha256"] = hashlib.sha256(body).hexdigest()
     (src / "index.json").write_text(json.dumps({"version": 1, "filings": [row]}))
-    store = SimpleNamespace(resolve_entity=lambda ticker: (1045810, "NVDA"),
+    store = SimpleNamespace(by_ticker=lambda ticker: (1045810, "NVDA"),
                             filings=lambda cik, forms: [dict(row)])
     edgar = SimpleNamespace(get=lambda url: body)
     return src, row, store, edgar
@@ -51,6 +51,38 @@ def test_snapshot_rejects_rewritten_text_even_with_updated_hash(tmp_path):
     (src / "index.json").write_text(json.dumps({"version": 1, "filings": [changed]}))
     with pytest.raises(SystemExit, match="original cached SEC"):
         copy_filing_texts(src, tmp_path / "snapshot", store, edgar)
+
+
+def word_ticker_filing(tmp_path):
+    """A packaged COST 10-Q, its cached SEC bytes and a real Store that lists the filing: COST is a word ticker, which
+    resolve_entity never matches by itself."""
+    from receipts.store import Store, company_aliases, connect_rw, replace_company
+    src = tmp_path / "source"
+    row = filing_fixture(src)
+    body = f"<html><body>{TEXT}</body></html>".encode()
+    row.update(id="COST-0000909832-26-000011", ticker="COST", cik=909832, accession="0000909832-26-000011",
+               url="https://www.sec.gov/Archives/edgar/data/909832/000090983226000011/cost-20260510.htm",
+               source_sha256=hashlib.sha256(body).hexdigest())
+    (src / "index.json").write_text(json.dumps({"version": 1, "filings": [row]}))
+    conn = connect_rw(tmp_path / "facts.sqlite")
+    replace_company(conn, {"cik": 909832, "ticker": "COST", "name": "COSTCO WHOLESALE CORP /NEW",
+                           "fiscal_year_end": "0831", "aliases": company_aliases("COST", "COSTCO WHOLESALE CORP /NEW")},
+                    [{"accession": row["accession"], "form": "10-Q", "filed": "2026-07-31", "report_date": "2026-06-27",
+                      "accepted_at": row["accepted_at"], "items": "", "primary_doc": "cost-20260510.htm",
+                      "url": row["url"]}], [], [])
+    conn.close()
+    return src, row, Store(tmp_path / "facts.sqlite", pr_dir=tmp_path / "pr"), SimpleNamespace(get=lambda url: body)
+
+
+def test_snapshot_binds_a_word_ticker_filing_to_its_company(tmp_path):
+    src, row, store, edgar = word_ticker_filing(tmp_path)
+    try:
+        assert store.resolve_entity("COST") is None
+        digest, count = copy_filing_texts(src, tmp_path / "snapshot", store, edgar)
+        assert count == 1 and len(digest) == 64
+        assert (tmp_path / "snapshot" / f"{row['sha256']}.txt").read_text() == TEXT
+    finally:
+        store.close()
 
 
 def test_empty_filing_collection_is_valid_without_network(tmp_path):

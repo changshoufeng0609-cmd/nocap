@@ -15,10 +15,17 @@ const newsreader = Newsreader({
   style: ["normal", "italic"],
 });
 
+const title = "NoCap · Check financial numbers against SEC filings";
+const description =
+  "Check every number in an earnings draft against the SEC filings of S&P 500 companies. Each ✓ or ✗ links to the filing that settles it; anything unsupported stays unverifiable.";
+
+// The link-preview image is app/opengraph-image.png (and twitter-image.png), built by docs/demo/make_og_image.py.
 export const metadata: Metadata = {
-  title: "NoCap · Check financial numbers against SEC filings",
-  description:
-    "Check numeric claims in an earnings draft against SEC filing evidence. Inspect the source behind each supported verdict and see what remains unverifiable.",
+  metadataBase: new URL("https://receipts-nocap.vercel.app"),
+  title,
+  description,
+  openGraph: { type: "website", siteName: "NoCap", title, description },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 export const viewport: Viewport = {

@@ -20,8 +20,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCheck } from "@/hooks/use-check";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { fetchExamples, fetchHealth } from "@/lib/api";
+import { fetchAskOptions, latestCoveredQuarter } from "@/lib/ask";
 import { STATUS_META, displayCounts, displayStatus, reasonText } from "@/lib/claims";
-import { formatErrorCost, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
+import { formatDay, formatErrorCost, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
 import { MAX_DRAFT_CHARS, type CheckRequest, type Example, type Health } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -73,6 +74,8 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
   const [examples, setExamples] = useState<Example[] | null>(null);
   const [examplesError, setExamplesError] = useState<string | null>(null);
   const [companies, setCompanies] = useState<string[] | null>(null);
+  const [coveredQuarters, setCoveredQuarters] = useState<Record<string, string | null>>({});
+  const [snapshot, setSnapshot] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [exampleId, setExampleId] = useState<string | null>(null);
   const [asOf, setAsOf] = useState<AsOfState>({ mode: "now" });
@@ -88,7 +91,6 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
   );
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const touched = useRef(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const pendingFocus = useRef<string | null>(null);
   // Where focus returns when the mobile receipt sheet closes: the mark or list row of the last claim shown.
@@ -121,6 +123,9 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
           id: DRAFT_TOAST,
           description: "NoCap checks numbers such as revenue, EPS, margins, growth and guidance.",
         });
+      } else {
+        // A result replaces an earlier pause or budget notice, which would otherwise cover a receipt on mobile.
+        toast.dismiss(DRAFT_TOAST);
       }
       const c = displayCounts(verdicts);
       setAnnouncement(
@@ -153,6 +158,8 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
       setSelectedId(null);
       setView("results");
       setAnnouncement("Checking the draft.");
+      // A new check starts clean: the previous run's error notice no longer applies.
+      toast.dismiss(DRAFT_TOAST);
       start(request);
     },
     [active, start],
@@ -172,17 +179,20 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
     runExampleRef.current = runExample;
   });
 
-  // Examples: load once; pre-fill the first one unless the user has already typed.
+  // Load available examples without changing the visitor's draft.
   useEffect(() => {
     const ac = new AbortController();
     void fetchHealth(ac.signal).then((health) => {
-      if (!ac.signal.aborted && health) setCompanies(health.companies);
+      if (!ac.signal.aborted && health) { setCompanies(health.companies); setSnapshot(health.data_snapshot || null); }
     });
+    void fetchAskOptions(ac.signal).then((options) => {
+      if (!ac.signal.aborted) setCoveredQuarters(Object.fromEntries(options.companies.map((company) =>
+        [company.ticker, latestCoveredQuarter(company.periods)])));
+    }).catch(() => { /* Health coverage remains usable; missing quarter labels stay unavailable. */ });
     fetchExamples(ac.signal)
       .then((list) => {
         if (ac.signal.aborted) return;
         setExamples(list);
-        if (list.length && !touched.current) loadExample(list[0]);
       })
       .catch((e: Error) => {
         if (ac.signal.aborted) return;
@@ -191,7 +201,7 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
         toast.error(e.message, { description: "Refresh in a moment to load the examples." });
       });
     return () => ac.abort();
-  }, [loadExample]);
+  }, []);
 
   const streaming = state.phase === "streaming";
 
@@ -410,12 +420,25 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
       </p>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-10">
         <section aria-label="Draft" className="min-w-0">
-          <p id="draft-coverage" className="mb-3 text-xs leading-relaxed text-muted-foreground">
-            {companies?.length ? <>Coverage: <span className="font-medium text-foreground/80">{companies.join(", ")}</span>. Other companies receive an unverifiable verdict.</> : "Coverage is limited to the companies in the evidence snapshot. Unsupported figures remain unverifiable."}
+          <p id="draft-coverage" className={cn("text-xs leading-relaxed text-muted-foreground", companies?.length ? "mb-1" : "mb-3")}>
+            {companies?.length ? <>Evidence: <span className="font-medium text-foreground/80">{companies.length} S&amp;P 500 companies</span>, their latest eight fiscal quarters{snapshot ? <> in SEC data as of <span className="font-medium text-foreground/80">{formatDay(snapshot)}</span></> : null}. Other companies, periods and metrics return ? (unverifiable), never guessed.</> : "Evidence is limited to the companies in NoCap's SEC snapshot. Anything else returns ? (unverifiable), never guessed."}
           </p>
+          {companies?.length ? (
+            <details className="mb-2 text-xs text-muted-foreground">
+              <summary className="w-fit cursor-pointer rounded-sm py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Covered tickers ({companies.length})</summary>
+              <p className="mt-1 leading-relaxed">Latest covered fiscal quarter. Coverage varies by metric.</p>
+              <div role="group" aria-label="Covered tickers and latest fiscal quarters" tabIndex={0} className="mt-1 max-h-32 overflow-y-auto rounded-sm leading-relaxed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+                <ul className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3">
+                  {companies.map((ticker) => <li key={ticker}>{ticker} · <span className="inline-block">{coveredQuarters[ticker] ?? "quarter unavailable"}</span></li>)}
+                </ul>
+              </div>
+              <p className="mt-1.5 mb-1 leading-relaxed">{companies.includes("XOM") ? null : <>Not covered: Exxon Mobil (XOM), whose ticker SEC now lists under a new holding company. </>}Company names and all covered periods: Ask → Available evidence.</p>
+            </details>
+          ) : null}
           <div
             className={cn(
-              "overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_3px_rgb(0_0_0/0.04)] transition-shadow",
+              // overflow-clip keeps the rounded corners without making the card a scroll container, so the action bar can dock.
+              "overflow-clip rounded-xl border border-border bg-card shadow-[0_1px_3px_rgb(0_0_0/0.04)] transition-shadow",
               "has-[#draft:focus-visible]:border-ring/60 has-[#draft:focus-visible]:ring-3 has-[#draft:focus-visible]:ring-ring/25",
             )}
           >
@@ -482,20 +505,36 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
                 <Textarea
                   id="draft"
                   value={draft}
-                  onChange={(e) => {
-                    touched.current = true;
-                    setDraft(e.target.value);
-                  }}
+                  maxLength={MAX_DRAFT_CHARS}
+                  onChange={(e) => setDraft(e.target.value)}
                   placeholder="Paste a draft with financial figures: an earnings story, a research note, or an AI-written summary."
                   spellCheck
-                  aria-describedby="draft-coverage draft-data-handling"
+                  aria-describedby="draft-coverage"
                   aria-invalid={over || undefined}
                   className="proof max-h-[65vh] min-h-60 resize-none overflow-y-auto rounded-none border-0 px-4 py-5 shadow-none focus-visible:ring-0 sm:px-6 sm:py-6 dark:bg-transparent"
                 />
+                {!draft.trim() && examples?.length ? (
+                  <div role="group" aria-labelledby="saved-examples-label" className="flex min-w-0 flex-wrap items-center gap-2 px-4 pb-4 sm:px-6">
+                    <span id="saved-examples-label" className="text-xs text-muted-foreground">Try a saved example:</span>
+                    {examples.map((ex) => (
+                      <Button
+                        key={ex.id}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-auto min-h-7 max-w-full bg-card whitespace-normal [overflow-wrap:anywhere]"
+                        onClick={() => runExample(ex)}
+                      >
+                        {ex.title}
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
               </>
             )}
 
-            <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-6">
+            {/* While editing, the bar docks to the bottom of the viewport so Check stays in view above a long draft. */}
+            <div className={cn("flex items-center justify-between gap-3 border-t border-border bg-card px-4 py-3 sm:px-6", !showResults && "sticky bottom-0 z-10")}>
               {showResults ? (
                 <Button variant="ghost" size="sm" className="-ml-2" onClick={edit}>
                   <PencilLineIcon />
@@ -531,7 +570,7 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
             </div>
           </div>
           <details id="draft-data-handling" className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            <summary className="cursor-pointer font-medium underline underline-offset-4">How Draft handles your text</summary>
+            <summary className="w-fit cursor-pointer rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">How Draft handles your text</summary>
             <p className="mt-2">Check and Fix send your text to the NoCap server and, when a model request is needed, its configured model provider. Hosting and provider retention policies apply; this is not a zero-retention guarantee.</p>
             <p className="mt-2">{draftCachePolicy === "snapshot_only"
               ? "This server reads bundled saved examples and does not read or write ordinary Draft/Fix application disk caches. This does not delete older caches."
@@ -553,7 +592,7 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
         </aside>
       </div>
 
-      {showResults && state.phase === "done" && state.done && state.done.counts.wrong > 0 && state.request ? (
+      {showResults && state.phase === "done" && state.done && displayCounts(Object.values(state.verdicts)).wrong > 0 && state.request ? (
         <FixWithReceipts key={state.run} request={state.request} active={active} livePaused={livePaused} />
       ) : null}
 

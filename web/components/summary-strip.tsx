@@ -5,9 +5,18 @@ import { DatabaseZapIcon } from "lucide-react";
 import { StatusGlyph } from "@/components/status";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CheckState } from "@/hooks/use-check";
-import { DISPLAY_STATUSES, STATUS_META, displayCounts } from "@/lib/claims";
+import { DISPLAY_STATUSES, STATUS_META, displayCounts, type ResolvedDisplayStatus } from "@/lib/claims";
 import { formatCost, formatLatency, formatUtcMinutes } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+// A count tile takes its verdict's tint only when it has something to report.
+const TILE: Record<ResolvedDisplayStatus, string> = {
+  verified: "border-ok-line/35 bg-ok-tint/60",
+  wrong: "border-bad-line/40 bg-bad-tint/70",
+  look_ahead: "border-time-line/40 bg-time-tint/60",
+  unverifiable: "border-unk-line/40 bg-unk-tint/60",
+  approximate: "border-approx-line/40 bg-approx-tint/60",
+};
 
 /** ✓ ✗ ? ≈ counts, then latency, cost, model and the cached badge once the check is done. */
 export function SummaryStrip({ state }: { state: CheckState }) {
@@ -17,6 +26,9 @@ export function SummaryStrip({ state }: { state: CheckState }) {
   const asOf = meta?.as_of ?? request?.as_of ?? null;
   const streaming = phase === "streaming";
   const progress = claims.length ? resolved / claims.length : 0;
+  // A saved example rebuilt from stored model responses reports a $0, near-instant "original run": that is the
+  // rebuild, not the model's work, so only a run that recorded a charge shows its time and cost.
+  const recordedRun = (done?.cost_usd ?? 0) > 0;
 
   let status: string;
   if (streaming && !claims.length) status = "Reading the draft with Muse Spark…";
@@ -30,34 +42,45 @@ export function SummaryStrip({ state }: { state: CheckState }) {
   else status = `${claims.length} ${claims.length === 1 ? "claim" : "claims"} checked`;
 
   return (
-    <section aria-label="Check summary" className="relative border-b border-border px-4 py-3.5 sm:px-6">
-      <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5" aria-label="Verdict counts">
-        {DISPLAY_STATUSES.filter((s) => s !== "look_ahead" || counts[s] > 0).map((s) => (
-          <li key={s} className="flex items-center gap-1.5 text-sm">
-            <StatusGlyph
-              status={s}
-              size="sm"
-              className={cn("transition-opacity", counts[s] === 0 && !streaming && "opacity-45")}
-            />
-            <span
-              className={cn("font-semibold tabular-nums", counts[s] === 0 && !streaming && "font-normal text-muted-foreground")}
+    <section aria-label="Check summary" className="relative border-b border-border px-4 py-4 sm:px-6">
+      <ul className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap" aria-label="Verdict counts">
+        {/* Four tiles fit one row: ◷ appears only when used, and then takes the slot of an empty ≈. */}
+        {DISPLAY_STATUSES.filter((s) => s === "look_ahead" ? counts.look_ahead > 0 : s === "approximate" ? counts.approximate > 0 || counts.look_ahead === 0 : true).map((s) => {
+          const quiet = counts[s] === 0 && !streaming;
+          return (
+            <li
+              key={s}
+              className={cn(
+                "flex min-w-0 items-center gap-2.5 rounded-lg border px-3 py-2 transition-colors sm:min-w-[8.5rem] sm:flex-1",
+                quiet ? "border-border/70" : TILE[s],
+              )}
             >
-              {counts[s]}
-            </span>
-            <span className="text-muted-foreground">{STATUS_META[s].label.toLowerCase()}</span>
-          </li>
-        ))}
+              <StatusGlyph status={s} className={cn("transition-opacity", quiet && "opacity-45")} />
+              <span className="flex min-w-0 flex-col leading-tight">
+                <span className={cn("text-lg font-semibold tabular-nums", quiet && "font-medium text-muted-foreground")}>
+                  {counts[s]}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">{STATUS_META[s].label}</span>
+              </span>
+            </li>
+          );
+        })}
       </ul>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
         <p className="flex flex-wrap items-center gap-x-2" aria-live="polite">
           <span className={cn(streaming && "text-foreground")}>{status}</span>
           <span aria-hidden>·</span>
-          <span>As of {asOf ? formatUtcMinutes(asOf) : "the latest filings"}</span>
+          <span>As of {asOf ? formatUtcMinutes(asOf) : "the snapshot's latest filings"}</span>
         </p>
         {done ? (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {meta?.cached ? (
-              <span className="tabular-nums">$0 this replay · original run: {formatLatency(done.latency_s)} / {done.cost_is_estimate ? "estimated " : ""}{formatCost(done.cost_usd)}</span>
+              <span className="tabular-nums">
+                $0 this replay ·{" "}
+                {recordedRun
+                  ? `original run: ${formatLatency(done.latency_s)} / ${done.cost_is_estimate ? "estimated " : ""}${formatCost(done.cost_usd)}`
+                  : "recorded extraction"}
+              </span>
             ) : (
               <span className="tabular-nums">{formatLatency(done.latency_s)} · {done.cost_is_estimate ? "estimated " : ""}{formatCost(done.cost_usd)}</span>
             )}
@@ -75,7 +98,9 @@ export function SummaryStrip({ state }: { state: CheckState }) {
                   </span>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-60 text-pretty">
-                  Served from the result cache with no new model charge. The original run&apos;s time and cost are shown for reference, not this replay&apos;s latency.
+                  {recordedRun
+                    ? "Served from the result cache with no new model charge. The original run's time and cost are shown for reference, not this replay's latency."
+                    : "Served from the result cache with no new model charge. Its claims come from a recorded extraction by the model shown here."}
                 </TooltipContent>
               </Tooltip>
             ) : null}

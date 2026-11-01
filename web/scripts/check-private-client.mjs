@@ -39,8 +39,20 @@ try {
     assert.deepEqual(JSON.parse(calls[0].init.body), { text: span, context: null, as_of: null });
   });
   await check("public backend metadata cannot be presented as private", async () => {
-    for (const changed of [{ private: false }, { backend: "meta" }, { model: "muse-spark-1.3" }, { cached: true }]) {
+    for (const changed of [{ private: false }, { backend: "meta" }, { model: "muse-spark-1.3" }, { cached: true },
+      { cached: true, recorded_utc: "2026-10-30T18:17:48Z" }]) {
       transport(frames({ ...meta, ...changed })); await assert.rejects(run, PrivateCheckError);
+    }
+  });
+  await check("a recorded replay is accepted only for the bundled sample and keeps its recording time", async () => {
+    const recordedMeta = { ...meta, cached: true, recorded_utc: "2026-10-30T18:17:48Z" };
+    const replay = (sampleText) => runPrivateCheck(req, new AbortController().signal, { recordedSampleText: sampleText });
+    transport(frames(recordedMeta)); const result = await replay(span);
+    assert.deepEqual(result.recording, { recorded_utc: "2026-10-30T18:17:48Z" }); assert.equal(result.claims.length, 1);
+    transport(frames()); assert.equal((await replay(span)).recording, null);  // a live run of the same text is not "recorded"
+    transport(frames(recordedMeta)); await assert.rejects(() => replay(`${span} `), PrivateCheckError);  // any other draft
+    for (const bad of [undefined, null, "yesterday"]) {
+      transport(frames({ ...meta, cached: true, recorded_utc: bad })); await assert.rejects(() => replay(span), PrivateCheckError);
     }
   });
   await check("failed request never falls back to public check", async () => {
@@ -50,6 +62,13 @@ try {
   await check("partial streams and wrong terminal counts are rejected", async () => {
     transport(frame("meta", meta) + frame("claim", { claim })); await assert.rejects(run, PrivateCheckError);
     transport(frames(meta, claim, verdict, { ...done, counts: { ...done.counts, verified: 2 } })); await assert.rejects(run, PrivateCheckError);
+  });
+  await check("a look-ahead result counts as not_public, never wrong; older counts keep status buckets", async () => {
+    const ahead = { ...verdict, status: "wrong", reason: "look_ahead", explanation: "Filed after the cutoff." };
+    const current = { verified: 0, wrong: 0, not_public: 1, unverifiable: 0, approximate: 0 };
+    transport(frames(meta, claim, ahead, { ...done, counts: current })); assert.equal((await run()).done.counts.not_public, 1);
+    transport(frames(meta, claim, ahead, { ...done, counts: { verified: 0, wrong: 1, unverifiable: 0, approximate: 0 } })); await run();
+    transport(frames(meta, claim, ahead, { ...done, counts: { ...current, wrong: 1, not_public: 0 } })); await assert.rejects(run, PrivateCheckError);
   });
   await check("fabricated spans and unsafe filing links are rejected", async () => {
     transport(frames(meta, { ...claim, span_text: "invented" })); await assert.rejects(run, PrivateCheckError);
@@ -62,9 +81,17 @@ try {
   await check("status cannot claim offline or allow response caching", async () => {
     const status = { available: true, message: "Configured", backend: "modal", model: "muse-glimmer", offline: false, response_cache: false };
     transport(JSON.stringify(status), { contentType: "application/json" });
-    assert.equal((await fetchPrivateStatus(new AbortController().signal)).available, true);
+    const parsed = await fetchPrivateStatus(new AbortController().signal);
+    assert.equal(parsed.available, true); assert.deepEqual(parsed.recorded, []);  // older servers list no recordings
     transport(JSON.stringify({ ...status, offline: true }), { contentType: "application/json" });
     await assert.rejects(() => fetchPrivateStatus(new AbortController().signal));
+  });
+  await check("status lists the recorded samples it can replay and drops malformed entries", async () => {
+    const good = { sample_id: "nvda-q2-fy2027-private", recorded_utc: "2026-10-30T18:17:48Z" };
+    const status = { available: false, message: "Unavailable", backend: "modal", model: "muse-glimmer", offline: false, response_cache: false,
+      recorded_samples: [good, { sample_id: 7, recorded_utc: null }, { sample_id: "x", recorded_utc: "not a time" }, "nvda", null] };
+    transport(JSON.stringify(status), { contentType: "application/json" });
+    assert.deepEqual((await fetchPrivateStatus(new AbortController().signal)).recorded, [good]);
   });
   await check("a mismatched historical cutoff is rejected", async () => {
     transport(frames({ ...meta, as_of: "2026-01-01T00:00:00Z" })); await assert.rejects(run, PrivateCheckError);

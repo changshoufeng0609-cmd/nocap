@@ -21,14 +21,13 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract, periods, verify
 from receipts.coverage import numeric_coverage
-from receipts.types import Claim, EvidenceStore, Verdict
+from receipts.types import Claim, EvidenceStore, Verdict, verdict_counts
 
 MODEL = "muse-wonder-1.0"
 WONDER = extract.make_backend("meta", model=MODEL)
 MAX_OUTPUT_TOKENS = 2048
 MAX_CANDIDATES = 24
 MAX_REQUEST_BYTES = 40 * 1024
-STATUSES = ("verified", "wrong", "unverifiable", "approximate")
 Event = tuple[str, dict[str, Any]]
 
 
@@ -78,10 +77,11 @@ class IncompleteExtraction(RewriteError):
 # In particular parse_value_text alone is insufficient: it also accepts a number inside prose.
 _NUMBER = r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
 _VALUE = re.compile(
-    rf"(?P<prefix>\(?\s*(?:[-−–+]\s*)?(?:(?:US)?\$\s*|USD\s+)?\(?\s*)"
+    rf"(?P<prefix>\(?\s*(?:[-−–+]\s*)?(?:(?:US)?\$\s*|\$US\s*|USD\s+)?\(?\s*)"
     rf"(?P<number>{_NUMBER})"
-    r"(?P<suffix>\s*(?:(?:thousand|million|billion)s?|bn|mn|MM|[BMK])?"
-    r"(?:\s*(?:%|percent|per cent|per (?:diluted |basic )?share|/share))?\)?)"
+    r"(?P<suffix>\s*(?:(?i:thousand|million|billion)s?|bn|mn|MM|[BMK])?"
+    r"(?:\s*(?:%|percent|per cent|per (?:diluted |basic )?share|/share))?\)?"
+    r"(?:\s*(?:(?i:thousand|million|billion)s?|bn|mn|MM|[BMK]))?)"
 )
 
 
@@ -153,6 +153,11 @@ def _check(text: str, *, context: str, as_of: Any, store: EvidenceStore, stats: 
                 account(item.passage, item.call)
                 if item.call.get("status") == "admission_rejected":
                     raise RewriteError("A model call was blocked by the spending guard. Your original draft is unchanged.")
+                asked = (item.call.get("error") or {}).get("retry_after_s")
+                if not item.ok and isinstance(asked, (int, float)) and not isinstance(asked, bool):
+                    wait = extract.wait_phrase(asked)  # Fix makes one attempt, so say how long Meta asked us to wait
+                    raise RewriteError(f"Meta's model API is busy and asked NoCap to wait {wait} before trying again. "
+                                       f"Your original draft is unchanged; please try again in {wait}.")
                 if (not item.ok or item.call.get("claims_rejected") or
                         item.call.get("response_status") not in (None, "completed") or
                         any(w.startswith(("dropped ", "the quote ")) for w in item.warnings)):
@@ -169,7 +174,9 @@ def _check(text: str, *, context: str, as_of: Any, store: EvidenceStore, stats: 
             or extract.uncovered_numbers(text, [r for r in ranges if r is not None])
             or numeric_coverage(text, claims)["uncovered"]):
         raise IncompleteExtraction("Not every figure could be located safely. Your original draft is unchanged.")
-    return [(c, verify.verify(c, store, as_of=as_of, context=context)) for c in claims]
+    named = verify.named_in_draft(text, store)  # as receipts.check does: the same verdicts and reasons as Check
+    extra = {"named": named} if named else {}
+    return [(c, verify.verify(c, store, as_of=as_of, context=context, **extra)) for c in claims]
 
 
 def _eligible(text: str, results: list[tuple[Claim, Verdict]], as_of: Any) -> dict[str, tuple[Claim, Verdict, tuple[int, int]]]:
@@ -288,7 +295,7 @@ def _result(text: str, rewritten: str, original: list[tuple[Claim, Verdict]], re
     changed = {e["claim_id"] for e in changes}
     remaining = [{"claim_id": c.id, "reason": v.reason, "explanation": blocked_message or v.explanation}
                  for c, v in original if v.status == "wrong" and c.id not in changed]
-    counts = {s: sum(v.status == s for _, v in results) for s in STATUSES}
+    counts = verdict_counts(v for _, v in results)  # a look-ahead ◷ is not_public, never wrong
     stats.complete = True
     return {"original_text": text, "rewritten_text": rewritten,
             "status": "unchanged" if not changes else "partial" if remaining else "corrected",

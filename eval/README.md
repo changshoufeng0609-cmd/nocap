@@ -11,7 +11,7 @@ Real sentences from EX-99.1 earnings press releases, plus copies with exactly on
 .venv/bin/python eval/build_corpus.py --items-only                 # rebuild items from v0_sources.jsonl (offline)
 ```
 
-**Dev only during development.** `--split dev` is the default. Test-split numbers are reserved for the headline numbers (plan: Mon 11/02, run once). Don't run `--split test` unless that's the explicit ask, and never tune against it.
+**Dev only during development.** `--split dev` is the default. Test-split numbers are the headline numbers, from one frozen run on 2026-10-29 ([held-out results](heldout_results.md)). Don't run `--split test` again, and never tune against it.
 
 ## What's in v0
 
@@ -187,6 +187,7 @@ All 60 errors are Wonder's planted ones as relabeled by code. Code's type agreed
 - **Gold audit:** 15/15 dev rows revalidated from their original Wonder caches; 40 errors, 112 true figures and 13 guidance figures. Only two secondary `types_seen` lists changed after excluding future evidence. Primary labels, draft text and offsets are unchanged; all held-out raw lines are byte-identical (see `trap_dev_validation.json`).
 - **'?' rate:** 16 of 167 claims (9.6%): all 13 guidance figures, 1 true figure, and 2 duplicate claims.
 - **Entity reasons:** the 4 entity errors that came back `value_mismatch` are a rival's segment figure or a rival's figure for a different quarter, for example Alphabet's June-quarter EPS in a Netflix September-quarter story. The verifier names another company only for the same metric and quarter.
+- **Since 2026-10-31:** the verifier names another company only when the draft or its context line names it, so one more rival's figure returns `value_mismatch`: entity reason✓ 2 of 7, **35/40 (87.5%)** overall. Every status is unchanged ([peer attribution](../docs/evidence-expansion.md#peer-attribution-at-sp-500-scale)).
 
 ## Known limits of trap_v1
 

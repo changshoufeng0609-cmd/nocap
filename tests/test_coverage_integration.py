@@ -20,7 +20,7 @@ def test_check_api_reports_omissions_and_replays_them(tmp_path, monkeypatch):
                        for line in reply.text.splitlines() if line.startswith("data: ")])
     for reply in events:
         done = reply[-1]
-        assert done["counts"] == {"verified": 1, "wrong": 0, "unverifiable": 0, "approximate": 0}
+        assert done["counts"] == {"verified": 1, "wrong": 0, "not_public": 0, "unverifiable": 0, "approximate": 0}
         assert done["coverage"]["candidate_count"] == 2
         assert done["coverage"]["covered_count"] == 1
         assert done["coverage"]["uncovered"] == [{"start": text.index("42%"), "end": len(text) - 1, "text": "42%"}]

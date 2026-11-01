@@ -1,0 +1,77 @@
+{
+ "version": 1,
+ "kind": "grounding",
+ "key": "57be39a75adde807b39a4e5da5479fbf53db64f4ed724d5dca07218dcec810fd",
+ "request": {
+  "filing_id": "META-0001628280-26-003942",
+  "question": "What does Meta plan to spend on capital expenditures in 2026, and what does it expect for Reality Labs operating losses?",
+  "as_of": null
+ },
+ "recorded_utc": "2026-10-30T07:23:11Z",
+ "source_commit": "e14241a",
+ "events": [
+  {
+   "event": "progress",
+   "data": {
+    "stage": "reading_filing"
+   }
+  },
+  {
+   "event": "result",
+   "data": {
+    "kind": "filing_quotes",
+    "question": "What does Meta plan to spend on capital expenditures in 2026, and what does it expect for Reality Labs operating losses?",
+    "filing": {
+     "id": "META-0001628280-26-003942",
+     "ticker": "META",
+     "cik": 1326801,
+     "form": "10-K",
+     "accession": "0001628280-26-003942",
+     "accepted_at": "2026-01-29T00:13:46Z",
+     "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+     "sha256": "5317b7d789a1d246561a0fc095858e427439d70c92ec8ff3fa54219dae5d544a",
+     "source_sha256": "ec658f52e16b110a0d35f4d28bc255dc3d9f34873572bd9e87e22a6a572d811f",
+     "characters": 516028,
+     "normalization": "HTML text with explicit hidden blocks removed and whitespace collapsed"
+    },
+    "as_of": null,
+    "quotes": [
+     {
+      "text": "We anticipate making capital expenditures of approximately $115 billion to $135 billion in 2026 to support our AI efforts and core business.",
+      "start": 341062,
+      "end": 341202
+     },
+     {
+      "text": "In 2025, our RL segment reduced our overall operating profit by approximately $19.19 billion, and we expect our 2026 RL operating losses to remain similar to 2025.",
+      "start": 302865,
+      "end": 303028
+     },
+     {
+      "text": "For example, our investments in Reality Labs reduced our 2025 overall operating profit by approximately $19.19 billion, and we expect our 2026 Reality Labs operating losses to remain similar to 2025.",
+      "start": 113970,
+      "end": 114169
+     },
+     {
+      "text": "Although it is inherently difficult to predict when and how the next computing platform will develop, we expect our RL segment to continue to operate at a loss for the foreseeable future,",
+      "start": 27139,
+      "end": 27326
+     }
+    ],
+    "rejected_quotes": 0,
+    "model": "muse-spark-1.3",
+    "notice": "Exact matches in normalized filing text establish quote provenance, not whether the passage answers the question or proves a claim. Quoted numbers are not independently verified here; use Check for numeric verdicts.",
+    "offset_unit": "unicode_code_points",
+    "whole_document": true,
+    "usage": {
+     "input_tokens": 101135,
+     "output_tokens": 509,
+     "cached_tokens": 0
+    },
+    "cost_usd": 0.128582,
+    "cost_is_estimate": false,
+    "model_calls": 1,
+    "latency_s": 6.14
+   }
+  }
+ ]
+}

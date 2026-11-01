@@ -1,10 +1,18 @@
 import { readSSE } from "./sse";
 import { parseCoverage } from "./coverage";
-import type { CheckRequest, Claim, DoneEvent, ErrorEvent, Example, FixRequest, FixResult, FixStage, Health, MetaEvent, Verdict } from "./types";
+import { MAX_DRAFT_CHARS, REFUSAL_REASONS, type CheckRequest, type Claim, type DoneEvent, type ErrorEvent, type Example, type FixRequest, type FixResult, type FixStage, type Health, type MetaEvent, type RefusalReason, type Verdict } from "./types";
 
 /** NEXT_PUBLIC_RECEIPTS_MOCK=1 replays web/fixtures from Next.js route handlers under /mock-api. */
 export const MOCK = process.env.NEXT_PUBLIC_RECEIPTS_MOCK === "1";
 export const API_BASE = MOCK ? "/mock-api" : "/api";
+
+/** Reject oversized drafts before any transport, including programmatic callers. */
+export function draftLimitError(text: string): ErrorEvent | null {
+  return text.length > MAX_DRAFT_CHARS ? {
+    message: `Drafts are limited to ${MAX_DRAFT_CHARS.toLocaleString("en-US")} characters.`,
+    retryable: false, cost_usd: 0, cost_is_estimate: false, model_calls: 0,
+  } : null;
+}
 
 /** Accept accounting only as a complete validated tuple. Missing usage is not zero. */
 export function costFields(data: Record<string, unknown>) {
@@ -12,6 +20,14 @@ export function costFields(data: Record<string, unknown>) {
       typeof data.cost_is_estimate !== "boolean" || !Number.isSafeInteger(data.model_calls) ||
       (data.model_calls as number) < 0) return {};
   return { cost_usd: data.cost_usd, cost_is_estimate: data.cost_is_estimate, model_calls: data.model_calls as number };
+}
+
+/** An error event's admission `reason` and Meta's requested wait, when present and well formed; anything else is dropped. */
+export function refusalFields(data: Record<string, unknown>): Pick<ErrorEvent, "reason" | "retry_after_s"> {
+  const reason = REFUSAL_REASONS.includes(data.reason as RefusalReason) ? (data.reason as RefusalReason) : undefined;
+  const wait = typeof data.retry_after_s === "number" && Number.isFinite(data.retry_after_s) && data.retry_after_s > 0
+    ? data.retry_after_s : undefined;
+  return { ...(reason ? { reason } : {}), ...(wait ? { retry_after_s: wait } : {}) };
 }
 
 function validCost(data: { cost_usd?: unknown; cost_is_estimate?: unknown; model_calls?: unknown }): boolean {
@@ -119,6 +135,9 @@ export interface CheckHandlers {
  * Always ends in exactly one onDone or onError call, unless the signal aborts first.
  */
 export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return;
+  const limitError = draftLimitError(req.text);
+  if (limitError) { h.onError(limitError); return; }
   let res: Response;
   try {
     res = await fetch(`${API_BASE}/check`, {
@@ -181,6 +200,7 @@ export async function streamCheck(req: CheckRequest, h: CheckHandlers, signal: A
             message: typeof d.message === "string" && d.message ? d.message : "The check failed.",
             retryable: d.retryable === true,
             ...costFields(d),
+            ...refusalFields(d),
           });
           break;
       }
@@ -214,6 +234,7 @@ function isFixResult(value: unknown): value is FixResult {
     Array.isArray(r.results) && r.results.every((x) => !!x && !!x.claim && !!x.verdict && Array.isArray(x.verdict.evidence)) &&
     !!r.counts && ["verified", "wrong", "unverifiable", "approximate"].every((s) =>
       Number.isFinite(r.counts[s as keyof typeof r.counts])) &&
+    (r.counts.not_public === undefined || Number.isFinite(r.counts.not_public)) &&
     validCost(r) && Number.isFinite(r.latency_s))) return false;
 
   // The comparison and citation export must reproduce the exact server-verified text.
@@ -231,6 +252,9 @@ function isFixResult(value: unknown): value is FixResult {
 
 /** Only the draft and its time/context are submitted; receipts and proposed changes come from the server. */
 export async function streamFix(req: FixRequest, h: FixHandlers, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return;
+  const limitError = draftLimitError(req.text);
+  if (limitError) { h.onError(limitError); return; }
   let finished = false;
   const fail = (error: ErrorEvent) => {
     if (!signal.aborted && !finished) {
@@ -273,7 +297,7 @@ export async function streamFix(req: FixRequest, h: FixHandlers, signal: AbortSi
             coverage: parseCoverage(data.coverage, data.rewritten_text) });
         }
       } else if (msg.event === "error") {
-        fail({ message: typeof d.message === "string" && d.message ? d.message : "The correction could not be completed.", retryable: d.retryable === true, ...costFields(d) });
+        fail({ message: typeof d.message === "string" && d.message ? d.message : "The correction could not be completed.", retryable: d.retryable === true, ...costFields(d), ...refusalFields(d) });
       }
       if (finished) return;
     }

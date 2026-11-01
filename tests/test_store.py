@@ -16,7 +16,8 @@ import pytest
 
 from receipts.edgar import Edgar, EdgarError, _norm_exhibit, _RateLimiter, parse_accepted
 from receipts.ingest import build_company
-from receipts.store import ALIASES, DB_PATH, Store, company_aliases, connect_rw, normalize_entity, replace_company
+from receipts.store import (ALIASES, DB_PATH, Store, company_aliases, connect_rw, display_name, normalize_entity,
+                            replace_company)
 from receipts.types import EvidenceStore, Fact
 
 UTC = timezone.utc
@@ -381,10 +382,112 @@ def test_unknown_entities_resolve_to_none(ten_companies, name):
     assert ten_companies.resolve_entity(name) is None
 
 
-def test_alias_table_covers_the_eleven_companies():
-    assert set(ALIASES) == {"NVDA", "AAPL", "MSFT", "META", "AMZN", "GOOGL", "JPM", "BAC", "AMD", "NFLX", "TSLA"}
+SEC_NAMES = {
+    "NVDA": "NVIDIA CORP", "AAPL": "Apple Inc.", "MSFT": "MICROSOFT CORP", "META": "Meta Platforms, Inc.",
+    "AMZN": "AMAZON COM INC", "GOOGL": "Alphabet Inc.", "JPM": "JPMORGAN CHASE & CO", "BAC": "BANK OF AMERICA CORP /DE/",
+    "AMD": "ADVANCED MICRO DEVICES INC", "NFLX": "NETFLIX INC", "TSLA": "Tesla, Inc.", "AVGO": "Broadcom Inc.",
+    "ORCL": "ORACLE CORP", "CRM": "Salesforce, Inc.", "ADBE": "ADOBE INC.", "INTC": "INTEL CORP",
+    "QCOM": "QUALCOMM INC/DE", "CSCO": "CISCO SYSTEMS, INC.", "IBM": "INTERNATIONAL BUSINESS MACHINES CORP",
+    "PLTR": "Palantir Technologies Inc.", "UBER": "Uber Technologies, Inc", "WMT": "Walmart Inc.",
+    "COST": "COSTCO WHOLESALE CORP /NEW", "DIS": "Walt Disney Co", "NKE": "NIKE, Inc.", "MCD": "MCDONALDS CORP",
+    "KO": "COCA COLA CO", "LLY": "ELI LILLY & Co", "UNH": "UNITEDHEALTH GROUP INC", "JNJ": "JOHNSON & JOHNSON",
+    "GS": "GOLDMAN SACHS GROUP INC", "WFC": "WELLS FARGO & COMPANY/MN", "GM": "General Motors Co",
+    "MS": "Morgan Stanley",
+    "HPE": "Hewlett Packard Enterprise Co",
+    "XOM": "ExxonMobil Holdings Corp",  # the registrant's SEC title since its 2026 holding-company reorganization
+}
+
+
+def test_alias_table_covers_every_company():
+    assert set(ALIASES) == set(SEC_NAMES)
     assert normalize_entity("JPMorgan Chase & Co.") == "jpmorgan chase"
     assert normalize_entity("BANK OF AMERICA CORP /DE/") == "bank of america"
+
+
+def test_no_alias_belongs_to_two_companies():
+    owners: dict[str, set[str]] = {}
+    for ticker in ALIASES:
+        for key in company_aliases(ticker, SEC_NAMES[ticker]):
+            owners.setdefault(key, set()).add(ticker)
+    assert {k: v for k, v in owners.items() if len(v) > 1} == {}
+
+
+@pytest.fixture
+def all_companies(tmp_path):
+    conn = connect_rw(tmp_path / "facts.sqlite")
+    for i, (ticker, name) in enumerate(SEC_NAMES.items()):
+        replace_company(conn, {"cik": 2000 + i, "ticker": ticker, "name": name,
+                               "aliases": company_aliases(ticker, name), "fiscal_year_end": "1231"}, [], [], [])
+    conn.close()
+    s = Store(tmp_path / "facts.sqlite", pr_dir=tmp_path / "pr")
+    yield s
+    s.close()
+
+
+@pytest.mark.parametrize("name, ticker", [
+    ("Walmart", "WMT"), ("Wal-Mart", "WMT"), ("Coca-Cola", "KO"), ("The Coca-Cola Company", "KO"),
+    ("J&J", "JNJ"), ("Johnson & Johnson", "JNJ"), ("Lilly", "LLY"), ("Eli Lilly", "LLY"), ("Eli Lilly and Co.", "LLY"),
+    ("UnitedHealth", "UNH"), ("UnitedHealth Group", "UNH"), ("Goldman", "GS"), ("Goldman Sachs", "GS"),
+    ("Wells Fargo", "WFC"), ("Salesforce", "CRM"), ("Broadcom", "AVGO"), ("Oracle", "ORCL"), ("Adobe", "ADBE"),
+    ("Intel", "INTC"), ("Qualcomm", "QCOM"), ("Cisco", "CSCO"), ("IBM", "IBM"), ("International Business Machines", "IBM"),
+    ("Palantir", "PLTR"), ("Uber", "UBER"), ("Costco", "COST"), ("Disney", "DIS"), ("The Walt Disney Company", "DIS"),
+    ("Nike", "NKE"), ("McDonald's", "MCD"), ("McDonalds", "MCD"),
+    # the original companies still resolve once the table grows
+    ("Meta", "META"), ("Alphabet", "GOOGL"), ("Google", "GOOGL"), ("NVIDIA", "NVDA"), ("JPMorgan", "JPM"),
+    ("Bank of America", "BAC"), ("Tesla", "TSLA"), ("Apple", "AAPL"), ("Microsoft", "MSFT"), ("Amazon", "AMZN"),
+    # the names people use for Exxon Mobil, whose SEC title is now "ExxonMobil Holdings Corp"
+    ("Exxon", "XOM"), ("ExxonMobil", "XOM"), ("Exxon Mobil", "XOM"), ("Exxon Mobil Corporation", "XOM"),
+])
+def test_expanded_entity_aliases(all_companies, name, ticker):
+    hit = all_companies.resolve_entity(name)
+    assert hit is not None and hit[1] == ticker
+
+
+# Companies left out of this table, a bottler that shares a nickname, and segments stay unresolved.
+@pytest.mark.parametrize("name", ["Visa", "Mastercard", "Coke", "AWS", "Google Cloud", "America", "Chase", "Azure"])
+def test_expanded_unknown_entities_resolve_to_none(all_companies, name):
+    assert all_companies.resolve_entity(name) is None
+
+
+def test_profit_loss_stands_in_for_net_income_only_without_a_noncontrolling_interest(tmp_path):
+    filings = {k: FILINGS[k] for k in ("A1", "A2", "A3")}
+    cf = companyfacts(filings,
+                      ("ProfitLoss", Q1, 10e6, "A1"),                                         # no NCI: net income
+                      ("ProfitLoss", Q2, 11e6, "A2"),
+                      ("NetIncomeLossAttributableToNoncontrollingInterest", Q2, 1e6, "A2"),  # NCI: not net income
+                      ("NetIncomeLoss", Q3, 12e6, "A3"), ("ProfitLoss", Q3, 12.5e6, "A3"))    # both: NetIncomeLoss
+    s, build = build_store(tmp_path, filings, cf)
+    got = {f.period_end: (f.concept, f.value) for f in s.facts(CIK, "net_income")}
+    # Q2 tags an NCI and Q3 shows one (ProfitLoss above NetIncomeLoss), so Q1's ProfitLoss may include one too: "?"
+    # (review fix 15); Q2's own filing tags both sides, so its net income is ProfitLoss less that NCI, derived
+    assert got == {date(2025, 6, 30): ("us-gaap:NetIncomeLoss", 10e6), date(2025, 9, 30): ("us-gaap:NetIncomeLoss", 12e6)}
+    assert build.stats["consolidated_net_income_skipped"] == 2 and build.stats["attributable_net_income_derived"] == 1
+    q2 = next(f for f in s.facts(CIK, "net_income") if f.period_end == date(2025, 6, 30))
+    assert q2.source == "derived" and q2.derived_from == [q2.accession] and "ProfitLoss 11,000,000" in q2.locator
+    s.close()
+    (tmp_path / "none").mkdir()
+    s, build = build_store(tmp_path / "none", filings, companyfacts(filings, ("ProfitLoss", Q1, 10e6, "A1"),
+                                                                    ("ProfitLoss", Q2, 11e6, "A2")))
+    got = {f.period_end: (f.concept, f.value) for f in s.facts(CIK, "net_income")}
+    assert got == {date(2025, 3, 31): ("us-gaap:ProfitLoss", 10e6), date(2025, 6, 30): ("us-gaap:ProfitLoss", 11e6)}
+    s.close()
+
+
+def test_a_contract_revenue_slice_never_stands_for_revenue(tmp_path):
+    filings = {k: FILINGS[k] for k in ("A1", "A2", "A3", "AK")}
+    rfc = "RevenueFromContractWithCustomerExcludingAssessedTax"
+    cf = companyfacts(filings,
+                      (rfc, Q1, 150e6, "A1"), ("NoninterestExpense", Q1, 1.2e9, "A1"),  # a bank's fee income,
+                      ("InterestIncomeExpenseNet", Q1, 1.4e9, "A1"),                   # beside its interest income
+                      (rfc, Q2, 500e6, "A2"),                                          # no cost reported: kept
+                      (rfc, Q3, 900e6, "A3"), ("OperatingExpenses", Q3, 1.2e9, "A3"),   # at least half: kept
+                      ("CostOfRevenue", Q3, 600e6, "A3"),
+                      (rfc, FY, 13e6, "AK"), ("CostOfGoodsAndServicesSold", FY, 567e6, "AK"))  # a REIT's 10-K
+    s, build = build_store(tmp_path, filings, cf)
+    got = {f.period_end: f.value for f in s.facts(CIK, "revenue")}
+    assert got == {date(2025, 6, 30): 500e6, date(2025, 9, 30): 900e6}
+    assert build.stats["component_revenue_skipped"] == 2
+    s.close()
 
 
 # --------------------------------------------------------------------------- EDGAR client (offline)
@@ -445,3 +548,137 @@ def test_real_fiscal_calendars(real):
     assert (2027, "Q2", date(2026, 4, 27), date(2026, 7, 26)) in nvda
     assert (2026, "Q3", date(2026, 3, 29), date(2026, 6, 27)) in real.fiscal_calendar(320193)    # AAPL
     assert (2026, "FY", date(2025, 7, 1), date(2026, 6, 30)) in real.fiscal_calendar(789019)     # MSFT
+
+
+# --------------------------------------------------------------------------- entity safety at S&P 500 scale
+WORD_TICKER_COMPANIES = {  # ticker -> SEC-style name: each ticker is an everyday word or two letters or fewer
+    "T": "AT&T INC.", "F": "FORD MOTOR CO", "A": "AGILENT TECHNOLOGIES, INC.", "C": "CITIGROUP INC", "IT": "GARTNER INC",
+    "ON": "ON SEMICONDUCTOR CORP", "NOW": "ServiceNow, Inc.", "LOW": "LOWE'S COMPANIES INC", "ALL": "ALLSTATE CORP",
+    "KEY": "KEYCORP /NEW/", "MO": "ALTRIA GROUP, INC.", "CAT": "CATERPILLAR INC", "HAS": "HASBRO, INC.",
+    "BALL": "BALL Corp", "CARR": "Carrier Global Corp", "COST": "COSTCO WHOLESALE CORP /NEW", "KO": "COCA COLA CO",
+    "GS": "GOLDMAN SACHS GROUP INC",
+    # S&P 500 tickers that are words, names or abbreviations in capitals (approved 2026-10-31)
+    "APP": "AppLovin Corp", "USB": "US BANCORP \\DE\\", "LIN": "LINDE PLC", "BRO": "BROWN & BROWN, INC.",
+    "PSA": "Public Storage", "DOC": "Healthpeak Properties, Inc.", "DOW": "DOW INC.",
+}
+# Tickers that resolve when a claim's company is written that way, but that running text never counts, also not in
+# capitals: "FICO score", "MSCI index", "RTX 5090", "start-ups", "AES encryption", "APA style", a "PTC" tax credit.
+WORD_NAME_TICKERS = {"UPS": "UNITED PARCEL SERVICE INC", "FICO": "FAIR ISAAC CORP", "MSCI": "MSCI Inc.",
+                     "RTX": "RTX Corp", "AES": "AES CORP", "APA": "APA Corp", "PTC": "PTC INC."}
+OTHER_COMPANIES = {"NVDA": "NVIDIA CORP", "MSFT": "MICROSOFT CORP", "CVX": "CHEVRON CORP", "MRK": "MERCK & CO., INC.",
+                   "FLEX": "FLEX LTD.", "TGT": "TARGET CORP", "V": "VISA INC.", "MCO": "MOODYS CORP /DE/"}
+
+
+@pytest.fixture
+def word_tickers(tmp_path):
+    conn = connect_rw(tmp_path / "facts.sqlite")
+    companies = {**WORD_TICKER_COMPANIES, **WORD_NAME_TICKERS, **OTHER_COMPANIES, "AAPL": "Apple Inc."}
+    for i, (ticker, name) in enumerate(companies.items()):
+        replace_company(conn, {"cik": 3000 + i, "ticker": ticker, "name": name,
+                               "aliases": company_aliases(ticker, name), "fiscal_year_end": "1231"}, [], [], [])
+    conn.close()
+    s = Store(tmp_path / "facts.sqlite", pr_dir=tmp_path / "pr")
+    yield s
+    s.close()
+
+
+# BALL is a lookup-only short name; GS is an explicit lookup alias (review L9).
+@pytest.mark.parametrize("word", [*(t for t in WORD_TICKER_COMPANIES if t not in {"BALL", "GS"}), "t", "it", "now", "all", "cost",
+                                  "Dow", "Key", "Low"])
+def test_a_word_ticker_never_resolves_by_itself(word_tickers, word):
+    assert word_tickers.resolve_entity(word) is None
+
+
+@pytest.mark.parametrize("name, ticker", [
+    ("AT&T", "T"), ("Ford Motor", "F"), ("Agilent Technologies", "A"), ("Citigroup", "C"), ("Gartner", "IT"),
+    ("ON Semiconductor", "ON"), ("ServiceNow", "NOW"), ("Lowe's Companies", "LOW"), ("Allstate", "ALL"),
+    ("KeyCorp", "KEY"), ("Altria Group", "MO"), ("Caterpillar", "CAT"), ("Hasbro", "HAS"), ("Carrier Global", "CARR"),
+    ("Costco", "COST"), ("Coca-Cola", "KO"), ("Goldman Sachs", "GS"), ("Apple", "AAPL"), ("AAPL", "AAPL"),
+    ("AppLovin", "APP"), ("US Bancorp", "USB"), ("Linde", "LIN"), ("Brown & Brown", "BRO"), ("Public Storage", "PSA"),
+    ("Healthpeak Properties", "DOC"), ("Altria", "MO"),
+    # WORD_NAMES keeps these out of running text only: a claim whose company is written "FICO" still resolves
+    ("UPS", "UPS"), ("FICO", "FICO"), ("MSCI", "MSCI"), ("RTX", "RTX"), ("AES", "AES"), ("APA", "APA"), ("PTC", "PTC"),
+    ("Chevron", "CVX"), ("Merck", "MRK"), ("Moody's", "MCO"), ("Moodys", "MCO"),
+    ("Ford", "F"), ("Ball", "BALL"), ("Flex", "FLEX"), ("Dow Inc.", "DOW"),  # lookup-only short names
+])
+def test_word_ticker_companies_still_resolve_by_name(word_tickers, name, ticker):
+    hit = word_tickers.resolve_entity(name)
+    assert hit is not None and hit[1] == ticker
+
+
+def test_a_drafts_ordinary_words_name_no_company(word_tickers):
+    text = ("Apple said it is on track: all of its cost of revenue fell, and now the key low-cost lines are a fast "
+            "path. C-suite leaders at the ball game had a T-shirt. Start-ups pitched the app over USB-C, analyst Lin "
+            "said, and a tech bro checked his FICO score, the MSCI index, an RTX 5090, Groupe PSA, AES encryption, APA "
+            "style and a PTC on wind power, with ups and downs. Chevron signs, a merck, a moody target and visa rules.")
+    assert [t for _, t, _ in word_tickers.names_in_text(text)] == ["AAPL"]
+    named = word_tickers.names_in_text("Allstate and ServiceNow beat Costco, AT&T and Goldman Sachs.")
+    assert [t for _, t, _ in named] == ["ALL", "NOW", "COST", "T", "GS"]
+
+
+def test_every_lookup_key_in_the_snapshot_names_exactly_one_company():
+    s = Store(DB_PATH.parent / "snapshot" / "facts.sqlite")
+    try:
+        lookup = s._index()[0]
+        assert {k: sorted(t for _, t in v) for k, v in lookup.items() if len(v) > 1} == {}
+    finally:
+        s.close()
+
+
+# --------------------------------------------------------------------------- DEI label reuse (receipts.fiscal_labels)
+def test_a_dei_label_reused_a_year_later_is_relabelled_by_the_companys_convention(tmp_path):
+    filings = {"K1": ("0000000999-25-000100", "10-K", "2025-06-20", "2025-06-20T20:00:00.000Z", "2025-05-31", 2025, "FY"),
+               "Q1A": ("0000000999-25-000101", "10-Q", "2024-09-10", "2024-09-10T20:00:00.000Z", "2024-08-31", 2025, "Q1"),
+               "Q1B": ("0000000999-26-000101", "10-Q", "2025-09-10", "2025-09-10T20:00:00.000Z", "2025-08-31", 2025, "Q1")}
+    cf = companyfacts(filings, ("Revenues", ("2024-06-01", "2025-05-31"), 430e6, "K1"),
+                      ("Revenues", ("2024-06-01", "2024-08-31"), 100e6, "Q1A"),
+                      ("Revenues", ("2025-06-01", "2025-08-31"), 120e6, "Q1B"),
+                      ("Revenues", ("2024-06-01", "2024-08-31"), 100e6, "Q1B"))
+    s, build = build_store(tmp_path, filings, cf, fye="0531")
+    cal = {(fy, fp): (start, end) for fy, fp, start, end in s.fiscal_calendar(CIK)}
+    assert cal[(2025, "Q1")] == (date(2024, 6, 1), date(2024, 8, 31))
+    assert cal[(2026, "Q1")] == (date(2025, 6, 1), date(2025, 8, 31))  # the 10-Q said Q1 FY2025 again
+    (latest,) = s.facts(CIK, "revenue", period_end=date(2025, 8, 31))
+    assert (latest.fiscal_year, latest.fiscal_period, latest.value) == (2026, "Q1", 120e6)
+    assert any("that period is Q1 FY2026: relabelled" in w for w in build.warnings)
+    s.close()
+
+
+def test_a_dei_label_two_periods_claim_is_dropped(tmp_path):
+    filings = {"Q1A": ("0000000999-25-000101", "10-Q", "2024-09-10", "2024-09-10T20:00:00.000Z", "2024-08-31", 2025, "Q1"),
+               "Q1B": ("0000000999-25-000102", "10-Q", "2024-11-10", "2024-11-10T20:00:00.000Z", "2024-10-31", 2025, "Q1")}
+    cf = companyfacts(filings, ("Revenues", ("2024-06-01", "2024-08-31"), 100e6, "Q1A"),
+                      ("Revenues", ("2024-08-01", "2024-10-31"), 110e6, "Q1B"))
+    s, build = build_store(tmp_path, filings, cf, fye="0531")
+    assert s.fiscal_calendar(CIK) == []  # no 10-K to settle it: neither period is labelled, so both answer "?"
+    assert any("claimed for different periods" in w and "label dropped" in w for w in build.warnings)
+    assert all(f.fiscal_period is None for f in s.facts(CIK, "revenue"))
+    s.close()
+
+
+def test_a_word_name_resolves_only_when_written_with_its_legal_suffix(word_tickers):
+    """Dow Inc.'s own name is the word "dow" (also the Dow index): "Dow" alone never resolves, "Dow Inc." does. Ball's
+    is lookup-only now (SHORT_NAMES): "Ball" resolves as a claim's company, and running text still never counts it."""
+    assert word_tickers.resolve_entity("Dow") is None and word_tickers.resolve_entity("DOW") is None
+    for written in ("Dow Inc.", "Dow Inc", "DOW INC."):
+        hit = word_tickers.resolve_entity(written)
+        assert hit is not None and hit[1] == "DOW"
+    assert word_tickers.word_name("Dow")[1] == "DOW" and word_tickers.word_name("Costco") is None
+    assert word_tickers.resolve_entity("Ball")[1] == "BALL" and word_tickers.names_in_text("Ball and Flex rose") == []
+
+
+def test_a_bare_word_name_is_explained_not_called_uncovered(word_tickers):
+    from receipts.types import Claim
+    from receipts.verify import verify
+    span = "Dow's revenue for the third quarter of 2026 was $3.2 billion."
+    c = Claim(id="c1", metric="revenue", metric_text="revenue", value_text="$3.2 billion", value=3.2, unit="USD",
+              scale="billions", period_text="the third quarter of 2026", period_type="quarter", comparison="none",
+              basis=None, forward_looking=False, entity="Dow", segment=None, span_text=span, span_start=0,
+              span_end=len(span))
+    v = verify(c, word_tickers)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous") and "everyday word" in v.explanation
+
+
+def test_exxon_mobil_is_named_as_people_write_it():
+    # explanations say "Exxon Mobil", not the holding company's SEC title
+    assert display_name("XOM", "ExxonMobil Holdings Corp") == "Exxon Mobil"

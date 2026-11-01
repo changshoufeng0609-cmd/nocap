@@ -1,0 +1,455 @@
+{
+ "figures": 8,
+ "qualifiers": 16,
+ "positions": [
+  "leading",
+  "trailing",
+  "inside",
+  "parenthetical"
+ ],
+ "variants": 2048,
+ "outcomes": {
+  "unverifiable": 2000,
+  "verified on reported non-GAAP evidence": 48
+ },
+ "controls": {
+  "variants": 16,
+  "outcomes": {
+   "verified": 16
+  }
+ },
+ "verified_rows": [
+  {
+   "span": "On an adjusted basis, NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "On an adjusted basis, NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion, on an adjusted basis.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion, on an adjusted basis.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue on an adjusted basis for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue on an adjusted basis for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion (on an adjusted basis).",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion (on an adjusted basis).",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "On a non-GAAP basis, NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "On a non-GAAP basis, NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion, on a non-GAAP basis.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion, on a non-GAAP basis.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue on a non-GAAP basis for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue on a non-GAAP basis for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion (on a non-GAAP basis).",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion (on a non-GAAP basis).",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "On a managed basis, NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "On a managed basis, NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion, on a managed basis.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion, on a managed basis.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue on a managed basis for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue on a managed basis for the second quarter of fiscal 2027 was $96.2 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion (on a managed basis).",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "NVIDIA's revenue for the second quarter of fiscal 2027 was $96.2 billion (on a managed basis).",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0001045810-26-000073"
+  },
+  {
+   "span": "On an adjusted basis, AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "On an adjusted basis, AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion, on an adjusted basis.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion, on an adjusted basis.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue on an adjusted basis for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue on an adjusted basis for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion (on an adjusted basis).",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion (on an adjusted basis).",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "On a non-GAAP basis, AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "On a non-GAAP basis, AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion, on a non-GAAP basis.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion, on a non-GAAP basis.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue on a non-GAAP basis for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue on a non-GAAP basis for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion (on a non-GAAP basis).",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion (on a non-GAAP basis).",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "On a managed basis, AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "On a managed basis, AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion, on a managed basis.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion, on a managed basis.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue on a managed basis for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue on a managed basis for the quarter ended March 28, 2026 was $10.3 billion.",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion (on a managed basis).",
+   "metric_text_has_qualifier": false,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  },
+  {
+   "span": "AMD's revenue for the quarter ended March 28, 2026 was $10.3 billion (on a managed basis).",
+   "metric_text_has_qualifier": true,
+   "model_basis": null,
+   "evidence_basis": [
+    "non-GAAP"
+   ],
+   "receipt": "0000002488-26-000072"
+  }
+ ]
+}

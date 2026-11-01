@@ -250,6 +250,29 @@ accounting, input hashes and limitations. Full regression validation passed **90
 The held-out split was not run. Meta Spark remains the local default and the hosted extractor; no deployment
 or persistent backend switch was made.
 
+## Fine-tuning experiment: Muse Glimmer LoRA SFT on Fireworks
+
+On 2026-10-30, Muse Glimmer 30B was fine-tuned with LoRA (rank 8, 2 epochs, 26 steps) on the Fireworks
+Serverless Training API.
+
+- **Training data:** 203 development passages, each with Muse Spark 1.3's extraction as the target, kept only where
+  NoCap's code accepted it. The prompt is the one the Modal Glimmer backend sends.
+- **Evaluation:** 70 test passages kept out of training (the 10 gold passages plus a seeded 20% of development
+  passages), scored with NoCap's deterministic checks. Base and tuned used identical greedy decoding.
+- **Results:**
+  - Both models scored **27/27 strict recall and 27/27 precision** on the gold claims.
+  - Tuned matched the teacher's exact claim sets more often: **51/70 vs 39/70** (McNemar p = 0.023), almost all
+    of it in `period_text` wording.
+  - End-to-end verdicts barely moved: **68/70 vs 66/70** passages verdict-equivalent to the teacher (p = 0.5),
+    and **33/34 vs 32/34** seeded errors caught, with no false alarms for either model.
+  - Tuned answers skip Glimmer's reasoning, using 203 vs 725 completion tokens on average.
+- **Cost:** training was **$0** under Fireworks' Glimmer promotion. Evaluation sampling was about **$0.47**. No
+  deployment was created, and the training session was deleted.
+
+The product is unchanged: Private mode still uses base Glimmer, and serving the stored adapter would need an
+on-demand deployment. Numbers, method, hashes and limitations are in
+[`eval/glimmer_sft/results.md`](../eval/glimmer_sft/results.md).
+
 ## Report definitions
 
 - **Raw errors:** model JSON invents a quoted number, or its value, scale or unit disagrees with the passage.

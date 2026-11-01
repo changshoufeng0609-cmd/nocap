@@ -1,0 +1,1535 @@
+{
+  "validated_on": "2026-10-30",
+  "scope": "MSFT (Q1 FY2027), GOOGL and AMZN (Q3 2026): the quarter ended 2026-09-30, from each company's 10-Q XBRL and its Item 2.02 earnings-release (8-K EX-99.1) tables. Additive only.",
+  "frozen_code_commit": "e657f609be37264b4f6045781449244cde97ab56",
+  "eligibility_check": {
+    "checked_at": "2026-10-30T11:57:11.552252+00:00",
+    "rule": "press-release ingestion pairs each earnings 8-K with its filed 10-Q (or 10-K for a fiscal Q4)",
+    "added": {
+      "MSFT": "8-K 0001193125-26-436122 + 10-Q 0001193125-26-436133",
+      "GOOGL": "8-K 0001652044-26-000080 + 10-Q 0001652044-26-000084",
+      "AMZN": "8-K 0001018724-26-000038 + 10-Q 0001018724-26-000040"
+    },
+    "not_added": {
+      "JPM": "earnings 8-K 0001628280-26-065582 (accepted 2026-10-13T10:30:38Z); no Q3 10-Q on EDGAR",
+      "BAC": "earnings 8-K 0000070858-26-000481 (accepted 2026-10-14T10:44:44Z); no Q3 10-Q on EDGAR",
+      "AAPL": "no new Item 2.02 8-K and no FY2026 10-K on EDGAR"
+    },
+    "inputs": [
+      {
+        "url": "https://data.sec.gov/submissions/CIK0000019617.json",
+        "sha256": "8494b16a3270172edb12148f4041ddedc1f67467e74895ec7579244da69a9acc",
+        "fetched_at": "2026-10-30T11:57:11.552252+00:00",
+        "bytes": 4681589
+      },
+      {
+        "url": "https://data.sec.gov/submissions/CIK0000070858.json",
+        "sha256": "26482b91e2d16bcee6d65ce1ff3a12d244fe9f0b39bacb55ee18ed95c31b4078",
+        "fetched_at": "2026-10-30T11:57:11.930715+00:00",
+        "bytes": 1788666
+      },
+      {
+        "url": "https://data.sec.gov/submissions/CIK0000320193.json",
+        "sha256": "2a1c62401f90039b5f3c10a80e3c4bb7f112c6e833ef0a163469f8b949396510",
+        "fetched_at": "2026-10-30T11:57:12.131564+00:00",
+        "bytes": 163586
+      }
+    ],
+    "note": "Fetched into an isolated scratch cache, so the shared EDGAR cache for these companies was not changed."
+  },
+  "commands": [
+    ".venv/bin/python -m receipts.ingest --tickers MSFT,GOOGL,AMZN --quarters 8 --refresh --max-requests 15",
+    ".venv/bin/python -m receipts.press_release --tickers MSFT GOOGL AMZN --quarters 1 --dry-run --max-sec-requests 20",
+    ".venv/bin/python -m receipts.press_release --tickers MSFT GOOGL AMZN --quarters 1 --validate --budget-usd 3.31 --concurrency 1 --max-sec-requests 20",
+    ".venv/bin/python scripts/build_snapshot.py --no-model"
+  ],
+  "command_notes": [
+    "SEC_USER_AGENT was supplied in each command's environment; its value is not recorded.",
+    "The snapshot was built with scripts/build_snapshot.py from frozen_code_commit, over the topped-up data/.",
+    "press_release --validate rewrites data/pr_facts/_validation.json; the earlier file was restored byte for byte and this run's report is kept below under gates.2_press_release_validation."
+  ],
+  "ingest_window": {
+    "run_date": "2026-10-30",
+    "quarters": 8,
+    "facts_start": "2023-09-13",
+    "filings_start": "2023-05-16",
+    "previous_meta": {
+      "schema_version": "1",
+      "built_at": "2026-10-29T05:36:23Z",
+      "facts_start": "2023-09-12",
+      "filings_start": "2023-05-15",
+      "quarters": "8"
+    },
+    "meta_after": {
+      "schema_version": "1",
+      "built_at": "2026-10-30T12:00:29Z",
+      "facts_start": "2023-09-13",
+      "filings_start": "2023-05-16",
+      "quarters": "8"
+    },
+    "why_quarters_8": "A dry rebuild from the pre-refresh cached inputs with this window reproduced every stored MSFT, GOOGL and AMZN row exactly (0 missing, 0 extra). --quarters 9 would also have added older history: +40/+35/+37 facts and +2/+4/+3 filings (Q2 2023 and Microsoft's FY2023)."
+  },
+  "sec_requests": {
+    "total_live": 16,
+    "eligibility_check": 3,
+    "ingest_refresh": 7,
+    "press_release_dry_run": 6,
+    "press_release_run": 0,
+    "detail": "ingest: MSFT and AMZN Submissions + companyfacts, GOOGL Submissions + page 001 + companyfacts (company_tickers.json from cache); dry run: three filing indexes and three EX-99.1 exhibits; the mapping run read all 15 inputs from the cache. Amazon's EX-99.2 (4,342 bytes) was skipped by the secondary-exhibit size rule without a request."
+  },
+  "input_cache_provenance": {
+    "refreshed": [
+      {
+        "url": "https://data.sec.gov/submissions/CIK0000789019.json",
+        "before": {
+          "sha256": "5f7093cab1b22bc9cc784b5a04f8394a0faf216513810829b302e464d138a990",
+          "fetched_at": "2026-10-27T08:49:29.126341+00:00",
+          "bytes": 185516
+        },
+        "after": {
+          "sha256": "46f3d184653f44f040005c30746b50f6e6a3e93b6e08630d4b400a73a9f6738e",
+          "fetched_at": "2026-10-30T12:00:26.804155+00:00",
+          "bytes": 185269
+        }
+      },
+      {
+        "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000789019.json",
+        "before": {
+          "sha256": "dd0308149a8e96497989ed7c690b5a49a00bef9ceafbb24638bda41e8ae938dd",
+          "fetched_at": "2026-10-27T08:49:29.439399+00:00",
+          "bytes": 4888108
+        },
+        "after": {
+          "sha256": "464cc12cc4796c90a6a0c709eb4920788aa7d4d5eee8b44f2d11d7d44804ae37",
+          "fetched_at": "2026-10-30T12:00:27.289784+00:00",
+          "bytes": 4936836
+        }
+      },
+      {
+        "url": "https://data.sec.gov/submissions/CIK0001652044.json",
+        "before": {
+          "sha256": "5f29ed0c43529dca319199d592e504a97b3628143a918d60d5852904b9f62c14",
+          "fetched_at": "2026-10-27T08:49:35.016893+00:00",
+          "bytes": 152401
+        },
+        "after": {
+          "sha256": "6eb3e5d221ac8d1215877e916701b1091757617f02ae14e6061e7bc4d0104433",
+          "fetched_at": "2026-10-30T12:00:27.973871+00:00",
+          "bytes": 152289
+        }
+      },
+      {
+        "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001652044.json",
+        "before": {
+          "sha256": "a017f26ee88cb4a639d1c1ddb06d53b4afe22f0ac89cabec7cd67c88919fe1c5",
+          "fetched_at": "2026-10-27T08:49:35.370336+00:00",
+          "bytes": 3164517
+        },
+        "after": {
+          "sha256": "ec4a3095d634583925b5ea450db8a5ed974dc48f6f1b4f594022310bc78d4032",
+          "fetched_at": "2026-10-30T12:00:28.801498+00:00",
+          "bytes": 3249987
+        }
+      },
+      {
+        "url": "https://data.sec.gov/submissions/CIK0001018724.json",
+        "before": {
+          "sha256": "64101d7a76a2c68e7a07d37369623ff0d4b11ededdf28410f953337990d1588f",
+          "fetched_at": "2026-10-27T08:49:31.287875+00:00",
+          "bytes": 159904
+        },
+        "after": {
+          "sha256": "b79ff9133318a7b14a5294cdf479a125654f6f96e2fd8b15ba541d6490fe0628",
+          "fetched_at": "2026-10-30T12:00:29.243937+00:00",
+          "bytes": 159932
+        }
+      },
+      {
+        "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+        "before": {
+          "sha256": "7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+          "fetched_at": "2026-10-27T08:49:31.596635+00:00",
+          "bytes": 4478611
+        },
+        "after": {
+          "sha256": "acddb7c0a6973a1fd08372de3b292298a34eae7f42a7eedc4bdebd3ac659c8fd",
+          "fetched_at": "2026-10-30T12:00:29.817074+00:00",
+          "bytes": 4554378
+        }
+      },
+      {
+        "url": "https://data.sec.gov/submissions/CIK0001652044-submissions-001.json",
+        "before": {
+          "sha256": "f7ce906f784849dfa005bca5c5c8c45420691c6c1edceb52be06e2c30d73af4c",
+          "fetched_at": "2026-10-27T09:21:17.324655+00:00",
+          "bytes": 268399
+        },
+        "after": {
+          "sha256": "4455c88690c4cf6526a83ada9305ede53c500cebc4aa5c843f1f107f73b0ec97",
+          "fetched_at": "2026-10-30T12:00:28.517456+00:00",
+          "bytes": 269830
+        }
+      }
+    ],
+    "new_press_release_inputs": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/0001193125-26-436122-index.htm",
+        "sha256": "d3d91d8226d13dbbcc62cf1d7e4bad89c6ea646db403f127877f6281b5112aa5",
+        "fetched_at": "2026-10-30T12:02:24.135589+00:00",
+        "bytes": 9185
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/msft-ex99_1.htm",
+        "sha256": "e2ba11aa6c71945f7b7bb03470b94b6c3e63744bb1dae03bc485856690a60225",
+        "fetched_at": "2026-10-30T12:02:24.532523+00:00",
+        "bytes": 597463
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/0001652044-26-000080-index.htm",
+        "sha256": "03a11f854a8bae9e094f2ef19dc9109a81a798aa2e534189986d1842b9d06fed",
+        "fetched_at": "2026-10-30T12:02:25.051058+00:00",
+        "bytes": 10355
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+        "sha256": "c5f86ba70e27aa8834fa4b110c9781ac413949adb050502008a180fec27b7b89",
+        "fetched_at": "2026-10-30T12:02:25.551244+00:00",
+        "bytes": 370589
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000038/0001018724-26-000038-index.htm",
+        "sha256": "06075ddf589bc1de02c795bccd3ed3ba85373a691299e11db8d4d71fcca205c9",
+        "fetched_at": "2026-10-30T12:02:26.052111+00:00",
+        "bytes": 10979
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000038/amzn-20260930xex991.htm",
+        "sha256": "7db2112f3b602c5b9ed3886a1811b30e2fe690963f8c9feba6f880fbcf33a68f",
+        "fetched_at": "2026-10-30T12:02:26.553631+00:00",
+        "bytes": 673525
+      }
+    ]
+  },
+  "model": {
+    "model": "muse-spark-1.3",
+    "mode": "Standard",
+    "reasoning_effort": "minimal",
+    "calls": 3,
+    "retries": 0,
+    "failed_calls": 0,
+    "requests": [
+      {
+        "ts": "2026-10-30T12:03:07+00:00",
+        "label": "MSFT 0001193125-26-436122 tables [0, 1, 2, 4, 7, 8, 9]",
+        "request_hash": "14d8e76e60019e1fc18f404c5756c20e245b9b1bb35e5e210222fc815137b785",
+        "status": "ok",
+        "cost_usd": 0.024695,
+        "usage": {
+          "input_tokens": 5204,
+          "cached_tokens": 0,
+          "output_tokens": 4280,
+          "reasoning_tokens": 1489
+        },
+        "latency_s": 13.72
+      },
+      {
+        "ts": "2026-10-30T12:03:18+00:00",
+        "label": "GOOGL 0001652044-26-000080 tables [0, 1, 5, 6, 7, 8, 9, 10]",
+        "request_hash": "de75269619d675c8efd4e4c742abd163f7324751bfff91a875b371358f7638e4",
+        "status": "ok",
+        "cost_usd": 0.024906,
+        "usage": {
+          "input_tokens": 6447,
+          "cached_tokens": 0,
+          "output_tokens": 3964,
+          "reasoning_tokens": 1271
+        },
+        "latency_s": 11.36
+      },
+      {
+        "ts": "2026-10-30T12:03:31+00:00",
+        "label": "AMZN 0001018724-26-000038 tables [0, 1, 3, 5, 6, 7]",
+        "request_hash": "0baab0119da5e315cc3985bf0cbc4a8c8f3354e9a14f51633181946dbc033e5a",
+        "status": "ok",
+        "cost_usd": 0.033628,
+        "usage": {
+          "input_tokens": 10834,
+          "cached_tokens": 0,
+          "output_tokens": 4726,
+          "reasoning_tokens": 1467
+        },
+        "latency_s": 12.78
+      }
+    ],
+    "new_spend_usd": 0.083229,
+    "dry_run_estimate_usd": 0.063,
+    "ledger_usd_before": 2.412138,
+    "ledger_usd_after": 2.495367,
+    "budget_usd_flag": 3.31,
+    "budget_note": "--budget-usd caps the cumulative press-release ledger, not one run: 3.31 = 2.412138 already spent + 0.897862. With --concurrency 1 at most one call's estimate error can land past the cap, so new spend could not exceed $1.00.",
+    "price_check": "dev.meta.ai/docs/pricing-rate-limits on 2026-10-30: muse-spark-1.3 Standard $1.25 input, $0.15 cached input, $4.25 output per 1M tokens, matching receipts.press_release.PRICE_PER_M."
+  },
+  "row_counts": {
+    "companies": {
+      "before": 11,
+      "after": 11,
+      "added": 0,
+      "added_per_company": {},
+      "per_company_before": {
+        "AAPL": 1,
+        "AMD": 1,
+        "AMZN": 1,
+        "BAC": 1,
+        "GOOGL": 1,
+        "JPM": 1,
+        "META": 1,
+        "MSFT": 1,
+        "NFLX": 1,
+        "NVDA": 1,
+        "TSLA": 1
+      },
+      "per_company_after": {
+        "AAPL": 1,
+        "AMD": 1,
+        "AMZN": 1,
+        "BAC": 1,
+        "GOOGL": 1,
+        "JPM": 1,
+        "META": 1,
+        "MSFT": 1,
+        "NFLX": 1,
+        "NVDA": 1,
+        "TSLA": 1
+      }
+    },
+    "filings": {
+      "before": 605,
+      "after": 612,
+      "added": 7,
+      "added_per_company": {
+        "AMZN": 2,
+        "GOOGL": 2,
+        "MSFT": 3
+      },
+      "per_company_before": {
+        "AAPL": 41,
+        "AMD": 56,
+        "AMZN": 47,
+        "BAC": 56,
+        "GOOGL": 55,
+        "JPM": 106,
+        "META": 45,
+        "MSFT": 45,
+        "NFLX": 47,
+        "NVDA": 50,
+        "TSLA": 57
+      },
+      "per_company_after": {
+        "AAPL": 41,
+        "AMD": 56,
+        "AMZN": 49,
+        "BAC": 56,
+        "GOOGL": 57,
+        "JPM": 106,
+        "META": 45,
+        "MSFT": 48,
+        "NFLX": 47,
+        "NVDA": 50,
+        "TSLA": 57
+      }
+    },
+    "facts": {
+      "before": 3660,
+      "after": 3758,
+      "added": 98,
+      "added_per_company": {
+        "AMZN": 37,
+        "GOOGL": 39,
+        "MSFT": 22
+      },
+      "per_company_before": {
+        "AAPL": 364,
+        "AMD": 335,
+        "AMZN": 308,
+        "BAC": 254,
+        "GOOGL": 323,
+        "JPM": 262,
+        "META": 372,
+        "MSFT": 383,
+        "NFLX": 311,
+        "NVDA": 369,
+        "TSLA": 379
+      },
+      "per_company_after": {
+        "AAPL": 364,
+        "AMD": 335,
+        "AMZN": 345,
+        "BAC": 254,
+        "GOOGL": 362,
+        "JPM": 262,
+        "META": 372,
+        "MSFT": 405,
+        "NFLX": 311,
+        "NVDA": 369,
+        "TSLA": 379
+      }
+    },
+    "fiscal_periods": {
+      "before": 180,
+      "after": 183,
+      "added": 3,
+      "added_per_company": {
+        "AMZN": 1,
+        "GOOGL": 1,
+        "MSFT": 1
+      },
+      "per_company_before": {
+        "AAPL": 16,
+        "AMD": 16,
+        "AMZN": 16,
+        "BAC": 16,
+        "GOOGL": 16,
+        "JPM": 16,
+        "META": 17,
+        "MSFT": 16,
+        "NFLX": 17,
+        "NVDA": 17,
+        "TSLA": 17
+      },
+      "per_company_after": {
+        "AAPL": 16,
+        "AMD": 16,
+        "AMZN": 17,
+        "BAC": 16,
+        "GOOGL": 17,
+        "JPM": 16,
+        "META": 17,
+        "MSFT": 17,
+        "NFLX": 17,
+        "NVDA": 17,
+        "TSLA": 17
+      }
+    }
+  },
+  "sqlite_facts_by_source": {
+    "before": {
+      "derived": 291,
+      "xbrl": 3369
+    },
+    "after": {
+      "derived": 292,
+      "xbrl": 3466
+    },
+    "added": {
+      "xbrl": 97,
+      "derived": 1
+    },
+    "added_by_kind": {
+      "ytd": 36,
+      "quarter": 57,
+      "ttm": 4,
+      "instant": 1
+    }
+  },
+  "press_release_facts": {
+    "before": 7894,
+    "after": 8157,
+    "files_before": 161,
+    "files_after": 167,
+    "per_filing": {
+      "MSFT": {
+        "eightk": "0001193125-26-436122",
+        "exhibit": "EX-99.1",
+        "exhibit_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/msft-ex99_1.htm",
+        "accepted_at": "2026-10-28T20:04:44+00:00",
+        "paired_report": "10-Q 0001193125-26-436133",
+        "tables": 10,
+        "candidate_tables": 7,
+        "exhibits_tried": [
+          {
+            "type": "EX-99.1",
+            "tables": 10,
+            "candidates": 7
+          }
+        ],
+        "facts": 56,
+        "gaap": 52,
+        "non_gaap": 4,
+        "segment": 32,
+        "new_quarter_facts": 28,
+        "rejections": {
+          "change_or_adjustment_column": 15
+        },
+        "conflicts": 0,
+        "jsonl_sha256": "60acbc8119bb823b23f8b1b40821dc271ee44ca626277eea543da7036e267f4e"
+      },
+      "GOOGL": {
+        "eightk": "0001652044-26-000080",
+        "exhibit": "EX-99.1",
+        "exhibit_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/googexhibit991q32026.htm",
+        "accepted_at": "2026-10-28T20:01:33+00:00",
+        "paired_report": "10-Q 0001652044-26-000084",
+        "tables": 12,
+        "candidate_tables": 8,
+        "exhibits_tried": [
+          {
+            "type": "EX-99.1",
+            "tables": 12,
+            "candidates": 8
+          }
+        ],
+        "facts": 69,
+        "gaap": 64,
+        "non_gaap": 5,
+        "segment": 24,
+        "new_quarter_facts": 22,
+        "rejections": {
+          "change_or_adjustment_column": 6,
+          "scale_disagreement": 10
+        },
+        "conflicts": 0,
+        "jsonl_sha256": "bad5c019d163ed6a1a4675d737174bafce44061b605cc6377bf61d70aa78a2dd"
+      },
+      "AMZN": {
+        "eightk": "0001018724-26-000038",
+        "exhibit": "EX-99.1",
+        "exhibit_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000038/amzn-20260930xex991.htm",
+        "accepted_at": "2026-10-29T20:05:27+00:00",
+        "paired_report": "10-Q 0001018724-26-000040",
+        "tables": 8,
+        "candidate_tables": 6,
+        "exhibits_tried": [
+          {
+            "type": "EX-99.1",
+            "tables": 8,
+            "candidates": 6
+          },
+          {
+            "type": "EX-99.2",
+            "role": "secondary",
+            "skipped": "listed size 4,342 bytes outside 50,000..1,000,000"
+          }
+        ],
+        "facts": 138,
+        "gaap": 138,
+        "non_gaap": 0,
+        "segment": 84,
+        "new_quarter_facts": 21,
+        "rejections": {
+          "change_or_adjustment_column": 3,
+          "row_duration_conflict": 12
+        },
+        "conflicts": 0,
+        "jsonl_sha256": "cb966589a56ccbdcdc420d9f70cb038a6af42d40ffa16ee7e5d9c422466b3df2"
+      }
+    }
+  },
+  "new_filings": [
+    {
+      "accession": "0001018724-26-000038",
+      "cik": 1018724,
+      "form": "8-K",
+      "filed": "2026-10-29",
+      "accepted_at": "2026-10-29T20:05:27Z",
+      "report_date": "2026-10-29",
+      "items": "2.02,9.01",
+      "primary_doc": "amzn-20261029.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000038/amzn-20261029.htm"
+    },
+    {
+      "accession": "0001018724-26-000040",
+      "cik": 1018724,
+      "form": "10-Q",
+      "filed": "2026-10-30",
+      "accepted_at": "2026-10-29T22:20:46Z",
+      "report_date": "2026-09-30",
+      "items": "",
+      "primary_doc": "amzn-20260930.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000040/amzn-20260930.htm"
+    },
+    {
+      "accession": "0001193125-26-436122",
+      "cik": 789019,
+      "form": "8-K",
+      "filed": "2026-10-28",
+      "accepted_at": "2026-10-28T20:04:44Z",
+      "report_date": "2026-10-28",
+      "items": "2.02,9.01",
+      "primary_doc": "msft-20261028.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/msft-20261028.htm"
+    },
+    {
+      "accession": "0001193125-26-436133",
+      "cik": 789019,
+      "form": "10-Q",
+      "filed": "2026-10-28",
+      "accepted_at": "2026-10-28T20:07:39Z",
+      "report_date": "2026-09-30",
+      "items": "",
+      "primary_doc": "msft-20260930.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436133/msft-20260930.htm"
+    },
+    {
+      "accession": "0001193125-26-436149",
+      "cik": 789019,
+      "form": "8-K",
+      "filed": "2026-10-28",
+      "accepted_at": "2026-10-28T20:11:03Z",
+      "report_date": "2026-10-28",
+      "items": "8.01,9.01",
+      "primary_doc": "msft-20261028.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436149/msft-20261028.htm"
+    },
+    {
+      "accession": "0001652044-26-000080",
+      "cik": 1652044,
+      "form": "8-K",
+      "filed": "2026-10-28",
+      "accepted_at": "2026-10-28T20:01:33Z",
+      "report_date": "2026-10-28",
+      "items": "2.02,9.01",
+      "primary_doc": "goog-20261028.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000080/goog-20261028.htm"
+    },
+    {
+      "accession": "0001652044-26-000084",
+      "cik": 1652044,
+      "form": "10-Q",
+      "filed": "2026-10-29",
+      "accepted_at": "2026-10-29T00:29:06Z",
+      "report_date": "2026-09-30",
+      "items": "",
+      "primary_doc": "goog-20260930.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000084/goog-20260930.htm"
+    }
+  ],
+  "new_fiscal_periods": [
+    {
+      "cik": 1018724,
+      "fiscal_year": 2026,
+      "fiscal_period": "Q3",
+      "period_start": "2026-07-01",
+      "period_end": "2026-09-30",
+      "source": "0001018724-26-000040"
+    },
+    {
+      "cik": 1652044,
+      "fiscal_year": 2026,
+      "fiscal_period": "Q3",
+      "period_start": "2026-07-01",
+      "period_end": "2026-09-30",
+      "source": "0001652044-26-000084"
+    },
+    {
+      "cik": 789019,
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "period_start": "2026-07-01",
+      "period_end": "2026-09-30",
+      "source": "0001193125-26-436133"
+    }
+  ],
+  "new_quarter_revenue": [
+    {
+      "ticker": "AMZN",
+      "fiscal": "Q3 FY2026",
+      "period": "2026-07-01..2026-09-30",
+      "value_usd": 201944000000.0,
+      "accession": "0001018724-26-000040",
+      "accepted_at": "2026-10-29T22:20:46Z"
+    },
+    {
+      "ticker": "GOOGL",
+      "fiscal": "Q3 FY2026",
+      "period": "2026-07-01..2026-09-30",
+      "value_usd": 127577000000.0,
+      "accession": "0001652044-26-000084",
+      "accepted_at": "2026-10-29T00:29:06Z"
+    },
+    {
+      "ticker": "MSFT",
+      "fiscal": "Q1 FY2027",
+      "period": "2026-07-01..2026-09-30",
+      "value_usd": 92279000000.0,
+      "accession": "0001193125-26-436133",
+      "accepted_at": "2026-10-28T20:07:39Z"
+    }
+  ],
+  "canonical_row_hashes": {
+    "method": "sha256 over the newline-joined, sorted rows of each table, each row serialised as json.dumps(list(row)) with every column except facts.id (an INTEGER PRIMARY KEY that replace_company reassigns on re-insert); old rows are checked as a multiset contained in the new rows. press-release files: sha256 per file.",
+    "tables": {
+      "companies": {
+        "before_rows": 11,
+        "before_sha256": "2ccfef09cc2e4753bad9cd59fb80f72cd18c2009d95e03f0ee62005e5c872b30",
+        "after_rows": 11,
+        "after_sha256": "2ccfef09cc2e4753bad9cd59fb80f72cd18c2009d95e03f0ee62005e5c872b30",
+        "old_rows_missing_or_altered": 0,
+        "old_rows_kept_sha256": "2ccfef09cc2e4753bad9cd59fb80f72cd18c2009d95e03f0ee62005e5c872b30",
+        "per_company_before_sha256": {
+          "AAPL": "cf73c31adace85fcc580ad11f408f3d90d77c30de55560b97157043bc9b57323",
+          "AMD": "b09cf465d5951570b60ffff08f291cff7db062e1eea6f92dad7354ff704c7225",
+          "AMZN": "b9ca7a6c8809935281e7848509dfd178668f6ae3fa3a89d5a5395f10936a3fee",
+          "BAC": "623fa13e183842a0bc70f2d192890b9c3f80458dfb46dc16633878caefe1f902",
+          "GOOGL": "a81762f839b42bd2099908bb60e0f4ffdddad2e0f6058255904d941b4a46cee9",
+          "JPM": "17aaa18304380d36afe4b22188f98b2695c00be18f90e77aeab36d611a5346b9",
+          "META": "81b3d6253eaeee3bbbb1a04ad529dc8fba52957c1aa8bcb23d1164a2af6aca4d",
+          "MSFT": "66ad11f0f3333437c9ee084d6e3137443672619b5062f3444b7bd30377a3f425",
+          "NFLX": "0cab96f487f905d088d22031c4f265b4aec3ff2db4a255ee9a4b28e97e639bd3",
+          "NVDA": "ef7f0c355d12aa5a5d0e9132502b0fff5675e0762263442cb3d5d926db5b1c22",
+          "TSLA": "2853713f871661a7fbd3bb27c5a9138bff18044761781784b75865885e76497f"
+        },
+        "per_company_after_sha256": {
+          "AAPL": "cf73c31adace85fcc580ad11f408f3d90d77c30de55560b97157043bc9b57323",
+          "AMD": "b09cf465d5951570b60ffff08f291cff7db062e1eea6f92dad7354ff704c7225",
+          "AMZN": "b9ca7a6c8809935281e7848509dfd178668f6ae3fa3a89d5a5395f10936a3fee",
+          "BAC": "623fa13e183842a0bc70f2d192890b9c3f80458dfb46dc16633878caefe1f902",
+          "GOOGL": "a81762f839b42bd2099908bb60e0f4ffdddad2e0f6058255904d941b4a46cee9",
+          "JPM": "17aaa18304380d36afe4b22188f98b2695c00be18f90e77aeab36d611a5346b9",
+          "META": "81b3d6253eaeee3bbbb1a04ad529dc8fba52957c1aa8bcb23d1164a2af6aca4d",
+          "MSFT": "66ad11f0f3333437c9ee084d6e3137443672619b5062f3444b7bd30377a3f425",
+          "NFLX": "0cab96f487f905d088d22031c4f265b4aec3ff2db4a255ee9a4b28e97e639bd3",
+          "NVDA": "ef7f0c355d12aa5a5d0e9132502b0fff5675e0762263442cb3d5d926db5b1c22",
+          "TSLA": "2853713f871661a7fbd3bb27c5a9138bff18044761781784b75865885e76497f"
+        },
+        "companies_byte_identical": [
+          "AAPL",
+          "AMD",
+          "AMZN",
+          "BAC",
+          "GOOGL",
+          "JPM",
+          "META",
+          "MSFT",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ]
+      },
+      "filings": {
+        "before_rows": 605,
+        "before_sha256": "f6ac0c5baa655436929bec7632713adf45d066cc04a52c9aa9fd0511bc101d67",
+        "after_rows": 612,
+        "after_sha256": "e9ff848a486df9929854f3be81080d1dc34ec88b2e1a6c0ec80a466a4dd005b9",
+        "old_rows_missing_or_altered": 0,
+        "old_rows_kept_sha256": "f6ac0c5baa655436929bec7632713adf45d066cc04a52c9aa9fd0511bc101d67",
+        "per_company_before_sha256": {
+          "AAPL": "c8881dc94d64cffb6ba89c51fcb74bfff4e07410898d55420d144b96496a8d1e",
+          "AMD": "7ec175d8a8643bda364dece4bb2297f1f885a81ef6a624251648ed6e17c7776f",
+          "AMZN": "278ea023dd9be75843f56edc68c7cebf576f5916e44ad4541518239067bd3f54",
+          "BAC": "dc7750ed32ec9be1eebcdcbda1a8d6de623bfd0ec7aba4a979295e1aa0002d45",
+          "GOOGL": "b04e5b11471ae205e93b5dd60987dc8d965890efa188b01780493d3c27a5dca2",
+          "JPM": "36cc5797980331e41127ae7ec2aca40a58804a6f9f35c77998fce00d7cbd83ef",
+          "META": "d90c2d7a5c6a2402c8c0fd962973bff4fab8afb871566b95251fc27656218b78",
+          "MSFT": "07dd9b16f5161b9dfa525bce24e15d4b524987af952d71ca7c4cef1076dc0aa9",
+          "NFLX": "dad5d8eaaae29ca19f8d98cc981dd67fdeb1fe78af95e5f11fc7a440b45354d2",
+          "NVDA": "de6fb3104f792e569803568f7e316ac41e4ee5e1cf48d056dc55c0678808962e",
+          "TSLA": "208397b0e6bc474ec9a58e36a43b0198f9b66c8dac58c8508f0bd472c94f7eac"
+        },
+        "per_company_after_sha256": {
+          "AAPL": "c8881dc94d64cffb6ba89c51fcb74bfff4e07410898d55420d144b96496a8d1e",
+          "AMD": "7ec175d8a8643bda364dece4bb2297f1f885a81ef6a624251648ed6e17c7776f",
+          "AMZN": "24a797d3d6f1bb7beda2e431e2144dc0f3c8574f90920b039cd2efcf50086334",
+          "BAC": "dc7750ed32ec9be1eebcdcbda1a8d6de623bfd0ec7aba4a979295e1aa0002d45",
+          "GOOGL": "30205de53a68118ef27bc9582e5468f7894b7a58922cab4769935c6612952f25",
+          "JPM": "36cc5797980331e41127ae7ec2aca40a58804a6f9f35c77998fce00d7cbd83ef",
+          "META": "d90c2d7a5c6a2402c8c0fd962973bff4fab8afb871566b95251fc27656218b78",
+          "MSFT": "5338a3bfd66d5be84e0d558d8636ceee3ef14c8bce8fea42764a96ca307f89e2",
+          "NFLX": "dad5d8eaaae29ca19f8d98cc981dd67fdeb1fe78af95e5f11fc7a440b45354d2",
+          "NVDA": "de6fb3104f792e569803568f7e316ac41e4ee5e1cf48d056dc55c0678808962e",
+          "TSLA": "208397b0e6bc474ec9a58e36a43b0198f9b66c8dac58c8508f0bd472c94f7eac"
+        },
+        "companies_byte_identical": [
+          "AAPL",
+          "AMD",
+          "BAC",
+          "JPM",
+          "META",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ]
+      },
+      "facts": {
+        "before_rows": 3660,
+        "before_sha256": "ede5e63aaa619277ffd9af33e18200af59f9f1bf4652602682f6b90262162ae3",
+        "after_rows": 3758,
+        "after_sha256": "676de52a42667818a290c30c78e72138443ab35e94d2074050f6f317b9f33f00",
+        "old_rows_missing_or_altered": 0,
+        "old_rows_kept_sha256": "ede5e63aaa619277ffd9af33e18200af59f9f1bf4652602682f6b90262162ae3",
+        "per_company_before_sha256": {
+          "AAPL": "5cc987e311b5ea55d19f9bd52d6aae1914fb7e8eb7742f48fe0123288b2038a3",
+          "AMD": "90cbcb3942eb8da2cf2b4341a84522fb707621d66961173042221f72fb19c8f3",
+          "AMZN": "a90c519734c1a4a884f91392d1bb004f5911b1dbbe58a391f4a1d89483fe1f67",
+          "BAC": "26fb9e7f015c3a0469dfdf384c54232ac115b14bc4c5eadf7e1e7128be787abf",
+          "GOOGL": "df5535248c2e4d59dc1b1faffce4bd421a8d67d5af64b48eef9d6c471f074e69",
+          "JPM": "897bc9849f689e19f2a09433953c92378a0cd56158c54c677f9d358524baf156",
+          "META": "97d7fe92ca30eb7eb222945f328a9ab85fc23377a763f30755df3ffccfd38523",
+          "MSFT": "a1a4e15189086ffd0e3eaf8815bb9c4ed1b0a0949ef6971a7187f4c58f59649e",
+          "NFLX": "35160fcc55c5a4620bdb559b564ef0f56a5eec5ae07197b14cc92bc048ffdcf7",
+          "NVDA": "cd353762946919c72bab2710798fa517f628b0e0577dbb69da0eeb1a0b562fb4",
+          "TSLA": "fcbb207767376713b597f61b76d9e1ae684b3bdcb47b920ce9e7a511b6aaaaef"
+        },
+        "per_company_after_sha256": {
+          "AAPL": "5cc987e311b5ea55d19f9bd52d6aae1914fb7e8eb7742f48fe0123288b2038a3",
+          "AMD": "90cbcb3942eb8da2cf2b4341a84522fb707621d66961173042221f72fb19c8f3",
+          "AMZN": "57bc0d65823b5a7b3c0fb5cbfbd0ebf0cc9c5b59e43d7f85ce8d2feb5300a3f5",
+          "BAC": "26fb9e7f015c3a0469dfdf384c54232ac115b14bc4c5eadf7e1e7128be787abf",
+          "GOOGL": "bef3b4445c9f6af83c172da3e6a932703c0af5bf5d26513f84fa9be737e67410",
+          "JPM": "897bc9849f689e19f2a09433953c92378a0cd56158c54c677f9d358524baf156",
+          "META": "97d7fe92ca30eb7eb222945f328a9ab85fc23377a763f30755df3ffccfd38523",
+          "MSFT": "becac22def9852d96fff8b9620e28dc8c21e20b09beed4c0033337578932bba8",
+          "NFLX": "35160fcc55c5a4620bdb559b564ef0f56a5eec5ae07197b14cc92bc048ffdcf7",
+          "NVDA": "cd353762946919c72bab2710798fa517f628b0e0577dbb69da0eeb1a0b562fb4",
+          "TSLA": "fcbb207767376713b597f61b76d9e1ae684b3bdcb47b920ce9e7a511b6aaaaef"
+        },
+        "companies_byte_identical": [
+          "AAPL",
+          "AMD",
+          "BAC",
+          "JPM",
+          "META",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ]
+      },
+      "fiscal_periods": {
+        "before_rows": 180,
+        "before_sha256": "cf53ed732102aaa92d58b4a9ae3c64c0f8d66e0b75e3e7f8731ce48cf97b19fb",
+        "after_rows": 183,
+        "after_sha256": "315b0987dd0bbeec2be93f4ca622cc6ed669e4dbd40fd76732365f55211ca78e",
+        "old_rows_missing_or_altered": 0,
+        "old_rows_kept_sha256": "cf53ed732102aaa92d58b4a9ae3c64c0f8d66e0b75e3e7f8731ce48cf97b19fb",
+        "per_company_before_sha256": {
+          "AAPL": "3b7424146328f126adf17ff7d3b45c433c260a8db60e078c6b237f368d225bd5",
+          "AMD": "0897a0bfcd4b33b86b08ae9367bb4f84126a1831b4889cecf4b1740e352fbe88",
+          "AMZN": "ee9588dd4d4503513e3f877580c8df7fc2a3debc03192d2ddd28a88092a31923",
+          "BAC": "40329ec5c00e1b4d0b63478d66aa49715d99ad601ee2ea48bd9829442b939e41",
+          "GOOGL": "b93266dd87426fe53fb4bcc12877dd04b704d9de28358651eb9db08c10242c9f",
+          "JPM": "d7464bbdc8d943132e8114459bdd1ea9679a3948b7148d97ca8a9594eaaee1dc",
+          "META": "9ada50c86b91c7455f826b3a54f72a45cd6241844700768d3600c530907cb3b4",
+          "MSFT": "92b04e91bb273fac08d066b94ec18ec791b190b8351b3df38ee66a0bc98eb6f6",
+          "NFLX": "a46491872b898e93c39bc5be3281224c0a51f213af692612e2bf76212e7f193e",
+          "NVDA": "f55c04d7e9f02322e816a233b18d24b5f8e9d12b1b9419d4eaf557bc25faa2de",
+          "TSLA": "c9f85ed82e4392f89e7af9ac754fc58db26dd022a5b45b2aad38c6ea98016205"
+        },
+        "per_company_after_sha256": {
+          "AAPL": "3b7424146328f126adf17ff7d3b45c433c260a8db60e078c6b237f368d225bd5",
+          "AMD": "0897a0bfcd4b33b86b08ae9367bb4f84126a1831b4889cecf4b1740e352fbe88",
+          "AMZN": "221b3e1f40432a797b187dff08c62039dc4133901e5c97308d182f297f1e29ef",
+          "BAC": "40329ec5c00e1b4d0b63478d66aa49715d99ad601ee2ea48bd9829442b939e41",
+          "GOOGL": "ce798fdbbc9c78c4d601b5f3d24a0dce6ad4939215c0a5e0ef553bf32da9bcea",
+          "JPM": "d7464bbdc8d943132e8114459bdd1ea9679a3948b7148d97ca8a9594eaaee1dc",
+          "META": "9ada50c86b91c7455f826b3a54f72a45cd6241844700768d3600c530907cb3b4",
+          "MSFT": "3938ab05944aecdffff9786ae7adfaaeefa4aa3684e1619b18eb8442a18db374",
+          "NFLX": "a46491872b898e93c39bc5be3281224c0a51f213af692612e2bf76212e7f193e",
+          "NVDA": "f55c04d7e9f02322e816a233b18d24b5f8e9d12b1b9419d4eaf557bc25faa2de",
+          "TSLA": "c9f85ed82e4392f89e7af9ac754fc58db26dd022a5b45b2aad38c6ea98016205"
+        },
+        "companies_byte_identical": [
+          "AAPL",
+          "AMD",
+          "BAC",
+          "JPM",
+          "META",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ]
+      }
+    },
+    "press_release_files": {
+      "changed": [],
+      "removed": [],
+      "added": [
+        "AMZN/0001018724-26-000038.jsonl",
+        "AMZN/0001018724-26-000038.report.json",
+        "GOOGL/0001652044-26-000080.jsonl",
+        "GOOGL/0001652044-26-000080.report.json",
+        "MSFT/0001193125-26-436122.jsonl",
+        "MSFT/0001193125-26-436122.report.json"
+      ],
+      "validation_json_sha256": "4f6cd954e2f5c60adf4ff1d082c10935d3d741150bfd05fbf0d5055196b67cfd",
+      "validation_json_restored_identical": true
+    },
+    "all_old_rows_and_files_unchanged": true
+  },
+  "gates": {
+    "1_canonical_row_hashes": {
+      "passed": true,
+      "detail": "see canonical_row_hashes; re-hashed after the snapshot rebuild with no difference"
+    },
+    "2_press_release_validation": {
+      "passed": true,
+      "report": {
+        "per_company": {
+          "MSFT": {
+            "filings": 1,
+            "facts": 56,
+            "compared": 20,
+            "matched": 20,
+            "other_compared": 0,
+            "other_matched": 0,
+            "no_xbrl": 0,
+            "non_gaap": 4,
+            "segment": 32,
+            "agreement": 1.0,
+            "other_agreement": null
+          },
+          "GOOGL": {
+            "filings": 1,
+            "facts": 69,
+            "compared": 34,
+            "matched": 34,
+            "other_compared": 1,
+            "other_matched": 1,
+            "no_xbrl": 5,
+            "non_gaap": 5,
+            "segment": 24,
+            "agreement": 1.0,
+            "other_agreement": 1.0
+          },
+          "AMZN": {
+            "filings": 1,
+            "facts": 138,
+            "compared": 34,
+            "matched": 34,
+            "other_compared": 12,
+            "other_matched": 12,
+            "no_xbrl": 8,
+            "non_gaap": 0,
+            "segment": 84,
+            "agreement": 1.0,
+            "other_agreement": 1.0
+          }
+        },
+        "overall": {
+          "compared": 88,
+          "matched": 88,
+          "other_compared": 13,
+          "other_matched": 13,
+          "agreement": 1.0,
+          "other_agreement": 1.0,
+          "mismatches_restatement": 0,
+          "mismatches_unexplained": 0
+        },
+        "mismatches": []
+      }
+    },
+    "3_dev_replay": {
+      "passed": true,
+      "items": 239,
+      "claims": 693,
+      "changed_claims": 0,
+      "compared": "claim id, value text, span start, status, reason and explanation",
+      "baseline_sha256": "b5fb31e56223bb691e38370324f21d1f27160895a30825aecf0d389402705559",
+      "after_sha256": "b5fb31e56223bb691e38370324f21d1f27160895a30825aecf0d389402705559",
+      "after_working_tree_sha256": "b5fb31e56223bb691e38370324f21d1f27160895a30825aecf0d389402705559",
+      "note": "Recorded with the frozen commit's code as code root (other agents were editing receipts/ in the working tree), and again with the working tree; both equal the baseline byte for byte."
+    },
+    "4_snapshot": {
+      "passed": true,
+      "bytes": 6270754,
+      "limit_bytes": 10485760,
+      "manifest": {
+        "fingerprint": "51c18eeb54efe9124a5adddb",
+        "built_at": "2026-10-30T12:10:27Z",
+        "source_built_at": "2026-10-30T12:00:29Z",
+        "companies": [
+          "AAPL",
+          "AMD",
+          "AMZN",
+          "BAC",
+          "GOOGL",
+          "JPM",
+          "META",
+          "MSFT",
+          "NFLX",
+          "NVDA",
+          "TSLA"
+        ],
+        "facts": {
+          "sqlite": 3758,
+          "press_release": 8157
+        },
+        "filings": 612,
+        "filing_texts": 1,
+        "recordings": 2
+      },
+      "examples": {
+        "nvda-ai-story": "7 ✓ 2 ✗ 2 ?",
+        "meta-ai-story": "5 ✓ 3 ✗ 0 ?",
+        "q2-roundup-look-ahead": "6 ✓ 3 ✗ 0 ?"
+      },
+      "model_cost_usd": 0.0,
+      "recordings_cache_fingerprint": "8e24b9326b9cf9695ae0",
+      "changed_files": [
+        "facts.sqlite",
+        "manifest.json",
+        "api_cache/ (3 example recordings re-baked)"
+      ],
+      "added_files": [
+        "pr_facts/AMZN/0001018724-26-000038.jsonl",
+        "pr_facts/GOOGL/0001652044-26-000080.jsonl",
+        "pr_facts/MSFT/0001193125-26-436122.jsonl"
+      ]
+    },
+    "5_reproductions": {
+      "qa_reproduce": {
+        "passed": true,
+        "before_top_up": {
+          "status": "passed",
+          "records": 200
+        },
+        "after_rebuild": {
+          "status": "passed",
+          "records": 200,
+          "archived_evidence": [
+            "facts.sqlite"
+          ]
+        },
+        "verification_1_pinned_backup_snapshot": {
+          "status": "passed",
+          "records": 200,
+          "code": "frozen commit's eval/qa_reproduce.py (no fallback)"
+        },
+        "verification_2_frozen_scorer_over_new_snapshot": {
+          "status": "passed",
+          "records": 200,
+          "evidence_pr_files": 83,
+          "bypassed_check": {
+            "what": "qa_benchmark.load_manifest() snapshot_hashes == evidence_hashes()",
+            "pinned_files": 82,
+            "actual_files": 85,
+            "differing": [
+              "facts.sqlite",
+              "pr_facts/AMZN/0001018724-26-000038.jsonl",
+              "pr_facts/GOOGL/0001652044-26-000080.jsonl",
+              "pr_facts/MSFT/0001193125-26-436122.jsonl"
+            ]
+          }
+        },
+        "runs_identical_across_all_and_committed_reproduction_json": true
+      },
+      "qualifier_robustness": {
+        "passed": true,
+        "variants": 2048,
+        "outcomes": {
+          "unverifiable": 2000,
+          "verified on reported non-GAAP evidence": 48
+        },
+        "controls": {
+          "variants": 16,
+          "outcomes": {
+            "verified": 16
+          }
+        },
+        "output_identical_to_committed_json": true
+      }
+    },
+    "6_pytest": {
+      "passed": true,
+      "isolated_tree": "frozen commit + eval/qa_reproduce.py, tests/test_qa_reproduce.py, eval/qa_methods.md and the evidence archive, over the topped-up data: 1581 passed",
+      "working_tree": "two runs first failed collection in 15 modules on another agent's in-progress receipts/api.py and ask_api.py (create_router() got an unexpected keyword argument 'filing_quota'); after its fix: 1587 passed",
+      "count_expectations_changed": []
+    },
+    "7_probes": {
+      "status": "passed_with_deviation",
+      "verified_at_now_with_new_receipts": true,
+      "verified_from_8k_acceptance_second": true,
+      "nothing_verified_one_second_before_8k": true,
+      "deviation": "The gate expected ? one second before acceptance; all 6 claims return ✗ wrong / look_ahead there instead, citing the 8-K.",
+      "method": "typed claims built the way extraction delivers them, verified with receipts.verify against the rebuilt snapshot; no model, network or SEC call",
+      "after_top_up": [
+        {
+          "ticker": "MSFT",
+          "claim": "revenue",
+          "as_of": "2026-10-28T20:04:43Z",
+          "point": "8-K accepted - 1 s",
+          "status": "wrong",
+          "reason": "look_ahead",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "revenue",
+          "as_of": "2026-10-28T20:04:44Z",
+          "point": "8-K accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "revenue",
+          "as_of": "2026-10-28T20:07:38Z",
+          "point": "10-Q accepted - 1 s",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "revenue",
+          "as_of": "2026-10-28T20:07:39Z",
+          "point": "10-Q accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)",
+            "10-Q 0001193125-26-436133 (xbrl)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)",
+            "10-Q 0001193125-26-436133 (xbrl)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "non-GAAP diluted EPS",
+          "as_of": "2026-10-28T20:04:43Z",
+          "point": "8-K accepted - 1 s",
+          "status": "wrong",
+          "reason": "look_ahead",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "non-GAAP diluted EPS",
+          "as_of": "2026-10-28T20:04:44Z",
+          "point": "8-K accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "non-GAAP diluted EPS",
+          "as_of": "2026-10-28T20:07:38Z",
+          "point": "10-Q accepted - 1 s",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "non-GAAP diluted EPS",
+          "as_of": "2026-10-28T20:07:39Z",
+          "point": "10-Q accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "non-GAAP diluted EPS",
+          "as_of": "now",
+          "point": "Now",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001193125-26-436122 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "revenue",
+          "as_of": "2026-10-28T20:01:32Z",
+          "point": "8-K accepted - 1 s",
+          "status": "wrong",
+          "reason": "look_ahead",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "revenue",
+          "as_of": "2026-10-28T20:01:33Z",
+          "point": "8-K accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "revenue",
+          "as_of": "2026-10-29T00:29:05Z",
+          "point": "10-Q accepted - 1 s",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "revenue",
+          "as_of": "2026-10-29T00:29:06Z",
+          "point": "10-Q accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)",
+            "10-Q 0001652044-26-000084 (xbrl)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)",
+            "10-Q 0001652044-26-000084 (xbrl)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "Google Cloud segment revenue",
+          "as_of": "2026-10-28T20:01:32Z",
+          "point": "8-K accepted - 1 s",
+          "status": "wrong",
+          "reason": "look_ahead",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "Google Cloud segment revenue",
+          "as_of": "2026-10-28T20:01:33Z",
+          "point": "8-K accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "Google Cloud segment revenue",
+          "as_of": "2026-10-29T00:29:05Z",
+          "point": "10-Q accepted - 1 s",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "Google Cloud segment revenue",
+          "as_of": "2026-10-29T00:29:06Z",
+          "point": "10-Q accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "Google Cloud segment revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001652044-26-000080 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "revenue",
+          "as_of": "2026-10-29T20:05:26Z",
+          "point": "8-K accepted - 1 s",
+          "status": "wrong",
+          "reason": "look_ahead",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "revenue",
+          "as_of": "2026-10-29T20:05:27Z",
+          "point": "8-K accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "revenue",
+          "as_of": "2026-10-29T22:20:45Z",
+          "point": "10-Q accepted - 1 s",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "revenue",
+          "as_of": "2026-10-29T22:20:46Z",
+          "point": "10-Q accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)",
+            "10-Q 0001018724-26-000040 (xbrl)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)",
+            "10-Q 0001018724-26-000040 (xbrl)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "AWS segment net sales",
+          "as_of": "2026-10-29T20:05:26Z",
+          "point": "8-K accepted - 1 s",
+          "status": "wrong",
+          "reason": "look_ahead",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "AWS segment net sales",
+          "as_of": "2026-10-29T20:05:27Z",
+          "point": "8-K accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "AWS segment net sales",
+          "as_of": "2026-10-29T22:20:45Z",
+          "point": "10-Q accepted - 1 s",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "AWS segment net sales",
+          "as_of": "2026-10-29T22:20:46Z",
+          "point": "10-Q accepted",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "AWS segment net sales",
+          "as_of": "now",
+          "point": "Now",
+          "status": "verified",
+          "reason": "match",
+          "evidence": [
+            "8-K 0001018724-26-000038 (press_release)"
+          ]
+        }
+      ],
+      "before_top_up_at_now": [
+        {
+          "ticker": "MSFT",
+          "claim": "revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "unverifiable",
+          "reason": "no_evidence",
+          "evidence": []
+        },
+        {
+          "ticker": "MSFT",
+          "claim": "non-GAAP diluted EPS",
+          "as_of": "now",
+          "point": "Now",
+          "status": "unverifiable",
+          "reason": "no_evidence",
+          "evidence": []
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "unverifiable",
+          "reason": "no_evidence",
+          "evidence": []
+        },
+        {
+          "ticker": "GOOGL",
+          "claim": "Google Cloud segment revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "unverifiable",
+          "reason": "no_evidence",
+          "evidence": []
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "revenue",
+          "as_of": "now",
+          "point": "Now",
+          "status": "unverifiable",
+          "reason": "no_evidence",
+          "evidence": []
+        },
+        {
+          "ticker": "AMZN",
+          "claim": "AWS segment net sales",
+          "as_of": "now",
+          "point": "Now",
+          "status": "unverifiable",
+          "reason": "no_evidence",
+          "evidence": []
+        }
+      ],
+      "note": "One second before each 8-K's acceptance the result is ✗ look_ahead, not ?: the release's own press-release fact dates the figure, so the verifier reports that it wasn't public yet. Tesla's XBRL-only probe returned ? because its earlier 8-K had no stored figure. Before this top-up the same claims at Now returned ? no_evidence."
+    }
+  },
+  "qa_reproduce_archive": {
+    "path": "eval/qa_runs/qa-closed-book-20261029/evidence/facts.sqlite",
+    "source": "pre-top-up data/snapshot/facts.sqlite from the backup taken before any change",
+    "bytes": 1404928,
+    "sha256": "ee1cb5a313cadfac9a8d36c6dbb2832996fbd91b823a045e62e5280418df0b53",
+    "pinned_sha256": "ee1cb5a313cadfac9a8d36c6dbb2832996fbd91b823a045e62e5280418df0b53",
+    "matches_pin": true,
+    "git_check_ignore": "not ignored (exit 1)",
+    "pinned_hashes_changed": false,
+    "manifest_sha256": "cbb66ebe97df238be8aa0df1e05fcda60507b605344a19097ce8c3470abe8224",
+    "bundle_sha256": "4a294dfc9a88ac565d92243115e85795f732a402d3e1becf6cc4318c024a99ea",
+    "rule": "eval/qa_reproduce.py reads a pinned snapshot file from data/snapshot while its digest equals the pin; when it differs or is missing, it reads only the same-named file under the run's evidence/ folder, checks it against the same pin, and fails with a clear error if that copy is missing or different.",
+    "tests": [
+      "test_matching_live_snapshot_is_used_and_the_archive_ignored",
+      "test_changed_or_missing_live_snapshot_reads_the_same_named_archive[topped up|missing]",
+      "test_changed_live_snapshot_without_a_matching_archive_fails[missing|tampered]",
+      "test_archived_evidence_is_the_pinned_october_29_bytes",
+      "test_every_pinned_snapshot_file_resolves_live_or_archived"
+    ]
+  },
+  "coverage_after": {
+    "AAPL": {
+      "quarters": 12,
+      "first": "Q4 FY2023 (ends 2023-09-30)",
+      "last": "Q3 FY2026 (ends 2026-06-27)"
+    },
+    "AMD": {
+      "quarters": 12,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q2 FY2026 (ends 2026-06-27)"
+    },
+    "AMZN": {
+      "quarters": 13,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q3 FY2026 (ends 2026-09-30)"
+    },
+    "BAC": {
+      "quarters": 12,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q2 FY2026 (ends 2026-06-30)"
+    },
+    "GOOGL": {
+      "quarters": 13,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q3 FY2026 (ends 2026-09-30)"
+    },
+    "JPM": {
+      "quarters": 12,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q2 FY2026 (ends 2026-06-30)"
+    },
+    "META": {
+      "quarters": 13,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q3 FY2026 (ends 2026-09-30)"
+    },
+    "MSFT": {
+      "quarters": 13,
+      "first": "Q1 FY2024 (ends 2023-09-30)",
+      "last": "Q1 FY2027 (ends 2026-09-30)"
+    },
+    "NFLX": {
+      "quarters": 13,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q3 FY2026 (ends 2026-09-30)"
+    },
+    "NVDA": {
+      "quarters": 12,
+      "first": "Q3 FY2024 (ends 2023-10-29)",
+      "last": "Q2 FY2027 (ends 2026-07-26)"
+    },
+    "TSLA": {
+      "quarters": 13,
+      "first": "Q3 FY2023 (ends 2023-09-30)",
+      "last": "Q3 FY2026 (ends 2026-09-30)"
+    }
+  },
+  "totals_after": {
+    "companies": 11,
+    "sqlite_facts": 3758,
+    "press_release_facts": 8157,
+    "stored_facts": 11915,
+    "filings": 612
+  },
+  "new_model_calls": 3,
+  "new_sec_requests": 16,
+  "model_cost_usd": 0.083229,
+  "limitations": [
+    "JPM, BAC and AAPL were not topped up: their Q3 (AAPL: FY2026 Q4) periodic reports were not on EDGAR when checked.",
+    "AMD and NVDA have not reported a newer quarter; their windows still end with the June/July 2026 quarter.",
+    "The XBRL window is computed from the run date; re-running the ingest weeks later shifts it.",
+    "Press-release facts come from Muse Spark table maps that code re-parses; the 88 + 13 GAAP comparisons validate integration, not segment or non-GAAP figures, which have no XBRL counterpart.",
+    "Probes test store and verifier integration, not independent extraction accuracy.",
+    "No held-out evaluation was run."
+  ]
+}

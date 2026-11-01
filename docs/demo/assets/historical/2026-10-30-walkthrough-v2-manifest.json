@@ -1,0 +1,1329 @@
+{
+  "schema_version": 3,
+  "product_brand": "NoCap",
+  "version": "v2 walkthrough",
+  "source_take": "data/eval_runs/demo-walkthrough-v2-20261030/take2",
+  "release_state": "Repository export prepared; not deployed, published or submitted",
+  "published": false,
+  "format": "v2 edit: recorded browser footage with camera moves and cuts, text cards, burned-in captions, local synthetic narration",
+  "product_pixels": "Cropped and scaled from the recorded browser master only; cards are separate full-frame text graphics",
+  "duration_s": 168.68,
+  "video_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuv420p",
+        "r_frame_rate": "25/1"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "168.680000",
+      "size": "35000399"
+    }
+  },
+  "asset_sha256": {
+    "receipts-demo.mp4": "fec139b4bbc12cc0271f3654f0055d7f4eca90db0535b69e8bede79327c00231",
+    "receipts-demo.gif": "ebaf562e6356da90c2859e2b8e9c4f0d4ef64892384782f52bb54fcfe1b4e1af",
+    "receipts-demo.en.srt": "40518e3e6f2839530ea3f9ef33dfdf68e2b4987109799d92bb28a3afe0e14d61",
+    "receipts-demo.en.vtt": "533dc850ef82c7263479bee6b12d4b61377074005c46cc324699608793050d1b"
+  },
+  "public_copies": {
+    "receipts-demo.mp4": "fec139b4bbc12cc0271f3654f0055d7f4eca90db0535b69e8bede79327c00231",
+    "receipts-demo.en.vtt": "533dc850ef82c7263479bee6b12d4b61377074005c46cc324699608793050d1b"
+  },
+  "script_sha256": {
+    "narration_v2.py": "756d72e4f98e2a1eb21844ce7f7117c71e3811c8fd21966d47d9fb9e90e99e6d",
+    "screencast_recorder.py": "f5074834b577abd5cbc47571e00480c302cc2d22e130f00cc60a1ca281d5eeb8",
+    "capture_walkthrough_v2.py": "eeaed313e3e0d38d31bf49fbce2ebb9b340197dafa34169a7b8887df101c047e",
+    "render_walkthrough_v2.py": "7dbb20dd64669091130563599c31286bcdc77f788302ba52b37590abc66e4201",
+    "validate_walkthrough_v2.py": "ef2e2473c0bc01b8c5d0881ccac4a6c860832b5a6614c9ecfdd7f15f9195f574",
+    "export_walkthrough_v2.py": "85d50e883b9f8764aed533d74157db442466a61cd1636f1b4545f0e5d41643c5",
+    "validate_media_v2.py": "845859dcb9d903bb5df18741ac311d4ed02098862756dfaf69ebabb31924631d",
+    "select_voice_v2.py": "f4853820d3c7e6c2ad019c92d9bb1ba186cf6882fe93fa1115c629905cb27d0c",
+    "whisper_transcribe.py": "48eb8df6bbc40661be17910dd7e2ec4d2a9fff95f7683a8491b8e932a94116a8"
+  },
+  "gif": {
+    "source": "receipts-demo.mp4",
+    "start_s": 15.55,
+    "end_s": 35.55,
+    "duration_s": 20.0,
+    "fps": 10,
+    "resolution": [
+      960,
+      540
+    ],
+    "speed": 1,
+    "audio": false,
+    "shots": [
+      "check",
+      "tiles",
+      "receipt"
+    ],
+    "content": "Check click, verdict tiles and the growth receipt, at original speed with burned-in captions"
+  },
+  "narration": {
+    "model": "hexgrad/Kokoro-82M v1.0",
+    "voice": "am_fenrir",
+    "speed": 1.0,
+    "runtime": "kokoro-onnx 0.6.1",
+    "execution": "local CPU",
+    "model_license": "Apache-2.0",
+    "runtime_license": "MIT",
+    "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "new_provider_calls": 0,
+    "loudness_target": "two-pass loudnorm, I=-14 LUFS, TP=-1.5 dBTP",
+    "loudnorm_first_pass": {
+      "input_i": "-22.41",
+      "input_tp": "-0.31",
+      "input_lra": "5.30",
+      "input_thresh": "-32.77",
+      "output_i": "-17.03",
+      "output_tp": "-1.50",
+      "output_lra": "4.50",
+      "output_thresh": "-27.30",
+      "normalization_type": "dynamic",
+      "target_offset": "3.03"
+    },
+    "human_listening_approval": false
+  },
+  "narration_segments": [
+    {
+      "cue": "c01",
+      "start_s": 0.4,
+      "seconds": 3.604,
+      "caption": "One wrong number in an earnings story becomes a public correction.",
+      "spoken_text": "One wrong number in an earnings story becomes a public correction.",
+      "speech_sha256": "60a8c8fb99b063c3120558aa1f5378e4eaddc5078890fcac6718f93d48af850b"
+    },
+    {
+      "cue": "c02",
+      "start_s": 4.604,
+      "seconds": 5.0,
+      "caption": "This AI-drafted story has two. NoCap flags both, with the filed figures.",
+      "spoken_text": "This AI-drafted story has two. No Cap flags both, with the filed figures.",
+      "speech_sha256": "c5cd0b96af04b71bc312c1362fabbf34151d054728dc49f647b9ececbdc0d9b2"
+    },
+    {
+      "cue": "c03",
+      "start_s": 10.204,
+      "seconds": 4.7,
+      "caption": "NoCap checks every financial number in a draft against SEC filings.",
+      "spoken_text": "No Cap checks every financial number in a draft against S E C filings.",
+      "speech_sha256": "400051cde3265aa4ed1d1a219c381f553d0a85545d736d21d05c13bf14c8d4b3"
+    },
+    {
+      "cue": "c04",
+      "start_s": 15.204,
+      "seconds": 4.516,
+      "caption": "Muse Spark pulls out each claim. Code checks every one against the filings.",
+      "spoken_text": "Muse Spark pulls out each claim. Code checks every one against the filings.",
+      "speech_sha256": "0516e5d6bf3f810617c07dc940367ff0a5c85daa58290b69f6039f5f6e8f4950"
+    },
+    {
+      "cue": "c05",
+      "start_s": 22.061,
+      "seconds": 4.818,
+      "caption": "Seven verified. Two wrong. Two unverifiable, because NoCap won't guess.",
+      "spoken_text": "Seven verified. Two wrong. Two unverifiable, because No Cap won't guess.",
+      "speech_sha256": "942823fde4d758ae2559a199f52a3bc6bec152f108d7c3c07f033a6a728315d1"
+    },
+    {
+      "cue": "c06",
+      "start_s": 27.979,
+      "seconds": 4.731,
+      "caption": "The draft says revenue grew 18% from a year ago. That's the quarterly rate.",
+      "spoken_text": "The draft says revenue grew eighteen percent from a year ago. That's the quarterly rate.",
+      "speech_sha256": "08faa6e1e5fdaa74ca86b671c9c77bc3b42f26362f8b2c2f1163e564dca21c05"
+    },
+    {
+      "cue": "c07",
+      "start_s": 33.06,
+      "seconds": 4.906,
+      "caption": "The receipt does the math from the filings: 105.85%.",
+      "spoken_text": "The receipt does the math from the filings: one hundred five point eight five percent.",
+      "speech_sha256": "7225ec739e840b78450244d0c22b952673681ba6a8fae4e5f965c111e09f0d67"
+    },
+    {
+      "cue": "c08",
+      "start_s": 39.766,
+      "seconds": 3.528,
+      "caption": "Each receipt cites the filing, down to when EDGAR accepted it.",
+      "spoken_text": "Each receipt cites the filing, down to when Edgar accepted it.",
+      "speech_sha256": "f6d8bf1c7dda0c17b787ae8a754ccba35568532fd66cf2ff735e0e797a5fb636"
+    },
+    {
+      "cue": "c09",
+      "start_s": 44.444,
+      "seconds": 5.212,
+      "caption": "And $2.22 is adjusted EPS. The GAAP figure was $2.46.",
+      "spoken_text": "And two twenty-two is adjusted earnings per share. The gap figure was two forty-six.",
+      "speech_sha256": "e017ecabbe3992149feb86b86cb175d297acdc2353c6e06d141f4a1c31501c14"
+    },
+    {
+      "cue": "c10",
+      "start_s": 51.256,
+      "seconds": 6.207,
+      "caption": "Fix with receipts: Muse Wonder proposes corrected numbers, and code lets only the digits change.",
+      "spoken_text": "Fix with receipts. Muse Wonder proposes corrected numbers, and code lets only the digits change.",
+      "speech_sha256": "c4a07a87cf8fb8d78f7174e35f7685a00f86420792691655ecb9d93662837c02"
+    },
+    {
+      "cue": "c11",
+      "start_s": 57.813,
+      "seconds": 3.692,
+      "caption": "Then the whole draft is checked again: nine verified, zero wrong.",
+      "spoken_text": "Then the whole draft is checked again. Nine verified, zero wrong.",
+      "speech_sha256": "d71104870ab08fd7bd28269b404f9c0f3e6733eadbf3b1681bb423280ed9615c"
+    },
+    {
+      "cue": "c12",
+      "start_s": 63.205,
+      "seconds": 1.639,
+      "caption": "Each correction keeps its receipt.",
+      "spoken_text": "Each correction keeps its receipt.",
+      "speech_sha256": "1ad31c22508ea7735f416f6242d29551718703e91bff75f869766d1323f03e00"
+    },
+    {
+      "cue": "c13",
+      "start_s": 66.344,
+      "seconds": 5.445,
+      "caption": "Time travel: check this roundup as of July 29, 4 p.m. UTC.",
+      "spoken_text": "Time travel. Check this roundup as of July twenty-ninth, four P M, U T C.",
+      "speech_sha256": "f0da3c74648e96a8da516c64c77f34978f4e9687e02519482281eeb3a108d61b"
+    },
+    {
+      "cue": "c14",
+      "start_s": 72.29,
+      "seconds": 6.472,
+      "caption": "Microsoft's revenue figure is right, but its filing reached EDGAR hours later, so it's marked not public yet.",
+      "spoken_text": "Microsoft's revenue figure is right, but its filing reached Edgar hours later, so it's marked not public yet.",
+      "speech_sha256": "3df0a3cd9d8ba3ab74ebfd4209da06443af691064f5aba2cc6b2eefdd03dbd68"
+    },
+    {
+      "cue": "c15",
+      "start_s": 80.661,
+      "seconds": 4.482,
+      "caption": "Now a real SEC slide: Bank of America's earnings presentation.",
+      "spoken_text": "Now a real S E C slide. Bank of America's earnings presentation.",
+      "speech_sha256": "be05c238d21655d96a4763caae26872d323db96d73d219a37c435ee4c2a79eef"
+    },
+    {
+      "cue": "c16",
+      "start_s": 85.343,
+      "seconds": 4.776,
+      "caption": "Its recorded live run: three model calls, 21 seconds, about three cents.",
+      "spoken_text": "Its recorded live run: three model calls, twenty-one seconds, about three cents.",
+      "speech_sha256": "6e5f1ca1ee895ae92beb3ac96f93ccb2cbe4b103e817db582c6aea787ac723e2"
+    },
+    {
+      "cue": "c17",
+      "start_s": 90.969,
+      "seconds": 5.37,
+      "caption": "SAM 3.1 finds both bar charts. Muse Spark reads the printed labels.",
+      "spoken_text": "Sam three point one finds both bar charts. Muse Spark reads the printed labels.",
+      "speech_sha256": "e3ce9f309d21a17306ef712024f82dee52b43e656dec1005bcd6a505bcf65d72"
+    },
+    {
+      "cue": "c18",
+      "start_s": 96.739,
+      "seconds": 6.019,
+      "caption": "All five GAAP net interest income bars verify. The non-GAAP totals stay unverifiable.",
+      "spoken_text": "All five gap net interest income bars verify. The non-gap totals stay unverifiable.",
+      "speech_sha256": "3a41a6d9857b0830481a64ff2ec83e7ae4ed3843ff410783671d23b8e4efabb5"
+    },
+    {
+      "cue": "c19",
+      "start_s": 104.208,
+      "seconds": 1.513,
+      "caption": "Each reading opens its receipt.",
+      "spoken_text": "Each reading opens its receipt.",
+      "speech_sha256": "0380c376b4a4652d69ecbf16df2eb30f9ba3e048278e6cca7c437ccaee2ef041"
+    },
+    {
+      "cue": "c20",
+      "start_s": 107.922,
+      "seconds": 4.685,
+      "caption": "Ask a question of Meta's entire 10-K: more than half a million characters.",
+      "spoken_text": "Ask a question of Meta's entire ten K. More than half a million characters.",
+      "speech_sha256": "2c03716f2f22e889647214d5e3b29c08e2d835082a248adc8a858aa4814cc308"
+    },
+    {
+      "cue": "c21",
+      "start_s": 113.206,
+      "seconds": 8.443,
+      "caption": "One Muse Spark request reads all of it in six seconds: 101,135 input tokens, no retrieval, no truncation.",
+      "spoken_text": "One Muse Spark request reads all of it in six seconds. A hundred and one thousand input tokens, no retrieval, no truncation.",
+      "speech_sha256": "b520a5b6acd03179eecafca1862114e1e2cc8d05aea0ed08b90d465c93b3d11e"
+    },
+    {
+      "cue": "c22",
+      "start_s": 122.949,
+      "seconds": 3.081,
+      "caption": "Code keeps only exact quotes it can find in the filing.",
+      "spoken_text": "Code keeps only exact quotes it can find in the filing.",
+      "speech_sha256": "697fd86ef6caa35ee3fe3b4a9228997a5b80759100fbd7d5af667c92063536b4"
+    },
+    {
+      "cue": "c23",
+      "start_s": 127.83,
+      "seconds": 8.461,
+      "caption": "Open weights: Muse Spark Open on Baseten and Muse Glimmer on our own Modal GPU answered 50 closed-book questions.",
+      "spoken_text": "Open weights. Muse Spark Open on Base ten, and Muse Glimmer on our own Modal G P U, answered fifty closed-book questions.",
+      "speech_sha256": "31ee2b1b56973671caf496a93be814fdee6890c5c26a5370c4edcf6b20d642a5"
+    },
+    {
+      "cue": "c24",
+      "start_s": 137.591,
+      "seconds": 2.358,
+      "caption": "NoCap's gate passed none of their wrong answers.",
+      "spoken_text": "No Cap's gate passed none of their wrong answers.",
+      "speech_sha256": "7dc826d18f1e6b5b3e04a18da5affa26750a2463a9e118a7f862a9a9289941ae"
+    },
+    {
+      "cue": "c25",
+      "start_s": 142.849,
+      "seconds": 7.37,
+      "caption": "Private check runs on Glimmer too. One real browser test: one verified, one wrong, and nothing kept to replay.",
+      "spoken_text": "Private check runs on Glimmer too. One real browser test: one verified, one wrong, and nothing kept to replay.",
+      "speech_sha256": "8df8bec774b44ae2751d5482a2b9f35d39dda20c1c7026185ff8e2f29556c5b3"
+    },
+    {
+      "cue": "c26",
+      "start_s": 151.119,
+      "seconds": 4.42,
+      "caption": "On held-out tests, NoCap caught 44 of 48 planted errors.",
+      "spoken_text": "On held-out tests, No Cap caught forty-four of forty-eight planted errors.",
+      "speech_sha256": "ab129cf5d61779982bc90453ab01646d0e34b70783ec142d9a2b958c6692675e"
+    },
+    {
+      "cue": "c27",
+      "start_s": 157.59,
+      "seconds": 8.672,
+      "caption": "NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17.",
+      "spoken_text": "No Cap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November seventeenth.",
+      "speech_sha256": "a861e585265d7238bf0326f3f8d3d8bcbbdb7d64061e42973b6aef45b7a0795e"
+    }
+  ],
+  "captions": [
+    {
+      "cue": "c01",
+      "start": 0.35,
+      "end": 4.554,
+      "caption": "One wrong number in an earnings story becomes a public correction."
+    },
+    {
+      "cue": "c02",
+      "start": 4.554,
+      "end": 10.154,
+      "caption": "This AI-drafted story has two. NoCap flags both, with the filed figures."
+    },
+    {
+      "cue": "c03",
+      "start": 10.154,
+      "end": 15.154,
+      "caption": "NoCap checks every financial number in a draft against SEC filings."
+    },
+    {
+      "cue": "c04",
+      "start": 15.154,
+      "end": 20.32,
+      "caption": "Muse Spark pulls out each claim. Code checks every one against the filings."
+    },
+    {
+      "cue": "c05",
+      "start": 22.011,
+      "end": 27.479,
+      "caption": "Seven verified. Two wrong. Two unverifiable, because NoCap won't guess."
+    },
+    {
+      "cue": "c06",
+      "start": 27.929,
+      "end": 33.01,
+      "caption": "The draft says revenue grew 18% from a year ago. That's the quarterly rate."
+    },
+    {
+      "cue": "c07",
+      "start": 33.01,
+      "end": 38.566,
+      "caption": "The receipt does the math from the filings: 105.85%."
+    },
+    {
+      "cue": "c08",
+      "start": 39.716,
+      "end": 43.894,
+      "caption": "Each receipt cites the filing, down to when EDGAR accepted it."
+    },
+    {
+      "cue": "c09",
+      "start": 44.394,
+      "end": 50.256,
+      "caption": "And $2.22 is adjusted EPS. The GAAP figure was $2.46."
+    },
+    {
+      "cue": "c10",
+      "start": 51.206,
+      "end": 57.763,
+      "caption": "Fix with receipts: Muse Wonder proposes corrected numbers, and code lets only the digits change."
+    },
+    {
+      "cue": "c11",
+      "start": 57.763,
+      "end": 62.105,
+      "caption": "Then the whole draft is checked again: nine verified, zero wrong."
+    },
+    {
+      "cue": "c12",
+      "start": 63.155,
+      "end": 65.444,
+      "caption": "Each correction keeps its receipt."
+    },
+    {
+      "cue": "c13",
+      "start": 66.294,
+      "end": 72.24,
+      "caption": "Time travel: check this roundup as of July 29, 4 p.m. UTC."
+    },
+    {
+      "cue": "c14",
+      "start": 72.24,
+      "end": 79.361,
+      "caption": "Microsoft's revenue figure is right, but its filing reached EDGAR hours later, so it's marked not public yet."
+    },
+    {
+      "cue": "c15",
+      "start": 80.611,
+      "end": 85.293,
+      "caption": "Now a real SEC slide: Bank of America's earnings presentation."
+    },
+    {
+      "cue": "c16",
+      "start": 85.293,
+      "end": 90.719,
+      "caption": "Its recorded live run: three model calls, 21 seconds, about three cents."
+    },
+    {
+      "cue": "c17",
+      "start": 90.919,
+      "end": 96.689,
+      "caption": "SAM 3.1 finds both bar charts. Muse Spark reads the printed labels."
+    },
+    {
+      "cue": "c18",
+      "start": 96.689,
+      "end": 103.358,
+      "caption": "All five GAAP net interest income bars verify. The non-GAAP totals stay unverifiable."
+    },
+    {
+      "cue": "c19",
+      "start": 104.158,
+      "end": 106.322,
+      "caption": "Each reading opens its receipt."
+    },
+    {
+      "cue": "c20",
+      "start": 107.872,
+      "end": 113.156,
+      "caption": "Ask a question of Meta's entire 10-K: more than half a million characters."
+    },
+    {
+      "cue": "c21",
+      "start": 113.156,
+      "end": 122.249,
+      "caption": "One Muse Spark request reads all of it in six seconds: 101,135 input tokens, no retrieval, no truncation."
+    },
+    {
+      "cue": "c22",
+      "start": 122.899,
+      "end": 126.63,
+      "caption": "Code keeps only exact quotes it can find in the filing."
+    },
+    {
+      "cue": "c23",
+      "start": 127.78,
+      "end": 136.891,
+      "caption": "Open weights: Muse Spark Open on Baseten and Muse Glimmer on our own Modal GPU answered 50 closed-book questions."
+    },
+    {
+      "cue": "c24",
+      "start": 137.541,
+      "end": 140.549,
+      "caption": "NoCap's gate passed none of their wrong answers."
+    },
+    {
+      "cue": "c25",
+      "start": 142.799,
+      "end": 150.819,
+      "caption": "Private check runs on Glimmer too. One real browser test: one verified, one wrong, and nothing kept to replay."
+    },
+    {
+      "cue": "c26",
+      "start": 151.069,
+      "end": 156.14,
+      "caption": "On held-out tests, NoCap caught 44 of 48 planted errors."
+    },
+    {
+      "cue": "c27",
+      "start": 157.54,
+      "end": 166.861,
+      "caption": "NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17."
+    }
+  ],
+  "timeline": [
+    {
+      "kind": "card",
+      "name": "stakes",
+      "start": 0.0,
+      "end": 4.454,
+      "fade": 0.0,
+      "camera_keys": []
+    },
+    {
+      "kind": "footage",
+      "name": "cold",
+      "src": 10.665,
+      "start": 4.004,
+      "end": 10.354,
+      "fade": 0.45,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            56.0,
+            0,
+            760,
+            380.0
+          ],
+          0
+        ],
+        [
+          1.75,
+          [
+            56.0,
+            235.2,
+            760,
+            380.0
+          ],
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "card",
+      "name": "title",
+      "start": 9.954,
+      "end": 14.954,
+      "fade": 0.4,
+      "camera_keys": []
+    },
+    {
+      "kind": "footage",
+      "name": "check",
+      "src": 0.6,
+      "start": 14.554,
+      "end": 21.861,
+      "fade": 0.4,
+      "chip": "Muse Spark 1.3 extracts the claims \u00b7 code decides each verdict",
+      "chip_corner": "bottom-right",
+      "camera_keys": [
+        [
+          0,
+          [
+            0,
+            0,
+            1280,
+            640
+          ],
+          0
+        ],
+        [
+          3.432,
+          [
+            0,
+            50.0,
+            1180,
+            590.0
+          ],
+          1.2
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "tiles",
+      "src": 19.198,
+      "start": 21.861,
+      "end": 27.779,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            46.0,
+            0,
+            780,
+            390.0
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "receipt",
+      "src": 26.914,
+      "start": 27.779,
+      "end": 39.566,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            56.0,
+            0,
+            760,
+            380.0
+          ],
+          0
+        ],
+        [
+          4.931,
+          [
+            522.4,
+            171.4,
+            757.6,
+            378.8
+          ],
+          0.9
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "sources",
+      "src": 43.872,
+      "start": 39.566,
+      "end": 44.194,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            516.0,
+            1.2,
+            740,
+            370.0
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "eps",
+      "src": 50.628,
+      "start": 44.194,
+      "end": 51.056,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            56.0,
+            260.0,
+            760,
+            380.0
+          ],
+          0
+        ],
+        [
+          2.55,
+          [
+            739.3,
+            175.8,
+            533.3,
+            266.7
+          ],
+          0.9
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "fix",
+      "src": 62.731,
+      "start": 50.706,
+      "end": 63.005,
+      "fade": 0.35,
+      "chip": "Muse Wonder 1.0 proposes \u00b7 code constrains and rechecks",
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            64.0,
+            64.0,
+            1152,
+            576.0
+          ],
+          0
+        ],
+        [
+          3.748,
+          [
+            83.5,
+            0,
+            1113.0,
+            556.5
+          ],
+          0.9
+        ],
+        [
+          6.807,
+          [
+            76.2,
+            0,
+            673.7,
+            336.8
+          ],
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "fix-receipts",
+      "src": 78.763,
+      "start": 63.005,
+      "end": 66.144,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            76.7,
+            0,
+            984.6,
+            492.3
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "cutoff",
+      "src": 88.539,
+      "start": 65.794,
+      "end": 72.09,
+      "fade": 0.35,
+      "chip": "Time travel: availability follows EDGAR acceptance time",
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            0,
+            193.0,
+            820,
+            410.0
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "cutoff-tiles",
+      "src": 101.412,
+      "start": 72.09,
+      "end": 74.29,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            46.0,
+            0,
+            780,
+            390.0
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "cutoff-receipt",
+      "src": 108.86,
+      "start": 74.29,
+      "end": 80.561,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            55.6,
+            80.0,
+            760,
+            380.0
+          ],
+          0
+        ],
+        [
+          1.6,
+          [
+            575.6,
+            32.9,
+            704.4,
+            352.2
+          ],
+          0.9
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "slide",
+      "src": 121.698,
+      "start": 80.211,
+      "end": 90.369,
+      "fade": 0.35,
+      "chip": "SAM 3.1 finds the chart regions \u00b7 Muse Spark 1.3 reads the labels",
+      "chip_corner": "bottom-right",
+      "camera_keys": [
+        [
+          0,
+          [
+            0,
+            0,
+            1280,
+            640
+          ],
+          0
+        ],
+        [
+          3.863,
+          [
+            10.0,
+            0,
+            860,
+            430.0
+          ],
+          0.8
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "slide-regions",
+      "src": 134.344,
+      "start": 90.369,
+      "end": 103.958,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            0,
+            7.5,
+            1072.0,
+            536.0
+          ],
+          0
+        ],
+        [
+          1.0,
+          [
+            41.4,
+            77.0,
+            812.8,
+            406.4
+          ],
+          1.2
+        ],
+        [
+          6.17,
+          [
+            0,
+            0,
+            640,
+            320.0
+          ],
+          1.2
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "slide-receipt",
+      "src": 151.198,
+      "start": 103.958,
+      "end": 107.722,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            548.6,
+            22.1,
+            731.4,
+            365.7
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "ask",
+      "src": 160.127,
+      "start": 107.372,
+      "end": 113.006,
+      "fade": 0.35,
+      "chip": "Muse Spark 1.3 \u00b7 one request reads the whole 10-K",
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            66.0,
+            230.0,
+            820,
+            410.0
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "ask-result",
+      "src": 173.41,
+      "start": 113.006,
+      "end": 122.749,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            151.0,
+            0,
+            978,
+            489.0
+          ],
+          0
+        ],
+        [
+          1.6,
+          [
+            162.2,
+            16.4,
+            609.5,
+            304.8
+          ],
+          1.0
+        ],
+        [
+          4.0,
+          [
+            508.2,
+            16.4,
+            609.5,
+            304.8
+          ],
+          1.5
+        ],
+        [
+          6.5,
+          [
+            151.0,
+            0,
+            978,
+            489.0
+          ],
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "ask-quotes",
+      "src": 184.545,
+      "start": 122.749,
+      "end": 127.53,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            153.0,
+            153.0,
+            974,
+            487.0
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "bench",
+      "src": 194.557,
+      "start": 127.18,
+      "end": 137.391,
+      "fade": 0.35,
+      "chip": "Open weights: Muse Spark Open on Baseten \u00b7 Muse Glimmer on Modal",
+      "chip_corner": "bottom-right",
+      "camera_keys": [
+        [
+          0,
+          [
+            0,
+            0,
+            1280,
+            640
+          ],
+          0
+        ],
+        [
+          0.971,
+          [
+            72.0,
+            0,
+            1136,
+            568.0
+          ],
+          1.1
+        ]
+      ]
+    },
+    {
+      "kind": "footage",
+      "name": "bench-question",
+      "src": 213.457,
+      "start": 137.391,
+      "end": 142.749,
+      "fade": 0.0,
+      "chip": null,
+      "chip_corner": "top-left",
+      "camera_keys": [
+        [
+          0,
+          [
+            51.5,
+            320.0,
+            640.0,
+            320.0
+          ],
+          0
+        ],
+        [
+          1.9,
+          [
+            588.5,
+            320.0,
+            640.0,
+            320.0
+          ],
+          0.9
+        ]
+      ]
+    },
+    {
+      "kind": "card",
+      "name": "private",
+      "start": 142.349,
+      "end": 151.019,
+      "fade": 0.4,
+      "camera_keys": []
+    },
+    {
+      "kind": "card",
+      "name": "results",
+      "start": 150.619,
+      "end": 157.44,
+      "fade": 0.4,
+      "camera_keys": []
+    },
+    {
+      "kind": "card",
+      "name": "end",
+      "start": 157.04,
+      "end": 168.661,
+      "fade": 0.4,
+      "camera_keys": []
+    }
+  ],
+  "capture": {
+    "harness": "capture_walkthrough_v2.py",
+    "source_commit": "4bd6f4c8a9055c68c90b34b83b957225cf5fc4a9",
+    "viewport_css": {
+      "width": 1280,
+      "height": 640
+    },
+    "device_scale_factor": 2,
+    "health_substitution": {
+      "live_requests_paused": false,
+      "live_until": "2026-11-17T16:00:00Z",
+      "reason": "Shows the owner-approved judging-window state (docs/deploy.md); the API process stayed paused"
+    },
+    "fix_source": {
+      "path": "data/eval_runs/demo-fix-current-20261029/events.json",
+      "sha256": "30840f72749e5f7f1f8091ec749a1b510043dc8bce2ce44d7243c2891d8b7acb"
+    },
+    "api_requests": [
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "time_s": null,
+        "mode": "real API; judging-window values substituted",
+        "status": 200,
+        "response_sha256": "8c956af14e1edc4dd56b27fa99c6e441c940ddb35e0aac7ff38ae8c197add89b"
+      },
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "time_s": null,
+        "mode": "real API; judging-window values substituted",
+        "status": 200,
+        "response_sha256": "8c956af14e1edc4dd56b27fa99c6e441c940ddb35e0aac7ff38ae8c197add89b"
+      },
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "time_s": null,
+        "mode": "real API; judging-window values substituted",
+        "status": 200,
+        "response_sha256": "8c956af14e1edc4dd56b27fa99c6e441c940ddb35e0aac7ff38ae8c197add89b"
+      },
+      {
+        "method": "GET",
+        "path": "/api/examples",
+        "time_s": null,
+        "mode": "real API",
+        "status": 200,
+        "response_sha256": "12fe6d5f67feab51ee4788714af320935c256b85fc0988e59d195099567d074d"
+      },
+      {
+        "method": "POST",
+        "path": "/api/check",
+        "time_s": 6.602,
+        "mode": "real snapshot-only API replay",
+        "status": 200,
+        "cached": true,
+        "input_sha256": "76c54e3034f2edf09067597093896f7da55864c68b9d6e1758dce5436a860aec",
+        "response_sha256": "9cd051256a43b0fbf97ec47ee50b30691324d27033728e832febe754b691dd01",
+        "response_bytes": 19360
+      },
+      {
+        "method": "POST",
+        "path": "/api/fix",
+        "time_s": 65.08,
+        "mode": "recorded October 29 live Fix response (Muse Wonder 1.0 + full Spark recheck)",
+        "status": 200,
+        "input_sha256": "dfd56a021e186b0a623fadbab3d2b5406963908523b136f1d67166dc2022b6b8",
+        "response_sha256": "ef45a0dc56859d73239981682db687754e86a26aef53745439c8fdc3285ed2c8"
+      },
+      {
+        "method": "POST",
+        "path": "/api/check",
+        "time_s": 98.542,
+        "mode": "real snapshot-only API replay",
+        "status": 200,
+        "cached": true,
+        "input_sha256": "9583eaa9a6244524d2e72bf01815d9327d9d53c7c315b01dc1f95c14380f0a9b",
+        "response_sha256": "df2eae8a79dd91b5263c18367e30b6019afb0e82b711b6725c98c8f5ee7f6212",
+        "response_bytes": 15486
+      },
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "time_s": 120.894,
+        "mode": "real API; judging-window values substituted",
+        "status": 200,
+        "response_sha256": "8c956af14e1edc4dd56b27fa99c6e441c940ddb35e0aac7ff38ae8c197add89b"
+      },
+      {
+        "method": "POST",
+        "path": "/api/slide",
+        "time_s": 123.541,
+        "mode": "real snapshot-only API replay",
+        "status": 200,
+        "cached": true,
+        "input_sha256": "aef5aba729810c0a58de05f287a8c3426a5e97dd2980f0dc92f5b774eeb9aa41",
+        "response_sha256": "1f7b0cea5825c4950f1b9f634bf1f2c761df53154f969b147838092b315a1dea",
+        "response_bytes": 35750
+      },
+      {
+        "method": "GET",
+        "path": "/api/grounding/filings",
+        "time_s": 158.426,
+        "mode": "real API",
+        "status": 200,
+        "response_sha256": "7fd04fd06d92876b135f3dfab46da23005e6a78a008ba7c6165773b1c88d5486"
+      },
+      {
+        "method": "GET",
+        "path": "/api/ask/options",
+        "time_s": 158.426,
+        "mode": "real API",
+        "status": 200,
+        "response_sha256": "68734803846a832ea23809365a48fdbe7be1a74d284de9ad653e0c1dc4c7af64"
+      },
+      {
+        "method": "POST",
+        "path": "/api/grounding",
+        "time_s": 170.119,
+        "mode": "real snapshot-only API replay",
+        "status": 200,
+        "cached": true,
+        "input_sha256": "175473fca23deb48cf35db0a49b815f1ea76d2df01fc1930f57e947acff485a9",
+        "response_sha256": "58c334527209f2bf4d155546ef3c361c9381b97a8f6e529537747b19bc27443c",
+        "response_bytes": 2152
+      },
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "time_s": 193.559,
+        "mode": "real API; judging-window values substituted",
+        "status": 200,
+        "response_sha256": "8c956af14e1edc4dd56b27fa99c6e441c940ddb35e0aac7ff38ae8c197add89b"
+      }
+    ],
+    "blocked_requests": [],
+    "refused_requests": [],
+    "page_errors": [],
+    "provider_calls": 0,
+    "new_provider_spend_usd": 0,
+    "recorder": {
+      "frames_written": 5497,
+      "frames_received": 1689,
+      "duration_s": 219.88,
+      "max_gap_between_chrome_frames_s": 13.533,
+      "fps": 25,
+      "size": [
+        2560,
+        1280
+      ]
+    },
+    "timeline_duration_s": 219.866
+  },
+  "cards_sha256": {
+    "stakes": "4ec5ecbb1c31556521718e52416fda119590a227b1ef46a08a52caa03573c53e",
+    "title": "e20824b6239a970c7f0c790483ff5308319b6ef263d28ce46ff4a048835da8fd",
+    "private": "0ab0c3a7b299b07c6007d383b2994617896855638e7e42c028f37319ca016a2e",
+    "results": "a39460d8732cebe4451d8f232c1a7595817567a0362565f2a9c1a9e9c5cc3b1e",
+    "end": "38d0dc453dee2081520bf6df55e06cface206f239035a780b567869e93077d9e"
+  },
+  "master_sha256": "67b19ad74c6ac11c4b7b0f95a28aee459ca69de075c2048b1a61e13c9b877836",
+  "source_validation": {
+    "status": "passed",
+    "video_sha256": "fec139b4bbc12cc0271f3654f0055d7f4eca90db0535b69e8bede79327c00231",
+    "video_bytes": 35000399,
+    "duration_s": 168.68,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "video_codec": "h264 yuv420p 25 fps",
+    "audio": "aac 48 kHz stereo",
+    "faststart": true,
+    "full_decode": "passed",
+    "loudness": {
+      "integrated_lufs": -13.9,
+      "loudness_range_lu": 4.4,
+      "true_peak_dbfs": -1.1
+    },
+    "caption_count": 27,
+    "caption_timing": "SRT and VTT match the manifest; ordered, non-overlapping, within the runtime",
+    "srt_sha256": "40518e3e6f2839530ea3f9ef33dfdf68e2b4987109799d92bb28a3afe0e14d61",
+    "vtt_sha256": "533dc850ef82c7263479bee6b12d4b61377074005c46cc324699608793050d1b",
+    "master_sha256": "67b19ad74c6ac11c4b7b0f95a28aee459ca69de075c2048b1a61e13c9b877836",
+    "api_posts": {
+      "/api/check": 2,
+      "/api/fix": 1,
+      "/api/slide": 1,
+      "/api/grounding": 1
+    },
+    "provider_calls_during_capture": 0,
+    "new_spend_during_capture_usd": 0,
+    "browser_page_errors": 0,
+    "blocked_or_refused_requests": 0,
+    "contact_sheet": "contact-sheet.jpg (one frame every 5 seconds)",
+    "key_frames": {
+      "key-cold-75.png": 8.77,
+      "key-tiles-60.png": 25.41,
+      "key-receipt-80.png": 37.21,
+      "key-sources-60.png": 42.34,
+      "key-eps-85.png": 50.03,
+      "key-fix-85.png": 61.16,
+      "key-cutoff-receipt-85.png": 79.62,
+      "key-slide-regions-35.png": 95.13,
+      "key-slide-regions-90.png": 102.6,
+      "key-slide-receipt-60.png": 106.22,
+      "key-ask-result-60.png": 118.85,
+      "key-ask-quotes-60.png": 125.62,
+      "key-bench-90.png": 136.37,
+      "key-bench-question-60.png": 140.61,
+      "key-title-50.png": 12.45,
+      "key-private-60.png": 147.55,
+      "key-results-60.png": 154.71,
+      "key-end-60.png": 164.01
+    },
+    "human_listening_or_editorial_approval": false,
+    "published": false
+  },
+  "fresh_fix_evidence": "../fix-live-2026-10-29.json",
+  "voice_selection": "../voice-selection-v2.json",
+  "privacy_review": "Only repository examples, public SEC filings and recorded public-document runs; no participant draft, secret, account page or terminal",
+  "historical_exports": {
+    "v1_165s": {
+      "manifest": "historical/2026-10-29-walkthrough-165s-manifest.json",
+      "validation": "historical/2026-10-29-walkthrough-165s-validation.json",
+      "video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b"
+    },
+    "screenshot_179s": {
+      "manifest": "historical/2026-10-29-screenshot-manifest.json",
+      "validation": "historical/2026-10-29-screenshot-validation.json"
+    }
+  },
+  "new_provider_calls": 0,
+  "new_provider_spend_usd": 0
+}

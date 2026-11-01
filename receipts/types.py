@@ -7,7 +7,7 @@ are built against it in parallel.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Literal, Optional, Protocol
+from typing import Iterable, Literal, Optional, Protocol, Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -22,6 +22,16 @@ Metric = Literal[
     "gross_profit", "cost_of_revenue", "research_and_development", "operating_cash_flow",
     "free_cash_flow", "net_interest_income",
 ]
+# Evidence-only metrics (receipts.balance_sheet): balance-sheet instants, and the cover page's share count. They are
+# not in Metric, the extraction vocabulary, so the model never proposes one and extraction's schema and cache keys stay
+# as they are: the verifier reaches them from a claim's own wording. Only Fact.metric takes them.
+BalanceSheetMetric = Literal[
+    "cash_and_equivalents", "total_assets", "total_liabilities", "stockholders_equity", "long_term_debt",
+    "long_term_debt_noncurrent", "total_debt", "shares_outstanding",
+]
+# Alternative income lines stay outside extraction. They only explain ambiguity for unqualified net income;
+# a claim's own words must name the alternative before the verifier can select it.
+IncomeAlternativeMetric = Literal["net_income_to_common", "net_income_including_nci"]
 Basis = Literal["GAAP", "non-GAAP"]
 Unit = Literal["USD", "%", "USD/share", "shares", "other"]
 Scale = Literal["units", "thousands", "millions", "billions"]
@@ -61,7 +71,7 @@ class Fact(BaseModel):
 
     cik: int
     ticker: str
-    metric: Metric
+    metric: Union[Metric, BalanceSheetMetric, IncomeAlternativeMetric]
     concept: Optional[str] = None  # e.g. "us-gaap:Revenues"; None for press-release cells
     basis: Basis                   # XBRL facts are GAAP; press-release cells may be non-GAAP
     segment: Optional[str] = None
@@ -107,6 +117,23 @@ class Verdict(BaseModel):
     expected_value: Optional[float] = None  # the correct value in the claim's own unit and scale, when wrong
     evidence: list[Fact] = []      # the receipt(s)
     as_of: Optional[datetime] = None
+
+
+# The buckets of Check, Fix and Slide `counts`, shown ✓ ✗ ◷ ? ≈. A look-ahead verdict keeps status "wrong" with
+# reason "look_ahead" (the evidence was not public at the as-of time); it is counted as not_public, never as wrong.
+COUNT_KEYS = ("verified", "wrong", "not_public", "unverifiable", "approximate")
+
+
+def count_key(verdict: Verdict) -> str:
+    """The `counts` bucket of one verdict."""
+    return "not_public" if verdict.reason == "look_ahead" else verdict.status
+
+
+def verdict_counts(verdicts: Iterable[Verdict]) -> dict[str, int]:
+    counts = dict.fromkeys(COUNT_KEYS, 0)
+    for verdict in verdicts:
+        counts[count_key(verdict)] += 1
+    return counts
 
 
 class EvidenceStore(Protocol):

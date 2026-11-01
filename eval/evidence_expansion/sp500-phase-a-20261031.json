@@ -1,0 +1,2174 @@
+{
+ "phase": "A (code changes and a 30-company pilot); stopped before Phase B as instructed",
+ "validated_on": "2026-10-31",
+ "constituents": {
+  "url": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+  "accessed_at": "2026-10-30T20:14:37Z",
+  "sha256": "f4ae1ac8824174465ad42a22df39b768cf63b423a3055e041cdd60163acc650e",
+  "bytes": 571032,
+  "rows": 503,
+  "columns": [
+   "Symbol",
+   "Security",
+   "GICS Sector",
+   "GICS Sub-Industry",
+   "Headquarters Location",
+   "Date added",
+   "CIK",
+   "Founded"
+  ],
+  "sectors": {
+   "Industrials": 83,
+   "Health Care": 60,
+   "Information Technology": 75,
+   "Utilities": 31,
+   "Financials": 76,
+   "Materials": 24,
+   "Consumer Discretionary": 47,
+   "Real Estate": 30,
+   "Communication Services": 22,
+   "Consumer Staples": 34,
+   "Energy": 21
+  },
+  "cik_source": {
+   "url": "https://www.sec.gov/files/company_tickers.json",
+   "sha256": "b5be63822ef78687908848b349820d9d6a962af9287e2164f44f4b217259f4ea",
+   "fetched_at": "2026-10-27T07:49:01.557319+00:00"
+  },
+  "cik_mapping": {
+   "ok": 471,
+   "covered": 32
+  },
+  "wikipedia_and_sec_cik_agree_for_all": true,
+  "second_share_classes_not_processed_separately": {
+   "GOOG": "GOOGL (CIK 1652044, covered)",
+   "FOX": "FOXA (CIK 1754301)",
+   "NWS": "NWSA (CIK 1564708)"
+  },
+  "drops": {
+   "XOM": "SEC's ticker map now points XOM at ExxonMobil Holdings Corp (CIK 2115436), a new registrant with one 10-Q; earlier quarters are under Exxon Mobil Corp (CIK 34088), and ingest maps one ticker to one CIK"
+  },
+  "drops_for_no_usable_xbrl": "none among the 30 piloted; the rest is checked in Phase B",
+  "companies_to_process": 467,
+  "piloted": 30,
+  "remaining": 437
+ },
+ "code_changes": {
+  "peer attribution (receipts/verify.py, check.py, stream.py, rewrite.py)": "_peer_entity considers only companies the same draft names (verify.named_in_draft) and those its context line names, never the whole universe; context companies are kept for attribution even when the context stops steering period resolution; named_in_draft never fails a check",
+  "entity safety (receipts/store.py, verify.py, ask.py)": "a ticker of two letters or fewer or in WORD_TICKERS never resolves by itself; free-text scans (a draft, an Ask question) also skip single words in WORD_NAMES; a company whose own name is a word ticker (Flex, Ball, Dow, Fox, Pool) resolves only with a legal suffix ('Flex Ltd.'), and a bare 'Flex' gets an everyday-word explanation; aliases are looked up through a cached index; SEC registrant tags ('/NEW/', '/DE/') are stripped for new aliases; known_companies lists the store's companies",
+  "DEI label reuse (receipts/ingest.py)": "a filing that reuses an earlier filing's DEI label for the same period one year later gets the next fiscal year's label when that label is free; any other conflict still keeps the earlier filing",
+  "component revenue (receipts/ingest.py)": "a RevenueFromContractWithCustomer figure stands for revenue only when it is at least half of both the operating expenses and the cost of revenue the same filing reports for the period; bank fee income and REIT non-lease income are slices (Fifth Third about $150M a quarter against $1.2B noninterest expense; Camden $13M for 2025 against $567M cost of revenue). The cost-of-revenue yardstick was added after the first final gates, when Camden's three annual figures (stored 6 times) were found to have survived the operating-expense test; Camden was re-ingested",
+  "existing companies": "all 32 covered companies dry-build identically under the final code except ORCL (+1 period, 10 relabelled facts) and CRM (+2 periods, 19 facts added, 11 replaced) from the DEI fix; neither was re-ingested, so every stored row is unchanged"
+ },
+ "tests": {
+  "tests/test_verify.py": [
+   "test_entity_mismatch_against_the_company_the_context_names: second half now passes named companies (universe-wide attribution is the retired policy)",
+   "new: test_a_peer_named_in_the_draft_is_still_attributed, test_an_unnamed_company_with_an_identical_value_is_not_attributed, test_attribution_still_requires_a_unique_match"
+  ],
+  "tests/test_store.py": [
+   "new: word-ticker list never resolves (T, F, A, C, IT, ON, NOW, LOW, ALL, KEY, MO, CAT, HAS, BALL, CARR, COST, KO, GS and spellings), their companies resolve by name, a draft's ordinary words name no company, every snapshot lookup key names one company, legal-suffix names, bare-word explanation, two DEI-reuse tests, test_a_contract_revenue_slice_never_stands_for_revenue (fails under the opex-only rule)"
+  ],
+  "tests/test_ask.py": [
+   "new: 'cost of revenue' never binds Costco; naming Costco still counts as a second company"
+  ],
+  "suite": "1738 passed"
+ },
+ "peer_attribution_gate": {
+  "rule": "statuses identical on 693/693; reasons and explanations identical except entity_mismatch -> value_mismatch",
+  "status_changes": 0,
+  "reason_changes": 15,
+  "other_changes": 0,
+  "note": "15, not the 17 first estimated: two trap drafts name Alphabet themselves, so those two Alphabet attributions stand unchanged. The 15 are 11 planted entity swaps (the seeded-dev targets) and 3 other wrong figures in seeded dev drafts, plus 1 trap-dev entity error",
+  "changes": [
+   {
+    "item": "128dfa7175c32698",
+    "claim": "c1",
+    "value": "$60.80 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$60.80 billion is Meta's revenue for Q2 2026 (quarter ended Jun 30, 2026); Amazon's was $200.606 billion.",
+    "new_explanation": "Amazon's 10-Q reports that revenue was $200.606 billion for Q2 2026 (quarter ended Jun 30, 2026), not $60.80 billion."
+   },
+   {
+    "item": "1d3faa34b0d96df0",
+    "claim": "c1",
+    "value": "$38.4 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$38.4 billion is Microsoft's operating income for Q3 FY2026 (quarter ended Mar 31, 2026); NVIDIA's was $36.01 billion.",
+    "new_explanation": "NVIDIA's 10-Q reports that operating income was $36.01 billion for Q3 FY2026 (quarter ended Oct 26, 2025), not $38.4 billion."
+   },
+   {
+    "item": "500551cce0bc4e59",
+    "claim": "c1",
+    "value": "$77.7 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$77.7 billion is Microsoft's revenue for Q1 FY2026 (quarter ended Sep 30, 2025); Bank of America's was $30.272 billion.",
+    "new_explanation": "Bank of America's 10-Q reports that revenue was $30.272 billion for Q1 2026 (quarter ended Mar 31, 2026), not $77.7 billion."
+   },
+   {
+    "item": "5e0f0f158c832de3",
+    "claim": "c2",
+    "value": "$181.5 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$181.5 billion is Amazon's revenue for Q1 2026 (quarter ended Mar 31, 2026); JPMorgan Chase's was $49.836 billion.",
+    "new_explanation": "JPMorgan Chase's 10-Q reports that revenue was $49.836 billion for Q1 2026 (quarter ended Mar 31, 2026), not $181.5 billion."
+   },
+   {
+    "item": "5e0f0f158c832de3",
+    "claim": "c3",
+    "value": "$155.7 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$155.7 billion is Amazon's revenue for Q1 2025 (quarter ended Mar 31, 2025); JPMorgan Chase's was $45.31 billion.",
+    "new_explanation": "JPMorgan Chase's 10-Q reports that revenue was $45.31 billion for Q1 2025 (quarter ended Mar 31, 2025), not $155.7 billion."
+   },
+   {
+    "item": "7cfe2d3a0f5e424d",
+    "claim": "c1",
+    "value": "$14.4 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$14.4 billion is JPMorgan's net income for Q3 2025 (quarter ended Sep 30, 2025); AMD's was $1.243 billion.",
+    "new_explanation": "AMD's 10-Q reports that net income was $1.243 billion for Q3 2025 (quarter ended Sep 27, 2025), not $14.4 billion."
+   },
+   {
+    "item": "8b5ee5594c684764",
+    "claim": "c1",
+    "value": "$56.31 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$56.31 billion is Meta's revenue for Q1 2026 (quarter ended Mar 31, 2026); Amazon's was $181.519 billion.",
+    "new_explanation": "Amazon's 10-Q reports that revenue was $181.519 billion for Q1 2026 (quarter ended Mar 31, 2026), not $56.31 billion."
+   },
+   {
+    "item": "900c9ad0d5b96fb5",
+    "claim": "c1",
+    "value": "$2.01",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$2.01 is Apple's diluted EPS for Q2 FY2026 (quarter ended Mar 28, 2026); AMD's was $1.38.",
+    "new_explanation": "AMD's 10-Q reports that diluted EPS was $1.38 for Q2 2026 (quarter ended Jun 27, 2026), not $2.01."
+   },
+   {
+    "item": "a424b4873b6d87cd",
+    "claim": "c1",
+    "value": "$16.5 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$16.5 billion is JPMorgan's net income for Q1 2026 (quarter ended Mar 31, 2026); Netflix's was $5.283 billion.",
+    "new_explanation": "Netflix's 10-Q reports that net income was $5.283 billion for Q1 2026 (quarter ended Mar 31, 2026), not $16.5 billion."
+   },
+   {
+    "item": "a4308ddf17d69456",
+    "claim": "c5",
+    "value": "$9.11",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$9.11 is Alphabet's diluted EPS for Q2 2026 (quarter ended Jun 30, 2026); Meta's was $6.18.",
+    "new_explanation": "Meta's 8-K press release reports that diluted EPS was $6.18 for Q2 2026 (quarter ended Jun 30, 2026), not $9.11."
+   },
+   {
+    "item": "c3a9d85a8a747b95",
+    "claim": "c3",
+    "value": "$5.11",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$5.11 is Alphabet's diluted EPS for Q1 2026 (quarter ended Mar 31, 2026); Meta's was $10.44.",
+    "new_explanation": "Meta's 10-Q reports that diluted EPS was $10.44 for Q1 2026 (quarter ended Mar 31, 2026), not $5.11."
+   },
+   {
+    "item": "c9358159bf7a12f8",
+    "claim": "c1",
+    "value": "$27.5 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$27.5 billion is Amazon's operating income for Q2 2026 (quarter ended Jun 30, 2026); AMD's was $1.99 billion.",
+    "new_explanation": "AMD's 10-Q reports that operating income was $1.99 billion for Q2 2026 (quarter ended Jun 27, 2026), not $27.5 billion."
+   },
+   {
+    "item": "d1f57201a2177306",
+    "claim": "c3",
+    "value": "36.1%",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "36.1% is Alphabet's operating margin for Q1 2026 (quarter ended Mar 31, 2026); Netflix's was 32.30%.",
+    "new_explanation": "Netflix's 10-Q reports that operating margin was 32.30% for Q1 2026 (quarter ended Mar 31, 2026), not 36.1%."
+   },
+   {
+    "item": "f8bbe37207883df6",
+    "claim": "c1",
+    "value": "$23.9 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$23.9 billion is Amazon's operating income for Q1 2026 (quarter ended Mar 31, 2026); Apple's was $50.852 billion.",
+    "new_explanation": "Apple's 10-Q reports that operating income was $50.852 billion for Q1 FY2026 (quarter ended Dec 27, 2025), not $23.9 billion."
+   },
+   {
+    "item": "fd4a645d1c17640c",
+    "claim": "c3",
+    "value": "$109.9 billion",
+    "status": "wrong",
+    "old_reason": "entity_mismatch",
+    "new_reason": "value_mismatch",
+    "old_explanation": "$109.9 billion is Alphabet's revenue for Q1 2026 (quarter ended Mar 31, 2026); Bank of America's was $30.272 billion.",
+    "new_explanation": "Bank of America's 10-Q reports that revenue was $30.272 billion for Q1 2026 (quarter ended Mar 31, 2026), not $109.9 billion."
+   }
+  ],
+  "examples": {
+   "nvda-ai-story": "7/2/0/2",
+   "meta-ai-story": "5/3/0/0",
+   "q2-roundup-look-ahead": "6/1/2/0, its JPMorgan-for-Alphabet error still entity_mismatch"
+  },
+  "eval_summary_impact": {
+   "seeded_dev_v0_basis5": {
+    "caught": "104/109 unchanged",
+    "correct_reason": "97/109 (89.0%) -> 86/109 (78.9%)",
+    "entity_mutator": "reason 11/18 -> 0/18 (all 18 still caught)",
+    "false_alarms": "0/107 unchanged",
+    "unverifiable": "51/250 unchanged"
+   },
+   "trap_dev": {
+    "caught": "40/40 unchanged",
+    "correct_reason": "36/40 (90.0%) -> 35/40 (87.5%)",
+    "entity": "reason 3/7 -> 2/7: META story quoting Alphabet's $9.11 EPS",
+    "false_alarms": "0/112 figures and 0/58 sentences unchanged"
+   },
+   "held_out": "not rerun (forbidden); its reported reasons were measured with the earlier rule",
+   "docs_quoting_old_numbers": [
+    "docs/submission/evidence-map.md:72",
+    "docs/submission/evidence-map.md:132",
+    "docs/submission/evidence-map.md:133",
+    "eval/README.md:175-189",
+    "docs/deploy.md:122",
+    "docs/fix-with-receipts.md:51",
+    "docs/review-2026-10-28.md:68 (dated review)",
+    "docs/claude-takeover-2026-10-29.md:162 (dated)"
+   ]
+  }
+ },
+ "pilot": {
+  "seed": 20261031,
+  "quota": {
+   "banks": 4,
+   "insurers": 4,
+   "reits": 4,
+   "utilities": 4,
+   "Industrials": 2,
+   "Information Technology": 2,
+   "Health Care": 2,
+   "Consumer Discretionary": 2,
+   "Consumer Staples": 2,
+   "Materials": 2,
+   "Energy": 2
+  },
+  "pool_size": 467,
+  "not_sampled": "Communication Services (15 of the remaining companies)",
+  "sec_requests": {
+   "xbrl_submissions_and_companyfacts": 75,
+   "press_release_dry_run": 271,
+   "companyfacts_recheck": 30,
+   "ingest": 0,
+   "mapping": 0
+  },
+  "model": {
+   "model": "muse-spark-1.3",
+   "mode": "Standard",
+   "calls": 121,
+   "statuses": {
+    "ok": 121
+   },
+   "new_spend_usd": 2.754767,
+   "dry_run_estimate_usd": 2.424,
+   "actual_over_estimate": 1.136,
+   "ledger_usd_before": 6.6744,
+   "ledger_usd_after": 9.429167,
+   "budget_usd_flag": 11.55
+  },
+  "cost_per_filing_usd": {
+   "files_with_tables": 99,
+   "mean": 0.0278,
+   "median": 0.0238,
+   "p90": 0.0526,
+   "max": 0.0645
+  },
+  "pairs_without_parseable_tables": {
+   "count": 21,
+   "of": 120,
+   "by_company": {
+    "ARES": 4,
+    "IRM": 4,
+    "ATO": 4,
+    "PNW": 4,
+    "LIN": 3,
+    "WEC": 1,
+    "MPC": 1
+   }
+  },
+  "xbrl_gate": {
+   "files": 99,
+   "facts_before": 5639,
+   "facts_after": 5362,
+   "served_before": 4326,
+   "served_after": 4116,
+   "quarantined": [
+    {
+     "ticker": "COR",
+     "accession": "0001140859-26-000032",
+     "reason": "2 unexplained GAAP mismatches in the 2024-10-01..2025-06-30 column (+3 more columns)",
+     "facts_held": 48
+    },
+    {
+     "ticker": "COR",
+     "accession": "0001140859-26-000018",
+     "reason": "2 unexplained GAAP mismatches in the 2024-10-01..2025-03-31 column (+3 more columns)",
+     "facts_held": 50
+    },
+    {
+     "ticker": "COR",
+     "accession": "0001140859-26-000004",
+     "reason": "2 unexplained GAAP mismatches in the 2024-10-01..2024-12-31 column (+1 more columns)",
+     "facts_held": 25
+    },
+    {
+     "ticker": "COR",
+     "accession": "0001140859-25-000128",
+     "reason": "2 unexplained GAAP mismatches in the 2023-10-01..2024-09-30 column (+1 more columns)",
+     "facts_held": 44
+    },
+    {
+     "ticker": "MPC",
+     "accession": "0001510295-26-000003",
+     "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)",
+     "facts_held": 40
+    },
+    {
+     "ticker": "MPC",
+     "accession": "0001510295-25-000059",
+     "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-09-30 column (+3 more columns)",
+     "facts_held": 32
+    }
+   ],
+   "dropped": [
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-067714",
+     "metric": "net_income",
+     "period": "2026-07-01..2026-09-30",
+     "press_release": 486000000.0,
+     "xbrl": 476000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-067714",
+     "metric": "net_income",
+     "period": "2025-07-01..2025-09-30",
+     "press_release": 470000000.0,
+     "xbrl": 458000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-050367",
+     "metric": "net_income",
+     "period": "2026-04-01..2026-06-30",
+     "press_release": 565000000.0,
+     "xbrl": 551000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-050367",
+     "metric": "net_income",
+     "period": "2025-04-01..2025-06-30",
+     "press_release": 594000000.0,
+     "xbrl": 579000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-029093",
+     "metric": "net_income",
+     "period": "2026-01-01..2026-03-31",
+     "press_release": 1239000000.0,
+     "xbrl": 1212000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-029093",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-03-31",
+     "press_release": 982000000.0,
+     "xbrl": 965000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-004273",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-12-31",
+     "press_release": 3750000000.0,
+     "xbrl": 3695000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "AON",
+     "accession": "0001628280-26-004273",
+     "metric": "net_income",
+     "period": "2024-01-01..2024-12-31",
+     "press_release": 2720000000.0,
+     "xbrl": 2654000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-067283",
+     "metric": "net_income",
+     "period": "2026-07-01..2026-09-30",
+     "press_release": 378348000.0,
+     "xbrl": 366926000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-067283",
+     "metric": "net_income",
+     "period": "2025-07-01..2025-09-30",
+     "press_release": 514773000.0,
+     "xbrl": 511063000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-050608",
+     "metric": "net_income",
+     "period": "2026-04-01..2026-06-30",
+     "press_release": 502938000.0,
+     "xbrl": 499960000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-027484",
+     "metric": "net_income",
+     "period": "2026-01-01..2026-03-31",
+     "press_release": 529375000.0,
+     "xbrl": 526273000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-027484",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-03-31",
+     "press_release": 410791000.0,
+     "xbrl": 407791000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-007684",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-12-31",
+     "press_release": 1797032000.0,
+     "xbrl": 1784348000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PSA",
+     "accession": "0001628280-26-007684",
+     "metric": "net_income",
+     "period": "2024-01-01..2024-12-31",
+     "press_release": 2084410000.0,
+     "xbrl": 2072011000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "DELL",
+     "accession": "0001571996-26-000003",
+     "metric": "net_income",
+     "period": "2024-11-02..2025-01-31",
+     "press_release": 1532000000.0,
+     "xbrl": 1533000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "DELL",
+     "accession": "0001571996-26-000003",
+     "metric": "net_income",
+     "period": "2024-02-03..2025-01-31",
+     "press_release": 4576000000.0,
+     "xbrl": 4592000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "DELL",
+     "accession": "0001571996-25-000118",
+     "metric": "net_income",
+     "period": "2024-08-03..2024-11-01",
+     "press_release": 1170000000.0,
+     "xbrl": 1175000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "BAX",
+     "accession": "0001628280-26-007474",
+     "metric": "net_income",
+     "period": "2024-10-01..2024-12-31",
+     "press_release": -510000000.0,
+     "xbrl": -512000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "BAX",
+     "accession": "0001628280-26-007474",
+     "metric": "net_income",
+     "period": "2024-01-01..2024-12-31",
+     "press_release": -638000000.0,
+     "xbrl": -649000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-066596",
+     "metric": "cost_of_revenue",
+     "period": "2026-07-01..2026-09-30",
+     "press_release": -3584000000.0,
+     "xbrl": 3584000000,
+     "cause": "sign"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-066596",
+     "metric": "cost_of_revenue",
+     "period": "2025-07-01..2025-09-30",
+     "press_release": -3484000000.0,
+     "xbrl": 3484000000,
+     "cause": "sign"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-066596",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-12-31",
+     "press_release": 11848000000.0,
+     "xbrl": 11348000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-049107",
+     "metric": "cost_of_revenue",
+     "period": "2026-04-01..2026-06-30",
+     "press_release": -3533000000.0,
+     "xbrl": 3533000000,
+     "cause": "sign"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-049107",
+     "metric": "cost_of_revenue",
+     "period": "2025-04-01..2025-06-30",
+     "press_release": -3274000000.0,
+     "xbrl": 3274000000,
+     "cause": "sign"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-005932",
+     "metric": "cost_of_revenue",
+     "period": "2025-01-01..2025-12-31",
+     "press_release": -13366000000.0,
+     "xbrl": 13366000000,
+     "cause": "sign"
+    },
+    {
+     "ticker": "PM",
+     "accession": "0001628280-26-005932",
+     "metric": "cost_of_revenue",
+     "period": "2024-01-01..2024-12-31",
+     "press_release": -13329000000.0,
+     "xbrl": 13329000000,
+     "cause": "sign"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-117217",
+     "metric": "net_income",
+     "period": "2026-07-01..2026-09-30",
+     "press_release": 755688000.0,
+     "xbrl": 756000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-117217",
+     "metric": "net_income",
+     "period": "2025-07-01..2025-09-30",
+     "press_release": 403926000.0,
+     "xbrl": 403685000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-085277",
+     "metric": "net_income",
+     "period": "2026-04-01..2026-06-30",
+     "press_release": 530785000.0,
+     "xbrl": 534087000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-085277",
+     "metric": "net_income",
+     "period": "2025-04-01..2025-06-30",
+     "press_release": 301191000.0,
+     "xbrl": 298726000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-045938",
+     "metric": "net_income",
+     "period": "2026-01-01..2026-03-31",
+     "press_release": 400105000.0,
+     "xbrl": 403436000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-045938",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-03-31",
+     "press_release": 217679000.0,
+     "xbrl": 217151000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-006889",
+     "metric": "net_income",
+     "period": "2025-01-01..2025-12-31",
+     "press_release": 1187311000.0,
+     "xbrl": 1185595000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-006889",
+     "metric": "net_income",
+     "period": "2024-01-01..2024-12-31",
+     "press_release": 1549956000.0,
+     "xbrl": 1537134000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "STLD",
+     "accession": "0001104659-26-006889",
+     "metric": "net_income",
+     "period": "2025-07-01..2025-09-30",
+     "press_release": 403926000.0,
+     "xbrl": 403685000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "MPC",
+     "accession": "0001510295-26-000060",
+     "metric": "net_income",
+     "period": "2026-04-01..2026-06-30",
+     "press_release": 5538000000.0,
+     "xbrl": 5138000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    },
+    {
+     "ticker": "MPC",
+     "accession": "0001510295-26-000060",
+     "metric": "net_income",
+     "period": "2025-04-01..2025-06-30",
+     "press_release": 1610000000.0,
+     "xbrl": 1216000000,
+     "cause": "concept choice: equals ProfitLoss, not NetIncomeLoss"
+    }
+   ]
+  },
+  "validation_after_gate": {
+   "compared": 1539,
+   "matched": 1521,
+   "other_compared": 230,
+   "other_matched": 228,
+   "mismatches_restatement": 2,
+   "mismatches_unexplained": 18,
+   "unexplained_that_are_served": 0
+  },
+  "recheck_under_final_code": {
+   "companyfacts_refetched": 30,
+   "same_bytes": 29,
+   "rows_identical": 29,
+   "changed": {
+    "CPT": "6 annual RevenueFromContractWithCustomer rows removed (3 values: $3.45M FY2023, $7.14M FY2024, $12.97M FY2025, against Camden's ~$1.5B revenue); re-ingested offline"
+   },
+   "note": "FLEX's companyfacts changed at SEC between the two fetches; it rebuilds the same rows",
+   "raw_companyfacts_deleted_after_hashing": 30
+  },
+  "companies": [
+   {
+    "ticker": "FITB",
+    "name": "FIFTH THIRD BANCORP",
+    "sector": "Financials",
+    "sub_industry": "Regional Banks",
+    "cik": 35527,
+    "last8_quarters": {
+     "revenue": "-",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 231,
+    "filings": 102,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 219,
+    "release_bytes": 112886,
+    "spark_usd": 0.217191,
+    "common_name_resolves": true,
+    "probe": {
+     "status": null,
+     "reason": null,
+     "span": null,
+     "probe": "no quarterly revenue fact with a fiscal label"
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000035527.json",
+     "sha256": "157d008429b1041c042fa888b76be494fef2ad900a1c7e447ed46c2b9f0fd11c",
+     "bytes": 7321381,
+     "fetched_at": "2026-10-30T20:29:47.148466+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000035527.json",
+     "fetched_at": "2026-10-30T21:13:25.149065+00:00",
+     "sha256": "157d008429b1041c042fa888b76be494fef2ad900a1c7e447ed46c2b9f0fd11c",
+     "bytes": 7321381,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "C",
+    "name": "CITIGROUP INC",
+    "sector": "Financials",
+    "sub_industry": "Diversified Banks",
+    "cik": 831001,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 228,
+    "filings": 84,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 731,
+    "release_bytes": 385265,
+    "spark_usd": 0.219257,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Citigroup's revenue for Q4 FY2025 was $19.9 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000831001.json",
+     "sha256": "fd88265cca9cab4635aae7aa2014ec08f7679d04b882ee0bd16623c65c4f5660",
+     "bytes": 8994104,
+     "fetched_at": "2026-10-30T20:29:55.435733+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000831001.json",
+     "fetched_at": "2026-10-30T21:13:25.598878+00:00",
+     "sha256": "fd88265cca9cab4635aae7aa2014ec08f7679d04b882ee0bd16623c65c4f5660",
+     "bytes": 8994104,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "KEY",
+    "name": "KEYCORP /NEW/",
+    "sector": "Financials",
+    "sub_industry": "Regional Banks",
+    "cik": 91576,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 269,
+    "filings": 62,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 304,
+    "release_bytes": 159930,
+    "spark_usd": 0.233688,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "KeyCorp's revenue for Q2 FY2026 was $2.0 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000091576.json",
+     "sha256": "ad11e36acdce350bb071f03b8702994fe3cf780fd4be2f2afd554a827e014d96",
+     "bytes": 6309254,
+     "fetched_at": "2026-10-30T20:29:56.433382+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000091576.json",
+     "fetched_at": "2026-10-30T21:13:26.477029+00:00",
+     "sha256": "ad11e36acdce350bb071f03b8702994fe3cf780fd4be2f2afd554a827e014d96",
+     "bytes": 6309254,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "ARES",
+    "name": "Ares Management Corp",
+    "sector": "Financials",
+    "sub_industry": "Asset Management & Custody Banks",
+    "cik": 1176948,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "-"
+    },
+    "xbrl_facts": 148,
+    "filings": 49,
+    "release_files_kept": 0,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 0,
+    "release_bytes": 0,
+    "spark_usd": 0.0,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Ares Management's revenue for Q2 FY2026 was $1.3 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001176948.json",
+     "sha256": "8c091571a7b1a227c61280eca4fc86c2cf8b554133fbca993d8761ae40d2d955",
+     "bytes": 1455574,
+     "fetched_at": "2026-10-30T20:29:57.662261+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001176948.json",
+     "fetched_at": "2026-10-30T21:13:26.815933+00:00",
+     "sha256": "8c091571a7b1a227c61280eca4fc86c2cf8b554133fbca993d8761ae40d2d955",
+     "bytes": 1455574,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "MRSH",
+    "name": "MARSH & MCLENNAN COMPANIES, INC.",
+    "sector": "Financials",
+    "sub_industry": "Insurance Brokers",
+    "cik": 62709,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 282,
+    "filings": 52,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 252,
+    "release_bytes": 131427,
+    "spark_usd": 0.09747,
+    "common_name_resolves": false,
+    "probe": {
+     "status": "unverifiable",
+     "reason": "no_evidence",
+     "span": "MARSH & MCLENNAN COMPANIES, INC.'s revenue for Q3 FY2026 was $6.9 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000062709.json",
+     "sha256": "9da677119301ac5c7c61fd0e057dc108ea91eafb8fbb0006b2eec08e75aa9b7b",
+     "bytes": 5148078,
+     "fetched_at": "2026-10-30T20:29:59.313249+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000062709.json",
+     "fetched_at": "2026-10-30T21:13:27.691522+00:00",
+     "sha256": "9da677119301ac5c7c61fd0e057dc108ea91eafb8fbb0006b2eec08e75aa9b7b",
+     "bytes": 5148078,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "AFL",
+    "name": "AFLAC INC",
+    "sector": "Financials",
+    "sub_industry": "Life & Health Insurance",
+    "cik": 4977,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 258,
+    "filings": 40,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 102,
+    "release_bytes": 51638,
+    "spark_usd": 0.085602,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Aflac's revenue for Q2 FY2026 was $4.1 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000004977.json",
+     "sha256": "dacccab45a225cc1f9c4607c267ef07c055d45d701f129eca651a717ba3c6a39",
+     "bytes": 5286453,
+     "fetched_at": "2026-10-30T20:30:00.692142+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000004977.json",
+     "fetched_at": "2026-10-30T21:13:28.583402+00:00",
+     "sha256": "dacccab45a225cc1f9c4607c267ef07c055d45d701f129eca651a717ba3c6a39",
+     "bytes": 5286453,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "AON",
+    "name": "Aon plc",
+    "sector": "Financials",
+    "sub_industry": "Insurance Brokers",
+    "cik": 315293,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 309,
+    "filings": 63,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 268,
+    "release_bytes": 136790,
+    "spark_usd": 0.174795,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Aon plc's revenue for Q3 FY2026 was $4.1 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000315293.json",
+     "sha256": "cbdcab47913eabbf20e424ee80b89c9945da6de5aec22dc79d1079deb19c0e1e",
+     "bytes": 4801438,
+     "fetched_at": "2026-10-30T20:30:01.751225+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000315293.json",
+     "fetched_at": "2026-10-30T21:13:28.953456+00:00",
+     "sha256": "cbdcab47913eabbf20e424ee80b89c9945da6de5aec22dc79d1079deb19c0e1e",
+     "bytes": 4801438,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "BRO",
+    "name": "BROWN & BROWN, INC.",
+    "sector": "Financials",
+    "sub_industry": "Insurance Brokers",
+    "cik": 79282,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 268,
+    "filings": 61,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 96,
+    "release_bytes": 47895,
+    "spark_usd": 0.058972,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Brown & Brown's revenue for Q3 FY2026 was $1.7 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000079282.json",
+     "sha256": "18f7d48a25b7f5444a96d7e33052fc8ec7cf2205f47814270e42ba9b1d85819d",
+     "bytes": 3928268,
+     "fetched_at": "2026-10-30T20:30:02.607269+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000079282.json",
+     "fetched_at": "2026-10-30T21:13:29.438928+00:00",
+     "sha256": "18f7d48a25b7f5444a96d7e33052fc8ec7cf2205f47814270e42ba9b1d85819d",
+     "bytes": 3928268,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "IRM",
+    "name": "IRON MOUNTAIN INC",
+    "sector": "Real Estate",
+    "sub_industry": "Other Specialized REITs",
+    "cik": 1020569,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "-",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 257,
+    "filings": 45,
+    "release_files_kept": 0,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 0,
+    "release_bytes": 0,
+    "spark_usd": 0.0,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Iron Mountain's revenue for Q2 FY2026 was $2.0 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001020569.json",
+     "sha256": "5a66cd68a1ee07b57cbd8d3cd6d9fc33824ebf52220f64d1884edc8f9b180934",
+     "bytes": 4688101,
+     "fetched_at": "2026-10-30T20:30:03.757404+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001020569.json",
+     "fetched_at": "2026-10-30T21:13:29.961775+00:00",
+     "sha256": "5a66cd68a1ee07b57cbd8d3cd6d9fc33824ebf52220f64d1884edc8f9b180934",
+     "bytes": 4688101,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "DLR",
+    "name": "DIGITAL REALTY TRUST, INC.",
+    "sector": "Real Estate",
+    "sub_industry": "Data Center REITs",
+    "cik": 1297996,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 206,
+    "filings": 70,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 78,
+    "release_bytes": 40890,
+    "spark_usd": 0.092991,
+    "common_name_resolves": false,
+    "probe": {
+     "status": "unverifiable",
+     "reason": "no_evidence",
+     "span": "DIGITAL REALTY TRUST, INC.'s revenue for Q1 FY2026 was $1.6 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001297996.json",
+     "sha256": "1f5fcfd178c7d6e26d50f0d0419ed3fba35c68bffa838ed16ee33e436a47ed14",
+     "bytes": 3707577,
+     "fetched_at": "2026-10-30T20:30:04.680059+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001297996.json",
+     "fetched_at": "2026-10-30T21:13:30.452193+00:00",
+     "sha256": "1f5fcfd178c7d6e26d50f0d0419ed3fba35c68bffa838ed16ee33e436a47ed14",
+     "bytes": 3707577,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "PSA",
+    "name": "Public Storage",
+    "sector": "Real Estate",
+    "sub_industry": "Self-Storage REITs",
+    "cik": 1393311,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 266,
+    "filings": 76,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 129,
+    "release_bytes": 67208,
+    "spark_usd": 0.097923,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Public Storage's revenue for Q3 FY2026 was $1.4 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001393311.json",
+     "sha256": "7b3054c0215a4a4ed60a374a4e705cd741be29a3c54eeca6dc275b41f3e698ee",
+     "bytes": 3231367,
+     "fetched_at": "2026-10-30T20:30:06.132518+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001393311.json",
+     "fetched_at": "2026-10-30T21:13:31.020230+00:00",
+     "sha256": "7b3054c0215a4a4ed60a374a4e705cd741be29a3c54eeca6dc275b41f3e698ee",
+     "bytes": 3231367,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "CPT",
+    "name": "CAMDEN PROPERTY TRUST",
+    "sector": "Real Estate",
+    "sub_industry": "Multi-Family Residential REITs",
+    "cik": 906345,
+    "last8_quarters": {
+     "revenue": "-",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 191,
+    "filings": 45,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 42,
+    "release_bytes": 21822,
+    "spark_usd": 0.070482,
+    "common_name_resolves": true,
+    "probe": {
+     "status": null,
+     "reason": null,
+     "span": null,
+     "probe": "no quarterly revenue fact with a fiscal label"
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000906345.json",
+     "sha256": "12b3949a8b31f87519a7d77dd27a1f4e90eb9312933e2f9e5f5eb68ffc5ad974",
+     "bytes": 3770290,
+     "fetched_at": "2026-10-30T20:30:07.306936+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000906345.json",
+     "fetched_at": "2026-10-30T21:13:31.481023+00:00",
+     "sha256": "12b3949a8b31f87519a7d77dd27a1f4e90eb9312933e2f9e5f5eb68ffc5ad974",
+     "bytes": 3770290,
+     "same_bytes": true,
+     "rows_identical_under_final_code": false
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "ATO",
+    "name": "ATMOS ENERGY CORP",
+    "sector": "Utilities",
+    "sub_industry": "Gas Utilities",
+    "cik": 731802,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 269,
+    "filings": 55,
+    "release_files_kept": 0,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 0,
+    "release_bytes": 0,
+    "spark_usd": 0.0,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Atmos Energy's revenue for Q3 FY2026 was $879.1 million.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000731802.json",
+     "sha256": "ab9c90cd4e4c4de311ef879fbf83d7cf62e705d22ca5f00276635bfbee0407ca",
+     "bytes": 3515882,
+     "fetched_at": "2026-10-30T20:30:08.274519+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000731802.json",
+     "fetched_at": "2026-10-30T21:13:32.356088+00:00",
+     "sha256": "ab9c90cd4e4c4de311ef879fbf83d7cf62e705d22ca5f00276635bfbee0407ca",
+     "bytes": 3515882,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "WEC",
+    "name": "WEC ENERGY GROUP, INC.",
+    "sector": "Utilities",
+    "sub_industry": "Electric Utilities",
+    "cik": 783325,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "0/8",
+     "eps_diluted": "0/8"
+    },
+    "xbrl_facts": 239,
+    "filings": 94,
+    "release_files_kept": 3,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 76,
+    "release_bytes": 38839,
+    "spark_usd": 0.027774,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "WEC Energy Group's revenue for Q3 FY2026 was $2.3 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000783325.json",
+     "sha256": "18f39ec973320340abd7f155042f439bb9bf9a1d7f90faa1ce124ca1ec751367",
+     "bytes": 4266478,
+     "fetched_at": "2026-10-30T20:30:09.967014+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000783325.json",
+     "fetched_at": "2026-10-30T21:13:33.061751+00:00",
+     "sha256": "18f39ec973320340abd7f155042f439bb9bf9a1d7f90faa1ce124ca1ec751367",
+     "bytes": 4266478,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "PNW",
+    "name": "PINNACLE WEST CAPITAL CORP",
+    "sector": "Utilities",
+    "sub_industry": "Multi-Utilities",
+    "cik": 764622,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "-",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 221,
+    "filings": 88,
+    "release_files_kept": 0,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 0,
+    "release_bytes": 0,
+    "spark_usd": 0.0,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Pinnacle West Capital's revenue for Q2 FY2026 was $1.5 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000764622.json",
+     "sha256": "c39e4bea530496251b6c0c9b92f2c5214374b6dffe9d015b913577aeefab638f",
+     "bytes": 4127165,
+     "fetched_at": "2026-10-30T20:30:11.772563+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000764622.json",
+     "fetched_at": "2026-10-30T21:13:33.650524+00:00",
+     "sha256": "c39e4bea530496251b6c0c9b92f2c5214374b6dffe9d015b913577aeefab638f",
+     "bytes": 4127165,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "LNT",
+    "name": "ALLIANT ENERGY CORP",
+    "sector": "Utilities",
+    "sub_industry": "Electric Utilities",
+    "cik": 352541,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 260,
+    "filings": 61,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 206,
+    "release_bytes": 104234,
+    "spark_usd": 0.07413,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Alliant Energy's revenue for Q1 FY2026 was $1.2 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000352541.json",
+     "sha256": "8b7e672af6eb1e1576f77f9109d24ae8dc447d2efa347d1eddb598880dbcefe0",
+     "bytes": 3390539,
+     "fetched_at": "2026-10-30T20:30:12.618224+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000352541.json",
+     "fetched_at": "2026-10-30T21:13:34.219905+00:00",
+     "sha256": "8b7e672af6eb1e1576f77f9109d24ae8dc447d2efa347d1eddb598880dbcefe0",
+     "bytes": 3390539,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "URI",
+    "name": "UNITED RENTALS, INC.",
+    "sector": "Industrials",
+    "sub_industry": "Trading Companies & Distributors",
+    "cik": 1067701,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "8/8"
+    },
+    "xbrl_facts": 379,
+    "filings": 55,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 244,
+    "release_bytes": 127797,
+    "spark_usd": 0.098262,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "United Rentals's revenue for Q3 FY2026 was $4.9 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001067701.json",
+     "sha256": "79e2ce1d675e620c256486b2f00c9601f2ea80ee3943dc56cfe5ab6677794ccb",
+     "bytes": 2842057,
+     "fetched_at": "2026-10-30T20:30:13.750496+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001067701.json",
+     "fetched_at": "2026-10-30T21:13:34.541568+00:00",
+     "sha256": "79e2ce1d675e620c256486b2f00c9601f2ea80ee3943dc56cfe5ab6677794ccb",
+     "bytes": 2842057,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "AXON",
+    "name": "AXON ENTERPRISE, INC.",
+    "sector": "Industrials",
+    "sub_industry": "Aerospace & Defense",
+    "cik": 1069183,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 459,
+    "filings": 53,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 410,
+    "release_bytes": 211616,
+    "spark_usd": 0.175235,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Axon Enterprise's revenue for Q2 FY2026 was $904.4 million.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001069183.json",
+     "sha256": "be850abfbd01dde516d129120f79c82e782240fdcd24df1f27234e36c35f4d06",
+     "bytes": 3387723,
+     "fetched_at": "2026-10-30T20:30:14.742107+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001069183.json",
+     "fetched_at": "2026-10-30T21:13:35.295250+00:00",
+     "sha256": "be850abfbd01dde516d129120f79c82e782240fdcd24df1f27234e36c35f4d06",
+     "bytes": 3387723,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "FLEX",
+    "name": "FLEX LTD.",
+    "sector": "Information Technology",
+    "sub_industry": "Electronic Manufacturing Services",
+    "cik": 866374,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "7/8"
+    },
+    "xbrl_facts": 331,
+    "filings": 64,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 154,
+    "release_bytes": 77949,
+    "spark_usd": 0.071308,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Flex Ltd.'s revenue for Q1 FY2027 was $7.9 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000866374.json",
+     "sha256": "5d922c26a276de702c49be1ee681f27a4d46cc67e78204ca92c53508b0242f83",
+     "bytes": 3352507,
+     "fetched_at": "2026-10-30T20:30:15.862837+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000866374.json",
+     "fetched_at": "2026-10-30T21:13:35.642595+00:00",
+     "sha256": "67c6235672c998d42cf063b663ee8ab22f704e9a0526549cfdcbca45372e7524",
+     "bytes": 3399521,
+     "same_bytes": false,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "DELL",
+    "name": "Dell Technologies Inc.",
+    "sector": "Information Technology",
+    "sub_industry": "Technology Hardware, Storage & Peripherals",
+    "cik": 1571996,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "7/8"
+    },
+    "xbrl_facts": 416,
+    "filings": 78,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 319,
+    "release_bytes": 167497,
+    "spark_usd": 0.142213,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Dell Technologies's revenue for Q2 FY2027 was $47.0 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001571996.json",
+     "sha256": "6e91eb4af5e3e0bd3885e0d93f3590846e6f78a14c6403138d171f762fe9160d",
+     "bytes": 3564875,
+     "fetched_at": "2026-10-30T20:30:17.779509+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001571996.json",
+     "fetched_at": "2026-10-30T21:13:36.139438+00:00",
+     "sha256": "6e91eb4af5e3e0bd3885e0d93f3590846e6f78a14c6403138d171f762fe9160d",
+     "bytes": 3564875,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": [
+     "calendar: FY FY2024 is 2023-02-04..2023-05-05 in 0001571996-23-000019 but 2023-05-06..2023-08-04 in 0001571996-23-000032; kept the earlier filing",
+     "calendar: FY FY2024 is 2023-02-04..2023-05-05 in 0001571996-23-000019 but 2023-02-04..2024-02-02 in 0001571996-24-000036; kept the earlier filing",
+     "calendar: Q3 FY2024 2023-08-05..2023-11-03 does not fit fiscal year start 2023-02-04",
+     "calendar: Q4 FY2024 2023-11-04..2023-05-05 does not fit fiscal year start 2023-02-04"
+    ]
+   },
+   {
+    "ticker": "BAX",
+    "name": "BAXTER INTERNATIONAL INC",
+    "sector": "Health Care",
+    "sub_industry": "Health Care Equipment",
+    "cik": 10456,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "7/8"
+    },
+    "xbrl_facts": 426,
+    "filings": 68,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 326,
+    "release_bytes": 168832,
+    "spark_usd": 0.126465,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Baxter International's revenue for Q3 FY2026 was $3.0 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000010456.json",
+     "sha256": "85e24f003ab1700a62f81d0481b482becf2c74f1d6c56b26ee9561c274fd531c",
+     "bytes": 4771919,
+     "fetched_at": "2026-10-30T20:30:19.344695+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000010456.json",
+     "fetched_at": "2026-10-30T21:13:36.660755+00:00",
+     "sha256": "85e24f003ab1700a62f81d0481b482becf2c74f1d6c56b26ee9561c274fd531c",
+     "bytes": 4771919,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "COR",
+    "name": "Cencora, Inc.",
+    "sector": "Health Care",
+    "sub_industry": "Health Care Distributors",
+    "cik": 1140859,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 309,
+    "filings": 86,
+    "release_files_kept": 0,
+    "release_files_quarantined": 4,
+    "release_facts_kept": 0,
+    "release_bytes": 0,
+    "spark_usd": 0.115294,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Cencora's revenue for Q3 FY2026 was $84.8 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001140859.json",
+     "sha256": "3dc134357c7d7cb1acfe534c4f2086a82e61b4c9367c091507c66b9efb8c863c",
+     "bytes": 3903114,
+     "fetched_at": "2026-10-30T20:30:20.273590+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001140859.json",
+     "fetched_at": "2026-10-30T21:13:37.165708+00:00",
+     "sha256": "3dc134357c7d7cb1acfe534c4f2086a82e61b4c9367c091507c66b9efb8c863c",
+     "bytes": 3903114,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "TJX",
+    "name": "TJX COMPANIES INC /DE/",
+    "sector": "Consumer Discretionary",
+    "sub_industry": "Apparel Retail",
+    "cik": 109198,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 240,
+    "filings": 39,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 220,
+    "release_bytes": 114819,
+    "spark_usd": 0.071753,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "TJX Companies's revenue for Q2 FY2027 was $15.2 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000109198.json",
+     "sha256": "1b8f7be3fed954f682ae56ebe9c56a245f4df3640b92181a2d44d6e086a4905b",
+     "bytes": 3654400,
+     "fetched_at": "2026-10-30T20:30:21.249863+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000109198.json",
+     "fetched_at": "2026-10-30T21:13:37.670133+00:00",
+     "sha256": "1b8f7be3fed954f682ae56ebe9c56a245f4df3640b92181a2d44d6e086a4905b",
+     "bytes": 3654400,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "ORLY",
+    "name": "O REILLY AUTOMOTIVE INC",
+    "sector": "Consumer Discretionary",
+    "sub_industry": "Automotive Retail",
+    "cik": 898173,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 281,
+    "filings": 65,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 184,
+    "release_bytes": 97178,
+    "spark_usd": 0.061434,
+    "common_name_resolves": false,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "O REILLY AUTOMOTIVE INC's revenue for Q2 FY2026 was $4.9 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000898173.json",
+     "sha256": "29a5e7ccfb4acae0edb20b5c9f9bd6dd8c68ca08da883bb2ae34ad1c5e43ec77",
+     "bytes": 3026097,
+     "fetched_at": "2026-10-30T20:30:22.802010+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000898173.json",
+     "fetched_at": "2026-10-30T21:13:38.166747+00:00",
+     "sha256": "29a5e7ccfb4acae0edb20b5c9f9bd6dd8c68ca08da883bb2ae34ad1c5e43ec77",
+     "bytes": 3026097,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "CL",
+    "name": "COLGATE PALMOLIVE CO",
+    "sector": "Consumer Staples",
+    "sub_industry": "Household Products",
+    "cik": 21665,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 337,
+    "filings": 42,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 291,
+    "release_bytes": 151422,
+    "spark_usd": 0.081841,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Colgate-Palmolive's revenue for Q3 FY2026 was $5.4 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000021665.json",
+     "sha256": "334b53709b5e5d67c058029e4f6c27a8a6395c46b4e707b248e1f5b0b8fb49b2",
+     "bytes": 3623652,
+     "fetched_at": "2026-10-30T20:30:23.884678+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000021665.json",
+     "fetched_at": "2026-10-30T21:13:38.687410+00:00",
+     "sha256": "334b53709b5e5d67c058029e4f6c27a8a6395c46b4e707b248e1f5b0b8fb49b2",
+     "bytes": 3623652,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "PM",
+    "name": "Philip Morris International Inc.",
+    "sector": "Consumer Staples",
+    "sub_industry": "Tobacco",
+    "cik": 1413329,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 342,
+    "filings": 99,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 98,
+    "release_bytes": 51178,
+    "spark_usd": 0.095848,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Philip Morris International's revenue for Q3 FY2026 was $11.4 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001413329.json",
+     "sha256": "f58cd15a2dadd8202ce34e64dbba0b73ab8710032a0b52ea973cb241a6138709",
+     "bytes": 4194730,
+     "fetched_at": "2026-10-30T20:30:26.114921+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001413329.json",
+     "fetched_at": "2026-10-30T21:13:39.452587+00:00",
+     "sha256": "f58cd15a2dadd8202ce34e64dbba0b73ab8710032a0b52ea973cb241a6138709",
+     "bytes": 4194730,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "LIN",
+    "name": "LINDE PLC",
+    "sector": "Materials",
+    "sub_industry": "Industrial Gases",
+    "cik": 1707925,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 303,
+    "filings": 48,
+    "release_files_kept": 1,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 63,
+    "release_bytes": 31511,
+    "spark_usd": 0.034069,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Linde plc's revenue for Q3 FY2026 was $9.4 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001707925.json",
+     "sha256": "faeccf860ecf8f18af89c7f059191b0aa900d00645f1a0168b8511b1cbbe1b9f",
+     "bytes": 2275222,
+     "fetched_at": "2026-10-30T20:30:27.120825+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001707925.json",
+     "fetched_at": "2026-10-30T21:13:39.763737+00:00",
+     "sha256": "faeccf860ecf8f18af89c7f059191b0aa900d00645f1a0168b8511b1cbbe1b9f",
+     "bytes": 2275222,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "STLD",
+    "name": "STEEL DYNAMICS INC",
+    "sector": "Materials",
+    "sub_industry": "Steel",
+    "cik": 1022671,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 354,
+    "filings": 80,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 365,
+    "release_bytes": 189930,
+    "spark_usd": 0.068484,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Steel Dynamics's revenue for Q3 FY2026 was $6.5 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001022671.json",
+     "sha256": "7189ceb2a99f88caa8e5491d1a158fc26d01ba10a79db6a0f3ba5d578f57a9ef",
+     "bytes": 3310155,
+     "fetched_at": "2026-10-30T20:30:27.962620+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001022671.json",
+     "fetched_at": "2026-10-30T21:13:40.308030+00:00",
+     "sha256": "7189ceb2a99f88caa8e5491d1a158fc26d01ba10a79db6a0f3ba5d578f57a9ef",
+     "bytes": 3310155,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "MPC",
+    "name": "Marathon Petroleum Corp",
+    "sector": "Energy",
+    "sub_industry": "Oil & Gas Refining & Marketing",
+    "cik": 1510295,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 308,
+    "filings": 45,
+    "release_files_kept": 1,
+    "release_files_quarantined": 2,
+    "release_facts_kept": 38,
+    "release_bytes": 20139,
+    "spark_usd": 0.08481,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Marathon Petroleum's revenue for Q2 FY2026 was $52.0 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001510295.json",
+     "sha256": "959e8816abb188a8475cc8bdaca0862c7fbe5e3bba650152fcb4f83ea821d849",
+     "bytes": 4256473,
+     "fetched_at": "2026-10-30T20:30:29.516526+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001510295.json",
+     "fetched_at": "2026-10-30T21:13:41.310260+00:00",
+     "sha256": "959e8816abb188a8475cc8bdaca0862c7fbe5e3bba650152fcb4f83ea821d849",
+     "bytes": 4256473,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   },
+   {
+    "ticker": "EXE",
+    "name": "EXPAND ENERGY Corp",
+    "sector": "Energy",
+    "sub_industry": "Oil & Gas Exploration & Production",
+    "cik": 895126,
+    "last8_quarters": {
+     "revenue": "8/8",
+     "net_income": "8/8",
+     "eps_diluted": "6/8"
+    },
+    "xbrl_facts": 284,
+    "filings": 62,
+    "release_files_kept": 4,
+    "release_files_quarantined": 0,
+    "release_facts_kept": 147,
+    "release_bytes": 75976,
+    "spark_usd": 0.077476,
+    "common_name_resolves": true,
+    "probe": {
+     "status": "verified",
+     "reason": "match",
+     "span": "Expand Energy's revenue for Q3 FY2026 was $3.3 billion.",
+     "probe": null
+    },
+    "companyfacts_ingested": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000895126.json",
+     "sha256": "a7c52b7b1e343ac88b75eacf9ba4f51aab143bbc112301118deb9a6b66fa5dfc",
+     "bytes": 4891685,
+     "fetched_at": "2026-10-30T20:30:30.860000+00:00"
+    },
+    "companyfacts_recheck": {
+     "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000895126.json",
+     "fetched_at": "2026-10-30T21:13:41.448811+00:00",
+     "sha256": "a7c52b7b1e343ac88b75eacf9ba4f51aab143bbc112301118deb9a6b66fa5dfc",
+     "bytes": 4891685,
+     "same_bytes": true,
+     "rows_identical_under_final_code": true
+    },
+    "calendar_warnings": []
+   }
+  ]
+ },
+ "gates": {
+  "1_prior_rows_and_files": {
+   "tables": {
+    "companies": {
+     "before": 32,
+     "after": 62,
+     "old_missing_or_altered": 0,
+     "before_sha256": "4f8f3c08f827e1ec4af6bfc61ec3a899e648845a1a135c081cca6f6702780bec",
+     "after_sha256": "a647d97aa56f1cc6b6ca73fb79247c1f546b231f72e7334d509b3bfc17457639",
+     "kept_old_sha256": "4f8f3c08f827e1ec4af6bfc61ec3a899e648845a1a135c081cca6f6702780bec"
+    },
+    "filings": {
+     "before": 1775,
+     "after": 3706,
+     "old_missing_or_altered": 0,
+     "before_sha256": "f50ae49e6e1967384c45edf1d450ae9e6a8a10b4dde7cb3adea4d9913cd0ab12",
+     "after_sha256": "67bcdc7af08fd695d97e9e1c858fed8f2997ee81ec658ae1e50dda6958ef3a3b",
+     "kept_old_sha256": "f50ae49e6e1967384c45edf1d450ae9e6a8a10b4dde7cb3adea4d9913cd0ab12"
+    },
+    "facts": {
+     "before": 10231,
+     "after": 18902,
+     "old_missing_or_altered": 0,
+     "before_sha256": "1ec5d43f42db894e27909d5b590ff25dc4fb3d60bda0e8c456b767d58dfd2a6e",
+     "after_sha256": "8a82d48307ad164dbdf83058ce98d1b9db38b20823a840e4b16e3625a5ffabef",
+     "kept_old_sha256": "1ec5d43f42db894e27909d5b590ff25dc4fb3d60bda0e8c456b767d58dfd2a6e"
+    },
+    "fiscal_periods": {
+     "before": 532,
+     "after": 1020,
+     "old_missing_or_altered": 0,
+     "before_sha256": "c64fa0b3849b832ae3193d9c8c14c0276a14d04246b98c4c7d1b484a2c286507",
+     "after_sha256": "5e1b05b7d8818521ef1247d3159dcf7e6cba700343f4d11b6377382cb17806ff",
+     "kept_old_sha256": "c64fa0b3849b832ae3193d9c8c14c0276a14d04246b98c4c7d1b484a2c286507"
+    }
+   },
+   "pr_files": {
+    "before": 491,
+    "after": 689,
+    "changed_or_removed": []
+   },
+   "ok": true
+  },
+  "2_xbrl_gate": "applied to all 99 pilot files; see pilot.xbrl_gate",
+  "3_dev_replay": "693 claims: 0 status changes; exactly the 15 listed reason changes; nothing else",
+  "4_snapshot_scratch": {
+   "bytes": 19559983,
+   "mib": 18.65,
+   "committed_limit_mib": 16,
+   "data_snapshot_untouched": true,
+   "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0 unchanged",
+   "recordings_replay": "slide, 10-K quote and Private identical",
+   "lookup_keys": 145,
+   "lookup_keys_naming_two_companies": 0,
+   "word_tickers_resolving": []
+  },
+  "5_reproductions": {
+   "qa_reproduce": "200/200 through the archive",
+   "qualifier_robustness": "identical"
+  },
+  "6_pytest": "1738 passed",
+  "7_probes": {
+   "verified_at_now": 26,
+   "probed": 28,
+   "not_probed": {
+    "FITB": "no quarterly revenue fact with a fiscal label",
+    "CPT": "no quarterly revenue fact with a fiscal label"
+   },
+   "lookahead_KEY": [
+    {
+     "point": "earliest receipt - 1 s",
+     "as_of": "2026-07-21T10:31:08Z",
+     "status": "wrong",
+     "reason": "look_ahead",
+     "explanation": "KeyCorp's revenue for Q2 2026 (quarter ended Jun 30, 2026) wasn't public until its 8-K earnings release (0000091576-26-000017) was accepted at 2026-07-21 10:31:09 UTC, after the as-of time 2026-07-21 10:31:08 UTC."
+    },
+    {
+     "point": "earliest receipt",
+     "as_of": "2026-07-21T10:31:09Z",
+     "status": "verified",
+     "reason": "match",
+     "explanation": "Matches KeyCorp's 8-K press release: revenue was $1.964 billion for Q2 2026 (quarter ended Jun 30, 2026)."
+    }
+   ]
+  }
+ },
+ "extrapolation_to_full_list": {
+  "remaining_companies": 437,
+  "remaining_by_sector": {
+   "Industrials": 80,
+   "Health Care": 55,
+   "Information Technology": 60,
+   "Utilities": 27,
+   "Materials": 22,
+   "Consumer Discretionary": 41,
+   "Real Estate": 26,
+   "Financials": 64,
+   "Consumer Staples": 29,
+   "Energy": 18,
+   "Communication Services": 15
+  },
+  "spark_usd_remaining": {
+   "mean_per_company": 40.13,
+   "sector_weighted": 44.35,
+   "every_quarter_with_tables": 48.64,
+   "stress_every_file_at_p90": 92.03
+  },
+  "ledger_usd_projected": {
+   "sector_weighted": 53.78,
+   "every_quarter_with_tables": 58.07
+  },
+  "guard_usd": 70,
+  "guard_rule_for_phase_b": "dry-run each batch; compare ledger + 1.15 x estimate with $70 (the pilot cost 1.14 x its estimate)",
+  "snapshot": {
+   "full_list_companies": 499,
+   "measured_bytes_per_company": {
+    "facts.sqlite": 110592,
+    "pr_facts": 92822,
+    "filing_texts": 0
+   },
+   "covered_32_bytes_per_company": {
+    "facts.sqlite": 120192,
+    "pr_facts": 280114
+   },
+   "pr_facts_note": "the pilot maps 4 release quarters per company (82.5% with parseable tables); the 32 covered companies hold about 8 quarters of releases, hence 280 KB against 93 KB per company",
+   "projected_mb_full_list": {
+    "facts.sqlite": 55.5,
+    "pr_facts": 52.3,
+    "filing_texts": 0.52,
+    "other": 0.13
+   },
+   "facts_sqlite_layouts": {
+    "as_built": {
+     "what": "today's copy of data/facts.sqlite",
+     "bytes_32_covered": 3846144,
+     "bytes_62_companies": 7163904,
+     "bytes_per_company_covered": 120192,
+     "bytes_per_company_pilot": 110592,
+     "mb_full_list": 55.5,
+     "within_45_mb": false,
+     "snapshot_total_mb": 108.5,
+     "snapshot_total_mib": 103.4
+    },
+    "served_rows_only": {
+     "what": "drop the ytd and ttm rows, which Store never reads (SERVED_KINDS)",
+     "bytes_32_covered": 2891776,
+     "bytes_62_companies": 5472256,
+     "bytes_per_company_covered": 90368,
+     "bytes_per_company_pilot": 86016,
+     "mb_full_list": 43.1,
+     "within_45_mb": true,
+     "snapshot_total_mb": 96.0,
+     "snapshot_total_mib": 91.6
+    },
+    "compact_view_all_rows": {
+     "what": "facts_compact without ticker, form, accepted_at and url, which equal the filing's and company's values on all 18,902 rows, plus a view named facts that joins them back",
+     "bytes_32_covered": 2572288,
+     "bytes_62_companies": 4833280,
+     "bytes_per_company_covered": 80384,
+     "bytes_per_company_pilot": 75366,
+     "mb_full_list": 37.8,
+     "within_45_mb": true,
+     "snapshot_total_mb": 90.7,
+     "snapshot_total_mib": 86.5
+    },
+    "compact_view_served_rows": {
+     "what": "both",
+     "bytes_32_covered": 2011136,
+     "bytes_62_companies": 3829760,
+     "bytes_per_company_covered": 62848,
+     "bytes_per_company_pilot": 60621,
+     "mb_full_list": 30.3,
+     "within_45_mb": true,
+     "snapshot_total_mb": 83.3,
+     "snapshot_total_mib": 79.4
+    }
+   },
+   "compact_view_checks": "on copies of both snapshots the view returns every source row exactly; on the 62-company copy all 806 Store.facts() calls, the qualifier grid and the 30 pilot probes are identical; median query 0.22 ms against 0.21 ms",
+   "recommendation": "compact_view_all_rows (lossless, 37.8 MB); add served_rows_only on top only if more room is needed",
+   "max_bytes_needed_mib": {
+    "as_built": 103.4,
+    "compact_view_all_rows": 86.5
+   },
+   "suggested_max_bytes_mib": 112,
+   "github_and_vercel": "GitHub warns at 50 MB per file and blocks at 100 MB; Vercel builds from a plain commit (no LFS) and bundles /data/snapshot; every rebuild commits a full new facts.sqlite, so one public release of the full snapshot"
+  },
+  "time": {
+   "measured_per_30_companies_s": {
+    "xbrl_fetch_s": 44.6,
+    "release_dry_run_s": 138.9,
+    "release_mapping_s_concurrency_4": 369.6,
+    "db_ingest_s": 1.2,
+    "gates_s": 81
+   },
+   "processing_hours_concurrency_4": 2.2,
+   "with_gates_after_9_batches_hours": 2.4
+  },
+  "disk_per_company_mb": {
+   "companyfacts_deleted_after_hashing": 4.2,
+   "exhibits_kept_in_cache": 3.53,
+   "exhibits_full_list_gb": 1.54,
+   "free_gib_now": 2.8
+  }
+ }
+}

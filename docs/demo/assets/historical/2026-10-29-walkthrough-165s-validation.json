@@ -1,0 +1,89 @@
+{
+  "status": "passed",
+  "video_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio"
+      }
+    ],
+    "format": {
+      "duration": "165.000000",
+      "size": "12443559"
+    }
+  },
+  "gif_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "gif",
+        "codec_type": "video",
+        "width": 960,
+        "height": 540
+      }
+    ],
+    "format": {
+      "duration": "20.000000",
+      "size": "1664486"
+    }
+  },
+  "full_video_decode": "passed",
+  "full_gif_decode": "passed",
+  "asset_sha256": {
+    "receipts-demo.mp4": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
+    "receipts-demo.gif": "89151e34b21dae8470442f08e4043c425f6612e5a620888fcab67dac2ed592a5",
+    "receipts-demo.en.srt": "22ff8023a91d3b3198fbbd402493f3d21d417776231c6a5dcb643258d7d56a65",
+    "receipts-demo.en.vtt": "7ddeb84e533a9570852435e16f8ac0debe9d96bdecdde0fe13e4c3420ca3ecca"
+  },
+  "caption_cues": 18,
+  "caption_timing": "SRT/VTT texts and times match narration; contiguous within 165 seconds",
+  "audio_mean_db": -16.8,
+  "audio_peak_db": -1.9,
+  "ask_tab_visible_s": 8.99,
+  "product_footage": "Continuous actual browser recording; no internal cuts or screenshot substitution",
+  "gif": {
+    "source": "receipts-demo.mp4",
+    "start_s": 8,
+    "end_s": 28,
+    "duration_s": 20,
+    "fps": 10,
+    "resolution": [
+      960,
+      540
+    ],
+    "speed": 1,
+    "audio": false,
+    "internal_cuts": false,
+    "content": "Actual Check click followed by the growth receipt"
+  },
+  "new_recording_provider_calls": 0,
+  "new_recording_provider_spend_usd": 0,
+  "fresh_fix_source_cost_usd": 0.01108,
+  "narration": {
+    "model": "hexgrad/Kokoro-82M v1.0",
+    "voice": "af_heart",
+    "runtime": "kokoro-onnx 0.6.1",
+    "execution": "local CPU",
+    "model_license": "Apache-2.0",
+    "runtime_license": "MIT",
+    "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "new_provider_calls": 0,
+    "human_listening_approval": false
+  },
+  "public_media": {
+    "repository_mp4_and_vtt_copies_match": true,
+    "deployed_new_export_acceptance": "Not performed by this export; recorded separately after deployment"
+  },
+  "review_scope": "Automated decode/hash/caption/audio checks plus agent contact-sheet/key-frame review; no human listening or editorial approval claimed",
+  "privacy_review": "Only repository synthetic examples and public SEC facts; no participant draft, secret or account page"
+}

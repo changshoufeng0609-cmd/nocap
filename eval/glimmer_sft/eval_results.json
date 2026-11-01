@@ -1,0 +1,686 @@
+{
+ "test_passages": 70,
+ "paired_passages": 70,
+ "paired_by_corpus": {
+  "gold": 10,
+  "v0": 42,
+  "trap_v1": 18
+ },
+ "unpaired": [],
+ "schema": {
+  "teacher": {
+   "passages": 70,
+   "empty": 0,
+   "pure_json_strict": 70,
+   "strict_after_repair": 70,
+   "repairs": {},
+   "lenient_unusable": 0,
+   "lenient_status": {
+    "ok": 70
+   },
+   "claims_rejected": 0,
+   "raw_claims": 155,
+   "built_claims": 160,
+   "claims_dropped_by_code": 0
+  },
+  "base": {
+   "passages": 70,
+   "empty": 0,
+   "pure_json_strict": 70,
+   "strict_after_repair": 70,
+   "repairs": {},
+   "lenient_unusable": 0,
+   "lenient_status": {
+    "ok": 70
+   },
+   "claims_rejected": 0,
+   "raw_claims": 154,
+   "built_claims": 158,
+   "claims_dropped_by_code": 0,
+   "unterminated": 0,
+   "other_recipients": 0,
+   "completion_tokens": {
+    "sum": 50735,
+    "mean": 724.8,
+    "median": 707.0,
+    "p90": 1103,
+    "max": 1427
+   },
+   "visible_tokens": {
+    "sum": 14429,
+    "mean": 206.1,
+    "median": 195.5,
+    "p90": 315,
+    "max": 588
+   },
+   "reasoning_tokens_approx": {
+    "sum": 35606,
+    "mean": 508.7,
+    "median": 481.5,
+    "p90": 803,
+    "max": 1102
+   }
+  },
+  "tuned": {
+   "passages": 70,
+   "empty": 0,
+   "pure_json_strict": 70,
+   "strict_after_repair": 70,
+   "repairs": {},
+   "lenient_unusable": 0,
+   "lenient_status": {
+    "ok": 70
+   },
+   "claims_rejected": 0,
+   "raw_claims": 154,
+   "built_claims": 158,
+   "claims_dropped_by_code": 0,
+   "unterminated": 0,
+   "other_recipients": 0,
+   "completion_tokens": {
+    "sum": 14216,
+    "mean": 203.1,
+    "median": 188.0,
+    "p90": 303,
+    "max": 563
+   },
+   "visible_tokens": {
+    "sum": 13936,
+    "mean": 199.1,
+    "median": 184.0,
+    "p90": 299,
+    "max": 559
+   },
+   "reasoning_tokens_approx": {
+    "sum": 0,
+    "mean": 0,
+    "median": 0.0,
+    "p90": 0,
+    "max": 0
+   }
+  }
+ },
+ "gold": {
+  "gold_passages_paired": 10,
+  "gold_claims": 27,
+  "teacher": {
+   "shipped_claims": 28,
+   "strict_matched": 27,
+   "value_matched": 27,
+   "label_errors": 0,
+   "recall": 1.0,
+   "precision": 0.9643,
+   "unflagged_errors": 0,
+   "verdicts": {
+    "verified": 12,
+    "unverifiable": 16
+   }
+  },
+  "base": {
+   "shipped_claims": 27,
+   "strict_matched": 27,
+   "value_matched": 27,
+   "label_errors": 0,
+   "recall": 1.0,
+   "precision": 1.0,
+   "unflagged_errors": 0,
+   "verdicts": {
+    "verified": 12,
+    "unverifiable": 15
+   }
+  },
+  "tuned": {
+   "shipped_claims": 27,
+   "strict_matched": 27,
+   "value_matched": 27,
+   "label_errors": 0,
+   "recall": 1.0,
+   "precision": 1.0,
+   "unflagged_errors": 0,
+   "verdicts": {
+    "verified": 12,
+    "unverifiable": 15
+   }
+  }
+ },
+ "teacher_relative": {
+  "base": {
+   "teacher_claims": 160,
+   "aligned": 156,
+   "missing": 4,
+   "teacher_wrong_missing": 0,
+   "eq_all4": 88,
+   "status_agree": 154,
+   "status_reason_agree": 153,
+   "teacher_wrong_model_verified": 0,
+   "teacher_verified_model_wrong": 0,
+   "extra": 2,
+   "extra_verified": 0,
+   "extra_wrong": 0,
+   "eq_metric": 153,
+   "eq_value_text": 156,
+   "eq_period_text": 91,
+   "eq_basis": 155,
+   "eq_period_type": 147,
+   "eq_comparison": 153,
+   "eq_segment": 154,
+   "eq_entity": 120,
+   "eq_forward_looking": 155,
+   "eq_unit": 156,
+   "eq_scale": 156,
+   "eq_value": 156,
+   "teacher_verified": 86,
+   "teacher_unverifiable": 32,
+   "teacher_wrong": 38,
+   "passages_exact_claim_set": 39,
+   "passages_verdict_equivalent": 66
+  },
+  "tuned": {
+   "teacher_claims": 160,
+   "aligned": 157,
+   "missing": 3,
+   "teacher_wrong_missing": 0,
+   "eq_all4": 123,
+   "status_agree": 157,
+   "status_reason_agree": 156,
+   "teacher_wrong_model_verified": 0,
+   "teacher_verified_model_wrong": 0,
+   "extra": 1,
+   "extra_verified": 0,
+   "extra_wrong": 0,
+   "eq_metric": 154,
+   "eq_value_text": 157,
+   "eq_period_text": 127,
+   "eq_basis": 156,
+   "eq_period_type": 146,
+   "eq_comparison": 154,
+   "eq_segment": 155,
+   "eq_entity": 125,
+   "eq_forward_looking": 156,
+   "eq_unit": 157,
+   "eq_scale": 157,
+   "eq_value": 157,
+   "teacher_verified": 86,
+   "teacher_unverifiable": 33,
+   "teacher_wrong": 38,
+   "passages_exact_claim_set": 51,
+   "passages_verdict_equivalent": 68
+  },
+  "teacher": {
+   "teacher_claims": 160,
+   "aligned": 160,
+   "missing": 0,
+   "teacher_wrong_missing": 0,
+   "eq_all4": 160,
+   "status_agree": 160,
+   "status_reason_agree": 160,
+   "teacher_wrong_model_verified": 0,
+   "teacher_verified_model_wrong": 0,
+   "extra": 0,
+   "extra_verified": 0,
+   "extra_wrong": 0,
+   "eq_metric": 160,
+   "eq_value_text": 160,
+   "eq_period_text": 160,
+   "eq_basis": 160,
+   "eq_period_type": 160,
+   "eq_comparison": 160,
+   "eq_segment": 160,
+   "eq_entity": 160,
+   "eq_forward_looking": 160,
+   "eq_unit": 160,
+   "eq_scale": 160,
+   "eq_value": 160,
+   "teacher_verified": 86,
+   "teacher_unverifiable": 36,
+   "teacher_wrong": 38,
+   "passages_exact_claim_set": 70,
+   "passages_verdict_equivalent": 70
+  }
+ },
+ "items": {
+  "v0": {
+   "items": 45,
+   "teacher": {
+    "per_mutator": {
+     "basis": {
+      "n": 1,
+      "caught": 1,
+      "reason_ok": 1,
+      "reason_any_status": 1,
+      "any_affected_wrong": 1
+     },
+     "period": {
+      "n": 5,
+      "caught": 5,
+      "reason_ok": 5,
+      "reason_any_status": 5,
+      "any_affected_wrong": 5
+     },
+     "entity": {
+      "n": 6,
+      "caught": 6,
+      "any_affected_wrong": 6,
+      "reason_ok": 3,
+      "reason_any_status": 3
+     },
+     "scale": {
+      "n": 4,
+      "caught": 3,
+      "reason_ok": 3,
+      "reason_any_status": 3,
+      "any_affected_wrong": 3,
+      "target_unverifiable": 1
+     },
+     "value": {
+      "n": 4,
+      "caught": 4,
+      "reason_ok": 4,
+      "reason_any_status": 4,
+      "any_affected_wrong": 4
+     },
+     "look_ahead": {
+      "n": 3,
+      "caught": 3,
+      "reason_ok": 3,
+      "reason_any_status": 3,
+      "any_affected_wrong": 3
+     }
+    },
+    "originals": {
+     "n": 20,
+     "claims": 44,
+     "verified": 38,
+     "wrong": 0,
+     "unverifiable": 6,
+     "approximate": 0
+    },
+    "controls": {
+     "n": 2,
+     "claims": 3,
+     "verified": 0,
+     "wrong": 0,
+     "unverifiable": 3,
+     "approximate": 0,
+     "fl_all_unverifiable": 2,
+     "fl_reason_seen": 2
+    }
+   },
+   "base": {
+    "per_mutator": {
+     "basis": {
+      "n": 1,
+      "caught": 1,
+      "reason_ok": 1,
+      "reason_any_status": 1,
+      "any_affected_wrong": 1
+     },
+     "period": {
+      "n": 5,
+      "caught": 5,
+      "reason_ok": 5,
+      "reason_any_status": 5,
+      "any_affected_wrong": 5
+     },
+     "entity": {
+      "n": 6,
+      "caught": 6,
+      "any_affected_wrong": 6,
+      "reason_ok": 3,
+      "reason_any_status": 3
+     },
+     "scale": {
+      "n": 4,
+      "caught": 3,
+      "reason_ok": 3,
+      "reason_any_status": 3,
+      "any_affected_wrong": 3,
+      "target_unverifiable": 1
+     },
+     "value": {
+      "n": 4,
+      "caught": 4,
+      "reason_ok": 4,
+      "reason_any_status": 4,
+      "any_affected_wrong": 4
+     },
+     "look_ahead": {
+      "n": 3,
+      "caught": 3,
+      "reason_ok": 3,
+      "reason_any_status": 3,
+      "any_affected_wrong": 3
+     }
+    },
+    "originals": {
+     "n": 20,
+     "claims": 44,
+     "verified": 38,
+     "wrong": 0,
+     "unverifiable": 6,
+     "approximate": 0
+    },
+    "controls": {
+     "n": 2,
+     "claims": 2,
+     "verified": 0,
+     "wrong": 0,
+     "unverifiable": 2,
+     "approximate": 0,
+     "fl_all_unverifiable": 2,
+     "fl_reason_seen": 2
+    }
+   },
+   "tuned": {
+    "per_mutator": {
+     "basis": {
+      "n": 1,
+      "caught": 1,
+      "reason_ok": 1,
+      "reason_any_status": 1,
+      "any_affected_wrong": 1
+     },
+     "period": {
+      "n": 5,
+      "caught": 5,
+      "reason_ok": 5,
+      "reason_any_status": 5,
+      "any_affected_wrong": 5
+     },
+     "entity": {
+      "n": 6,
+      "caught": 6,
+      "any_affected_wrong": 6,
+      "reason_ok": 3,
+      "reason_any_status": 3
+     },
+     "scale": {
+      "n": 4,
+      "caught": 3,
+      "reason_ok": 3,
+      "reason_any_status": 3,
+      "any_affected_wrong": 3,
+      "target_unverifiable": 1
+     },
+     "value": {
+      "n": 4,
+      "caught": 4,
+      "reason_ok": 4,
+      "reason_any_status": 4,
+      "any_affected_wrong": 4
+     },
+     "look_ahead": {
+      "n": 3,
+      "caught": 3,
+      "reason_ok": 3,
+      "reason_any_status": 3,
+      "any_affected_wrong": 3
+     }
+    },
+    "originals": {
+     "n": 20,
+     "claims": 44,
+     "verified": 38,
+     "wrong": 0,
+     "unverifiable": 6,
+     "approximate": 0
+    },
+    "controls": {
+     "n": 2,
+     "claims": 2,
+     "verified": 0,
+     "wrong": 0,
+     "unverifiable": 2,
+     "approximate": 0,
+     "fl_all_unverifiable": 2,
+     "fl_reason_seen": 2
+    }
+   }
+  },
+  "trap_v1": {
+   "items": 4,
+   "teacher": {
+    "per_type": {
+     "value": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "basis": {
+      "n": 1,
+      "planted": 1,
+      "caught": 1,
+      "reason_ok": 1
+     },
+     "look_ahead": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "period": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "scale": {
+      "n": 3,
+      "planted": 3,
+      "caught": 3,
+      "reason_ok": 3
+     },
+     "entity": {
+      "n": 1,
+      "planted": 1,
+      "caught": 1,
+      "reason_ok": 1
+     }
+    },
+    "true_claims": {
+     "true_n": 25,
+     "true_verified": 25,
+     "fl_n": 6,
+     "fl_unverifiable": 6,
+     "extra_claims": 0,
+     "extra_wrong": 0
+    },
+    "sentences": {
+     "true_sentences": 14
+    },
+    "claims": {
+     "items": 4,
+     "claims": 42,
+     "verified": 25,
+     "wrong": 11,
+     "unverifiable": 6
+    }
+   },
+   "base": {
+    "per_type": {
+     "value": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "basis": {
+      "n": 1,
+      "planted": 1,
+      "caught": 1,
+      "reason_ok": 1
+     },
+     "look_ahead": {
+      "n": 2,
+      "planted": 2,
+      "caught": 1,
+      "reason_ok": 1,
+      "target_unverifiable": 1
+     },
+     "period": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "scale": {
+      "n": 3,
+      "planted": 3,
+      "caught": 3,
+      "reason_ok": 3
+     },
+     "entity": {
+      "n": 1,
+      "planted": 1,
+      "caught": 1,
+      "reason_ok": 1
+     }
+    },
+    "true_claims": {
+     "true_n": 25,
+     "true_verified": 24,
+     "fl_n": 6,
+     "fl_unverifiable": 6,
+     "extra_claims": 0,
+     "extra_wrong": 0,
+     "true_unverifiable": 1
+    },
+    "sentences": {
+     "true_sentences": 14
+    },
+    "claims": {
+     "items": 4,
+     "claims": 42,
+     "verified": 24,
+     "wrong": 10,
+     "unverifiable": 8
+    }
+   },
+   "tuned": {
+    "per_type": {
+     "value": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "basis": {
+      "n": 1,
+      "planted": 1,
+      "caught": 1,
+      "reason_ok": 1
+     },
+     "look_ahead": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "period": {
+      "n": 2,
+      "planted": 2,
+      "caught": 2,
+      "reason_ok": 2
+     },
+     "scale": {
+      "n": 3,
+      "planted": 3,
+      "caught": 3,
+      "reason_ok": 3
+     },
+     "entity": {
+      "n": 1,
+      "planted": 1,
+      "caught": 1,
+      "reason_ok": 1
+     }
+    },
+    "true_claims": {
+     "true_n": 25,
+     "true_verified": 25,
+     "fl_n": 6,
+     "fl_unverifiable": 6,
+     "extra_claims": 0,
+     "extra_wrong": 0
+    },
+    "sentences": {
+     "true_sentences": 14
+    },
+    "claims": {
+     "items": 4,
+     "claims": 42,
+     "verified": 25,
+     "wrong": 11,
+     "unverifiable": 6
+    }
+   }
+  }
+ },
+ "paired_tests": {
+  "gold_claim_strict_match": {
+   "n": 27,
+   "base_true": 27,
+   "tuned_true": 27,
+   "only_tuned": 0,
+   "only_base": 0,
+   "p_value": 1.0
+  },
+  "passage_exact_claim_set_vs_teacher": {
+   "n": 70,
+   "base_true": 39,
+   "tuned_true": 51,
+   "only_tuned": 18,
+   "only_base": 6,
+   "p_value": 0.022655844688415527
+  },
+  "passage_verdict_equivalent_vs_teacher": {
+   "n": 70,
+   "base_true": 66,
+   "tuned_true": 68,
+   "only_tuned": 2,
+   "only_base": 0,
+   "p_value": 0.5
+  },
+  "passage_pure_json_strict": {
+   "n": 70,
+   "base_true": 70,
+   "tuned_true": 70,
+   "only_tuned": 0,
+   "only_base": 0,
+   "p_value": 1.0
+  },
+  "seeded_error_caught": {
+   "n": 34,
+   "base_true": 32,
+   "tuned_true": 33,
+   "only_tuned": 1,
+   "only_base": 0,
+   "p_value": 1.0
+  }
+ },
+ "cost": {
+  "sampled_requests": 140,
+  "failed_requests": 0,
+  "sampling_usd_estimate": 0.469983,
+  "cost_basis": {
+   "provider cached-token counts": 140
+  }
+ },
+ "source_sha256": {
+  "receipts/extract.py": "287bd9d0f45a2d2124e648cf3504e18847d1441598ee7866ab40131bf2827376",
+  "receipts/verify.py": "efb38db134bdeb376a5de82e0849b7cfaf6c5572a5de6428c8b2095845eab5b4",
+  "receipts/stream.py": "ebcd714e36442b242a5a129f9e2524fd96ed19398fec0efa40205f9a2904788e",
+  "receipts/check.py": "6ffde5bf070b120cfee9ab71f7a6d389685dfeffbaa1771383b4383b9ebcef8b",
+  "receipts/types.py": "a5f400c1691c5e48492db45c966678e17f9a1153a4f43aa3b76891e888ce921e",
+  "receipts/periods.py": "74a7db335722b28c6d515f15771764c68eafb713ab5a06eaa0ea6393c5dedf82",
+  "receipts/store.py": "3f621e7643eb501122efbe60ec0d31748127560a918cd761451119a172d6ae8a",
+  "eval/bench_models.py": "61ec5f8493db929b8aba675142045949369792d24cfbf969e5a16baf19abf799",
+  "eval/eval.py": "a841f25a956201c8b74e4fb31bc16974daeb25fa7f0a198fb238cd0a8bdcc504",
+  "eval/corpus/v0_dev.jsonl": "08a1b772921acbf6b91c05b21be17fbd09567ebaf02f74057c7f5b3b0ba2a4f4",
+  "spikes/inputs/gold_text.txt": "6eb8cb0e0eefd0968a17239861f5094820185bf0065e541de13c997a7456f602",
+  "spikes/inputs/gold_claims.json": "489ff2c278c632c619fdb56e67a8abbd2d577c673b8d19f3135f56ed7b5a79a0",
+  "eval/glimmer_sft/build_data.py": "04f5af5ee7402084fddfe565fc73cf6ea3a0c2c09e154c80b751fdd2f5794b96",
+  "eval/glimmer_sft/evaluate.py": "c048f507e974ff062ff6aca2e35b953894627ce190d061b9e88059416cd4f8eb"
+ }
+}

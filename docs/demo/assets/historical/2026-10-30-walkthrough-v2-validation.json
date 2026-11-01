@@ -1,0 +1,117 @@
+{
+  "status": "passed",
+  "video_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "25/1"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "168.680000",
+      "size": "35000399"
+    }
+  },
+  "gif_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "gif",
+        "codec_type": "video",
+        "width": 960,
+        "height": 540,
+        "r_frame_rate": "10/1"
+      }
+    ],
+    "format": {
+      "duration": "20.000000",
+      "size": "4980489"
+    }
+  },
+  "full_video_decode": "passed",
+  "full_gif_decode": "passed",
+  "asset_sha256": {
+    "receipts-demo.mp4": "fec139b4bbc12cc0271f3654f0055d7f4eca90db0535b69e8bede79327c00231",
+    "receipts-demo.gif": "ebaf562e6356da90c2859e2b8e9c4f0d4ef64892384782f52bb54fcfe1b4e1af",
+    "receipts-demo.en.srt": "40518e3e6f2839530ea3f9ef33dfdf68e2b4987109799d92bb28a3afe0e14d61",
+    "receipts-demo.en.vtt": "533dc850ef82c7263479bee6b12d4b61377074005c46cc324699608793050d1b"
+  },
+  "caption_cues": 27,
+  "caption_timing": "SRT/VTT texts and times match the manifest captions",
+  "audio_integrated_lufs": -13.9,
+  "audio_true_peak_dbfs": -1.1,
+  "gif": {
+    "source": "receipts-demo.mp4",
+    "start_s": 15.55,
+    "end_s": 35.55,
+    "duration_s": 20.0,
+    "fps": 10,
+    "resolution": [
+      960,
+      540
+    ],
+    "speed": 1,
+    "audio": false,
+    "shots": [
+      "check",
+      "tiles",
+      "receipt"
+    ],
+    "content": "Check click, verdict tiles and the growth receipt, at original speed with burned-in captions"
+  },
+  "narration": {
+    "model": "hexgrad/Kokoro-82M v1.0",
+    "voice": "am_fenrir",
+    "speed": 1.0,
+    "runtime": "kokoro-onnx 0.6.1",
+    "execution": "local CPU",
+    "model_license": "Apache-2.0",
+    "runtime_license": "MIT",
+    "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "new_provider_calls": 0,
+    "loudness_target": "two-pass loudnorm, I=-14 LUFS, TP=-1.5 dBTP",
+    "loudnorm_first_pass": {
+      "input_i": "-22.41",
+      "input_tp": "-0.31",
+      "input_lra": "5.30",
+      "input_thresh": "-32.77",
+      "output_i": "-17.03",
+      "output_tp": "-1.50",
+      "output_lra": "4.50",
+      "output_thresh": "-27.30",
+      "normalization_type": "dynamic",
+      "target_offset": "3.03"
+    },
+    "human_listening_approval": false
+  },
+  "voice_selection": {
+    "chosen": "am_fenrir",
+    "ranking_by_mean_wer": [
+      "am_fenrir",
+      "am_michael",
+      "am_puck"
+    ]
+  },
+  "public_media": {
+    "repository_mp4_and_vtt_copies_match": true,
+    "deployed_acceptance": "Not performed by this export; a deployment must be checked separately"
+  },
+  "new_recording_provider_calls": 0,
+  "new_recording_provider_spend_usd": 0,
+  "review_scope": "Automated decode/hash/caption/loudness checks plus agent contact-sheet and key-frame review; no human listening or editorial approval claimed",
+  "privacy_review": "Only repository examples, public SEC filings and recorded public-document runs; no participant draft, secret, account page or terminal"
+}

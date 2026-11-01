@@ -24,14 +24,19 @@ def check(client, text=TEXT):
     return parse_sse(client.post('/api/check', json={'text': text}).text)
 
 
-def test_unknown_usage_is_labeled_and_retains_full_precharge(tmp_path):
+def test_unknown_usage_is_labeled_and_settles_at_the_attempts_own_estimate(tmp_path):
+    # The one attempt reached the request's accounting, so unknown usage settles at that attempt's conservative
+    # estimate ($0.05 floor), not at the whole $0.10 precharge (2 attempts admitted, 1 made).
     c = app_client(tmp_path, lambda **_: response(), daily_budget_usd=.15, use_caches=False)
     result = check(c)[-1]
     assert result[0] == 'done' and result[1]['cost_is_estimate'] is True
-    assert result[1]['cost_usd'] >= .05 and result[1]['model_calls'] == 1
-    assert c.app.state.ledger.spent_today() == pytest.approx(.1)
+    assert result[1]['cost_usd'] == pytest.approx(.05) and result[1]['model_calls'] == 1
+    assert c.app.state.ledger.spent_today() == pytest.approx(.05, abs=1e-6)
     assert c.app.state.ledger.pending_count() == 0
-    assert check(c)[-1][0] == 'error'  # a second reservation no longer fits
+    assert check(c)[-1][0] == 'done'  # the unused half of the precharge came back, so a second check fits
+    refused = check(c)[-1]
+    assert refused[0] == 'error' and refused[1]['reason'] == 'daily_budget'  # a third reservation does not
+    assert c.app.state.ledger.spent_today() == pytest.approx(.1, abs=1e-6)
 
 
 def test_two_app_instances_share_one_local_budget(tmp_path):
@@ -39,12 +44,14 @@ def test_two_app_instances_share_one_local_budget(tmp_path):
     def provider(**_):
         calls.append(True)
         return response()
-    clients = [app_client(tmp_path, provider, daily_budget_usd=.15, use_caches=False) for _ in range(2)]
+    # $0.12 holds one $0.10 precharge, and still refuses a second after the first settles at $0.05.
+    clients = [app_client(tmp_path, provider, daily_budget_usd=.12, use_caches=False) for _ in range(2)]
     with ThreadPoolExecutor(2) as pool:
         outcomes = list(pool.map(check, clients))
     assert sorted(events[-1][0] for events in outcomes) == ['done', 'error']
     assert len(calls) == 1
-    assert clients[0].app.state.ledger.spent_today() == pytest.approx(.1)
+    assert clients[0].app.state.ledger.spent_today() == pytest.approx(.05, abs=1e-6)
+    assert clients[1].app.state.ledger.spent_today() == pytest.approx(.05, abs=1e-6)
 
 
 def test_deadline_keeps_estimate_and_late_usage_does_not_refund(tmp_path):
@@ -59,11 +66,14 @@ def test_deadline_keeps_estimate_and_late_usage_does_not_refund(tmp_path):
         result = check(c)[-1]
         assert result[0] == 'error' and result[1]['cost_is_estimate']
         assert result[1]['model_calls'] == 1 and result[1]['cost_usd'] > 0
-        assert c.app.state.ledger.spent_today() == pytest.approx(.1)
+        # The abandoned attempt was accounted at dispatch, so it settles at its own conservative estimate.
+        assert c.app.state.ledger.spent_today() == pytest.approx(.05, abs=1e-6)
+        assert c.app.state.ledger.spent_today() == pytest.approx(result[1]['cost_usd'], abs=1e-6)
     finally:
         release.set()
     assert finished.wait(2)
-    assert c.app.state.ledger.spent_today() == pytest.approx(.1)
+    # The late, much cheaper usage never refunds that settled estimate.
+    assert c.app.state.ledger.spent_today() == pytest.approx(.05, abs=1e-6)
 
 
 def test_shared_required_blocks_all_paid_routes_but_preserves_cached_example(tmp_path):

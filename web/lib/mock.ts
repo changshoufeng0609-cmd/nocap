@@ -6,6 +6,7 @@ import draft6 from "@/fixtures/checks/draft-6claims.json";
 import nvdaQ1 from "@/fixtures/checks/nvda-q1-fy2027.json";
 import examples from "@/fixtures/examples.json";
 import health from "@/fixtures/health.json";
+import askOptions from "@/fixtures/ask-options.json";
 import { MAX_DRAFT_CHARS } from "./types";
 
 export interface FixtureEvent {
@@ -31,6 +32,7 @@ const FIXTURES = [draft6, nvdaQ1] as unknown as CheckFixture[];
 
 export const mockExamples = examples;
 export const mockHealth = health;
+export const mockAskOptions = askOptions;
 
 export function mockEnabled(): boolean {
   return process.env.NEXT_PUBLIC_RECEIPTS_MOCK === "1";

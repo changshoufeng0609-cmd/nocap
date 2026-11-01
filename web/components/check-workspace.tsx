@@ -1,6 +1,6 @@
 "use client";
 
-import { FileImageIcon, FileTextIcon, MessageSquareTextIcon, ShieldCheckIcon } from "lucide-react";
+import { CirclePauseIcon, FileImageIcon, FileTextIcon, MessageSquareTextIcon, ShieldCheckIcon, ZapIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { ReceiptsApp } from "@/components/receipts-app";
@@ -9,22 +9,35 @@ import { AskWorkspace } from "@/components/ask-workspace";
 import { PrivateCheck } from "@/components/private-check";
 import { cn } from "@/lib/utils";
 import { fetchHealth } from "@/lib/api";
+import { formatUtcMinutes } from "@/lib/format";
 import type { Health } from "@/lib/types";
 
 const MODES = ["draft", "slide", "ask", "private"] as const;
 const LABELS = { draft: "Draft", slide: "Slide", ask: "Ask", private: "Private" };
 const ICONS = { draft: FileTextIcon, slide: FileImageIcon, ask: MessageSquareTextIcon, private: ShieldCheckIcon };
+// The open-window notice suggests a first step that exists on the current tab. Private also needs the operator's own
+// Modal GPU, which the live window alone does not provide, so on Private the notice names only the tabs it opens.
+const LIVE_SCOPE = { draft: "checks are", slide: "checks are", ask: "checks are", private: "Draft, Slide and Ask checks are" };
+const LIVE_HINT = {
+  draft: "Try one: paste an earnings paragraph, or change a number in a saved example, then press Check.",
+  slide: "Try one: upload an earnings chart, or replay the real SEC slide at $0.",
+  ask: "Try one: ask for one company's figure in one fiscal quarter.",
+  private: "Private runs on the operator's own Modal GPU; try its recorded run at $0.",
+};
 
 export function CheckWorkspace() {
   const [mode, setMode] = useState<(typeof MODES)[number]>("draft");
   const [livePaused, setLivePaused] = useState(false);
   const [draftCachePolicy, setDraftCachePolicy] = useState<Health["draft_cache_policy"]>();
+  // Only a confirmed open window is announced; an unreachable health check shows neither notice.
+  const [liveOpen, setLiveOpen] = useState<Pick<Health, "live_until"> | null>(null);
   useEffect(() => {
     const controller = new AbortController();
     void fetchHealth(controller.signal).then((health) => {
       if (!controller.signal.aborted) {
         setLivePaused(health?.live_requests_paused === true);
         setDraftCachePolicy(health?.draft_cache_policy);
+        setLiveOpen(health && health.live_requests_paused === false ? { live_until: health.live_until } : null);
       }
     });
     return () => controller.abort();
@@ -32,8 +45,9 @@ export function CheckWorkspace() {
   return (
     <>
       <div className="mx-auto w-full max-w-6xl px-4 pt-5 sm:px-6">
-        {livePaused ? <p role="status" className="mb-4 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">Live model requests are currently paused. In Draft, choose a built-in example to explore its saved results and SEC receipts. The demo video is also available.</p> : null}
-        <div className="max-w-full overflow-x-auto pb-1"><div role="tablist" aria-label="What to check" className="inline-flex min-w-max gap-1 rounded-lg border border-border bg-muted/40 p-1">
+        {livePaused ? <p role="status" className="mb-4 flex items-start gap-2.5 rounded-lg border border-time-line/35 bg-time-tint/55 px-3.5 py-3 text-sm text-foreground/80"><CirclePauseIcon className="mt-0.5 size-4 shrink-0 text-time" aria-hidden /><span>Live model requests are currently paused. In Draft, choose a built-in example to explore its saved results and SEC receipts. The demo video is also available.</span></p> : null}
+        {liveOpen ? <p role="status" className="mb-4 flex items-start gap-2.5 rounded-lg border border-ok-line/35 bg-ok-tint/50 px-3.5 py-3 text-sm text-foreground/80"><ZapIcon className="mt-0.5 size-4 shrink-0 text-ok" aria-hidden /><span>{`Live ${LIVE_SCOPE[mode]} open${liveOpen.live_until ? ` until ${formatUtcMinutes(liveOpen.live_until)}` : ""}. ${LIVE_HINT[mode]}`}</span></p> : null}
+        <div className="pb-1"><div role="tablist" aria-label="What to check" className="grid w-full grid-cols-4 gap-1 rounded-lg border border-border bg-muted/40 p-1 sm:inline-flex sm:w-auto">
           {MODES.map((item) => {
             const Icon = ICONS[item];
             return (
@@ -46,8 +60,8 @@ export function CheckWorkspace() {
               const target = document.getElementById(`mode-${next}`);
               target?.focus();
               target?.scrollIntoView({ block: "nearest", inline: "nearest" });
-            }} className={cn("inline-flex min-h-10 items-center gap-2 rounded-md px-4 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring", mode === item ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
-              <Icon className="size-4" aria-hidden />{LABELS[item]}
+            }} className={cn("inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-md px-1.5 text-[0.8125rem] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring sm:gap-2 sm:px-4 sm:text-sm", mode === item ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:bg-card/60 hover:text-foreground")}>
+              <Icon className="size-4 shrink-0" aria-hidden /><span className="truncate">{LABELS[item]}</span>
             </button>
           );})}
         </div></div>
@@ -57,7 +71,7 @@ export function CheckWorkspace() {
         <div hidden={mode !== "draft"} className={mode === "draft" ? "flex flex-1 flex-col" : undefined}>
           <ReceiptsApp active={mode === "draft"} livePaused={livePaused} draftCachePolicy={draftCachePolicy} />
         </div>
-        {mode === "slide" ? <SlideApp /> : mode === "ask" ? <AskWorkspace /> : mode === "private" ? <PrivateCheck /> : null}
+        {mode === "slide" ? <SlideApp /> : mode === "ask" ? <AskWorkspace livePaused={livePaused} /> : mode === "private" ? <PrivateCheck /> : null}
       </div>
     </>
   );

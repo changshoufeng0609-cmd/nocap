@@ -9,14 +9,16 @@
 Local:   uvicorn receipts.api:app --port 8000
 Vercel:  the Python service's entrypoint (vercel.json: services.api.entrypoint = "receipts.api:app")
 
-Guards on live checks: drafts of at most 6,000 characters, a per-IP rate limit, a durable estimated daily admission
+Guards on live checks: drafts of at most 12,000 characters, a per-IP rate limit, a durable estimated daily admission
 budget (RECEIPTS_DAILY_BUDGET_USD, default $5), per-call timeouts with one retry, and an overall
 deadline. A replay from the cache, or a draft whose passages are all in the model-response cache, costs nothing, so
 it skips the rate limit and the budget. Every failure reaches the client as an `error` event. Logs carry draft
 hashes, never draft text, keys or client IPs.
 
 Environment (all optional): RECEIPTS_DATA_DIR (default data/, or data/snapshot when data/facts.sqlite is absent),
-RECEIPTS_DAILY_BUDGET_USD, RECEIPTS_RATE_LIMIT_CHECKS and RECEIPTS_RATE_LIMIT_WINDOW_S (10 per 600 s),
+RECEIPTS_DAILY_BUDGET_USD, RECEIPTS_CHECK_FIX_RESERVE_USD (the end of the daily budget that Slide, Ask and quote
+search may not use; default $1.50), RECEIPTS_FILING_QUESTIONS_PER_DAY (new whole-filing questions per UTC day across
+instances; default 5), RECEIPTS_RATE_LIMIT_CHECKS and RECEIPTS_RATE_LIMIT_WINDOW_S (10 per 600 s),
 RECEIPTS_API_CACHE_DIR, RECEIPTS_SPARK_CACHE_DIR, RECEIPTS_NO_CACHE=1 (measure uncached latency),
 RECEIPTS_PERSIST_DRAFT_CACHES (only true enables ordinary draft persistence; default false on Vercel,
 true locally; disabled persistence reads only committed snapshot caches),
@@ -57,13 +59,14 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract as _extract
 from receipts import stream as _stream
+from receipts import recordings as _recordings
 from receipts.stream import Event
-from receipts.spend import BudgetUnavailable, LocalLedger, PostgresLedger, Reservation
+from receipts.spend import BudgetUnavailable, DailyCount, LocalLedger, PostgresLedger, Reservation
 
 log = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-MAX_CHARS = 6000
+MAX_CHARS = 12000
 MAX_CONTEXT_CHARS = 300
 SSE_HEADERS = {"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"}
 
@@ -99,10 +102,13 @@ class Settings:
     data_dir: Path
     api_cache_dir: Optional[Path]                      # writable recorded streams; local ledger default location
     prebaked_dirs: tuple[Path, ...] = ()               # read-only recorded streams (the snapshot)
+    recording_dirs: tuple[Path, ...] = ()              # read-only recorded Slide/quote/Private samples (recordings)
     spark_cache_dir: Optional[Path] = None             # writable model-response cache
     spark_read_dirs: tuple[Path, ...] = ()             # read-only model-response caches (the snapshot)
     examples_paths: tuple[Path, ...] = ()
     daily_budget_usd: float = 5.0
+    check_fix_reserve_usd: float = 1.5                 # the end of the daily budget only Check and Fix may use
+    filing_questions_per_day: int = 5                  # new whole-filing questions per UTC day, all instances
     rate_limit_checks: int = 10
     rate_limit_window_s: float = 600.0
     max_chars: int = MAX_CHARS
@@ -160,10 +166,13 @@ class Settings:
             data_dir=data_dir,
             api_cache_dir=api_cache if persist_drafts else None,
             prebaked_dirs=tuple(dict.fromkeys(d / "api_cache" for d in cache_sources)),
+            recording_dirs=tuple(dict.fromkeys(d / "recordings" for d in cache_sources)),
             spark_cache_dir=spark_cache if persist_drafts else None,
             spark_read_dirs=tuple(dict.fromkeys(d / "spark_cache" for d in cache_sources)),
             examples_paths=tuple(dict.fromkeys([data_dir / "examples.json", REPO_ROOT / "examples" / "examples.json"])),
             daily_budget_usd=max(0.0, _num(env, "RECEIPTS_DAILY_BUDGET_USD", 5.0)),
+            check_fix_reserve_usd=max(0.0, _num(env, "RECEIPTS_CHECK_FIX_RESERVE_USD", 1.5)),
+            filing_questions_per_day=max(0, int(_num(env, "RECEIPTS_FILING_QUESTIONS_PER_DAY", 5))),
             rate_limit_checks=int(_num(env, "RECEIPTS_RATE_LIMIT_CHECKS", 10)),
             rate_limit_window_s=max(1.0, _num(env, "RECEIPTS_RATE_LIMIT_WINDOW_S", 600.0)),
             use_caches=(env.get("RECEIPTS_NO_CACHE") or "").strip().lower() not in ("1", "true", "yes"),
@@ -221,7 +230,7 @@ SpendLedger = LocalLedger
 class UnavailableLedger:
     """A missing or broken shared ledger never falls back to an instance-local budget."""
 
-    def reserve(self, estimate_usd: float) -> None:
+    def reserve(self, estimate_usd: float, *, keep_usd: float = 0.0) -> None:
         raise BudgetUnavailable()
 
     def settle(self, token: Reservation, actual_usd: float, *, uncertain: bool = False) -> None:
@@ -260,9 +269,9 @@ class AccessControlledLedger:
         if _live_requests_paused(self._settings):
             raise Rejected("live_paused", LIVE_PAUSED_MESSAGE, False)
 
-    def reserve(self, estimate_usd: float) -> Optional[Reservation]:
+    def reserve(self, estimate_usd: float, *, keep_usd: float = 0.0) -> Optional[Reservation]:
         self.require_live()
-        return self._ledger.reserve(estimate_usd)
+        return self._ledger.reserve(estimate_usd, keep_usd=keep_usd)
 
     def settle(self, token: Reservation, actual_usd: float, *, uncertain: bool = False) -> None:
         # A pause never prevents accounting for work admitted before it.
@@ -277,6 +286,7 @@ class OperationBudget:
         self._lock = threading.Lock()
         self._admitted = 0.0
         self.started_calls = 0
+        self.unaccounted = False      # an admitted attempt never reached the request's own accounting
         self._closed = False
 
     def before_call(self, estimate_usd: float) -> None:
@@ -293,37 +303,55 @@ class OperationBudget:
             self.started_calls += 1
 
     def finish(self, stats: Any) -> None:
+        """Settle the reservation once.
+
+        When every admitted attempt reached the request's accounting, its cost is complete: observed usage
+        plus each unknown attempt's own conservative estimate (at least $0.05; $0.15 for Wonder). A failed
+        attempt therefore costs its estimate, not the whole reservation. Only an attempt missing from that
+        accounting (a worker that died around the usage callback) retains the entire reservation.
+        """
         with self._lock:
             self._closed = True
         if self.token is None:
             return
         self.synchronize(stats)
-        self.ledger.settle(self.token, stats.cost_usd, uncertain=stats.cost_is_estimate)
+        self.ledger.settle(self.token, stats.cost_usd, uncertain=self.unaccounted)
 
     def synchronize(self, stats: Any) -> None:
         # A last-resort worker exception may bypass an extractor's usage callback.
         # Never publish zero cost or refund an attempt admitted before that failure.
         if self.started_calls > stats.model_calls:
+            self.unaccounted = True
             stats.cost_usd = max(stats.cost_usd, self.reserved_usd)
             stats.estimated_calls += self.started_calls - stats.model_calls
             stats.model_calls = self.started_calls
 
 
-def _spend_ledger(settings: Settings) -> Any:
+def _spend_storage(settings: Settings, *, namespace: str, cap: Any, legacy: bool = False) -> Any:
+    """The configured ledger storage for one namespace: the shared PostgreSQL ledger, else (when allowed)
+    local SQLite. A broken configuration never falls back; it disables the paid work that needs it."""
     try:
         if settings.spend_database_url:
-            return PostgresLedger(settings.daily_budget_usd, settings.spend_database_url,
-                                  namespace=settings.spend_namespace)
+            return PostgresLedger(cap, settings.spend_database_url, namespace=namespace)
         if settings.require_shared_budget:
             return UnavailableLedger()
         ledger_dir = settings.local_ledger_dir or settings.api_cache_dir
-        return LocalLedger(settings.daily_budget_usd,
-                           ledger_dir / "_spend.sqlite3" if ledger_dir else None,
-                           namespace=settings.spend_namespace,
-                           legacy_path=ledger_dir / "_spend.json" if ledger_dir else None)
+        return LocalLedger(cap, ledger_dir / "_spend.sqlite3" if ledger_dir else None, namespace=namespace,
+                           legacy_path=ledger_dir / "_spend.json" if ledger_dir and legacy else None)
     except BudgetUnavailable:
         log.error("budget storage unavailable; live operations disabled")
         return UnavailableLedger()
+
+
+def _spend_ledger(settings: Settings) -> Any:
+    return _spend_storage(settings, namespace=settings.spend_namespace, cap=settings.daily_budget_usd, legacy=True)
+
+
+def _filing_quota(settings: Settings) -> DailyCount:
+    """New whole-filing questions per UTC day, counted in the same storage under `<namespace>.filing_questions`."""
+    limit = settings.filing_questions_per_day
+    return DailyCount(_spend_storage(settings, namespace=f"{settings.spend_namespace}.filing_questions",
+                                     cap=DailyCount.cap(limit)), limit)
 
 
 def _ledger(settings: Settings) -> Any:
@@ -333,22 +361,28 @@ def _ledger(settings: Settings) -> Any:
     return ledger
 
 
-def _reserve(ledger: Any, amount: float) -> Optional[Reservation]:
+LEDGER_UNAVAILABLE_MESSAGE = ("Live checks are paused because the spending ledger is unavailable. "
+                              "The cached examples still work.")
+
+
+def _reserve(ledger: Any, amount: float, keep_usd: float = 0.0) -> Optional[Reservation]:
     try:
-        return ledger.reserve(amount)
+        return ledger.reserve(amount, keep_usd=keep_usd)
     except BudgetUnavailable:
-        raise Rejected("budget_unavailable", "Live checks are paused because the spending ledger is unavailable. "
-                       "The cached examples still work.", True) from None
+        raise Rejected("budget_unavailable", LEDGER_UNAVAILABLE_MESSAGE, True) from None
 
 
-async def _reserve_async(ledger: Any, amount: float) -> Optional[Reservation]:
+async def _reserve_async(ledger: Any, amount: float, keep_usd: float = 0.0) -> Optional[Reservation]:
     """Run transactional admission outside ASGI's event loop.
+
+    keep_usd: the end of today's budget this route may not use (Slide, Ask and quote search leave
+    Settings.check_fix_reserve_usd to Check and Fix).
 
     Cancellation cannot stop a commit already running in the thread. In that case
     no provider is dispatched and a possibly committed precharge remains pending,
     just as after a process crash; never guess that the transaction was rolled back.
     """
-    return await asyncio.to_thread(_reserve, ledger, amount)
+    return await asyncio.to_thread(_reserve, ledger, amount, keep_usd)
 
 
 def _require_live(settings: Settings) -> None:
@@ -485,9 +519,23 @@ async def _from_events(events: Iterable[Event]) -> AsyncIterator[str]:
         yield _stream.sse(name, data)
 
 
-def error_response(message: str, retryable: bool) -> StreamingResponse:
-    return sse_response(_from_events([("error", {"message": message, "retryable": retryable,
-        "cost_usd": 0.0, "cost_is_estimate": False, "model_calls": 0})]))
+def error_response(message: str, retryable: bool, reason: Optional[str] = None) -> StreamingResponse:
+    """A one-event error stream for work that started no model call. `reason` names an admission refusal
+    (docs/api-contract.md) so a client can offer the $0 samples; other errors omit it."""
+    data: dict[str, Any] = {"message": message, "retryable": retryable,
+                            "cost_usd": 0.0, "cost_is_estimate": False, "model_calls": 0}
+    if reason:
+        data["reason"] = reason
+    return sse_response(_from_events([("error", data)]))
+
+
+# Admission refusals a client can act on; carried as the error event's `reason`.
+REFUSAL_REASONS = frozenset({"live_paused", "budget_unavailable", "daily_budget", "rate_limited",
+                             "filing_question_limit"})
+
+
+def refusal(r: "Rejected") -> StreamingResponse:
+    return error_response(r.message, r.retryable, r.reason if r.reason in REFUSAL_REASONS else None)
 
 
 async def _from_thread(events: Iterator[Event], on_finish: Callable[[], None], keepalive_s: float,
@@ -600,6 +648,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                                settings.prebaked_dirs if settings.use_caches else ())
     limiter = RateLimiter(settings.rate_limit_checks, settings.rate_limit_window_s)
     ledger = _ledger(settings)
+    recordings = _recordings.Recordings(settings.recording_dirs if settings.use_caches else ())
     make_client = client_factory or (lambda: _extract.make_client(timeout=settings.model_timeout_s))
     lock = threading.Lock()
     shared: dict[str, Any] = {"store": store, "client": None, "wonder_client": None, "slide_client": None}
@@ -701,19 +750,20 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             try:
                 _require_live(settings)
             except Rejected as r:
-                return error_response(r.message, r.retryable)
+                return refusal(r)
             wait = limiter.acquire(client_ip(request, settings))
             if wait is not None:
                 minutes = max(1, math.ceil(wait / 60))
                 log.info("check %s rejected reason=rate_limit", tag)
                 return error_response(f"Too many live checks from your network. Try again in {minutes} minute"
-                                      f"{'s' if minutes != 1 else ''}, or open one of the examples.", True)
+                                      f"{'s' if minutes != 1 else ''}, or open one of the examples.", True,
+                                      "rate_limited")
             try:
                 if isinstance(ledger, AccessControlledLedger):
                     ledger.require_live()
                 client = get_client()
             except Rejected as r:
-                return error_response(r.message, r.retryable)
+                return refusal(r)
             except _extract.ExtractionError:
                 log.error("check %s rejected reason=no_api_key", tag)
                 return error_response(_stream.MSG_NO_MODEL, False)
@@ -722,11 +772,11 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                                _extract.extraction_estimate(text, ctx or "", max_attempts=settings.model_attempts))
                 token = await _reserve_async(ledger, estimate)
             except Rejected as r:
-                return error_response(r.message, r.retryable)
+                return refusal(r)
             if token is None:
                 log.warning("check %s rejected reason=daily_budget", tag)
                 return error_response("NoCap has reached today's budget for live checks. The examples still "
-                                      "work, and live checks resume tomorrow (UTC).", False)
+                                      "work, and live checks resume tomorrow (UTC).", False, "daily_budget")
 
         budget = OperationBudget(ledger, token, estimate)
         stats = _stream.CheckStats()
@@ -760,7 +810,7 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         try:
             _require_live(settings)
         except Rejected as r:
-            return error_response(r.message, r.retryable)
+            return refusal(r)
         key = _stream.draft_key(text, as_of, context)
         try:
             evidence_store = get_store()
@@ -769,7 +819,8 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             return error_response("The evidence database isn't available on this server.", False)
         wait = limiter.acquire(client_ip(request, settings))
         if wait is not None:
-            return error_response("Too many live checks or fixes from your network. Try again in a few minutes.", True)
+            return error_response("Too many live checks or fixes from your network. Try again in a few minutes.", True,
+                                  "rate_limited")
         # The original and revised draft can both need extraction. Wonder has a separate, larger allowance;
         # cached extraction saves actual spend, but never bypasses a fix request's admission guard.
         ctx = _extract.infer_context(text) if context is None else context
@@ -781,11 +832,13 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         try:
             estimate = 2 * _extract.extraction_estimate(text, ctx or "", max_attempts=1) + wonder_bound + 0.05
             token = await _reserve_async(ledger, estimate)
-        except (Rejected, _extract.ExtractionError) as exc:
-            return error_response(exc.message if isinstance(exc, Rejected) else _stream.MSG_NO_MODEL, False)
+        except Rejected as r:
+            return refusal(r)
+        except _extract.ExtractionError:
+            return error_response(_stream.MSG_NO_MODEL, False)
         if token is None:
             return error_response("NoCap has reached today's budget for fixes. Checks of the examples still work.",
-                                  False)
+                                  False, "daily_budget")
         budget = OperationBudget(ledger, token, estimate)
         stats = RewriteStats()
         events = fix_events(
@@ -825,10 +878,15 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         context = _stream.normalize_context(req.context)
         if context is not None and len(context) > MAX_CONTEXT_CHARS:
             return error_response("Context must be one short line of 300 characters or fewer.", False)
+        # A built-in sample replays its recorded live run at $0, even while live requests are paused.
+        record = recordings.load("slide", _recordings.slide_key(req.image_data_url, context, as_of))
+        if record is not None:
+            log.info("slide replay recording=%s", record["key"][:12])
+            return sse_response(_from_events(_recordings.replay(record)))
         try:
             _require_live(settings)
         except Rejected as r:
-            return error_response(r.message, r.retryable)
+            return refusal(r)
         try:
             image = await asyncio.to_thread(slides.decode_image, req.image_data_url)
         except slides.SlideError as exc:
@@ -839,13 +897,17 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
             log.error("slide store unavailable error=%s", type(exc).__name__)
             return error_response("The evidence database isn't available on this server.", False)
         if limiter.acquire(client_ip(request, settings)) is not None:
-            return error_response("Too many live checks from your network. Try again in a few minutes.", True)
+            return error_response("Too many live checks from your network. Try again in a few minutes.", True,
+                                  "rate_limited")
         try:
-            token = await _reserve_async(ledger, slides.RESERVE_USD)
+            # The end of the daily budget stays with Check and Fix.
+            token = await _reserve_async(ledger, slides.RESERVE_USD, settings.check_fix_reserve_usd)
         except Rejected as r:
-            return error_response(r.message, r.retryable)
+            return refusal(r)
         if token is None:
-            return error_response("NoCap has reached today's budget for slide checks. Text examples still work.", False)
+            return error_response("Today's live budget for slide checks is used up; NoCap keeps the rest for Check "
+                                  "and Fix. The real SEC slide sample still replays at $0, and slide checks resume "
+                                  "tomorrow (UTC).", False, "daily_budget")
         budget = OperationBudget(ledger, token, slides.RESERVE_USD)
         stats = slides.SlideStats()
         events = slides.slide_events(image, store=evidence_store, context=context, as_of=as_of, stats=stats,
@@ -868,21 +930,26 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         paused = _live_requests_paused(settings)
         cache_policy = ("disabled" if not settings.use_caches else
                         "persistent" if settings.api_cache_dir or settings.spark_cache_dir else "snapshot_only")
+        # The scheduled end of an open live window, so visitors can see how long new checks stay available.
+        until = (settings.live_until.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+                 if settings.live_until is not None and not paused else None)
+        live = {"live_requests_paused": paused, "live_until": until, "draft_cache_policy": cache_policy}
         try:
-            return JSONResponse({**data_info(settings.data_dir), "live_requests_paused": paused,
-                                 "draft_cache_policy": cache_policy})
+            return JSONResponse({**data_info(settings.data_dir), **live})
         except Exception as e:
             log.error("health check failed error=%s", type(e).__name__)
-            return JSONResponse({"ok": False, "data_snapshot": None, "companies": [], "facts": 0,
-                                 "live_requests_paused": paused, "draft_cache_policy": cache_policy}, status_code=503)
+            return JSONResponse({"ok": False, "data_snapshot": None, "companies": [], "facts": 0, **live},
+                                status_code=503)
 
     from receipts.ask_api import create_router as create_ask_router
     from receipts.private import create_private_router
 
+    app.state.filing_quota = _filing_quota(settings)
     app.include_router(create_ask_router(settings=settings, get_store=get_store,
-                                        get_client=get_slide_client, limiter=limiter, ledger=ledger))
+                                        get_client=get_slide_client, limiter=limiter, ledger=ledger,
+                                        recordings=recordings, filing_quota=app.state.filing_quota))
     app.include_router(create_private_router(settings=settings, limiter=limiter,
-                                            ledger=ledger, get_store=get_store))
+                                            ledger=ledger, get_store=get_store, recordings=recordings))
 
     return app
 

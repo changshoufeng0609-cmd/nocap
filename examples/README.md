@@ -75,15 +75,17 @@ python -m receipts check examples/roundup_q2_2026.txt \
 | c5 | Alphabet revenue $119.8 billion | ✓ `match` | ✓ | $119,796M (8-K 0001652044-26-000066) |
 | c6 | Alphabet operating income $40.8 billion | ✓ `match` | ✓ | $40,770M |
 | c7 | Alphabet earned $7.70 per diluted share | ✗ `entity_mismatch` | ✗ `entity_mismatch` | $7.70 is JPMorgan's EPS; Alphabet's was $9.11 |
-| c8 | Microsoft fiscal Q4 revenue $90.0 billion | ✗ `look_ahead` | ✓ `match` | not public until 8-K 0001193125-26-323632 at 2026-07-29 20:04:53 UTC; $90,007M |
-| c9 | Microsoft diluted EPS $4.81 | ✗ `look_ahead` | ✓ `match` | same 8-K; $4.81 |
+| c8 | Microsoft fiscal Q4 revenue $90.0 billion | ◷ `look_ahead` | ✓ `match` | not public until 8-K 0001193125-26-323632 at 2026-07-29 20:04:53 UTC; $90,007M |
+| c9 | Microsoft diluted EPS $4.81 | ◷ `look_ahead` | ✓ `match` | same 8-K; $4.81 |
 
-Summary at `as_of`: `6 ✓ · 3 ✗ · 0 ? · 0 ≈`. Without `as_of`: `8 ✓ · 1 ✗`. In the API, the as-of re-check of this
+Summary at `as_of`: `6 ✓ · 1 ✗ · 2 ◷ · 0 ? · 0 ≈`. Without `as_of`: `8 ✓ · 1 ✗`. In the API, the as-of re-check of this
 example costs nothing: its model responses ship in `data/snapshot/spark_cache/`, so only verification reruns.
 
 ## `draft_6claims.txt`
 
 A hand-written six-claim draft covering NVIDIA, Microsoft and Meta. Four claims are true and two are wrong (one period swap, one scale error). Every figure is a real SEC value.
+
+Its model responses are not part of the bundled snapshot, so its first check in a fresh clone needs a configured model backend (`MODEL_API_KEY`). Without one, NoCap stops before sending anything.
 
 ```
 python -m receipts check examples/draft_6claims.txt
@@ -111,8 +113,8 @@ The `--as-of` time decides which filings count as already public:
 | `--as-of` | c1 and c2 (NVIDIA) | c3 (Microsoft) | c4 to c6 (Meta) |
 |---|---|---|---|
 | none (latest filings) | ✓ | ✗ `period_mismatch` | ✓ ✗ ✓ |
-| `2026-08-26T20:00:00Z`, before NVIDIA's 8-K | ✗ `look_ahead`: the 8-K was accepted at 20:21:19 UTC | ✗ `period_mismatch` | ✗ `look_ahead`: Meta's 8-K was accepted 2026-10-21 |
-| `2026-08-26T20:25:00Z`, between NVIDIA's 8-K and 10-Q | ✓, from the 8-K press release | ✗ `period_mismatch` | ✗ `look_ahead` |
+| `2026-08-26T20:00:00Z`, before NVIDIA's 8-K | ◷ `look_ahead`: the 8-K was accepted at 20:21:19 UTC | ✗ `period_mismatch` | ◷ `look_ahead`: Meta's 8-K was accepted 2026-10-21 |
+| `2026-08-26T20:25:00Z`, between NVIDIA's 8-K and 10-Q | ✓, from the 8-K press release | ✗ `period_mismatch` | ◷ `look_ahead` |
 
 ### Output on 2026-10-27
 
@@ -179,9 +181,9 @@ python -m receipts check examples/trap_jpm_q1_2026.txt \
 | c8 | CIB revenue up 19% year over year | ✓ `match` | ✓ | 18.9% (vs $19,666M) |
 | c9 | CCB revenue $19.6 billion | ✓ `match` | ✓ | $19,568M |
 | c10 | net income $13.0 billion in the previous quarter | ✓ `match` | ✓ | $13,025M for Q4 2025 (8-K 0001628280-26-001902) |
-| c11 | Bank of America revenue $30.3 billion, quarter ended March 31, 2026 | ✗ `look_ahead` | ✓ `match` | **planted (look-ahead):** not public until BofA's 8-K 0000070858-26-000222 at 2026-04-15 10:44:44 UTC, a day after the dateline; $30,272M |
+| c11 | Bank of America revenue $30.3 billion, quarter ended March 31, 2026 | ◷ `look_ahead` | ✓ `match` | **planted (look-ahead):** not public until BofA's 8-K 0000070858-26-000222 at 2026-04-15 10:44:44 UTC, a day after the dateline; $30,272M |
 
-Summary at `as_of`: `8 ✓ · 3 ✗ · 0 ? · 0 ≈`. Without `as_of`: `9 ✓ · 2 ✗`.
+Summary at `as_of`: `8 ✓ · 2 ✗ · 1 ◷ · 0 ? · 0 ≈`. Without `as_of`: `9 ✓ · 2 ✗`.
 
 ### `trap_amd_q1_2026.txt`: AMD Q1 2026, citing NVIDIA's quarter two weeks early
 
@@ -202,8 +204,8 @@ python -m receipts check examples/trap_amd_q1_2026.txt \
 | c7 | non-GAAP gross margin 55.4% | ✓ `match` | ✓ | 55.45% (non-GAAP gross profit $5,685M) |
 | c8 | GAAP diluted EPS $1.37 | ✗ `basis_mismatch` | ✗ | **planted (basis):** $1.37 is non-GAAP diluted EPS; GAAP was $0.84 |
 | c9 | NVIDIA revenue $68.1 billion, quarter ended January 25, 2026 | ✓ `match` | ✓ | $68,127M (NVIDIA 8-K 0001045810-26-000019, public since 2026-02-25) |
-| c10 | NVIDIA revenue $81.6 billion, quarter ended April 26, 2026 | ✗ `look_ahead` | ✓ `match` | **planted (look-ahead):** not public until NVIDIA's 8-K 0001045810-26-000051 at 2026-05-20 20:21:19 UTC, 15 days after the dateline; $81,615M |
+| c10 | NVIDIA revenue $81.6 billion, quarter ended April 26, 2026 | ◷ `look_ahead` | ✓ `match` | **planted (look-ahead):** not public until NVIDIA's 8-K 0001045810-26-000051 at 2026-05-20 20:21:19 UTC, 15 days after the dateline; $81,615M |
 | c11 | outlook: revenue $11.2 billion | ? `forward_looking` | ? | guidance (the release's own outlook) |
 | c12 | plus or minus $300 million | ? `forward_looking` | ? | guidance range |
 
-Summary at `as_of`: `7 ✓ · 3 ✗ · 2 ? · 0 ≈`. Without `as_of`: `8 ✓ · 2 ✗ · 2 ?`.
+Summary at `as_of`: `7 ✓ · 2 ✗ · 1 ◷ · 2 ? · 0 ≈`. Without `as_of`: `8 ✓ · 2 ✗ · 2 ?`.

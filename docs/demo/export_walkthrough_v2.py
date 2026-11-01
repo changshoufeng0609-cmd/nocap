@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+"""Copy a validated v2.1 walkthrough (and its X cut, once rendered and validated) into the repository and
+public-player paths, and cut the README GIF.
+
+Copies files only; it never deploys, publishes or submits. Before replacing the current files it keeps the
+records of the export they belong to: v2's manifest and validation go to
+assets/historical/2026-10-30-walkthrough-v2-*.json (the v2 MP4 itself stays in git history at commit 1300f84);
+when the October 31 end-card update replaces the first v2.1 export, that export's records go to
+assets/historical/2026-10-31-walkthrough-v21-*.json (both of its MP4s stay in git history at commit 121a6cb);
+when the November 1 coverage-line update replaces the October 31 end-card export, its records go to
+assets/historical/2026-10-31-walkthrough-v21-endcard-*.json (both of its MP4s stay in git history at commit 5d6f7ed).
+Re-running after the X cut is validated adds it without touching the history.
+
+  python export_walkthrough_v2.py --source data/eval_runs/demo-walkthrough-v21-endcard-20261101
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from render_walkthrough_v2 import OUTPUT  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[2]
+ASSETS = ROOT / 'docs/demo/assets'
+PUBLIC = ROOT / 'web/public/demo'
+GIF_SECONDS = 20.0
+SCRIPTS = ('narration_v2.py', 'music_bed.py', 'screencast_recorder.py', 'capture_walkthrough_v2.py', 'render_walkthrough_v2.py',
+           'render_demo.py', 'validate_walkthrough_v2.py', 'export_walkthrough_v2.py', 'validate_media_v2.py', 'select_voice_v2.py',
+           'whisper_transcribe.py')
+V2_HISTORY = {'manifest': 'historical/2026-10-30-walkthrough-v2-manifest.json',
+              'validation': 'historical/2026-10-30-walkthrough-v2-validation.json'}
+X_ASSETS = ('nocap-x.mp4', 'nocap-x.en.srt', 'nocap-x.en.vtt')
+# The first v2.1 export (commit 121a6cb), replaced on October 31 by the same cuts with an updated end card.
+V21_HISTORY = {'manifest': 'historical/2026-10-31-walkthrough-v21-manifest.json',
+               'validation': 'historical/2026-10-31-walkthrough-v21-validation.json'}
+V21_FIRST = {'receipts-demo.mp4': '364b7773da0751b605f0707f2f29017c9e6f989e7b9ce2861c41dffad00e5011',
+             'nocap-x.mp4': 'f001ecd0f910d1aa20c617bbe52650918f4d81da1c6ec9723045c66789a5ce0a'}
+END_CARD_UPDATE = {
+    'date': '2026-10-31',
+    'change': ('The end card of both cuts ("end" and "end-x") gained one line, "Now covering 499 S&P 500 companies". '
+               'Every other end-card line is kept; the spacing was rebalanced and no text size changed.'),
+    'reason': ('The footage was recorded on October 30, when NoCap covered fewer companies. On October 31 the evidence grew '
+               'to 499 of the 500 S&P 500 companies (index members that day; Exxon Mobil is not covered), so the line '
+               'states current coverage.'),
+    'approval': 'Owner-approved, for both cuts',
+    'unchanged': ('Footage, edit timeline, narration, music, captions and every other card. Rendered with the same '
+                  'pipeline: with the previous end card it reproduced both previous MP4s byte for byte.'),
+    'previous_video_sha256': V21_FIRST,
+    'comparison_with_previous': {
+        'receipts-demo.mp4': {
+            'end_card_starts_s': 160.254, 'first_frame_with_new_card': 4007,
+            'decoded_frames_identical': '0-3985 (0.00-159.40 s)',
+            'reencoded_before_card': ('3986-4006 (159.44-160.24 s): the keyframe group that contains the first card frame; '
+                                      'x264 looks ahead into the new card. Same source pixels; PSNR >= 62.4 dB against the '
+                                      'previous export, under 0.1% of samples off by more than 2 levels'),
+            'audio': 'AAC packets and decoded PCM identical'},
+        'nocap-x.mp4': {
+            'end_card_starts_s': 45.072, 'first_frame_with_new_card': 1127,
+            'decoded_frames_identical': '0-1083 (0.00-43.32 s)',
+            'reencoded_before_card': ('1084-1126 (43.36-45.04 s): the keyframe group that contains the first card frame. '
+                                      'Same source pixels; PSNR >= 56.9 dB, under 0.12% of samples off by more than 2 levels'),
+            'audio': 'AAC packets and decoded PCM identical'},
+        'captions_and_plan': 'SRT, VTT and the render plan (timeline and cue times) byte-identical in both cuts',
+        'receipts-demo.gif': ('Unchanged: its 20 seconds (16.56-36.56 s) decode identically, so the export kept it rather than '
+                              're-cutting it with a palette shifted by the new end card')},
+}
+# The October 31 end-card export (commit 5d6f7ed), replaced on November 1 by the same cuts with the coverage line updated.
+V21_ENDCARD_HISTORY = {'manifest': 'historical/2026-10-31-walkthrough-v21-endcard-manifest.json',
+                       'validation': 'historical/2026-10-31-walkthrough-v21-endcard-validation.json'}
+V21_ENDCARD = {'receipts-demo.mp4': '3dd8818760b8ce605757f48cfe3fbde1df5db72fd9a2af7c56dc903b59768cbd',
+               'nocap-x.mp4': 'e5e20d5d312701e11501b706da68694f0e57c2d21ae0d3d032cd94434aeed688'}
+COVERAGE_UPDATE = {
+    'date': '2026-11-01',
+    'change': ('The coverage line on the end card of both cuts ("end" and "end-x") now reads "Now covering all 500 S&P 500 '
+               'companies" instead of "Now covering 499 S&P 500 companies". Same position, size, weight and color; every other '
+               'end-card line is kept.'),
+    'reason': ('Exxon Mobil, the one S&P 500 company not covered on October 31, joined the evidence on November 1 (snapshot '
+               'committed in e61df17: 500 companies), so NoCap covers all 500 index members of October 31.'),
+    'approval': 'Owner-approved (November 1), for both cuts',
+    'unchanged': ('Footage, edit timeline, narration, music, captions and every other card. Rendered with the same pipeline: '
+                  'with the October 31 end card it reproduced both October 31 MP4s byte for byte.'),
+    'previous_video_sha256': V21_ENDCARD,
+    'comparison_with_previous': {
+        'receipts-demo.mp4': {
+            'end_card_starts_s': 160.254, 'first_frame_with_new_card': 4007,
+            'decoded_frames_identical': '0-3985 (0.00-159.40 s)',
+            'reencoded_before_card': ('3986-4006 (159.44-160.24 s): the keyframe group that contains the first card frame; '
+                                      'x264 looks ahead into the new card. Same source pixels; PSNR >= 63.7 dB against the '
+                                      'October 31 export, under 0.07% of samples off by more than 2 levels'),
+            'audio': 'AAC packets and decoded PCM identical'},
+        'nocap-x.mp4': {
+            'end_card_starts_s': 45.072, 'first_frame_with_new_card': 1127,
+            'decoded_frames_identical': '0-1083 (0.00-43.32 s)',
+            'reencoded_before_card': ('1084-1126 (43.36-45.04 s): the keyframe group that contains the first card frame. '
+                                      'Same source pixels; PSNR >= 57.9 dB, under 0.09% of samples off by more than 2 levels'),
+            'audio': 'AAC packets and decoded PCM identical'},
+        'captions_and_plan': 'SRT, VTT and the render plan (timeline and cue times) byte-identical in both cuts',
+        'receipts-demo.gif': ('Unchanged: its 20 seconds (16.56-36.56 s) decode identically, so the export kept it rather than '
+                              're-cutting it with a palette shifted by the new end card')},
+}
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def gif_frames(video, start):
+    """Per-frame MD5s of the 20 seconds the GIF is cut from, decoded with the GIF command's own seek."""
+    return subprocess.run(['ffmpeg', '-v', 'error', '-ss', f'{start:.2f}', '-i', str(video), '-t', f'{GIF_SECONDS:.2f}',
+                           '-map', '0:v', '-f', 'framemd5', '-'], capture_output=True, text=True, check=True).stdout
+
+
+def load_cut(source, cut, capture):
+    folder = source / cut
+    validation = json.loads((folder / 'validation.json').read_text())
+    manifest = json.loads((folder / 'manifest.json').read_text())
+    video = folder / f'{OUTPUT[cut]}.mp4'
+    assert validation['status'] == 'passed' and validation['cut'] == cut == manifest['cut']
+    assert sha(video) == validation['video_sha256'] == manifest['video_sha256']
+    assert sha(capture / 'master.mp4') == manifest['master_sha256']
+    return folder, video, manifest, validation
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--source', type=Path, default=ROOT / 'data/eval_runs/demo-walkthrough-v21-endcard-20261101',
+                        help='the folder passed to render_walkthrough_v2.py --out')
+    parser.add_argument('--capture', type=Path, default=ROOT / 'data/eval_runs/demo-walkthrough-v2-20261030/take2',
+                        help='the browser capture both cuts were edited from')
+    args = parser.parse_args()
+    source, capture = args.source.resolve(), args.capture.resolve()
+    folder, video, manifest, validation = load_cut(source, 'main', capture)
+    x = load_cut(source, 'x', capture) if (source / 'x' / 'validation.json').exists() else None
+
+    # Keep the records of the export being replaced.
+    previous = json.loads((ASSETS / 'manifest.json').read_text())
+    history = ASSETS / 'historical'
+    if previous['schema_version'] == 3:
+        assert previous['version'] == 'v2 walkthrough', previous['version']
+        for name in ('manifest', 'validation'):
+            target = ASSETS / V2_HISTORY[name]
+            if not target.exists():
+                shutil.copy2(ASSETS / f'{name}.json', target)
+        historical = dict(previous['historical_exports'])
+        historical['v2_168s'] = {**V2_HISTORY, 'video_sha256': previous['asset_sha256']['receipts-demo.mp4'],
+                                 'duration_s': previous['duration_s'], 'commit': '1300f84'}
+    else:
+        assert previous['schema_version'] == 4, previous['schema_version']
+        historical = dict(previous['historical_exports'])
+        if previous['asset_sha256']['receipts-demo.mp4'] == V21_FIRST['receipts-demo.mp4'] != sha(video):
+            # The end-card update replaces the first v2.1 export: keep its records, as for v2.
+            assert previous['asset_sha256']['nocap-x.mp4'] == V21_FIRST['nocap-x.mp4'] and x, 'export both cuts together'
+            for name in ('manifest', 'validation'):
+                target = ASSETS / V21_HISTORY[name]
+                if not target.exists():
+                    shutil.copy2(ASSETS / f'{name}.json', target)
+            historical['v21_172s'] = {**V21_HISTORY, 'video_sha256': V21_FIRST['receipts-demo.mp4'],
+                                      'duration_s': previous['duration_s'], 'commit': '121a6cb'}
+            historical['v21_x_56s'] = {**V21_HISTORY, 'video_sha256': V21_FIRST['nocap-x.mp4'],
+                                       'duration_s': previous['x_cut']['duration_s'], 'commit': '121a6cb'}
+        elif previous['asset_sha256']['receipts-demo.mp4'] == V21_ENDCARD['receipts-demo.mp4'] != sha(video):
+            # The November 1 coverage-line update replaces the October 31 end-card export: keep its records too.
+            assert previous['asset_sha256']['nocap-x.mp4'] == V21_ENDCARD['nocap-x.mp4'] and x, 'export both cuts together'
+            for name in ('manifest', 'validation'):
+                target = ASSETS / V21_ENDCARD_HISTORY[name]
+                if not target.exists():
+                    shutil.copy2(ASSETS / f'{name}.json', target)
+            historical['v21_endcard_172s'] = {**V21_ENDCARD_HISTORY, 'video_sha256': V21_ENDCARD['receipts-demo.mp4'],
+                                              'duration_s': previous['duration_s'], 'commit': '5d6f7ed'}
+            historical['v21_endcard_x_56s'] = {**V21_ENDCARD_HISTORY, 'video_sha256': V21_ENDCARD['nocap-x.mp4'],
+                                               'duration_s': previous['x_cut']['duration_s'], 'commit': '5d6f7ed'}
+    for entry in historical.values():
+        for key in ('manifest', 'validation'):
+            assert (ASSETS / entry[key]).exists(), entry[key]
+    assert history.is_dir()
+
+    # README GIF: 20 continuous seconds of the Check scene at original speed (click Check, tiles, receipt).
+    shots = {shot['name']: shot for shot in manifest['timeline']}
+    start = round(shots['check']['start'] + 1.0, 2)
+    end = start + GIF_SECONDS
+    assert end <= shots['sources']['end'], 'GIF must stay inside the Check scene'
+    gif = ASSETS / 'receipts-demo.gif'
+    # palettegen reads its input to the end of the file, so a re-cut also depends on later scenes (the October 31
+    # end-card line shifts its palette). Keep the current GIF when its 20 seconds decode identically in the new MP4.
+    keep_gif = (gif.exists() and sha(gif) == previous['asset_sha256'].get('receipts-demo.gif')
+                and previous.get('gif', {}).get('start_s') == start
+                and gif_frames(ASSETS / 'receipts-demo.mp4', start) == gif_frames(video, start))
+
+    for source_name, target_name in ((video.name, 'receipts-demo.mp4'), (f'{OUTPUT["main"]}.en.srt', 'receipts-demo.en.srt'),
+                                     (f'{OUTPUT["main"]}.en.vtt', 'receipts-demo.en.vtt')):
+        shutil.copy2(folder / source_name, ASSETS / target_name)
+        if target_name.endswith(('.mp4', '.vtt')):
+            shutil.copy2(folder / source_name, PUBLIC / target_name)
+    if x:
+        x_folder = x[0]
+        for suffix, target_name in zip(('.mp4', '.en.srt', '.en.vtt'), X_ASSETS):
+            shutil.copy2(x_folder / f'{OUTPUT["x"]}{suffix}', ASSETS / target_name)
+
+    if not keep_gif:
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.2f}', '-i', str(ASSETS / 'receipts-demo.mp4'), '-t', f'{GIF_SECONDS:.2f}',
+                        '-vf', 'fps=10,scale=960:540:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a',
+                        '-loop', '0', str(gif)], check=True)
+    covered = [shot['name'] for shot in manifest['timeline'] if shot['end'] > start and shot['start'] < end]
+
+    names = ('receipts-demo.mp4', 'receipts-demo.gif', 'receipts-demo.en.srt', 'receipts-demo.en.vtt') + (X_ASSETS if x else ())
+    record = {
+        'schema_version': 4, 'product_brand': 'NoCap', 'version': 'v2.1 walkthrough',
+        'source_render': str(source.relative_to(ROOT)), 'capture_take': str(capture.relative_to(ROOT)),
+        'release_state': 'Repository export prepared; not deployed, published or submitted',
+        'published': False,
+        'end_card_update': (COVERAGE_UPDATE if 'v21_endcard_172s' in historical
+                            else END_CARD_UPDATE if 'v21_172s' in historical else None),
+        'earlier_end_card_updates': [END_CARD_UPDATE] if 'v21_endcard_172s' in historical else [],
+        'format': manifest['format'], 'product_pixels': manifest['product_pixels'],
+        'duration_s': manifest['duration_s'], 'video_probe': manifest['video_probe'],
+        'asset_sha256': {name: sha(ASSETS / name) for name in names},
+        'public_copies': {name: sha(PUBLIC / name) for name in ('receipts-demo.mp4', 'receipts-demo.en.vtt')},
+        'script_sha256': {name: sha(ROOT / 'docs/demo' / name) for name in SCRIPTS},
+        'gif': {'source': 'receipts-demo.mp4', 'start_s': start, 'end_s': round(end, 2), 'duration_s': GIF_SECONDS, 'fps': 10,
+                'resolution': [960, 540], 'speed': 1, 'audio': False, 'shots': covered,
+                'content': 'Check click, verdict tiles and the growth receipt, at original speed with burned-in captions'},
+        'narration': {key: value for key, value in manifest['narration'].items() if key != 'segments'},
+        'narration_segments': manifest['narration']['segments'],
+        'audio': manifest['audio'],
+        'captions': manifest['captions'], 'timeline': manifest['timeline'], 'edit_overlays': manifest['edit_overlays'],
+        'footage_commits': manifest['footage_commits'], 'capture': manifest['capture'], 'private_take': manifest['private_take'],
+        'cards_sha256': manifest['cards_sha256'], 'master_sha256': manifest['master_sha256'],
+        'source_validation': validation,
+        'x_cut': ({'files': list(X_ASSETS), 'duration_s': x[2]['duration_s'], 'video_probe': x[2]['video_probe'],
+                   'narration_segments': x[2]['narration']['segments'], 'captions': x[2]['captions'], 'caption_font_px': x[2]['caption_font_px'],
+                   'timeline': x[2]['timeline'], 'edit_overlays': x[2]['edit_overlays'], 'audio': x[2]['audio'],
+                   'cards_sha256': x[2]['cards_sha256'], 'source_validation': x[3]} if x else None),
+        'fresh_fix_evidence': '../fix-live-2026-10-29.json',
+        'voice_selection': '../voice-selection-v2.json',
+        'music_license': 'Original work synthesized by music_bed.py for this project (see ../narration-license.md)',
+        'privacy_review': 'Only repository examples, public SEC filings and recorded public-document runs; no participant draft, secret, account page or terminal',
+        'historical_exports': historical,
+        'new_provider_calls': 0, 'new_provider_spend_usd': 0,
+    }
+    (ASSETS / 'manifest.json').write_text(json.dumps(record, indent=2) + '\n')
+    print(json.dumps({'assets': record['asset_sha256'], 'gif_bytes': gif.stat().st_size, 'gif_kept': keep_gif, 'gif_interval': [start, round(end, 2)],
+                      'x_cut': bool(x), 'historical_exports': sorted(historical)}, indent=2))
+
+
+if __name__ == '__main__':
+    main()

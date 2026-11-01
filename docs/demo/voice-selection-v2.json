@@ -1,0 +1,503 @@
+{
+  "method": "Each voice reads the same v2 cues at speed 1.0. Local Whisper models transcribe each cue; word error rate compares normalized transcripts with the narration text. An automated intelligibility proxy, not a listening test.",
+  "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+  "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+  "cue_count": 27,
+  "reference_words": 365,
+  "voices": {
+    "am_michael": {
+      "catalogue": {
+        "target_quality": "B",
+        "training_duration": "H hours",
+        "overall_grade": "C+"
+      },
+      "speech_seconds": 155.09,
+      "words_per_minute": 141.2,
+      "peak_dbfs": -5.7,
+      "role": "candidate",
+      "whisper": {
+        "small": {
+          "word_error_rate": 0.0636,
+          "word_errors": 22,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c01",
+              "errors": 1,
+              "heard": "One wrong number in an earning story becomes a public correction."
+            },
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c10",
+              "errors": 1,
+              "heard": "Fixed with receipts, Muse Wonder proposes corrected numbers, and code lets only the digits change."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel. Check this roundup as of July 29th, 4pm UTC."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run. Three model calls 21 seconds about 3 cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "Sam 3.1 finds both bar charts. MuSpark reads the printed labels."
+            },
+            {
+              "cue": "c21",
+              "errors": 1,
+              "heard": "One Mu spark request reads all of it in six seconds. A hundred and one thousand input tokens. No retrieval, no truncation."
+            },
+            {
+              "cue": "c23",
+              "errors": 3,
+              "heard": "Open weights. Mews spark open on base 10, and Mews glimmer on our own modal GPU, answered 50 close book questions."
+            },
+            {
+              "cue": "c24",
+              "errors": 2,
+              "heard": "No caps gate passed, none of their wrong answers."
+            },
+            {
+              "cue": "c25",
+              "errors": 2,
+              "heard": "Private Check runs on Glimmer 2. One real browser test, one verified, one wrong, and nothing kept to replay."
+            }
+          ]
+        },
+        "medium": {
+          "word_error_rate": 0.0665,
+          "word_errors": 23,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c01",
+              "errors": 1,
+              "heard": "One wrong number in an earning story becomes a public correction."
+            },
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c09",
+              "errors": 2,
+              "heard": "and $2.22 is adjusted earnings per share. The gap figure was $2.46."
+            },
+            {
+              "cue": "c10",
+              "errors": 1,
+              "heard": "Fixed with receipts, Muse Wonder proposes corrected numbers, and code lets only the digits change."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "time travel. Check this roundup as of July 29th, 4 p.m. UTC."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run. Three model calls, 21 seconds, about three cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "SAM 3.1 finds both bar charts. MuSpark reads the printed labels."
+            },
+            {
+              "cue": "c21",
+              "errors": 3,
+              "heard": "One MuSpark request reads all of it in six seconds. 101,000 input tokens. No retrieval. No truncation."
+            },
+            {
+              "cue": "c24",
+              "errors": 2,
+              "heard": "No Caps Gate passed none of their wrong answers."
+            },
+            {
+              "cue": "c25",
+              "errors": 2,
+              "heard": "Private check runs on Glimmer 2. One real browser test. One verified, one wrong, and nothing kept to replay."
+            }
+          ]
+        }
+      }
+    },
+    "am_fenrir": {
+      "catalogue": {
+        "target_quality": "B",
+        "training_duration": "H hours",
+        "overall_grade": "C+"
+      },
+      "speech_seconds": 141.07,
+      "words_per_minute": 155.2,
+      "peak_dbfs": -0.5,
+      "role": "candidate",
+      "whisper": {
+        "small": {
+          "word_error_rate": 0.052,
+          "word_errors": 18,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c01",
+              "errors": 1,
+              "heard": "One wrong number in an earning story becomes a public correction."
+            },
+            {
+              "cue": "c04",
+              "errors": 2,
+              "heard": "Muse Spark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel, check this roundup as of July 29th 4pm UTC."
+            },
+            {
+              "cue": "c14",
+              "errors": 2,
+              "heard": "Microsoft's revenue figure is right, but it's filing reached Edgar hours later so it's marked not public yet."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run, 3 model calls, 21 seconds about 3 cents."
+            },
+            {
+              "cue": "c21",
+              "errors": 1,
+              "heard": "One Muse Spark request reads all of it in six seconds. 101,000 input tokens, no retrieval, no truncation."
+            },
+            {
+              "cue": "c24",
+              "errors": 3,
+              "heard": "No capsgate passed, none of their wrong answers."
+            },
+            {
+              "cue": "c25",
+              "errors": 2,
+              "heard": "Private check runs on Glimmer 2. One real browser test, one verified, one wrong and nothing kept to replay."
+            },
+            {
+              "cue": "c27",
+              "errors": 1,
+              "heard": "No cap for financial journalists and analysts, built during this hackathon by Robert Chang, try it live through November 17."
+            }
+          ]
+        },
+        "medium": {
+          "word_error_rate": 0.0694,
+          "word_errors": 24,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim, code checks everyone against the filings."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel, check this roundup as of July 29th 4pm UTC."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run, three model calls, 21 seconds about three cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "SAM 3.1 finds both bar charts, MuSpark reads the printed labels."
+            },
+            {
+              "cue": "c20",
+              "errors": 1,
+              "heard": "Ask a question of Mata's entire 10k, more than half a million characters."
+            },
+            {
+              "cue": "c21",
+              "errors": 3,
+              "heard": "One Mu's Spark request reads all of it in six seconds. 101,000 input tokens, no retrieval, no truncation."
+            },
+            {
+              "cue": "c24",
+              "errors": 4,
+              "heard": "No caps skate past none of their wrong answers."
+            },
+            {
+              "cue": "c25",
+              "errors": 2,
+              "heard": "Private check runs on Glimmer 2. One real browser test, one verified, one wrong, and nothing kept to replay."
+            },
+            {
+              "cue": "c26",
+              "errors": 2,
+              "heard": "Unheld out tests no cap caught 44 of 48 planted errors."
+            }
+          ]
+        }
+      }
+    },
+    "am_puck": {
+      "catalogue": {
+        "target_quality": "B",
+        "training_duration": "H hours",
+        "overall_grade": "C+"
+      },
+      "speech_seconds": 141.24,
+      "words_per_minute": 155.1,
+      "peak_dbfs": -0.0,
+      "role": "candidate",
+      "whisper": {
+        "small": {
+          "word_error_rate": 0.0896,
+          "word_errors": 31,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c01",
+              "errors": 1,
+              "heard": "One wrong number in an earning story becomes a public correction."
+            },
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel, check this roundup as of July 29th, 4pm UTC."
+            },
+            {
+              "cue": "c14",
+              "errors": 2,
+              "heard": "Microsoft's revenue figure is right, but it's filing reached Edgar hours later, so it's marked not public yet."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run, three model calls, 21 seconds, about 3 cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "SAM 3.1 finds both bar charts. MuseSpark reads the printed labels."
+            },
+            {
+              "cue": "c18",
+              "errors": 4,
+              "heard": "All five GapNet interest income bars verify. The non-GapTotal stay unverifiable."
+            },
+            {
+              "cue": "c21",
+              "errors": 3,
+              "heard": "OneMew's Spark Request reads all of it in six seconds. 101,000 input tokens, no retrieval, no truncation."
+            },
+            {
+              "cue": "c24",
+              "errors": 3,
+              "heard": "No capsgate passed none of their wrong answers."
+            },
+            {
+              "cue": "c25",
+              "errors": 4,
+              "heard": "PrivateCheck runs on Glimmer 2. One real browser test, one verified, one wrong, and nothing kept to replay."
+            },
+            {
+              "cue": "c26",
+              "errors": 2,
+              "heard": "Unheld out tests, no cap caught 44 of 48 planted errors."
+            }
+          ]
+        },
+        "medium": {
+          "word_error_rate": 0.0751,
+          "word_errors": 26,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c09",
+              "errors": 2,
+              "heard": "and 2.22 is adjusted earnings per share. The gap figure was 2.46."
+            },
+            {
+              "cue": "c10",
+              "errors": 2,
+              "heard": "Fix with receipts. MuseWonder proposes corrected numbers and code lets only the digits change."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel, check this roundup as of July 29th, 4pm UTC."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run, 3 model calls, 21 seconds, about 3 cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "SAM 3.1 finds both bar charts. MuseSpark reads the printed labels."
+            },
+            {
+              "cue": "c21",
+              "errors": 2,
+              "heard": "One Mews Spark request reads all of it in six seconds. 101,000 input tokens, no retrieval, no truncation."
+            },
+            {
+              "cue": "c23",
+              "errors": 2,
+              "heard": "Open Wait's Muse Spark Open on base 10 and Muse Glimmer on our own modal GPU answered 50 closed book questions."
+            },
+            {
+              "cue": "c24",
+              "errors": 4,
+              "heard": "No caps skate past none of their wrong answers."
+            },
+            {
+              "cue": "c25",
+              "errors": 2,
+              "heard": "Private check runs on Glimmer 2. One real browser test, one verified, one wrong, and nothing kept to replay."
+            }
+          ]
+        }
+      }
+    },
+    "af_heart": {
+      "catalogue": {
+        "target_quality": null,
+        "training_duration": null,
+        "overall_grade": "A"
+      },
+      "speech_seconds": 139.86,
+      "words_per_minute": 156.6,
+      "peak_dbfs": -5.8,
+      "role": "v1 reference only",
+      "whisper": {
+        "small": {
+          "word_error_rate": 0.0607,
+          "word_errors": 21,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c01",
+              "errors": 1,
+              "heard": "One wrong number in an earning story becomes a public correction."
+            },
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c09",
+              "errors": 2,
+              "heard": "and $222 is adjusted earnings per share. The gap figure was $246."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel. Check this roundup as of July 29th, 4 p.m. UTC."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run. Three model calls, 21 seconds, about 3 cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "SAM 3.1 finds both bar charts. MuseSpark reads the printed labels."
+            },
+            {
+              "cue": "c20",
+              "errors": 1,
+              "heard": "Ask a question of Metta's entire 10k, more than half a million characters."
+            },
+            {
+              "cue": "c21",
+              "errors": 1,
+              "heard": "One MUSE Spark request reads all of it in six seconds. 101,000 input tokens, no retrieval, no truncation."
+            },
+            {
+              "cue": "c23",
+              "errors": 1,
+              "heard": "Open weights. Muse Spark Open on base 10, and Muse Glimmer on our own modal GPU, answered 50 close book questions."
+            },
+            {
+              "cue": "c24",
+              "errors": 3,
+              "heard": "No capsgate passed none of their wrong answers."
+            }
+          ]
+        },
+        "medium": {
+          "word_error_rate": 0.0549,
+          "word_errors": 19,
+          "reference_tokens": 346,
+          "cues_with_errors": [
+            {
+              "cue": "c04",
+              "errors": 4,
+              "heard": "MuSpark pulls out each claim. Code checks everyone against the filings."
+            },
+            {
+              "cue": "c09",
+              "errors": 2,
+              "heard": "and $2.22 is adjusted earnings per share. The gap figure was $2.46."
+            },
+            {
+              "cue": "c13",
+              "errors": 4,
+              "heard": "Time travel. Check this roundup as of July 29th, 4pm UTC."
+            },
+            {
+              "cue": "c16",
+              "errors": 2,
+              "heard": "It's recorded live run. Three model calls, 21 seconds, about three cents."
+            },
+            {
+              "cue": "c17",
+              "errors": 2,
+              "heard": "SAM 3.1 finds both bar charts. MuseSpark reads the printed labels."
+            },
+            {
+              "cue": "c21",
+              "errors": 3,
+              "heard": "One MuSpark request reads all of it in six seconds. 101,000 input tokens, no retrieval, no truncation."
+            },
+            {
+              "cue": "c24",
+              "errors": 2,
+              "heard": "No caps gate passed none of their wrong answers."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "ranking_by_mean_wer": [
+    "am_fenrir",
+    "am_michael",
+    "am_puck"
+  ],
+  "human_listening_approval": false
+}

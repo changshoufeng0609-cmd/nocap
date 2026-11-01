@@ -80,9 +80,14 @@ def test_slide_and_fix_share_rate_limit(tmp_path):
 def test_failed_model_settles_estimate_and_redacts_provider_message(tmp_path):
     c = client(tmp_path, Model(spark_error="SECRET_UPLOAD_AND_KEY"))
     response = c.post("/api/slide", json={"image_data_url": image_url()})
-    assert events(response)[-1][0] == "error"
+    error = events(response)[-1]
+    assert error[0] == "error"
     assert "SECRET_UPLOAD_AND_KEY" not in response.text
-    assert c.app.state.ledger.spent_today() == pytest.approx(slides.RESERVE_USD)  # unknown usage retains precharge
+    # Every attempt was accounted, so the failed Spark call keeps its own $0.10 estimate, not the whole precharge.
+    assert error[1]["cost_is_estimate"] is True
+    assert slides.SPARK_UNKNOWN_USAGE_USD <= error[1]["cost_usd"] < slides.RESERVE_USD
+    # The ledger rounds each settlement up to a whole micro-dollar, so float noise can add one.
+    assert error[1]["cost_usd"] <= c.app.state.ledger.spent_today() <= error[1]["cost_usd"] + 2e-6
     assert c.app.state.ledger.pending_count() == 0
 
 

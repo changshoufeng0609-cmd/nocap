@@ -114,6 +114,44 @@ def test_schema_is_strict_and_matches_the_contract():
     assert not {"span_start", "span_end", "id"} & set(item["properties"])  # offsets come from code
 
 
+@pytest.mark.parametrize("text", [
+    "x" * 12000,
+    ("Revenue was $12 million. " * 500)[:12000],
+    "  " + "x" * 5990 + "  revenue $12 million. " + "y" * 5988,
+    ("x\n\n" * 4000),
+])
+def test_long_draft_passages_preserve_source_offsets_and_size_bound(text):
+    passages = ex.split_passages(text)
+    assert all(0 < len(p) <= ex.MAX_PASSAGE_CHARS for _, p in passages)
+    assert all(text[start:start + len(p)] == p for start, p in passages)
+    cursor = 0
+    for start, passage in passages:
+        assert not text[cursor:start].strip()  # no non-whitespace text was lost or duplicated
+        cursor = start + len(passage)
+    assert not text[cursor:].strip()
+    assert len(passages) <= 4000  # max blank-line fanout of a 12,000-character draft
+
+
+def test_old_passages_keep_the_same_requests_and_cache_keys():
+    backend = ex.BACKENDS["meta"]
+    text = "  " + "x" * 6000 + "\n\n " + P2 + " \n"
+    passages = ex.split_passages(text)
+    assert passages == [(2, "x" * 6000), (6005, P2)]
+    expected = [ex.request_key(ex.build_request(p, CONTEXT, backend=backend), backend) for _, p in passages]
+    assert ex.request_keys(text, CONTEXT, backend=backend) == expected
+
+
+def test_12000_character_extraction_keeps_existing_concurrency_and_output_bounds(tmp_path):
+    text = "\n\n".join(f"Passage {i}.".ljust(598, "x") for i in range(20)) + "xx"
+    assert len(text) == 12000
+    passages = ex.split_passages(text)
+    api = MockAPI(replies={p: [] for _, p in passages}, delay=.005)
+    result = run(api, tmp_path, text=text, use_cache=False)
+    assert len(result.calls) == len(passages) == 20
+    assert api.max_in_flight <= ex.CONCURRENCY
+    assert all(r["body"]["max_output_tokens"] == ex.MAX_OUTPUT_TOKENS for r in api.requests)
+
+
 def test_one_call_per_passage_with_the_context_line(tmp_path):
     api = MockAPI()
     res = run(api, tmp_path)

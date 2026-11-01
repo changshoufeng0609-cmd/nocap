@@ -138,12 +138,13 @@ _FY_RE = re.compile(r"\bfiscal\s+(?:year\s+)?(?P<y4>\d{4})\b|(?<![a-z])fy\s*'?\s
 _YEAR_RE = re.compile(r"(?<![0-9])(?P<y>(?:19|20)\d{2})(?![0-9])")
 _FISCAL_WORD_RE = re.compile(r"\bfiscal\b|(?<![a-z])fy(?![a-z])")
 _YTD_RE = re.compile(r"\b(?:six|nine|6|9)[\s-]+months?\b|\b(?:first|second)\s+half\b|(?<![a-z0-9])(?:h[12]|[12]h)"
-                     r"(?![a-z0-9])|\byear[\s-]to[\s-]date\b|\bytd\b|\b(?:26|39)[\s-]+weeks\b")
+                     r"(?![a-z0-9])|\byear[\s-]to[\s-]date\b|\bytd\b|\b(?:24|26|28|36|39|40)[\s-]+weeks?\b")
+_WEEKS_RE = re.compile(r"\b(?P<weeks>\d+)[\s-]+weeks?\b")
 _ANNUAL_RE = re.compile(r"\bfull[\s-]+(?:fiscal[\s-]+)?year\b|\btwelve[\s-]+months\b|\b12[\s-]+months\b"
-                        r"|\b5[23][\s-]+weeks\b|\bannual\b|\byear\s+ended\b"
+                        r"|\b5[23][\s-]+weeks?\b|\bannual\b|\byear\s+ended\b"
                         r"|\b(?:the|this|that)\s+(?:fiscal\s+)?year\b(?![\s-]+(?:ago|earlier))")
 _FISCAL_YEAR_RE = re.compile(r"\bfiscal\s+year\b")
-_QUARTER_RE = re.compile(r"\bquarter(?:ly)?\b|\bthree[\s-]+months\b|\b3[\s-]+months\b|\b1[34][\s-]+weeks\b|\bqtr\b")
+_QUARTER_RE = re.compile(r"\bquarter(?:ly)?\b|\bthree[\s-]+months\b|\b3[\s-]+months\b|\b1[2-7][\s-]+weeks?\b|\bqtr\b")
 _SHIFT_YEAR_RE = re.compile(r"\ba\s+year\s+(?:ago|earlier|before)\b|\byear[\s-]+(?:ago|earlier)\b|\bprior[\s-]+year\b"
                             r"|\bprevious\s+year\b|\bsame\s+(?:quarter|period)\s+(?:of\s+)?(?:a|the\s+prior|the\s+previous"
                             r"|last)\s+year\b")
@@ -165,6 +166,7 @@ class ParsedPeriod:
     end: Optional[date] = None      # an explicit end date
     shift: Optional[str] = None     # "year" | "quarter" | "ambiguous": a comparison-base phrase
     month: Optional[int] = None     # "June quarter": the quarter that ends in this calendar month
+    weeks: Optional[int] = None     # an explicit duration, checked against inclusive calendar dates
 
 
 def _year(s: str) -> int:
@@ -225,7 +227,10 @@ def parse(text: Optional[str]) -> ParsedPeriod:
         kind = None
     shift = ("year" if _SHIFT_YEAR_RE.search(s) else "quarter" if _SHIFT_QUARTER_RE.search(s)
              else "ambiguous" if _SHIFT_AMBIGUOUS_RE.search(s) else None)
-    return ParsedPeriod(kind, quarter, year, fiscal, end, shift, month)
+    counts = {int(wm.group("weeks")) for wm in _WEEKS_RE.finditer(s)}
+    if len(counts) > 1:
+        kind = "conflict"
+    return ParsedPeriod(kind, quarter, year, fiscal, end, shift, month, min(counts) if counts else None)
 
 
 # ---------------------------------------------------------------------------
@@ -292,7 +297,16 @@ def shift(rp: ResolvedPeriod, cal: list[CalEntry], *, years: int = 0, quarters: 
 
 
 def _hint(period_type: Optional[str]) -> Optional[str]:
-    return {"quarter": "quarter", "annual": "annual"}.get(period_type or "")
+    return {"quarter": "quarter", "annual": "annual", "year_to_date": "ytd"}.get(period_type or "")
+
+
+def _check_weeks(rp: Optional[ResolvedPeriod], cal: list[CalEntry], weeks: Optional[int]) -> Optional[ResolvedPeriod]:
+    if rp is None or weeks is None:
+        return rp
+    entry = lookup(cal, rp.fiscal_year, rp.fiscal_period)
+    if entry is None or entry.start is None or (entry.end - entry.start).days + 1 != weeks * 7:
+        return None
+    return rp
 
 
 def _nominal(end: date) -> date:
@@ -320,6 +334,9 @@ def _by_month(cal: list[CalEntry], p: ParsedPeriod, context: Optional[str],
     if p.year is not None:
         return _at(cal, p.year if p.fiscal else p.year + offset, fp)
     c = parse(context) if context else None
+    if (c is not None and c.weeks is not None and (c.end is None or any(e.end == c.end for e in cal))
+            and resolve_in_calendar(context, cal, as_of=as_of) is None):
+        return None  # a context's unsupported duration cannot anchor a month-named quarter
     if c is not None and c.end is not None:
         anchor = c.end + timedelta(days=7)  # another company's quarter may end a few days later in the same month
     elif c is not None and c.year is not None and c.kind not in ("ytd", "conflict"):
@@ -337,13 +354,13 @@ def _by_month(cal: list[CalEntry], p: ParsedPeriod, context: Optional[str],
     return _at(cal, year + offset, fp)
 
 
-def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, context: Optional[str] = None,
-                        period_type: Optional[str] = None, comparison: Optional[str] = None,
-                        as_of: Any = None) -> Optional[ResolvedPeriod]:
+def _resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, context: Optional[str] = None,
+                         period_type: Optional[str] = None, comparison: Optional[str] = None,
+                         as_of: Any = None) -> Optional[ResolvedPeriod]:
     p = parse(period_text)
     hint = _hint(period_type)
     level = comparison in (None, "none")  # a comparison-base phrase moves a level claim, not a percent change
-    if p.kind in ("ytd", "conflict"):
+    if p.kind in ("ytd", "conflict") or hint == "ytd":
         return None
     if p.end is not None:
         return _by_end(cal, p.end, kind=p.kind or hint, quarter=p.quarter)
@@ -367,12 +384,38 @@ def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, cont
         return None
     else:
         base = _by_year(cal, c)
+    base = _check_weeks(base, cal, c.weeks)
     if base is None:
         return None
     rp = _merge(p, base, cal, hint)
     if rp is not None and level and p.shift in ("year", "quarter"):
         rp = shift(rp, cal, years=-1 if p.shift == "year" else 0, quarters=-1 if p.shift == "quarter" else 0)
     return rp
+
+
+def resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, context: Optional[str] = None,
+                        period_type: Optional[str] = None, comparison: Optional[str] = None,
+                        as_of: Any = None) -> Optional[ResolvedPeriod]:
+    rp = _resolve_in_calendar(period_text, cal, context=context, period_type=period_type,
+                              comparison=comparison, as_of=as_of)
+    return _check_weeks(rp, cal, parse(period_text).weeks)
+
+
+def unresolved_reason(period_text: Optional[str], *, context: Optional[str] = None,
+                      period_type: Optional[str] = None) -> Optional[str]:
+    """Explain a rejected week duration or YTD hint; keep other ambiguity explanations unchanged."""
+    p = parse(period_text)
+    c = parse(context)
+    if (p.weeks is not None and p.kind == "ytd") or (period_type == "year_to_date" and p.kind != "ytd") or (
+            p.weeks is None and c.weeks is not None and c.kind == "ytd"):
+        return "NoCap does not serve year-to-date figures, so this period cannot be checked against a single quarter."
+    if p.kind == "conflict" and p.weeks is not None:
+        return "The period wording gives conflicting durations, so NoCap cannot identify one fiscal period."
+    weeks = p.weeks if p.weeks is not None else c.weeks
+    if weeks is not None:
+        return (f"Couldn't match the stated {weeks}-week duration and period to a fiscal period with known "
+                "start and end dates.")
+    return None
 
 
 def resolve_period(period_text: Optional[str], store: EvidenceStore, cik: int, *, context: Optional[str] = None,

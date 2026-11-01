@@ -7,7 +7,7 @@ import re
 import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Callable, Iterator, Literal, Optional
 
@@ -15,12 +15,16 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from receipts import extract, verify
 from receipts.types import Basis, Claim, Fact, Metric
-from receipts.store import normalize_entity
+from receipts.store import (EntityIndex, build_entity_index, company_aliases, find_mentions, fold, normalize_entity,
+                            scan_tokens)
 
 SPARK = extract.make_backend("meta", model="muse-spark-1.3")
 MAX_QUESTION_CHARS = 1500
 MAX_OUTPUT_TOKENS = 2000
 MAX_METRICS = 4
+MAX_REQUEST_BYTES = 64_000
+MAX_HINT_COMPANIES = 5   # the companies a request names: a hint for the model, re-checked by bind_question
+OPTIONS_PERIODS = 8      # fiscal periods per company that /api/ask/options lists (the most recent ones)
 ASK_METRICS = ("revenue", "operating_income", "net_income", "eps_diluted", "eps_basic",
                "gross_profit", "cost_of_revenue", "research_and_development", "operating_expenses",
                "operating_cash_flow", "free_cash_flow", "net_interest_income", "gross_margin",
@@ -66,6 +70,7 @@ class AskStats:
     model_calls: int = 0
     complete: bool = False
     estimated_calls: int = 0
+    tokens: dict[str, int] = field(default_factory=dict)  # provider-reported usage, when the response carried it
 
     @property
     def cost_is_estimate(self) -> bool:
@@ -80,6 +85,10 @@ class AskStats:
         return {"cost_usd": round(self.cost_usd, 6), "cost_is_estimate": self.cost_is_estimate,
                 "model_calls": self.model_calls}
 
+    def add_tokens(self, tokens: dict[str, int]) -> None:
+        for key, count in tokens.items():
+            self.tokens[key] = self.tokens.get(key, 0) + count
+
 
 def validate_question(question: str) -> str:
     if not isinstance(question, str) or not question.strip() or len(question) > MAX_QUESTION_CHARS:
@@ -87,16 +96,57 @@ def validate_question(question: str) -> str:
     return question.strip()
 
 
-def companies(store: Any) -> list[dict[str, Any]]:
-    """The database, rather than a model or fixed ticker list, defines available companies."""
+def companies(store: Any, *, max_periods: int = OPTIONS_PERIODS) -> list[dict[str, Any]]:
+    """The database, rather than a model or fixed ticker list, defines available companies. Each lists its most recent
+    max_periods fiscal periods, so the list grows with the number of companies, not with their history."""
     rows = store._rows("SELECT cik, ticker, name FROM companies ORDER BY ticker")
     return [{"ticker": row["ticker"], "name": row["name"],
              "periods": [{"fiscal_year": fy, "fiscal_period": fp}
-                         for fy, fp, _, _ in store.fiscal_calendar(row["cik"])]} for row in rows]
+                         for fy, fp, _, _ in store.fiscal_calendar(row["cik"])[-max_periods:]]} for row in rows]
+
+
+def lookup_companies(store: Any) -> list[dict[str, Any]]:
+    """Every company with the keys a question may name it by (its lookup keys and its everyday-word name, "flex" for
+    Flex Ltd.), from the store's cached entity index: the list build_request picks the request's companies from. No
+    periods: bind_question and answer_plan check those."""
+    index = _entity_index(store)
+    keys: dict[int, set[str]] = {}
+    for key, hits in (*index.lookup.items(), *index.words.items()):
+        for cik, _ticker in hits:
+            keys.setdefault(cik, set()).add(key)
+    return [{"ticker": ticker, "name": name, "keys": sorted(keys.get(cik, ()))}
+            for cik, ticker, name, _ in sorted(index.rows, key=lambda r: r[1])]
+
+
+def question_companies(question: str, available: list[dict[str, Any]], *,
+                       limit: int = MAX_HINT_COMPANIES) -> list[dict[str, Any]]:
+    """The available companies whose keys appear in the question, in order of first mention, at most `limit`. Any
+    phrase counts, everyday-word names included ("Visa", "Target"), because this list is only a hint: bind_question
+    decides which company the question names. A company without "keys" is matched by its ticker and name."""
+    by_key: dict[str, list[int]] = {}
+    for i, company in enumerate(available):
+        keys = company.get("keys")
+        if keys is None:
+            keys = company_aliases(str(company.get("ticker", "")), str(company.get("name", "")))
+        for key in keys:
+            by_key.setdefault(key, []).append(i)
+    words = [w.lower() for w, _, _ in scan_tokens(question)[1]]
+    picked: dict[int, None] = {}
+    for start in range(len(words)):
+        for n in range(min(6, len(words) - start), 0, -1):
+            phrase = " ".join(words[start:start + n])
+            hits = by_key.get(phrase) or by_key.get(normalize_entity(phrase))
+            if hits:
+                picked.update(dict.fromkeys(hits))
+                break
+    return [available[i] for i in list(picked)[:limit]]
 
 
 def build_request(question: str, *, available_companies: list[dict[str, Any]]) -> dict[str, Any]:
+    """The lookup request: the question, the companies it names (question_companies: tickers and names only, at most
+    MAX_HINT_COMPANIES) and the metric vocabulary. Its size no longer depends on how many companies NoCap covers."""
     question = validate_question(question)
+    hint = [{"ticker": c["ticker"], "name": c["name"]} for c in question_companies(question, available_companies)]
     request = {
         "model": SPARK.model,
         "instructions": (
@@ -111,13 +161,13 @@ def build_request(question: str, *, available_companies: list[dict[str, Any]]) -
             "comparisons, ratios, qualitative explanations, multiple companies/periods, or metrics outside "
             "the supplied vocabulary. Never supply values, verdicts, URLs, SQL or free-form answers."
         ),
-        "input": json.dumps({"question": question, "companies": available_companies,
+        "input": json.dumps({"question": question, "companies": hint,
                              "supported_metrics": ASK_METRICS}, ensure_ascii=False),
         "reasoning": {"effort": "minimal"}, "max_output_tokens": MAX_OUTPUT_TOKENS, "store": False,
         "text": {"format": {"type": "json_schema", "name": "financial_lookup",
                               "schema": extract.build_json_schema(LookupPlan), "strict": True}},
     }
-    if len(json.dumps(request, ensure_ascii=False).encode()) > 64_000:
+    if len(json.dumps(request, ensure_ascii=False).encode()) > MAX_REQUEST_BYTES:
         raise AskError("The available lookup context is too large.")
     return request
 
@@ -147,10 +197,58 @@ def call_proposal(request: dict[str, Any], *, client_factory: Callable[[], Any],
         # Freezing this meter retains estimates for a still-running attempt. Its late response
         # cannot refund the settled amount, publish an answer, or authorize another SDK call.
         stats.account(usage.finish())
+        stats.add_tokens(usage.observed_tokens())
         pool.shutdown(wait=False, cancel_futures=True)
     if getattr(response, "status", None) != "completed":
         raise AskError("The model did not complete its proposal. No answer was accepted.")
     return response.output_text or ""
+
+
+def normalized_question(question: str) -> str:
+    """The question as bind_question reads it: lowercase, possessives and dots dropped, every word kept.
+    Entity normalization intentionally drops parenthetical aliases; doing that to a question can erase restrictions
+    such as "(excluding China)". All question words are preserved, including unknown Unicode words and arithmetic
+    operators, for the residual-intent check."""
+    q = unicodedata.normalize("NFKC", question).lower().replace("’", "'")
+    q = re.sub(r"'s\b", "", q).replace("&", " and ").replace(".", "").replace("'", "")
+    q = re.sub(r"\bnon-gaap\b", "non gaap", q)
+    q = "".join(char if (char.isalnum() or char in "%/+*=<>-"
+                        or unicodedata.category(char).startswith("S")
+                        or unicodedata.category(char) == "Pd") else " " for char in q).strip()
+    return re.sub(r"\s+", " ", q)
+
+
+def _entity_index(store: Any) -> EntityIndex:
+    """The store's cached EntityIndex (receipts.store.Store), else one built from its companies rows."""
+    cached = getattr(store, "entity_index", None)
+    if callable(cached):
+        return cached()
+    rows = store._rows("SELECT cik, ticker, name, aliases FROM companies")
+    return build_entity_index((r["cik"], r["ticker"], r["name"], r["aliases"] if "aliases" in r.keys() else None)
+                              for r in rows)
+
+
+_NAME_JOIN = re.compile(r"[ \-\u2010-\u2015]+")  # "Coca-Cola" is one name; "NVIDIA/Microsoft" two
+
+
+def question_mentions(question: str, store: Any, proposed: Optional[int] = None) -> tuple[set[int], list[tuple[int, int]]]:
+    """(CIKs of the companies the question names, the spans of normalized_question(question) that name them).
+
+    A name counts in any case ("nvidia", "Coca-Cola"); a bare ticker only as that word in capitals outside an all-caps
+    run ("NVDA", "(NVDA)", "NVDA GAAP"), never a word ticker ("cost of revenue" names no Costco). A one-word name that is
+    also an ordinary word (WORD_NAMES: "Visa", "Target", "Chevron") counts only for `proposed`, the CIK the model's
+    lookup resolved to, and never for any other company: "Visa's revenue target" names Visa alone. Written with a
+    legal suffix ("Target Corp.") it names its company whatever was proposed."""
+    q = normalized_question(question)
+    index = _entity_index(store)
+    qtokens = [(m.group(), m.start(), m.end()) for m in re.finditer(r"\w+", q)]
+    s, cased = scan_tokens(question)  # the question's own capitals and punctuation, word for word with q
+    if [w.lower() for w, _, _ in cased] != [fold(w) for w, _, _ in qtokens]:
+        s, cased = q, qtokens  # can't line them up (unusual Unicode): no capitals, so no bare ticker counts
+    joins = [bool(_NAME_JOIN.fullmatch(q[a[2]:b[1]])) for a, b in zip(qtokens, qtokens[1:])]
+    found = find_mentions(s, cased, index, proposed=proposed, joins=joins)
+    return ({cik for _, _, hits in found for cik, _ in hits},
+            [(qtokens[i][1], qtokens[j - 1][2]) for i, j, _ in found])
 
 
 def bind_question(question: str, plan: LookupPlan, store: Any) -> None:
@@ -163,39 +261,13 @@ def bind_question(question: str, plan: LookupPlan, store: Any) -> None:
         return  # answer_plan will return a clarification without a value
     message = ("The proposed lookup could not be matched safely to the question. Specify one company, "
                "an explicit fiscal period (for example Q2 FY2027), accounting basis and metric.")
-    # Entity normalization intentionally drops parenthetical aliases; doing that to a question
-    # can erase restrictions such as "(excluding China)". Preserve all question words, including
-    # unknown Unicode words and arithmetic operators, for the residual-intent check below.
-    q = unicodedata.normalize("NFKC", question).lower().replace("’", "'")
-    q = re.sub(r"'s\b", "", q).replace("&", " and ").replace(".", "").replace("'", "")
-    q = re.sub(r"\bnon-gaap\b", "non gaap", q)
-    q = "".join(char if (char.isalnum() or char in "%/+*=<>-"
-                        or unicodedata.category(char).startswith("S")
-                        or unicodedata.category(char) == "Pd") else " " for char in q).strip()
-    q = re.sub(r"\s+", " ", q)
+    q = normalized_question(question)
     if re.search(r"\b(?:buy|sell|invest|investment|recommend|recommendation|forecast|predict|should|will|compare|versus|vs|growth|ratio|difference|increase|decrease|not|except|excluding)\b", q):
         raise AskError(message)
     proposed = store.resolve_entity(plan.entity)
     if proposed is None:
         return  # unresolved entity cannot produce an answer
-    mentioned = set()
-    consumed: list[tuple[int, int]] = []
-    for row in store._rows("SELECT cik, ticker, name, aliases FROM companies"):
-        aliases = [row["ticker"], row["name"]]
-        if "aliases" in row.keys():
-            aliases += json.loads(row["aliases"])
-        # Keep a full legal name as well as its entity key so "NVIDIA CORP" is recognized
-        # without allowing arbitrary unbound words elsewhere in the question.
-        variants = {variant for alias in aliases for variant in (
-            normalize_entity(alias),
-            re.sub(r"[^0-9a-z]+", " ", unicodedata.normalize("NFKC", alias).lower()
-                   .replace("&", " and ").replace(".", "")).strip(),
-        ) if variant}
-        hits = [match for alias in variants for match in re.finditer(
-            r"(?<!\w)" + re.escape(alias) + r"(?!\w)", q)]
-        if hits:
-            mentioned.add(row["cik"])
-            consumed.extend((match.start(), match.end()) for match in hits)
+    mentioned, consumed = question_mentions(question, store, proposed=proposed[0])
     if mentioned != {proposed[0]}:
         raise AskError(message)
     years = {int(y) for y in re.findall(r"(?<!\d)(20\d{2})(?!\d)", q)}
@@ -258,9 +330,12 @@ def bind_question(question: str, plan: LookupPlan, store: Any) -> None:
 
 
 def _number(fact: Fact) -> str:
+    """The exact filed value with thousands separators: '$96,221,000,000', '$2.46', '105.9%'."""
     value = format(Decimal(str(fact.value)), "f")
     if "." in value:
         value = value.rstrip("0").rstrip(".")
+    whole, dot, fraction = value.partition(".")
+    value = f"{'-' if whole.startswith('-') else ''}{int(whole.lstrip('-')):,}{dot}{fraction}"
     return ("$" + value if fact.unit in ("USD", "USD/share") else
             value + "%" if fact.unit == "%" else value)
 
@@ -280,6 +355,19 @@ def fact_claim(fact: Fact, index: int) -> tuple[str, Claim]:
                   comparison="none", basis=fact.basis, forward_looking=False, entity=fact.ticker,
                   segment=fact.segment, span_text=sentence, span_start=0, span_end=len(sentence))
     return sentence, claim
+
+
+def _known_company(store: Any, fact: Fact) -> dict[str, Any]:
+    """verify's entity for a claim written from one stored fact: the company stored under the fact's own ticker
+    (Store.by_ticker), so "GS", "KO" or "FLEX" verify like any ticker although a draft's "GS" never names a company.
+    A store without by_ticker resolves the claim's ticker as before."""
+    by_ticker = getattr(store, "by_ticker", None)
+    if not callable(by_ticker):
+        return {}
+    found = by_ticker(fact.ticker)
+    if found is None or int(found[0]) != int(fact.cik):  # never expected: then the fact is withheld, not re-resolved
+        raise AskError("The selected evidence does not belong to a covered company.")
+    return {"entity": found}
 
 
 def answer_plan(plan: LookupPlan, *, store: Any, as_of: Any = None) -> dict[str, Any]:
@@ -315,10 +403,11 @@ def answer_plan(plan: LookupPlan, *, store: Any, as_of: Any = None) -> dict[str,
         fact = latest[0]
         try:
             sentence, claim = fact_claim(fact, len(result["items"]) + 1)
+            known = _known_company(store, fact)
         except AskError:
             notes.append(f"Incomplete evidence for {metric.replace('_', ' ')}.")
             continue
-        verdict = verify.verify(claim, store, as_of=cutoff)
+        verdict = verify.verify(claim, store, as_of=cutoff, **known)
         withheld = verdict.status != "verified" or not verdict.evidence
         ids = []
         if not withheld:

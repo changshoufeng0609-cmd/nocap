@@ -17,6 +17,7 @@ import contextlib
 import hashlib
 import json
 import logging
+import math
 import os
 import tempfile
 import time
@@ -30,17 +31,19 @@ from pydantic import ValidationError
 from receipts import extract as _extract
 from receipts import verify as _verify
 from receipts.coverage import numeric_coverage, validate_coverage
-from receipts.types import Claim, EvidenceStore, Verdict
+from receipts.types import COUNT_KEYS, Claim, EvidenceStore, Verdict, count_key
 
 log = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MODEL = _extract.MODEL
-STATUSES = ("verified", "wrong", "unverifiable", "approximate")
 CACHE_VERSION = 1
 KEEPALIVE = ": keep-alive\n\n"  # an SSE comment; EventSource-style parsers ignore it
-# The modules whose code decides what a check returns. A stream recorded under other code is not replayed.
-RESULT_MODULES = ("types.py", "extract.py", "coverage.py", "periods.py", "verify.py", "store.py", "stream.py")
+# The modules whose code decides what a check returns. A stream recorded under other code is not replayed. Every
+# receipts module these import is listed (tests/test_code_review_fixes.py checks it): splits.py holds the split table.
+RESULT_MODULES = ("types.py", "extract.py", "coverage.py", "periods.py", "verify.py", "store.py", "splits.py",
+                  "stream.py", "balance_sheet.py", "fiscal_labels.py", "ingest.py", "edgar.py",
+                  "filing_xbrl.py", "press_release.py", "release_gates.py")
 
 Event = tuple[str, dict[str, Any]]
 
@@ -231,7 +234,7 @@ class CheckStats:
     passages_failed: int = 0
     model_calls: int = 0
     estimated_calls: int = 0
-    counts: dict[str, int] = field(default_factory=lambda: dict.fromkeys(STATUSES, 0))
+    counts: dict[str, int] = field(default_factory=lambda: dict.fromkeys(COUNT_KEYS, 0))  # receipts.types.count_key
     events: list[Event] = field(default_factory=list)  # every event sent, in order, for the cache
     error: Optional[str] = None     # short internal reason when the stream ended with an error event
 
@@ -245,10 +248,11 @@ class CheckStats:
 
 
 def verdict_for(claim: Claim, store: EvidenceStore, as_of: Optional[datetime], context: Optional[str],
-                draft_hash: str = "") -> Verdict:
-    """receipts.verify.verify with the receipts.check fallback: one bad claim must not sink the draft."""
+                draft_hash: str = "", named: Optional[list] = None) -> Verdict:
+    """receipts.verify.verify with the receipts.check fallback: one bad claim must not sink the draft. named: the
+    companies the draft names (receipts.verify.named_in_draft), as receipts.check passes them."""
     try:
-        return _verify.verify(claim, store, as_of=as_of, context=context)
+        return _verify.verify(claim, store, as_of=as_of, context=context, **({"named": named} if named else {}))
     except Exception as e:
         log.error("verify failed draft=%s claim=%s error=%s", draft_hash[:12], claim.id, type(e).__name__)
         return Verdict(claim_id=claim.id, status="unverifiable", reason="no_evidence", as_of=as_of,
@@ -291,7 +295,9 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
     yield emit("meta", {"draft_hash": draft_hash, "cached": False, "passages": stats.passages, "as_of": as_of})
     ctx = _extract.infer_context(text) if context is None else (context.strip() or None)
     admission_rejected = False
+    retry_after: Optional[float] = None  # the longest wait Meta asked for on a failed passage
     extracted_claims: list[Claim] = []
+    named = _verify.named_in_draft(text, store)  # from the whole draft up front, exactly as receipts.check does
     try:
         results = _extract.iter_extract(text, ctx if ctx is not None else "",
                                         usage_callback=account, before_model_call=before_model_call, **extract_kwargs)
@@ -301,6 +307,9 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
                 if not res.ok:
                     stats.passages_failed += 1
                     admission_rejected |= res.call.get("status") == "admission_rejected"
+                    asked = (res.call.get("error") or {}).get("retry_after_s")
+                    if isinstance(asked, (int, float)) and not isinstance(asked, bool):
+                        retry_after = max(retry_after or 0.0, float(asked))
                     log.warning("passage failed draft=%s passage=%d status=%s", draft_hash[:12], res.passage,
                                 res.call.get("status"))
                     continue
@@ -308,8 +317,8 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
                     extracted_claims.append(claim)
                     yield emit("claim", {"claim": claim.model_dump(mode="json")})
                 for claim in res.claims:
-                    verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash)
-                    stats.counts[verdict.status] += 1
+                    verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash, named)
+                    stats.counts[count_key(verdict)] += 1  # a look-ahead ◷ is not_public, never wrong
                     yield emit("verdict", {"claim_id": claim.id, "verdict": verdict.model_dump(mode="json")})
     except _extract.ExtractionError:
         stats.error = "no_api_key"
@@ -323,12 +332,24 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
     if stats.passages_failed:
         stats.error = "admission_rejected" if admission_rejected else "passages_failed"
         n, m = stats.passages_failed, stats.passages
-        message = ("The check could not finish because a model call was blocked by the spending guard. "
-                   "Please try again later." if admission_rejected else
-                   f"The model didn't answer for {n} of {m} passage{'s' if m != 1 else ''}, so "
-                   f"{'their' if n != 1 else 'its'} numbers weren't checked. Please try again.")
-        yield emit("error", {"message": message,
-                             "retryable": True})
+        waited = (not admission_rejected and retry_after is not None
+                  and retry_after > _extract.INTERACTIVE_MAX_SLEEP_S)
+        if admission_rejected:
+            message = ("The check could not finish because a model call was blocked by the spending guard. "
+                       "Please try again later.")
+        elif waited:
+            # Meta asked for a longer wait than the interactive retry allows, so NoCap did not retry (P1-3).
+            wait = _extract.wait_phrase(retry_after)
+            message = (f"Meta's model API is busy and asked NoCap to wait {wait} before trying again, so "
+                       f"{n} of {m} passage{'s' if m != 1 else ''} {'were' if n != 1 else 'was'} not checked. "
+                       f"Please try again in {wait}.")
+        else:
+            message = (f"The model didn't answer for {n} of {m} passage{'s' if m != 1 else ''}, so "
+                       f"{'their' if n != 1 else 'its'} numbers weren't checked. Please try again.")
+        error: dict[str, Any] = {"message": message, "retryable": True}
+        if waited:
+            error["retry_after_s"] = math.ceil(retry_after)
+        yield emit("error", error)
         return
     stats.complete = True
     yield emit("done", {"counts": dict(stats.counts), "latency_s": round(time.monotonic() - t0, 2),

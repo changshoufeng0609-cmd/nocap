@@ -1,5 +1,7 @@
 # Fifteen-minute moderated session
 
+Traditional Chinese facilitator version: [session-script.zh-TW.md](session-script.zh-TW.md); notes sheet: [notes-sheet.zh-TW.md](notes-sheet.zh-TW.md).
+
 Use the current tested build and record its commit. The facilitator may load the required example before each task but should not point at a result or explain the answer until the participant has tried. Record every hint. If time runs out, mark the task **not attempted**, not failed or passed.
 
 | Time | Activity |
@@ -8,7 +10,7 @@ Use the current tested build and record its commit. The facilitator may load the
 | 1:30–5:00 | Task 1: check the draft and trace a correction |
 | 5:00–8:00 | Task 2: review Fix and unresolved guidance |
 | 8:00–10:30 | Task 3: explain the historical cutoff |
-| 10:30–12:30 | Task 4: optional validated slide flow, or source-link review |
+| 10:30–12:30 | Task 4: the recorded real SEC slide; with live checks open, optionally Task 5 instead |
 | 12:30–15:00 | Five closing questions and permission check |
 
 ## Opening, read verbatim
@@ -43,15 +45,19 @@ Load **June-quarter roundup, as of July 29** with its supplied cutoff.
 
 **Observe:** distinguishes not-public-yet from a wrong value; finds `2026-07-29T20:04:53Z` versus the `16:00Z` cutoff; understands the cutoff concerns EDGAR acceptance. Ask them to predict what will happen with **Now**, then let them check. Alphabet's entity error remains wrong.
 
-## Task 4 — slide or source review
+## Task 4 — real SEC slide
 
-Use the slide task only after the integrated upload flow is validated and participants have a visible file chooser and results. Otherwise use the fallback for every participant in this round and record that choice.
+In Slide, choose **Try a real SEC slide** (Bank of America's 2Q26 earnings presentation, page 9; a recorded real run that replays at $0).
 
-**Slide prompt:** “Check this supplied earnings slide. Choose one printed value and show where you would look for evidence. What, if anything, would you trust about a value read from the chart axes?”
+**Prompt:** "This slide was filed with the SEC. Choose one printed value and show where you would look for its evidence. Which readings on the chart would you trust?"
 
-**Observe:** can upload the provided BAC image; connects the overlay to the claim/receipt; understands uploaded pixels are not independent evidence; does not treat an axis estimate as exact.
+**Observe:** connects the region outlines and numbered readings to the receipts; understands the image itself is not evidence; does not treat an axis estimate as exact; can say why the non-GAAP figures stay `?`.
 
-**Fallback prompt:** “Open a source link for one checked figure. What extra information would you need before citing this in your own work?”
+## Task 5 — optional, only while live checks are open: a published article
+
+**Prompt:** "Paste a paragraph from an already published earnings story, for example on Microsoft, Alphabet or Amazon this quarter, press Check and tell me what you make of the result."
+
+Use only published text; each check costs about one to five cents of the shared daily cap. Record any company or metric NoCap does not cover. **Observe:** whether the result matches their expectation, whether `?` confuses them, and whether they would use it in their own work.
 
 ## Five closing questions
 

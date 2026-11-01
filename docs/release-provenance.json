@@ -1,14 +1,15 @@
 {
-  "exported_on": "2026-10-30",
+  "exported_on": "2026-11-01",
   "development_began": "2026-10-27",
-  "source_private_commit": "59c6d2a830baa98a4852dde0a00f5378650a243b",
+  "source_private_commit": "42d48aae8722ee632efc5b45d2eb90d4987f1a2a",
   "source_private_branch": "wip/day3-handoff",
-  "source_archive_sha256": "e6bc47f4e7637b36602e4c11dc4f5173a5562f0568a07ba42768ddebd720aa3f",
+  "source_archive_sha256": "2cbf47839c3032c5781801a03dbe361dfc11690bf9f3accbe3765077cfbf346a",
   "public_history": "Clean main release updates; filtered source-only reconstructed development history is published separately on source-history. Private original history remains unchanged.",
-  "public_video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
-  "export_file_count": 578,
-  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable.",
-  "deployed_runtime_private_commit": "04e5450a37e9f3f68cf68b90d0efbf6e6f619876",
-  "deployed_public_commit": "9db6cfcd058d81c59b87e165caaedaaf8f2f381d",
-  "source_archive_scope": "Documentation follow-up: runtime code, media, benchmark data and snapshot are identical to the deployed public commit."
+  "public_video_sha256": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
+  "public_x_cut_sha256": "3b03ca6cb3e7d37936f0710139d1a68f72039be32381b0e48b1725de5dffa714",
+  "snapshot_fingerprint": "1381a6507b55e7322c8b369e",
+  "export_file_count": 2464,
+  "removed_from_public_tree": 0,
+  "largest_file_bytes": 46940160,
+  "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable."
 }

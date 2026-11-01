@@ -96,7 +96,7 @@ export function AsOfPicker({
       </div>
       <p id={hintId} className={cn("text-xs", isNow ? "text-muted-foreground" : "text-foreground/80")}>
         {isNow
-          ? "Now: checks against the latest filings"
+          ? "Now: every filing in NoCap's snapshot counts"
           : iso
             ? `Anything filed after ${formatUtcMinutes(iso).replace(" UTC", "")} counts as not yet public`
             : "Enter a full date and time"}

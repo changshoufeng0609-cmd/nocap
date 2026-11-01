@@ -128,7 +128,10 @@ def post(c: TestClient, text: str = TEXT, ip: str = "203.0.113.7", **body):
 
 def only_error(events):
     assert len(events) == 1 and events[0][0] == "error", events
-    assert set(events[0][1]) == {"message", "retryable", "cost_usd", "cost_is_estimate", "model_calls"}
+    required = {"message", "retryable", "cost_usd", "cost_is_estimate", "model_calls"}
+    # An admission refusal also names its reason (docs/api-contract.md); nothing else is added.
+    assert set(events[0][1]) in (required, required | {"reason"}), events[0][1]
+    assert events[0][1].get("reason", "live_paused") in api.REFUSAL_REASONS
     return events[0][1]
 
 
@@ -164,7 +167,7 @@ def test_events_follow_the_contract_order_and_shapes(tmp_path, fake):
     assert names[1:-1] == ["claim", "verdict", "claim", "claim", "verdict", "verdict"]
     done = events[-1][1]
     assert set(done) == {"counts", "latency_s", "cost_usd", "model", "cost_is_estimate", "model_calls", "coverage"} and done["model"] == "muse-spark-1.3"
-    assert done["counts"] == {"verified": 1, "wrong": 1, "unverifiable": 1, "approximate": 0}
+    assert done["counts"] == {"verified": 1, "wrong": 1, "not_public": 0, "unverifiable": 1, "approximate": 0}
     assert done["cost_usd"] == pytest.approx(2 * extract.cost_usd(USAGE)) and done["latency_s"] >= 0
     assert fake.calls[0]["context"] == "Example Corp, Q3 FY2025" and fake.calls[0]["deadline"] is not None
 
@@ -273,11 +276,29 @@ def test_unexpected_extraction_crash_is_an_error_event(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 # Guards
 # ---------------------------------------------------------------------------
-def test_text_longer_than_6000_characters_is_rejected(tmp_path, fake):
+def test_text_longer_than_12000_characters_is_rejected(tmp_path, fake):
     c = client(tmp_path)
-    err = only_error(post(c, text="Revenue was $1 billion. " + "x" * 6000))
-    assert err["retryable"] is False and "6,000" in err["message"] and not fake.calls
-    assert [n for n, _ in post(c, text="y" * 6000)] == ["meta", "done"]  # exactly at the limit is fine
+    err = only_error(post(c, text="x" * 12001))
+    assert err["retryable"] is False and "12,000" in err["message"] and not fake.calls
+    events = post(c, text="y" * 12000)
+    assert [n for n, _ in events] == ["meta", "done"]  # exactly at the limit is fine
+    assert events[0][1]["passages"] == 2
+
+
+def test_12000_character_draft_reserves_both_passages_and_retries(tmp_path, fake):
+    text, context = "x" * 12000, "c" * 300
+    estimate = extract.extraction_estimate(text, context, max_attempts=2, backend=extract.BACKENDS["meta"])
+    c = client(tmp_path, daily_budget_usd=estimate - .000001)
+    err = only_error(post(c, text=text, context=context))
+    assert err["reason"] == "daily_budget" and not fake.calls
+    assert c.app.state.ledger.spent_today() == 0
+
+
+def test_12000_character_fragmented_draft_cannot_exceed_default_daily_budget(tmp_path, fake):
+    c = client(tmp_path)
+    err = only_error(post(c, text="x\n\n" * 4000))
+    assert err["reason"] == "daily_budget" and err["model_calls"] == 0 and not fake.calls
+    assert c.app.state.ledger.spent_today() == 0
 
 
 @pytest.mark.parametrize("body,needle", [
@@ -436,7 +457,7 @@ def test_health_reports_snapshot_companies_and_facts(tmp_path):
     r = client(tmp_path).get("/api/health")
     assert r.status_code == 200
     assert r.json() == {"ok": True, "data_snapshot": "2026-10-27", "companies": ["EXCO", "ZZZ"], "facts": 4,
-                        "live_requests_paused": False, "draft_cache_policy": "persistent"}
+                        "live_requests_paused": False, "live_until": None, "draft_cache_policy": "persistent"}
 
 
 def test_health_without_data_is_503(tmp_path):

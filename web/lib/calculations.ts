@@ -1,4 +1,4 @@
-import { formatValue } from "./format";
+import { formatValue, marginChangeUnit } from "./format";
 import type { Claim, Fact, Verdict } from "./types";
 
 export interface ReceiptCalculation {
@@ -28,6 +28,8 @@ export function fullFactValue(fact: Fact): string {
  */
 export function receiptCalculation(claim: Claim, verdict: Verdict): ReceiptCalculation | null {
   const facts = verdict.evidence;
+  // The verifier owns the same-filing margin difference; a level/growth formula would misstate its unit.
+  if (marginChangeUnit(claim)) return null;
   if (claim.unit !== "%" || verdict.status === "unverifiable" || facts.length < 2) return null;
   if (facts.some((f) => f.unit === "%" && (verdict.expected_value == null || sameValue(f.value, verdict.expected_value)))) return null;
   const candidates: ReceiptCalculation[] = [];

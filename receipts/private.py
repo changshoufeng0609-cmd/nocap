@@ -2,6 +2,10 @@
 
 Private means operator-controlled inference on Modal, not offline processing. The
 browser, API host and operator's Modal deployment necessarily handle the draft.
+
+One public synthetic sample has a recorded live run (receipts.recordings). A request that
+exactly matches it replays that run at $0 before the live gate, so the sample still works
+where Private mode is not configured. Nothing is written for any draft, recorded or not.
 """
 from __future__ import annotations
 
@@ -18,6 +22,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract, stream
+from receipts import recordings as _recordings
 
 log = logging.getLogger(__name__)
 
@@ -112,8 +117,9 @@ def private_events(text: str, *, backend: extract.Backend, client: Any, store: A
 def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
                           get_store: Callable[[], Any],
                           backend_factory: Callable[[], extract.Backend] = configured_private_backend,
-                          client_factory: Optional[Callable[[extract.Backend], Any]] = None) -> APIRouter:
-    """Mount once inside create_app, using its existing shared ledger and rate limiter."""
+                          client_factory: Optional[Callable[[extract.Backend], Any]] = None,
+                          recordings: Optional[_recordings.Recordings] = None) -> APIRouter:
+    """Mount once inside create_app, using its existing shared ledger, rate limiter and read-only recordings."""
     from receipts.api import (OperationBudget, Rejected, _from_events, _from_thread,
                               _require_live, _reserve_async, client_ip)
 
@@ -130,9 +136,14 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
             backend_factory()
             available, message = True, "Configured for the operator's Modal workspace; live availability is not guaranteed."
         except Exception:
-            available, message = False, "Private mode is unavailable until the operator configures Modal Glimmer."
+            available, message = False, ("Live Private checks are off on this server: they need the operator's own "
+                                         "Modal GPU deployment.")
+        # The recorded public samples this server replays at $0, whether or not live private checks are available.
+        recorded = [{"sample_id": entry["request"].get("sample_id"), "recorded_utc": entry["recorded_utc"]}
+                    for entry in (recordings.entries("private") if recordings is not None else [])]
         return JSONResponse({"available": available, "backend": "modal", "model": "muse-glimmer",
-            "message": message, "offline": False, "response_cache": False}, headers=PRIVATE_HEADERS)
+            "message": message, "offline": False, "response_cache": False, "recorded_samples": recorded},
+            headers=PRIVATE_HEADERS)
 
     @router.post("/api/private/check")
     async def check(request: Request) -> StreamingResponse:
@@ -151,6 +162,15 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
             as_of = stream.canonical_as_of(req.as_of)
         except (ValidationError, ValueError):
             return fail("Use text, optional context and an ISO 8601 as-of time only.")
+        context = stream.normalize_context(req.context)
+        # The recorded public sample replays its live Modal run at $0, before the live gate and the backend check.
+        # It is keyed to the exact draft text, so no other draft replays it; the lookup only reads, and neither the
+        # draft nor its hash is logged.
+        record = (recordings.load("private", _recordings.private_key(req.text, context, as_of))
+                  if recordings is not None else None)
+        if record is not None:
+            return StreamingResponse(_from_events(_recordings.replay(record)), media_type="text/event-stream",
+                                     headers=PRIVATE_HEADERS)
         try:
             _require_live(settings)
         except Rejected as exc:
@@ -161,7 +181,6 @@ def create_private_router(*, settings: Any, limiter: Any, ledger: Any,
             return fail("Private mode is unavailable. No draft was sent to a model.")
         if limiter.acquire(client_ip(request, settings)) is not None:
             return fail("Too many live checks. Wait before trying private mode again.", True)
-        context = stream.normalize_context(req.context)
         try:
             store = get_store()
             estimate = extract.extraction_estimate(req.text, context, backend=backend, max_attempts=1)

@@ -54,7 +54,7 @@ def test_fix_receives_canonical_inputs_and_settles_usage(tmp_path, fake_fix):
 
 
 @pytest.mark.parametrize("body", [
-    {"text": ""}, {"text": "x" * 6001}, {"text": TEXT, "as_of": "tomorrow"},
+    {"text": ""}, {"text": "x" * 12001}, {"text": TEXT, "as_of": "tomorrow"},
     {"text": TEXT, "context": "x" * 301}, {"text": TEXT, "verdicts": []},
     {"text": TEXT, "evidence": []}, {"text": TEXT, "example_id": "trusted"},
     {"text": TEXT, "edits": [{"start": 0, "end": 1}]},

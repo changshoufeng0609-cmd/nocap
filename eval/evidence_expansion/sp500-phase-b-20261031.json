@@ -1,0 +1,5000 @@
+{
+ "phase": "B: the remaining 437 S&P 500 companies in 9 batches, then the wrap-up (reconciliation, coverage profile, audit record, disk)",
+ "validated_on": "2026-10-31",
+ "code_state": "receipts/ and scripts/ as committed in cabfa53 (the coordinator committed the Phase B code as-is); the only mid-run code change was the confirm_revenue per-period rule after batch 1 (AJG). Nothing in receipts/ or scripts/ was edited for the wrap-up. The bugs below are reported, not fixed (code freeze). Wrap-up analyses are read-only (data/facts.sqlite opened read-only, archived companyfacts, data/pr_facts); no SEC request and no model call.",
+ "model": {
+  "model": "muse-spark-1.3",
+  "mode": "Standard",
+  "live_calls": 1848,
+  "cached_calls": 0
+ },
+ "spend": {
+  "ledger_usd_before": 9.4292,
+  "ledger_usd_after": 49.6404,
+  "phase_b_usd": 40.2112,
+  "dry_run_estimate_usd": 35.612,
+  "actual_over_estimate": 1.129,
+  "per_batch_usd": {
+   "1": 4.7051,
+   "2": 4.3138,
+   "3": 4.9272,
+   "4": 4.6689,
+   "5": 4.235,
+   "6": 3.9535,
+   "7": 4.6787,
+   "8": 4.9574,
+   "9": 3.7716
+  },
+  "guard": "before each batch: ledger + 1.15 x dry-run estimate must stay under $70; the highest check was 49.6328 (batch 9)",
+  "run_cap_overshoot": "the mapper's per-run cap (ledger + 1.15 x estimate) was passed by in-flight calls in batch 2 ($18.4481 vs $18.43), batch 3 ($23.3753 vs $23.37) and batch 7 ($40.9114 vs $40.89), and batch 9 by $0.0004; never near the $70 guard"
+ },
+ "batches": [
+  {
+   "batch": 1,
+   "companies": 50,
+   "tickers": [
+    "APP",
+    "CHTR",
+    "CMCSA",
+    "ECHO",
+    "FOXA",
+    "LYV",
+    "NWSA",
+    "OMC",
+    "RDDT",
+    "SKYD",
+    "T",
+    "TKO",
+    "TMUS",
+    "TTWO",
+    "VZ",
+    "ABNB",
+    "ADM",
+    "APA",
+    "ACGL",
+    "A",
+    "ADP",
+    "ACN",
+    "ALB",
+    "AMT",
+    "AEE",
+    "APTV",
+    "BF-B",
+    "BKR",
+    "AIG",
+    "ABBV",
+    "ALLE",
+    "ADI",
+    "AMCR",
+    "ARE",
+    "AEP",
+    "AZO",
+    "BG",
+    "COP",
+    "AIZ",
+    "ABT",
+    "AME",
+    "ADSK",
+    "APD",
+    "BXP",
+    "AES",
+    "BBY",
+    "CASY",
+    "CVX",
+    "AJG",
+    "ALGN"
+   ],
+   "sectors": {
+    "Communication Services": 15,
+    "Consumer Discretionary": 4,
+    "Consumer Staples": 4,
+    "Energy": 4,
+    "Financials": 4,
+    "Health Care": 4,
+    "Industrials": 3,
+    "Information Technology": 3,
+    "Materials": 3,
+    "Real Estate": 3,
+    "Utilities": 3
+   },
+   "spend": {
+    "dry_run_estimate_usd": 4.165,
+    "actual_usd": 4.7051,
+    "actual_over_estimate": 1.13,
+    "ledger_usd_before": 9.4292,
+    "ledger_usd_after": 14.1343,
+    "guard_check": "9.4292 + 1.15 x 4.1650 = 14.2189 vs 70.0",
+    "run_cap_usd": 14.23,
+    "model_calls_live": 221,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 398.5
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 104 live requests, 50 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 418,
+    "press_release_dry_run_cache_hits": 150,
+    "mapping_live": 0,
+    "mapping_cache_hits": 568
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 181,
+     "facts_before": 8345,
+     "facts_after": 7577,
+     "served_before": 6450,
+     "served_after": 5817,
+     "files_quarantined": 13,
+     "facts_held_in_quarantined_files": 674,
+     "served_facts_dropped": 94,
+     "agreement_after_gate": 0.9831,
+     "agreement_before_gate": 0.9308,
+     "largest_quarantined": [
+      {
+       "ticker": "TKO",
+       "accession": "0001193125-26-071552",
+       "facts_held": 262,
+       "reason": "2 unexplained GAAP mismatches in the 2024-10-01..2024-12-31 column (+2 more columns)"
+      },
+      {
+       "ticker": "AES",
+       "accession": "0000874761-25-000086",
+       "facts_held": 52,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-09-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "AES",
+       "accession": "0000874761-25-000071",
+       "facts_held": 50,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-06-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "TKO",
+       "accession": "0001193125-26-330561",
+       "facts_held": 48,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-06-30 column"
+      },
+      {
+       "ticker": "AJG",
+       "accession": "0001193125-26-029407",
+       "facts_held": 47,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 168,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 24,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "AJG"
+     ],
+     "confirmed": [],
+     "still_held": [
+      "AJG"
+     ]
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 112,
+      "filings": 7293,
+      "facts": 32469,
+      "fiscal_periods": 1815
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 24834411,
+     "facts_sqlite_bytes": 8503296,
+     "line": "data/snapshot: 24.83 MB · 112 companies · 32469 SQLite facts · 30325 press-release facts · fingerprint f9b5d689f6b6 · 0.9 s"
+    },
+    "free_gib": {
+     "start": 4.18,
+     "end": 3.88
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {
+     "ACGL": [
+      "calendar: 0000947484-24-000144 tags Q2 for 2024-07-01..2024-09-30, which is quarter 3 of its fiscal year: label dropped",
+      "calendar: Q2 FY2024 is claimed for different periods by 0000947484-24-000105, 0000947484-24-000144: label dropped"
+     ],
+     "AES": [
+      "calendar: 0000874761-23-000080 tags Q2 for 2023-07-01..2023-09-30, which is quarter 3 of its fiscal year: label dropped",
+      "calendar: Q2 FY2023 is claimed for different periods by 0000874761-23-000071, 0000874761-23-000080: label dropped"
+     ]
+    },
+    "calendar_other": [
+     "AES",
+     "APTV",
+     "BXP"
+    ],
+    "revenue": [
+     "AJG"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 2,
+   "companies": 50,
+   "tickers": [
+    "AOS",
+    "AKAM",
+    "AVY",
+    "CBRE",
+    "AWK",
+    "BKNG",
+    "CHD",
+    "DVN",
+    "ALL",
+    "AMGN",
+    "BA",
+    "AMAT",
+    "BALL",
+    "CCI",
+    "CEG",
+    "CCL",
+    "CLX",
+    "EOG",
+    "AMP",
+    "BDX",
+    "BE",
+    "ANET",
+    "CF",
+    "CSGP",
+    "CMS",
+    "CMG",
+    "DG",
+    "EQT",
+    "APO",
+    "BIIB",
+    "BR",
+    "APH",
+    "CRH",
+    "DOC",
+    "CNP",
+    "CVNA",
+    "DLTR",
+    "FANG",
+    "AXP",
+    "BMY",
+    "CARR",
+    "CDNS",
+    "DOW",
+    "EQIX",
+    "D",
+    "DASH",
+    "EL",
+    "HAL",
+    "BEN",
+    "BSX"
+   ],
+   "sectors": {
+    "Industrials": 5,
+    "Information Technology": 5,
+    "Materials": 5,
+    "Real Estate": 5,
+    "Utilities": 5,
+    "Consumer Discretionary": 5,
+    "Consumer Staples": 5,
+    "Energy": 5,
+    "Financials": 5,
+    "Health Care": 5
+   },
+   "spend": {
+    "dry_run_estimate_usd": 3.727,
+    "actual_usd": 4.3138,
+    "actual_over_estimate": 1.157,
+    "ledger_usd_before": 14.1343,
+    "ledger_usd_after": 18.4481,
+    "guard_check": "14.1343 + 1.15 x 3.7270 = 18.4203 vs 70.0",
+    "run_cap_usd": 18.43,
+    "model_calls_live": 190,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 379.4
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 101 live requests, 50 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 405,
+    "press_release_dry_run_cache_hits": 150,
+    "mapping_live": 0,
+    "mapping_cache_hits": 555
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 172,
+     "facts_before": 9043,
+     "facts_after": 8428,
+     "served_before": 7089,
+     "served_after": 6614,
+     "files_quarantined": 8,
+     "facts_held_in_quarantined_files": 493,
+     "served_facts_dropped": 122,
+     "agreement_after_gate": 0.9853,
+     "agreement_before_gate": 0.929,
+     "largest_quarantined": [
+      {
+       "ticker": "CARR",
+       "accession": "0001783180-26-000030",
+       "facts_held": 80,
+       "reason": "3 unexplained GAAP mismatches in the 2025-01-01..2025-06-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "CARR",
+       "accession": "0001783180-26-000005",
+       "facts_held": 72,
+       "reason": "3 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "DOW",
+       "accession": "0001751788-26-000011",
+       "facts_held": 69,
+       "reason": "5 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "CARR",
+       "accession": "0001783180-26-000035",
+       "facts_held": 68,
+       "reason": "3 unexplained GAAP mismatches in the 2025-01-01..2025-09-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "DOW",
+       "accession": "0001751788-26-000155",
+       "facts_held": 65,
+       "reason": "6 unexplained GAAP mismatches in the 2025-01-01..2025-09-30 column (+3 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 164,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 12,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "AWK",
+      "EQIX",
+      "BEN"
+     ],
+     "confirmed": [
+      "EQIX",
+      "BEN"
+     ],
+     "still_held": [
+      "AWK"
+     ]
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 162,
+      "filings": 10336,
+      "facts": 47505,
+      "fiscal_periods": 2631
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 33024969,
+     "facts_sqlite_bytes": 12337152,
+     "line": "data/snapshot: 33.02 MB · 162 companies · 47505 SQLite facts · 38753 press-release facts · fingerprint 396b0bfb2774 · 1.3 s"
+    },
+    "free_gib": {
+     "start": 3.9,
+     "end": 3.95
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {},
+    "calendar_other": [],
+    "revenue": [
+     "AWK",
+     "BEN",
+     "EQIX"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 3,
+   "companies": 50,
+   "tickers": [
+    "CAT",
+    "CDW",
+    "ECL",
+    "ESS",
+    "DTE",
+    "DECK",
+    "GIS",
+    "KMI",
+    "BLK",
+    "CAH",
+    "CHRW",
+    "CIEN",
+    "FCX",
+    "EXR",
+    "DUK",
+    "DHI",
+    "HRL",
+    "OKE",
+    "BNY",
+    "CI",
+    "CMI",
+    "COHR",
+    "IFF",
+    "FRT",
+    "ED",
+    "DPZ",
+    "HSY",
+    "OXY",
+    "BRK-B",
+    "CNC",
+    "CPRT",
+    "CRWD",
+    "IP",
+    "HST",
+    "EIX",
+    "DRI",
+    "KDP",
+    "PSX",
+    "BX",
+    "COO",
+    "CSX",
+    "CTSH",
+    "LYB",
+    "INVH",
+    "ES",
+    "EBAY",
+    "KHC",
+    "SLB",
+    "CB",
+    "CRL"
+   ],
+   "sectors": {
+    "Industrials": 5,
+    "Information Technology": 5,
+    "Materials": 5,
+    "Real Estate": 5,
+    "Utilities": 5,
+    "Consumer Discretionary": 5,
+    "Consumer Staples": 5,
+    "Energy": 5,
+    "Financials": 5,
+    "Health Care": 5
+   },
+   "spend": {
+    "dry_run_estimate_usd": 4.27,
+    "actual_usd": 4.9272,
+    "actual_over_estimate": 1.154,
+    "ledger_usd_before": 18.4481,
+    "ledger_usd_after": 23.3753,
+    "guard_check": "18.4481 + 1.15 x 4.2700 = 23.3586 vs 70.0",
+    "run_cap_usd": 23.37,
+    "model_calls_live": 211,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 431.0
+   },
+   "sec_requests": {
+    "ingest": "not printed: ingest stopped on a KeyError at INVH (finding 1)",
+    "press_release_dry_run_live": 439,
+    "press_release_dry_run_cache_hits": 139,
+    "mapping_live": 0,
+    "mapping_cache_hits": 578
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 177,
+     "facts_before": 8310,
+     "facts_after": 7842,
+     "served_before": 6248,
+     "served_after": 5828,
+     "files_quarantined": 8,
+     "facts_held_in_quarantined_files": 365,
+     "served_facts_dropped": 103,
+     "agreement_after_gate": 0.9786,
+     "agreement_before_gate": 0.9313,
+     "largest_quarantined": [
+      {
+       "ticker": "INVH",
+       "accession": "0001687229-26-000013",
+       "facts_held": 72,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column"
+      },
+      {
+       "ticker": "IFF",
+       "accession": "0000051253-26-000003",
+       "facts_held": 60,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-12-31 column"
+      },
+      {
+       "ticker": "BX",
+       "accession": "0001193125-25-247643",
+       "facts_held": 57,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-09-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "BX",
+       "accession": "0001193125-26-313250",
+       "facts_held": 56,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-06-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "DUK",
+       "accession": "0001326160-26-000007",
+       "facts_held": 38,
+       "reason": "2 unexplained GAAP mismatches in the 2023-01-01..2023-12-31 column (+2 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 169,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 38,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "BLK",
+      "DUK",
+      "OKE",
+      "HST"
+     ],
+     "confirmed": [
+      "BLK",
+      "HST"
+     ],
+     "still_held": [
+      "DUK",
+      "OKE"
+     ]
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 205,
+      "filings": 12741,
+      "facts": 59542,
+      "fiscal_periods": 3328
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 40166690,
+     "facts_sqlite_bytes": 15417344,
+     "line": "data/snapshot: 40.17 MB · 205 companies · 59542 SQLite facts · 46595 press-release facts · fingerprint 22c912ecaa89 · 1.6 s"
+    },
+    "free_gib": {
+     "start": 3.95,
+     "end": 3.72
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {
+     "BX": [
+      "calendar: 0001193125-24-192846 tags Q1 for 2024-04-01..2024-06-30, which is quarter 2 of its fiscal year: label dropped",
+      "calendar: Q1 FY2024 is claimed for different periods by 0001193125-24-130670, 0001193125-24-192846: label dropped"
+     ]
+    },
+    "calendar_other": [
+     "CRWD",
+     "FCX",
+     "FRT"
+    ],
+    "revenue": [
+     "BLK",
+     "DUK",
+     "HST",
+     "OKE"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 4,
+   "companies": 50,
+   "tickers": [
+    "CTAS",
+    "DDOG",
+    "MLM",
+    "KIM",
+    "ETR",
+    "EXPE",
+    "KMB",
+    "TPL",
+    "CBOE",
+    "CVS",
+    "DAL",
+    "FFIV",
+    "MOS",
+    "MAA",
+    "EVRG",
+    "F",
+    "KR",
+    "TRGP",
+    "CFG",
+    "DGX",
+    "DD",
+    "FICO",
+    "NEM",
+    "O",
+    "EXC",
+    "GM",
+    "KVUE",
+    "VLO",
+    "CINF",
+    "DHR",
+    "DE",
+    "FSLR",
+    "NUE",
+    "PLD",
+    "FE",
+    "GPC",
+    "MDLZ",
+    "WMB",
+    "CME",
+    "DVA",
+    "DOV",
+    "FTNT",
+    "PKG",
+    "REG",
+    "NEE",
+    "GRMN",
+    "MKC",
+    "COF",
+    "DXCM",
+    "EFX"
+   ],
+   "sectors": {
+    "Industrials": 6,
+    "Information Technology": 5,
+    "Materials": 5,
+    "Real Estate": 5,
+    "Utilities": 5,
+    "Consumer Discretionary": 5,
+    "Consumer Staples": 5,
+    "Energy": 4,
+    "Financials": 5,
+    "Health Care": 5
+   },
+   "spend": {
+    "dry_run_estimate_usd": 4.339,
+    "actual_usd": 4.6689,
+    "actual_over_estimate": 1.076,
+    "ledger_usd_before": 23.3753,
+    "ledger_usd_after": 28.0442,
+    "guard_check": "23.3753 + 1.15 x 4.3390 = 28.3651 vs 70.0",
+    "run_cap_usd": 28.38,
+    "model_calls_live": 218,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 432.0
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 101 live requests, 50 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 430,
+    "press_release_dry_run_cache_hits": 150,
+    "mapping_live": 0,
+    "mapping_cache_hits": 580
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 183,
+     "facts_before": 8701,
+     "facts_after": 8306,
+     "served_before": 6658,
+     "served_after": 6361,
+     "files_quarantined": 9,
+     "facts_held_in_quarantined_files": 311,
+     "served_facts_dropped": 84,
+     "agreement_after_gate": 0.9906,
+     "agreement_before_gate": 0.9543,
+     "largest_quarantined": [
+      {
+       "ticker": "CVS",
+       "accession": "0000064803-26-000009",
+       "facts_held": 66,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "CVS",
+       "accession": "0000064803-26-000097",
+       "facts_held": 64,
+       "reason": "2 unexplained GAAP mismatches in the 2025-04-01..2025-06-30 column (+1 more columns)"
+      },
+      {
+       "ticker": "DHR",
+       "accession": "0000313616-26-000163",
+       "facts_held": 40,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-06-27 column (+3 more columns)"
+      },
+      {
+       "ticker": "DHR",
+       "accession": "0000313616-26-000201",
+       "facts_held": 36,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-09-26 column (+3 more columns)"
+      },
+      {
+       "ticker": "MDLZ",
+       "accession": "0001628280-26-050157",
+       "facts_held": 25,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-06-30 column (+2 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 174,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 0,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "ETR",
+      "TPL",
+      "CBOE",
+      "NEE"
+     ],
+     "confirmed": [
+      "TPL"
+     ],
+     "still_held": [
+      "CBOE",
+      "ETR",
+      "NEE"
+     ]
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 255,
+      "filings": 15587,
+      "facts": 74089,
+      "fiscal_periods": 4136
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 48158404,
+     "facts_sqlite_bytes": 19103744,
+     "line": "data/snapshot: 48.16 MB · 255 companies · 74089 SQLite facts · 54901 press-release facts · fingerprint e2fda7324310 · 1.9 s"
+    },
+    "free_gib": {
+     "start": 3.72,
+     "end": 3.39
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {
+     "NUE": [
+      "calendar: 0000950170-23-040234 tags Q3 for 2023-04-02..2023-07-01, which is quarter 2 of its fiscal year: label dropped",
+      "calendar: Q3 FY2023 is claimed for different periods by 0000950170-23-040234, 0000950170-23-060729: label dropped"
+     ],
+     "REG": [
+      "calendar: 0000950170-24-120019 tags Q2 for 2024-07-01..2024-09-30, which is quarter 3 of its fiscal year: label dropped",
+      "calendar: Q2 FY2024 is claimed for different periods by 0000950170-24-089720, 0000950170-24-120019: label dropped"
+     ]
+    },
+    "calendar_other": [
+     "KR",
+     "NUE"
+    ],
+    "revenue": [
+     "CBOE",
+     "ETR",
+     "NEE",
+     "TPL"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 5,
+   "companies": 50,
+   "tickers": [
+    "GDDY",
+    "PPG",
+    "SBAC",
+    "NI",
+    "HAS",
+    "MNST",
+    "COIN",
+    "ELV",
+    "EME",
+    "GEN",
+    "SHW",
+    "SPG",
+    "NRG",
+    "HD",
+    "MO",
+    "CPAY",
+    "EW",
+    "EMR",
+    "GLW",
+    "SW",
+    "UDR",
+    "PCG",
+    "HLT",
+    "PEP",
+    "EG",
+    "GEHC",
+    "ETN",
+    "HPE",
+    "VMC",
+    "VICI",
+    "PEG",
+    "LEN",
+    "PG",
+    "ERIE",
+    "GILD",
+    "EXPD",
+    "HPQ",
+    "VMRK",
+    "PPL",
+    "LOW",
+    "SJM",
+    "FDS",
+    "HCA",
+    "FAST",
+    "INTU",
+    "VTR",
+    "SO",
+    "LULU",
+    "STZ",
+    "FIS"
+   ],
+   "sectors": {
+    "Information Technology": 6,
+    "Materials": 4,
+    "Real Estate": 6,
+    "Utilities": 6,
+    "Consumer Discretionary": 6,
+    "Consumer Staples": 6,
+    "Financials": 6,
+    "Health Care": 5,
+    "Industrials": 5
+   },
+   "spend": {
+    "dry_run_estimate_usd": 3.941,
+    "actual_usd": 4.235,
+    "actual_over_estimate": 1.075,
+    "ledger_usd_before": 28.0442,
+    "ledger_usd_after": 32.2792,
+    "guard_check": "28.0442 + 1.15 x 3.9410 = 32.5763 vs 70.0",
+    "run_cap_usd": 32.59,
+    "model_calls_live": 215,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 395.7
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 100 live requests, 50 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 422,
+    "press_release_dry_run_cache_hits": 150,
+    "mapping_live": 0,
+    "mapping_cache_hits": 572
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 195,
+     "facts_before": 8488,
+     "facts_after": 8103,
+     "served_before": 6456,
+     "served_after": 6165,
+     "files_quarantined": 7,
+     "facts_held_in_quarantined_files": 306,
+     "served_facts_dropped": 79,
+     "agreement_after_gate": 0.9883,
+     "agreement_before_gate": 0.9518,
+     "largest_quarantined": [
+      {
+       "ticker": "HAS",
+       "accession": "0000046080-26-000044",
+       "facts_held": 72,
+       "reason": "2 unexplained GAAP mismatches in the 2024-12-30..2025-06-29 column (+3 more columns)"
+      },
+      {
+       "ticker": "PPG",
+       "accession": "0000079879-26-000025",
+       "facts_held": 70,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "SW",
+       "accession": "0001104659-26-087794",
+       "facts_held": 48,
+       "reason": "2 unexplained GAAP mismatches in the 2025-04-01..2025-06-30 column (+2 more columns)"
+      },
+      {
+       "ticker": "SW",
+       "accession": "0001104659-25-103425",
+       "facts_held": 48,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-09-30 column (+1 more columns)"
+      },
+      {
+       "ticker": "VMRK",
+       "accession": "0001193125-26-312445",
+       "facts_held": 30,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-06-30 column (+3 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 188,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 12,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "NI",
+      "ERIE"
+     ],
+     "confirmed": [
+      "ERIE"
+     ],
+     "still_held": [
+      "NI"
+     ]
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 305,
+      "filings": 18282,
+      "facts": 88574,
+      "fiscal_periods": 4955
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 55989498,
+     "facts_sqlite_bytes": 22736896,
+     "line": "data/snapshot: 55.99 MB · 305 companies · 88574 SQLite facts · 63004 press-release facts · fingerprint 37ce8c3b0baa · 2.4 s"
+    },
+    "free_gib": {
+     "start": 3.39,
+     "end": 3.1
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {
+     "PPG": [
+      "calendar: 0000079879-23-000045 tags Q1 for 2023-04-01..2023-06-30, which is quarter 2 of its fiscal year: label dropped"
+     ],
+     "PPL": [
+      "calendar: 0000922224-23-000045 tags Q3 for 2023-04-01..2023-06-30, which is quarter 2 of its fiscal year: label dropped",
+      "calendar: Q3 FY2023 is claimed for different periods by 0000922224-23-000045, 0000922224-23-000049: label dropped"
+     ]
+    },
+    "calendar_other": [
+     "PPL"
+    ],
+    "revenue": [
+     "ERIE",
+     "NI"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 6,
+   "companies": 50,
+   "tickers": [
+    "HSIC",
+    "FDX",
+    "IT",
+    "WELL",
+    "SRE",
+    "LVS",
+    "SYY",
+    "FISV",
+    "HUM",
+    "FDXF",
+    "JBL",
+    "WY",
+    "VST",
+    "MAR",
+    "TGT",
+    "GL",
+    "IDXX",
+    "FERG",
+    "KEYS",
+    "XEL",
+    "MGM",
+    "TSN",
+    "GPN",
+    "ILMN",
+    "FIX",
+    "KLAC",
+    "NCLH",
+    "VYLR",
+    "HBAN",
+    "INCY",
+    "FTV",
+    "LITE",
+    "NVR",
+    "HIG",
+    "IQV",
+    "GD",
+    "LRCX",
+    "PHM",
+    "HOOD",
+    "ISRG",
+    "GE",
+    "MCHP",
+    "RCL",
+    "IBKR",
+    "LH",
+    "GEV",
+    "MPWR",
+    "RL",
+    "ICE",
+    "MCK"
+   ],
+   "sectors": {
+    "Health Care": 9,
+    "Industrials": 8,
+    "Information Technology": 8,
+    "Real Estate": 2,
+    "Utilities": 3,
+    "Consumer Discretionary": 8,
+    "Consumer Staples": 4,
+    "Financials": 8
+   },
+   "spend": {
+    "dry_run_estimate_usd": 3.52,
+    "actual_usd": 3.9535,
+    "actual_over_estimate": 1.123,
+    "ledger_usd_before": 32.2792,
+    "ledger_usd_after": 36.2327,
+    "guard_check": "32.2792 + 1.15 x 3.5200 = 36.3272 vs 70.0",
+    "run_cap_usd": 36.34,
+    "model_calls_live": 194,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 351.4
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 100 live requests, 50 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 408,
+    "press_release_dry_run_cache_hits": 150,
+    "mapping_live": 0,
+    "mapping_cache_hits": 558
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 184,
+     "facts_before": 9016,
+     "facts_after": 7733,
+     "served_before": 6747,
+     "served_after": 5708,
+     "files_quarantined": 15,
+     "facts_held_in_quarantined_files": 1177,
+     "served_facts_dropped": 106,
+     "agreement_after_gate": 0.9808,
+     "agreement_before_gate": 0.9224,
+     "largest_quarantined": [
+      {
+       "ticker": "MCK",
+       "accession": "0000927653-26-000066",
+       "facts_held": 140,
+       "reason": "2 unexplained GAAP mismatches in the 2024-04-01..2025-03-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "MCK",
+       "accession": "0000927653-26-000015",
+       "facts_held": 140,
+       "reason": "2 unexplained GAAP mismatches in the 2024-04-01..2024-12-31 column (+3 more columns)"
+      },
+      {
+       "ticker": "MPWR",
+       "accession": "0001437749-26-003191",
+       "facts_held": 105,
+       "reason": "3 unexplained GAAP mismatches in the 2025-01-01..2025-12-31 column"
+      },
+      {
+       "ticker": "RL",
+       "accession": "0001628280-26-005615",
+       "facts_held": 100,
+       "reason": "2 unexplained GAAP mismatches in the 2024-03-31..2024-12-28 column (+3 more columns)"
+      },
+      {
+       "ticker": "RL",
+       "accession": "0001628280-26-037053",
+       "facts_held": 98,
+       "reason": "2 unexplained GAAP mismatches in the 2024-03-31..2025-03-29 column (+1 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 169,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 17,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "SRE",
+      "ICE"
+     ],
+     "confirmed": [
+      "ICE"
+     ],
+     "still_held": [
+      "SRE"
+     ]
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 355,
+      "filings": 21009,
+      "facts": 102831,
+      "fiscal_periods": 5737
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 63589058,
+     "facts_sqlite_bytes": 26341376,
+     "line": "data/snapshot: 63.59 MB · 355 companies · 102831 SQLite facts · 70737 press-release facts · fingerprint f39ded8d4310 · 2.6 s"
+    },
+    "free_gib": {
+     "start": 3.1,
+     "end": 3.05
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {
+     "FDX": [
+      "calendar: 0001048911-26-000131 tags Q3 for 2026-07-01..2026-09-30, which is quarter 1 of its fiscal year: label dropped"
+     ],
+     "FDXF": [
+      "calendar: 0001628280-26-068246 tags Q3 for 2026-07-01..2026-09-30, which is quarter 1 of its fiscal year: label dropped"
+     ],
+     "FERG": [
+      "calendar: 0002011641-26-000030 tags Q1 for 2026-01-01..2026-03-31, which is quarter 3 of its fiscal year: label dropped",
+      "calendar: 0002011641-26-000040 tags Q2 for 2026-04-01..2026-06-30, which is quarter 4 of its fiscal year: label dropped",
+      "calendar: Q1 FY2026 is claimed for different periods by 0002011641-25-000059, 0002011641-26-000030: label dropped"
+     ],
+     "LH": [
+      "calendar: 0000920148-23-000063 tags Q1 for 2023-04-01..2023-06-30, which is quarter 2 of its fiscal year: label dropped"
+     ]
+    },
+    "calendar_other": [
+     "FDX",
+     "FDXF"
+    ],
+    "revenue": [
+     "ICE",
+     "SRE"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 7,
+   "companies": 50,
+   "tickers": [
+    "GNRC",
+    "MRVL",
+    "ROST",
+    "IVZ",
+    "MDT",
+    "GWW",
+    "MSI",
+    "SBUX",
+    "JKHY",
+    "MRK",
+    "HII",
+    "MU",
+    "TPR",
+    "KKR",
+    "MRNA",
+    "HON",
+    "NOW",
+    "TSCO",
+    "L",
+    "MTD",
+    "HONA",
+    "NTAP",
+    "ULTA",
+    "MA",
+    "PFE",
+    "HUBB",
+    "NXPI",
+    "WSM",
+    "MCO",
+    "PODD",
+    "HWM",
+    "ON",
+    "WYNN",
+    "MET",
+    "REGN",
+    "IEX",
+    "P",
+    "YUM",
+    "MS",
+    "RMD",
+    "IR",
+    "PANW",
+    "MSCI",
+    "RVTY",
+    "ITW",
+    "PTC",
+    "MTB",
+    "SOLV",
+    "J",
+    "Q"
+   ],
+   "sectors": {
+    "Industrials": 11,
+    "Information Technology": 11,
+    "Consumer Discretionary": 8,
+    "Financials": 10,
+    "Health Care": 10
+   },
+   "spend": {
+    "dry_run_estimate_usd": 4.042,
+    "actual_usd": 4.6787,
+    "actual_over_estimate": 1.158,
+    "ledger_usd_before": 36.2327,
+    "ledger_usd_after": 40.9114,
+    "guard_check": "36.2327 + 1.15 x 4.0420 = 40.8810 vs 70.0",
+    "run_cap_usd": 40.89,
+    "model_calls_live": 209,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 404.0
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 114 live requests, 52 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 408,
+    "press_release_dry_run_cache_hits": 155,
+    "mapping_live": 0,
+    "mapping_cache_hits": 563
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 178,
+     "facts_before": 10159,
+     "facts_after": 9549,
+     "served_before": 8000,
+     "served_after": 7436,
+     "files_quarantined": 9,
+     "facts_held_in_quarantined_files": 531,
+     "served_facts_dropped": 79,
+     "agreement_after_gate": 0.9914,
+     "agreement_before_gate": 0.9587,
+     "largest_quarantined": [
+      {
+       "ticker": "NXPI",
+       "accession": "0001413447-26-000003",
+       "facts_held": 85,
+       "reason": "3 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+2 more columns)"
+      },
+      {
+       "ticker": "PTC",
+       "accession": "0001193125-25-266865",
+       "facts_held": 72,
+       "reason": "3 unexplained GAAP mismatches in the 2024-10-01..2025-09-30 column"
+      },
+      {
+       "ticker": "HON",
+       "accession": "0000773840-26-000006",
+       "facts_held": 62,
+       "reason": "2 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "HON",
+       "accession": "0000773840-26-000120",
+       "facts_held": 61,
+       "reason": "2 unexplained GAAP mismatches in the 2025-04-01..2025-06-30 column (+1 more columns)"
+      },
+      {
+       "ticker": "HON",
+       "accession": "0000773840-26-000141",
+       "facts_held": 57,
+       "reason": "2 unexplained GAAP mismatches in the 2025-07-01..2025-09-30 column (+1 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 167,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 4,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "IVZ"
+     ],
+     "confirmed": [
+      "IVZ"
+     ],
+     "still_held": []
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 405,
+      "filings": 23503,
+      "facts": 118027,
+      "fiscal_periods": 6531
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 72274379,
+     "facts_sqlite_bytes": 30101504,
+     "line": "data/snapshot: 72.27 MB · 405 companies · 118027 SQLite facts · 80286 press-release facts · fingerprint 6f9865d4cd08 · 2.9 s"
+    },
+    "free_gib": {
+     "start": 3.05,
+     "end": 2.91
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {},
+    "calendar_other": [
+     "MTD",
+     "NTAP",
+     "WYNN"
+    ],
+    "revenue": [
+     "IVZ"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 8,
+   "companies": 50,
+   "tickers": [
+    "NDAQ",
+    "STE",
+    "JBHT",
+    "ROP",
+    "NTRS",
+    "SYK",
+    "JCI",
+    "SMCI",
+    "PFG",
+    "TECH",
+    "LDOS",
+    "SNDK",
+    "PGR",
+    "TMO",
+    "LHX",
+    "SNPS",
+    "PNC",
+    "UHS",
+    "LII",
+    "STX",
+    "PRU",
+    "VEEV",
+    "LMT",
+    "SWKS",
+    "PYPL",
+    "VRTX",
+    "LUV",
+    "TDY",
+    "RF",
+    "VTRS",
+    "MAS",
+    "TEL",
+    "RJF",
+    "WAT",
+    "MMM",
+    "TER",
+    "SCHW",
+    "WST",
+    "NDSN",
+    "TRMB",
+    "SPGI",
+    "ZBH",
+    "NOC",
+    "TWLO",
+    "STT",
+    "ZTS",
+    "NSC",
+    "TXN",
+    "SYF",
+    "ODFL"
+   ],
+   "sectors": {
+    "Financials": 13,
+    "Health Care": 12,
+    "Industrials": 13,
+    "Information Technology": 12
+   },
+   "spend": {
+    "dry_run_estimate_usd": 4.335,
+    "actual_usd": 4.9574,
+    "actual_over_estimate": 1.144,
+    "ledger_usd_before": 40.9114,
+    "ledger_usd_after": 45.8688,
+    "guard_check": "40.9114 + 1.15 x 4.3350 = 45.8967 vs 70.0",
+    "run_cap_usd": 45.91,
+    "model_calls_live": 224,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 435.7
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 101 live requests, 50 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 420,
+    "press_release_dry_run_cache_hits": 150,
+    "mapping_live": 0,
+    "mapping_cache_hits": 570
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 195,
+     "facts_before": 10853,
+     "facts_after": 10626,
+     "served_before": 8301,
+     "served_after": 8075,
+     "files_quarantined": 4,
+     "facts_held_in_quarantined_files": 140,
+     "served_facts_dropped": 87,
+     "agreement_after_gate": 0.9881,
+     "agreement_before_gate": 0.9633,
+     "largest_quarantined": [
+      {
+       "ticker": "SPGI",
+       "accession": "0000064040-26-000019",
+       "facts_held": 58,
+       "reason": "2 unexplained GAAP mismatches in the 2025-01-01..2025-03-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "JCI",
+       "accession": "0000833444-26-000014",
+       "facts_held": 38,
+       "reason": "2 unexplained GAAP mismatches in the 2024-10-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "SWKS",
+       "accession": "0001104659-25-102814",
+       "facts_held": 32,
+       "reason": "3 unexplained GAAP mismatches in the 2024-09-28..2025-10-03 column"
+      },
+      {
+       "ticker": "PFG",
+       "accession": "0001104659-26-087091",
+       "facts_held": 12,
+       "reason": "2 unexplained GAAP mismatches in the 2025-04-01..2025-06-30 column"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 191,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 43,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "NDAQ"
+     ],
+     "confirmed": [
+      "NDAQ"
+     ],
+     "still_held": []
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 455,
+      "filings": 26308,
+      "facts": 134040,
+      "fiscal_periods": 7348
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 81750232,
+     "facts_sqlite_bytes": 34086912,
+     "line": "data/snapshot: 81.75 MB · 455 companies · 134040 SQLite facts · 90912 press-release facts · fingerprint e3bf2cf7f7ef · 3.3 s"
+    },
+    "free_gib": {
+     "start": 2.91,
+     "end": 2.74
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {},
+    "calendar_other": [
+     "STX"
+    ],
+    "revenue": [
+     "NDAQ"
+    ]
+   },
+   "ok": true
+  },
+  {
+   "batch": 9,
+   "companies": 37,
+   "tickers": [
+    "TYL",
+    "TFC",
+    "OTIS",
+    "VRSN",
+    "TROW",
+    "PAYX",
+    "WDAY",
+    "TRV",
+    "PCAR",
+    "WDC",
+    "USB",
+    "PH",
+    "ZBRA",
+    "V",
+    "PNR",
+    "WRB",
+    "PWR",
+    "WTW",
+    "ROK",
+    "XYZ",
+    "ROL",
+    "RSG",
+    "RTX",
+    "SNA",
+    "SWK",
+    "TDG",
+    "TT",
+    "TXT",
+    "UAL",
+    "UNP",
+    "UPS",
+    "VLTO",
+    "VRSK",
+    "VRT",
+    "WAB",
+    "WM",
+    "XYL"
+   ],
+   "sectors": {
+    "Information Technology": 5,
+    "Financials": 8,
+    "Industrials": 24
+   },
+   "spend": {
+    "dry_run_estimate_usd": 3.273,
+    "actual_usd": 3.7716,
+    "actual_over_estimate": 1.152,
+    "ledger_usd_before": 45.8688,
+    "ledger_usd_after": 49.6404,
+    "guard_check": "45.8688 + 1.15 x 3.2730 = 49.6328 vs 70.0",
+    "run_cap_usd": 49.64,
+    "model_calls_live": 166,
+    "model_calls_cached": 0,
+    "mapping_wall_s": 348.9
+   },
+   "sec_requests": {
+    "ingest": "EDGAR: 72 live requests, 39 cache hits. All companies ingested.",
+    "press_release_dry_run_live": 316,
+    "press_release_dry_run_cache_hits": 111,
+    "mapping_live": 0,
+    "mapping_cache_hits": 427
+   },
+   "gates": {
+    "ingest_failed": {},
+    "xbrl_gate": {
+     "files": 146,
+     "facts_before": 7311,
+     "facts_after": 6250,
+     "served_before": 5619,
+     "served_after": 4725,
+     "files_quarantined": 15,
+     "facts_held_in_quarantined_files": 1016,
+     "served_facts_dropped": 45,
+     "agreement_after_gate": 0.9879,
+     "agreement_before_gate": 0.9283,
+     "largest_quarantined": [
+      {
+       "ticker": "ROK",
+       "accession": "0001024478-25-000112",
+       "facts_held": 140,
+       "reason": "3 unexplained GAAP mismatches in the 2023-10-01..2024-09-30 column (+4 more columns)"
+      },
+      {
+       "ticker": "ROK",
+       "accession": "0001024478-26-000028",
+       "facts_held": 96,
+       "reason": "4 unexplained GAAP mismatches in the 2024-10-01..2025-06-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "WAB",
+       "accession": "0000943452-26-000017",
+       "facts_held": 92,
+       "reason": "3 unexplained GAAP mismatches in the 2025-01-01..2025-09-30 column (+3 more columns)"
+      },
+      {
+       "ticker": "WAB",
+       "accession": "0001628280-26-007113",
+       "facts_held": 89,
+       "reason": "3 unexplained GAAP mismatches in the 2024-01-01..2024-12-31 column (+1 more columns)"
+      },
+      {
+       "ticker": "WAB",
+       "accession": "0001628280-26-049105",
+       "facts_held": 77,
+       "reason": "3 unexplained GAAP mismatches in the 2025-01-01..2025-06-30 column (+3 more columns)"
+      }
+     ]
+    },
+    "xbrl_gate_rerun_after_relabel": {
+     "files": 131,
+     "dropped": 0,
+     "quarantined": 0
+    },
+    "label_gate": {
+     "release_facts_relabelled": 4,
+     "label_gate_messages_after": 0
+    },
+    "revenue": {
+     "held_back": [
+      "TROW"
+     ],
+     "confirmed": [
+      "TROW"
+     ],
+     "still_held": []
+    },
+    "prior_rows_and_files": {
+     "old_rows_missing_or_altered": {
+      "companies": 0,
+      "filings": 0,
+      "facts": 0,
+      "fiscal_periods": 0
+     },
+     "old_release_files_changed": [],
+     "rows_after": {
+      "companies": 492,
+      "filings": 28157,
+      "facts": 145198,
+      "fiscal_periods": 7961
+     }
+    },
+    "dev_replay_identical_to_reference": true,
+    "examples": {
+     "nvda-ai-story": [
+      "11",
+      "7",
+      "2",
+      "0",
+      "2"
+     ],
+     "meta-ai-story": [
+      "8",
+      "5",
+      "3",
+      "0",
+      "0"
+     ],
+     "q2-roundup-look-ahead": [
+      "9",
+      "6",
+      "1",
+      "2",
+      "0"
+     ]
+    },
+    "recordings_replay": [
+     true,
+     true,
+     true
+    ],
+    "qualifier_grid_identical": true,
+    "scratch_snapshot": {
+     "bytes": 87719266,
+     "facts_sqlite_bytes": 36835328,
+     "line": "data/snapshot: 87.72 MB · 492 companies · 145198 SQLite facts · 97162 press-release facts · fingerprint ce280d3c2df4 · 3.5 s"
+    },
+    "free_gib": {
+     "start": 2.74,
+     "end": 2.58
+    }
+   },
+   "warnings": {
+    "label_gate_quarantine": {},
+    "calendar_other": [
+     "WDAY",
+     "WTW"
+    ],
+    "revenue": [
+     "TROW"
+    ]
+   },
+   "ok": true
+  }
+ ],
+ "old_rows_unchanged": {
+  "compared": "<session-scratchpad>/sp500/phase_b/batch_1_before.json (store before batch 1, 62 companies) against the store after the wrap-up, which is identical to batch_9_after.json",
+  "report": "<session-scratchpad>/sp500/phase_b/final_old_rows_report.json",
+  "tables": {
+   "companies": {
+    "before": 62,
+    "after": 492,
+    "old_missing_or_altered": 0,
+    "before_sha256": "a647d97aa56f1cc6b6ca73fb79247c1f546b231f72e7334d509b3bfc17457639",
+    "after_sha256": "5eb152af75356478db3861ab76e645eb6d446c1bba99ed83a9a3d83c49c5b937",
+    "kept_old_sha256": "a647d97aa56f1cc6b6ca73fb79247c1f546b231f72e7334d509b3bfc17457639"
+   },
+   "filings": {
+    "before": 3706,
+    "after": 28157,
+    "old_missing_or_altered": 0,
+    "before_sha256": "67bcdc7af08fd695d97e9e1c858fed8f2997ee81ec658ae1e50dda6958ef3a3b",
+    "after_sha256": "dea35c0bf780d626f0f2125eb2e1d4e73e298b2a6152ad94e6313e374949f6c1",
+    "kept_old_sha256": "67bcdc7af08fd695d97e9e1c858fed8f2997ee81ec658ae1e50dda6958ef3a3b"
+   },
+   "facts": {
+    "before": 18886,
+    "after": 145198,
+    "old_missing_or_altered": 0,
+    "before_sha256": "4a709129b33408844a7b59db0b56b72d5601d8f98d7c812b159d6f905fbe10e1",
+    "after_sha256": "87c21d5529ba7e12236200465092bd982e8ffeeeef53c5ba45bdf699e543e270",
+    "kept_old_sha256": "4a709129b33408844a7b59db0b56b72d5601d8f98d7c812b159d6f905fbe10e1"
+   },
+   "fiscal_periods": {
+    "before": 1023,
+    "after": 7961,
+    "old_missing_or_altered": 0,
+    "before_sha256": "20a907fd48c56fb0195445d1f9cc46841603ed011617119e6078557a2d59505c",
+    "after_sha256": "ce0008f05447588e1b50f1fe5aadbb75befd77120bfdc1b0494965d75d6a64a3",
+    "kept_old_sha256": "20a907fd48c56fb0195445d1f9cc46841603ed011617119e6078557a2d59505c"
+   }
+  },
+  "release_files": {
+   "before": 689,
+   "after": 3909,
+   "changed_or_removed": []
+  },
+  "ok": true
+ },
+ "reconciliation": {
+  "constituent_rows": 503,
+  "store_companies": 492,
+  "planned": {
+   "before_phase_b": 62,
+   "phase_b": 437,
+   "total": 499,
+   "not_planned": {
+    "GOOG": "second share class; same CIK 1652044 as GOOGL, which is stored (ingest maps one ticker per CIK)",
+    "FOX": "second share class; same CIK 1754301 as FOXA, which is stored",
+    "NWS": "second share class; same CIK 1564708 as NWSA, which is stored",
+    "XOM": "dropped in Phase A: SEC's ticker map points XOM at ExxonMobil Holdings Corp (CIK 2115436), a new registrant with one 10-Q; earlier quarters are under Exxon Mobil Corp (CIK 34088), and ingest maps one ticker to one CIK"
+   }
+  },
+  "planned_but_missing": {
+   "tickers": {
+    "INVH": {
+     "release_files": 3,
+     "release_files_quarantined": 1,
+     "release_facts": 101
+    },
+    "ES": {
+     "release_files": 1,
+     "release_files_quarantined": 0,
+     "release_facts": 44
+    },
+    "EBAY": {
+     "release_files": 3,
+     "release_files_quarantined": 0,
+     "release_facts": 133
+    },
+    "KHC": {
+     "release_files": 4,
+     "release_files_quarantined": 0,
+     "release_facts": 253
+    },
+    "SLB": {
+     "release_files": 4,
+     "release_files_quarantined": 0,
+     "release_facts": 412
+    },
+    "CB": {
+     "release_files": 4,
+     "release_files_quarantined": 0,
+     "release_facts": 124
+    },
+    "CRL": {
+     "release_files": 3,
+     "release_files_quarantined": 0,
+     "release_facts": 174
+    }
+   },
+   "cause": "batch 3 ingest stopped with a KeyError at INVH after 43 of its 50 companies (finding 1); INVH, ES, EBAY, KHC, SLB, CB and CRL have no company, filing, fact or fiscal-period rows. Their companyfacts and Submissions are still cached raw (not archived), so an offline re-ingest after the fix needs no SEC request. Their release files were mapped, XBRL-gated against companyfacts and kept; they have no store rows to relabel against."
+  },
+  "arithmetic": "503 - 3 share classes - XOM = 499 planned; 499 - 7 = 492 stored",
+  "store_tickers_not_in_constituents": []
+ },
+ "coverage_profile": {
+  "companies": 492,
+  "xbrl": {
+   "facts": 145198,
+   "filings": 28157,
+   "fiscal_periods": 7961
+  },
+  "release_facts": {
+   "companies_with_release_files": 458,
+   "companies_with_release_facts": 453,
+   "xbrl_only_no_release_file": {
+    "count": 34,
+    "tickers": [
+     "ABNB",
+     "AES",
+     "APA",
+     "APO",
+     "ARES",
+     "ATO",
+     "BKNG",
+     "COR",
+     "DECK",
+     "DHR",
+     "ECHO",
+     "EOG",
+     "EQT",
+     "F",
+     "FANG",
+     "FE",
+     "HON",
+     "HSIC",
+     "IRM",
+     "JKHY",
+     "KKR",
+     "MCK",
+     "MKC",
+     "NXPI",
+     "OKE",
+     "OXY",
+     "PNW",
+     "REGN",
+     "RL",
+     "ROK",
+     "TSLA",
+     "VYLR",
+     "VZ",
+     "WAB"
+    ],
+    "of_which_every_release_file_quarantined": [
+     "AES",
+     "COR",
+     "DHR",
+     "HON",
+     "MCK",
+     "NXPI",
+     "RL",
+     "ROK",
+     "WAB"
+    ]
+   },
+   "release_files_without_facts": {
+    "count": 5,
+    "tickers": [
+     "ABBV",
+     "FOXA",
+     "PLD",
+     "Q",
+     "REG"
+    ]
+   },
+   "live_release_files": 1825,
+   "quarantined_release_files": 105,
+   "release_facts_of_stored_companies": 95921,
+   "release_facts_of_the_7_missing_companies": 1241,
+   "release_facts_in_snapshot": 97162
+  },
+  "labelled_quarters": {
+   "rule": "fiscal_periods Q1-Q4 rows ending on or before 2026-10-31",
+   "8_or_more": 485,
+   "fewer_than_8": {
+    "FDXF": 0,
+    "FERG": 4,
+    "HONA": 2,
+    "PPL": 5,
+    "Q": 4,
+    "SKYD": 4,
+    "VYLR": 0
+   },
+   "why_fewer": {
+    "FDXF": "FedEx Freight spin-off; its one 10-Q uses the new calendar year (label gate)",
+    "VYLR": "no 10-Q or 10-K yet (Form 10 registrant)",
+    "HONA": "new registrant: 2 labelled quarters",
+    "FERG": "fiscal-year change to December (10-KT); the 2026 10-Qs lose their labels",
+    "Q": "new registrant: 4 labelled quarters",
+    "SKYD": "registrant since the merger: 4 labelled quarters; its 10-K/A is missing from companyfacts",
+    "PPL": "two 10-Ks (DEI fy=2021) and three 2024 10-Qs (fy=2022) carry implausible DEI years and are ignored; Q3 FY2023 is claimed by two filings (label gate)"
+   }
+  },
+  "latest_labelled_quarter": {
+   "by_calendar_quarter_of_period_end": {
+    "2026Q3": 265,
+    "2026Q2": 182,
+    "2026Q1": 28,
+    "2026Q4": 11,
+    "2025Q4": 3,
+    "2025Q3": 1,
+    "none": 2
+   },
+   "by_label_top": {
+    "Q3 FY2026": 233,
+    "Q2 FY2026": 164,
+    "Q1 FY2027": 26,
+    "Q1 FY2026": 25,
+    "Q4 FY2026": 24,
+    "Q2 FY2027": 15
+   },
+   "most_companies_reach": "the quarter ending July-September 2026 (265 of 492; 233 labelled Q3 FY2026)",
+   "behind_their_newest_filing": {
+    "companies": 37,
+    "filings": 51,
+    "sec_companyfacts_lag": {
+     "companies": 32,
+     "filings": 43,
+     "tickers": [
+      "ABT",
+      "AEP",
+      "C",
+      "CLX",
+      "CMS",
+      "CNP",
+      "D",
+      "DLR",
+      "DTE",
+      "DUK",
+      "ED",
+      "ESS",
+      "ETR",
+      "EVRG",
+      "EXC",
+      "FE",
+      "FRT",
+      "HUM",
+      "JCI",
+      "KIM",
+      "LNT",
+      "MAA",
+      "NEE",
+      "PCG",
+      "PLD",
+      "PPL",
+      "REG",
+      "SO",
+      "SRE",
+      "UDR",
+      "V",
+      "VRSK"
+     ],
+     "with_release_facts_for_the_missing_quarters": [
+      "ABT",
+      "AEP",
+      "CLX",
+      "CNP",
+      "D",
+      "DTE",
+      "DUK",
+      "ED",
+      "ESS",
+      "ETR",
+      "EXC",
+      "FRT",
+      "HUM",
+      "JCI",
+      "KIM",
+      "LNT",
+      "MAA",
+      "PCG",
+      "PPL",
+      "SRE",
+      "UDR",
+      "V",
+      "VRSK"
+     ],
+     "without": [
+      "C",
+      "CMS",
+      "DLR",
+      "EVRG",
+      "FE",
+      "NEE",
+      "PLD",
+      "REG",
+      "SO"
+     ]
+    },
+    "dei_fp_FY_on_10Q": [
+     "BXP"
+    ],
+    "label_gate_or_fiscal_year_change": [
+     "FDX",
+     "FDXF",
+     "FERG"
+    ],
+    "dei_year_implausible": [
+     "MTD"
+    ],
+    "detail": "finding 3"
+   }
+  },
+  "metric_coverage_of_the_last_8_labelled_quarters": {
+   "revenue_8_of_8": 463,
+   "revenue_none": {
+    "count": 22,
+    "held_back_pending_confirmation": [
+     "AWK",
+     "CBOE",
+     "DUK",
+     "IRM",
+     "NEE",
+     "NI",
+     "OKE"
+    ],
+    "banks_without_a_quarterly_total": [
+     "BNY",
+     "FITB",
+     "HBAN",
+     "MTB",
+     "RF",
+     "SYF",
+     "TFC"
+    ],
+    "only_RegulatedAndUnregulatedOperatingRevenue_which_is_comparison_only": [
+     "DTE",
+     "XEL"
+    ],
+    "reit_contract_revenue_dropped_by_the_lease_rule_no_total": [
+     "ARE",
+     "CPT"
+    ],
+    "no_revenue_concept_in_companyfacts_for_the_window": [
+     "APA",
+     "VMRK"
+    ],
+    "no_quarterly_xbrl": [
+     "FDXF",
+     "VYLR"
+    ]
+   },
+   "revenue_partial": {
+    "FERG": 4,
+    "HONA": 2,
+    "MRNA": 6,
+    "PPL": 5,
+    "Q": 4,
+    "SKYD": 4,
+    "SRE": 3
+   },
+   "net_income_8_of_8": 453,
+   "net_income_none": {
+    "count": 19,
+    "tickers": [
+     "AEE",
+     "AMT",
+     "BE",
+     "BKNG",
+     "CF",
+     "CMI",
+     "ESS",
+     "FDXF",
+     "FOXA",
+     "IBKR",
+     "IRM",
+     "MA",
+     "OXY",
+     "PNW",
+     "VTR",
+     "VTRS",
+     "VYLR",
+     "WEC",
+     "WELL"
+    ],
+    "note": "their 10-Qs/10-Ks tag net income outside the served concepts (e.g. NetIncomeLossAvailableToCommonStockholdersBasic, ProfitLoss); the fallback was declined earlier; not investigated further"
+   },
+   "eps_diluted_6_or_more": 465,
+   "eps_diluted_none": {
+    "count": 18,
+    "tickers": [
+     "ABNB",
+     "ARES",
+     "BKR",
+     "BRK-B",
+     "CVNA",
+     "ERIE",
+     "FDXF",
+     "GD",
+     "HSY",
+     "KIM",
+     "KKR",
+     "MNST",
+     "REG",
+     "STZ",
+     "V",
+     "VRSN",
+     "VYLR",
+     "WEC"
+    ]
+   }
+  }
+ },
+ "revenue_held_back": {
+  "rule": "contract revenue of a SIC-flagged filer (or one with a lease note of 10% or more) is withheld until scripts/confirm_revenue.py finds at least 2 periods where a filed version equals a release total",
+  "confirmed_in_phase_b": [
+   "AJG",
+   "EQIX",
+   "BEN",
+   "BLK",
+   "HST",
+   "TPL",
+   "ERIE",
+   "ICE",
+   "IVZ",
+   "NDAQ",
+   "TROW"
+  ],
+  "still_held": {
+   "IRM": "from the 62-company set: no earnings-release tables to compare (0 release files); its 10-K \"Total Revenues $6,901,737 thousand\" equals contract revenue, so a 10-K text confirmation would pass if the coordinator accepts that source",
+   "AWK": "0 comparable periods: release totals cover Q4 2024, Q4 2025 and YTD (H1/9M) columns; the held figures are Q1-Q3 quarters and fiscal years",
+   "CBOE": "0 comparable periods: release totals only for H1 2025 and H1 2026; held figures are quarters and fiscal years",
+   "DUK": "0 comparable periods: 3 releases were quarantined by the XBRL gate because 'Total operating revenues' (Q1 2026: 9,178M) differs from contract revenue (8,995M), including the one with a held period (Q1 2025); the live file has Q2 and H1 2025-2026 only. The gap itself says contract revenue is a slice for DUK (finding 6)",
+   "ETR": "0 comparable periods: its 4 release files have no GAAP total revenue",
+   "NEE": "0 comparable periods: its 2 release files (4 facts) have no GAAP total revenue",
+   "NI": "0 comparable periods: its 4 release files have no GAAP total revenue",
+   "OKE": "0 comparable periods: no release files",
+   "SRE": "0 comparable periods: one held figure (Q1 2024); release totals start at Q4 2024 and YTD columns"
+  },
+  "note": "ETR and SRE still serve revenue for most quarters from other concepts; the held figures are the contract-revenue ones only"
+ },
+ "quarantine": {
+  "phase_b_files": 88,
+  "phase_b_facts_held": 5013,
+  "phase_b_served_facts_dropped_in_kept_files": 799,
+  "per_batch": {
+   "1": {
+    "files": 13,
+    "facts_held": 674,
+    "largest": [
+     "TKO 0001193125-26-071552 (262)",
+     "AES 0000874761-25-000086 (52)",
+     "AES 0000874761-25-000071 (50)",
+     "TKO 0001193125-26-330561 (48)",
+     "AJG 0001193125-26-029407 (47)"
+    ]
+   },
+   "2": {
+    "files": 8,
+    "facts_held": 493,
+    "largest": [
+     "CARR 0001783180-26-000030 (80)",
+     "CARR 0001783180-26-000005 (72)",
+     "DOW 0001751788-26-000011 (69)",
+     "CARR 0001783180-26-000035 (68)",
+     "DOW 0001751788-26-000155 (65)"
+    ]
+   },
+   "3": {
+    "files": 8,
+    "facts_held": 365,
+    "largest": [
+     "INVH 0001687229-26-000013 (72)",
+     "IFF 0000051253-26-000003 (60)",
+     "BX 0001193125-25-247643 (57)",
+     "BX 0001193125-26-313250 (56)",
+     "DUK 0001326160-26-000007 (38)"
+    ]
+   },
+   "4": {
+    "files": 9,
+    "facts_held": 311,
+    "largest": [
+     "CVS 0000064803-26-000009 (66)",
+     "CVS 0000064803-26-000097 (64)",
+     "DHR 0000313616-26-000163 (40)",
+     "DHR 0000313616-26-000201 (36)",
+     "MDLZ 0001628280-26-050157 (25)"
+    ]
+   },
+   "5": {
+    "files": 7,
+    "facts_held": 306,
+    "largest": [
+     "HAS 0000046080-26-000044 (72)",
+     "PPG 0000079879-26-000025 (70)",
+     "SW 0001104659-26-087794 (48)",
+     "SW 0001104659-25-103425 (48)",
+     "VMRK 0001193125-26-312445 (30)"
+    ]
+   },
+   "6": {
+    "files": 15,
+    "facts_held": 1177,
+    "largest": [
+     "MCK 0000927653-26-000066 (140)",
+     "MCK 0000927653-26-000015 (140)",
+     "MPWR 0001437749-26-003191 (105)",
+     "RL 0001628280-26-005615 (100)",
+     "RL 0001628280-26-037053 (98)"
+    ]
+   },
+   "7": {
+    "files": 9,
+    "facts_held": 531,
+    "largest": [
+     "NXPI 0001413447-26-000003 (85)",
+     "PTC 0001193125-25-266865 (72)",
+     "HON 0000773840-26-000006 (62)",
+     "HON 0000773840-26-000120 (61)",
+     "HON 0000773840-26-000141 (57)"
+    ]
+   },
+   "8": {
+    "files": 4,
+    "facts_held": 140,
+    "largest": [
+     "SPGI 0000064040-26-000019 (58)",
+     "JCI 0000833444-26-000014 (38)",
+     "SWKS 0001104659-25-102814 (32)",
+     "PFG 0001104659-26-087091 (12)"
+    ]
+   },
+   "9": {
+    "files": 15,
+    "facts_held": 1016,
+    "largest": [
+     "ROK 0001024478-25-000112 (140)",
+     "ROK 0001024478-26-000028 (96)",
+     "WAB 0000943452-26-000017 (92)",
+     "WAB 0001628280-26-007113 (89)",
+     "WAB 0001628280-26-049105 (77)"
+    ]
+   }
+  },
+  "store_wide_quarantined_files": 105
+ },
+ "label_gate_clears": {
+  "release_facts_relabelled": 154,
+  "cleared_to_no_label": {
+   "ACGL Q4 2024 (2024-10-01..2024-12-31)": 10,
+   "SKYD Q4 2025 (2025-10-01..2025-12-31)": 12,
+   "CAH Q4 FY2026 (2026-04-01..2026-06-30)": 12,
+   "FERG Q4 FY2024 (2024-05-01..2024-07-31)": 13
+  },
+  "filled_from_the_store": {
+   "ADI FY2025": 1,
+   "TMUS FY2025": 1,
+   "CLX Q1 FY2025/FY2026": 4,
+   "DASH FY2024/FY2025": 8,
+   "ESS FY2024/FY2025": 26,
+   "EG FY2024/FY2025": 12,
+   "HIG FY2024/FY2025": 2,
+   "RCL FY2025": 2,
+   "HWM FY2024/FY2025": 4,
+   "NDSN FY2025, Q1 FY2025/FY2026": 5,
+   "PFG FY2024/FY2025": 18,
+   "PGR Q1 FY2025/FY2026": 2,
+   "STE FY2025/FY2026": 4,
+   "STX FY2026": 8,
+   "TXN FY2024/FY2025": 6,
+   "XYZ FY2024/FY2025": 4
+  },
+  "label_gate_messages_after_each_batch": 0,
+  "companies_with_label_gate_messages": [
+   "ACGL",
+   "AES",
+   "BX",
+   "FDX",
+   "FDXF",
+   "FERG",
+   "LH",
+   "NUE",
+   "PPG",
+   "PPL",
+   "REG"
+  ],
+  "why_cleared": "a stored 10-Q/10-K covers the period but the store leaves it unlabelled (gate or missing Q3), so the release label goes too; an unlabelled period answers '?'"
+ },
+ "findings_not_fixed": [
+  {
+   "id": 1,
+   "severity": "high (7 companies missing)",
+   "where": "receipts/ingest.py, _drop_component_revenue, the operating-lease test",
+   "bug": "when contract revenue v <= 0 (now checked), `lease.get(k, 0.0) >= 0.01 * v` is true without a lease entry, and the message then reads `lease[k]`: KeyError",
+   "seen": "batch 3, INVH (CIK 1687229), key ('0001687229-26-000032', 2025-01-01, 2025-03-31); INVH, ES, EBAY, KHC, SLB, CB and CRL were never ingested",
+   "proposed_fix": "require `k in lease` in that test (or skip the ratio tests when v <= 0), plus a test with a non-positive contract revenue and no lease entry",
+   "recovery": "after the fix: offline re-ingest of the 7 (companyfacts and Submissions are cached raw), then relabel_release_facts, confirm_revenue for any the revenue guard holds back (INVH is a REIT and ES a utility, so likely), and archive_companyfacts for the 7; then rebuild the snapshot"
+  },
+  {
+   "id": 2,
+   "severity": "medium (process)",
+   "where": "<session-scratchpad>/sp500/phase_b_batch.py (scratch driver, not repo code)",
+   "bug": "the ingest step accepted exit codes 0 and 1 and parsed only FAILED lines, so the traceback was missed and batch 3 was marked ok (its 'edgar' summary is null)",
+   "proposed_fix": "treat any non-zero exit or a missing EDGAR summary line as a batch failure"
+  },
+  {
+   "id": 3,
+   "severity": "high for those companies (newest quarters missing)",
+   "where": "upstream: SEC companyfacts at fetch time (2026-10-31)",
+   "finding": "52 stored 10-Q/10-K filings at 40 companies are absent from the companyfacts we fetched; 43 of them are the newest 1-2 quarters of 32 companies (17 utilities, 8 REITs and ABT, C, CLX, HUM, JCI, V, VRSK: their companyfacts stops at a 10-Q/10-K filed in February (C), April-May (most) or July-August 2026 (CMS, ESS, KIM, PCG) while the Submissions list later ones). Those quarters have no XBRL facts and no fiscal label; release facts cover them for some companies",
+   "by_filed_month": {
+    "2025-02": 2,
+    "2025-05": 1,
+    "2025-07": 1,
+    "2026-04": 2,
+    "2026-05": 1,
+    "2026-07": 23,
+    "2026-08": 8,
+    "2026-10": 14
+   },
+   "holes_elsewhere": {
+    "AOS": [
+     "10-K 2024-12-31 (filed 2025-02-11)"
+    ],
+    "CAH": [
+     "10-Q 2026-03-31 (filed 2026-04-30)"
+    ],
+    "DOW": [
+     "10-Q 2026-06-30 (filed 2026-07-24)"
+    ],
+    "EIX": [
+     "10-Q 2026-06-30 (filed 2026-07-30)"
+    ],
+    "HSY": [
+     "10-Q/A 2025-03-30 (filed 2025-05-20)",
+     "10-Q/A 2025-03-30 (filed 2025-07-03)"
+    ],
+    "SKYD": [
+     "10-K/A 2025-12-31 (filed 2026-04-24)"
+    ],
+    "SPGI": [
+     "10-K 2024-12-31 (filed 2025-02-11)"
+    ],
+    "URI": [
+     "10-Q 2026-06-30 (filed 2026-07-22)"
+    ]
+   },
+   "other_unlabelled_newest_filings": {
+    "BXP": "2026 10-Qs tagged DEI fp=FY: ignored by rule, facts stored unlabelled",
+    "FDX, FDXF": "Jul-Sep 2026 10-Q tagged Q3 FY2026: FedEx moved to a calendar fiscal year; the label gate drops it (safe '?')",
+    "FERG": "fiscal-year change to December (10-KT); 2026 10-Qs lose their labels (safe '?')",
+    "MTD": "Q2 2026 10-Q tagged DEI fy=2024: ignored (implausible year), period unlabelled"
+   },
+   "options": "re-fetch companyfacts later (SEC may catch up; needs SEC requests and a re-ingest), or read each filing's own XBRL instance for filings missing from companyfacts (code change)"
+  },
+  {
+   "id": 4,
+   "severity": "high for 2 companies (every fiscal label one year off)",
+   "where": "receipts/fiscal_labels.py, convention(): the majority over the 10-Ks wins even when nearly all 10-Qs disagree",
+   "seen": {
+    "CRWD": "10-K DEI offsets -1, -1, 0 (two slipped 10-Ks) against 10-Q offsets 0 x10, -1 x1: convention -1, so the year ending 2026-01-31 (CrowdStrike's fiscal 2026) is stored as FY2025 and May-Jul 2026 (Q2 FY2027) as Q2 FY2026; 332 stored facts and 237 labelled release facts",
+    "KR": "10-K DEI offsets 0, 0, -1 against 10-Q offsets -1 x11: convention 0, so the year ending 2026-01-31 (Kroger's fiscal 2025) is stored as FY2026 and its Q2 2026 as Q2 FY2027; 182 stored facts and 82 labelled release facts"
+   },
+   "scan": "of 492 companies, only CRWD, KR and FDXF have a 10-K majority different from the 10-Q majority; FDXF is the fiscal-year change and already label-gated",
+   "proposed_fix": "use the majority over all 10-Qs and 10-Ks (CRWD 0, KR -1), or drop all labels with a gate message when the 10-K and 10-Q majorities disagree; then offline re-ingest CRWD and KR (restore their archived companyfacts first) and relabel their release facts",
+   "impact": "a draft that names CrowdStrike's or Kroger's own fiscal year is checked against the neighbouring year; the committed data/snapshot (acac293) carries these labels"
+  },
+  {
+   "id": 5,
+   "severity": "medium",
+   "where": "data/pr_facts and the snapshot build",
+   "finding": "the snapshot built after batch 9 (and the committed data/snapshot, acac293) includes the 1,241 release facts of the 7 companies missing from the store (97,162 = 95,921 + 1,241); they have no company row, so whether the query side can reach them is for the query-side owner to check"
+  },
+  {
+   "id": 6,
+   "severity": "low",
+   "where": "XBRL gate for SIC-flagged revenue",
+   "finding": "for a company whose contract revenue is held back, the gate still compares release revenue with that concept: DUK's 3 releases were quarantined because the true total differs from the contract-revenue slice, which leaves DUK without revenue from either source"
+  }
+ ],
+ "known_limitations": [
+  "FiscalCalendar (receipts/press_release.py) only sees store-labelled periods, so a period a stored filing covers but the store rejected can get a helper label in the Spark mapping prompt; relabel_release_facts is the safety net and values are unaffected (kept as is by the coordinator's decision)",
+  "Kroger's 16-week first quarters have no Q1 label in the store (observed; cause not traced)",
+  "fiscal-year changes (FDX, FDXF, FERG) leave the new-calendar quarters unlabelled until the store learns the new year end"
+ ],
+ "decisions_recorded": [
+  "AJG confirmation rule (accepted by the coordinator): a period agrees when any filed version equals a release total within the release's precision, so a later restatement does not block a confirmed first version",
+  "BAX: the 1% lease-income rule applies only to SIC 65xx/6798; other filers get a note when lease income is 10% or more"
+ ],
+ "disk": {
+  "free_gib_after_batch_9": 2.58,
+  "free_gib_before_cleanup": 2.32,
+  "free_gib_after_cleanup": 3.1,
+  "freed_mib": 794,
+  "deleted": "<session-scratchpad>/sp500: per-batch row-hash snapshots (batch_1..8_after, batch_2..9_before, ajg_before/after), the per-batch gate re-run JSONs, four superseded scratch snapshots, size experiments, older gate/hash/row/dry-run/claims intermediates and a frozen code copy",
+  "kept": [
+   "<session-scratchpad>/sp500/phase_b/batch_1_before.json",
+   "<session-scratchpad>/sp500/phase_b/batch_9_after.json",
+   "<session-scratchpad>/sp500/phase_b/snapshot (final scratch snapshot)",
+   "<session-scratchpad>/sp500/phase_b/batch_N.json, batch_N_validation.json and logs",
+   "<session-scratchpad>/sp500/claims_final2.* (dev replay reference)",
+   "<session-scratchpad>/fallback-62 (pre-Phase-B rollback point, 22 MB; delete on request)"
+  ],
+  "untouched": [
+   "data/cache",
+   "data/archive",
+   "data/eval_runs",
+   "data/snapshot"
+  ]
+ },
+ "post_review_fixes": {
+  "reviewed": "2026-10-31: the coordinator's review of this record and the 40-company QA (.claude/judging/2026-10-31-sp500-qa-40.md)",
+  "commit": "7243253: receipts/ingest.py, receipts/fiscal_labels.py, receipts/release_gates.py, scripts/gate_release_facts.py and four test files. The data under data/ is not committed, and data/snapshot was not rebuilt",
+  "spend": {
+   "model_usd": 0,
+   "sec_requests": 0,
+   "note": "every ingest offline, from the cached Submissions and the archived companyfacts"
+  },
+  "fix_1_ingest_keyerror": {
+   "change": "_drop_component_revenue runs no ratio test against contract revenue that is not positive and never reads a lease entry a period lacks (finding 1)",
+   "test": "tests/test_revenue_guard.py: INVH's shape ($0 contract revenue for Q1 2025, no lease income tagged); the old code raises the original KeyError on it",
+   "seven_companies": {
+    "INVH": {
+     "filings": 62,
+     "facts": 295,
+     "fiscal_periods": 17,
+     "release_facts_kept": 101
+    },
+    "ES": {
+     "filings": 53,
+     "facts": 241,
+     "fiscal_periods": 16,
+     "release_facts_kept": 44
+    },
+    "EBAY": {
+     "filings": 53,
+     "facts": 417,
+     "fiscal_periods": 17,
+     "release_facts_kept": 133
+    },
+    "KHC": {
+     "filings": 61,
+     "facts": 301,
+     "fiscal_periods": 16,
+     "release_facts_kept": 253
+    },
+    "SLB": {
+     "filings": 53,
+     "facts": 222,
+     "fiscal_periods": 17,
+     "release_facts_kept": 412
+    },
+    "CB": {
+     "filings": 47,
+     "facts": 251,
+     "fiscal_periods": 17,
+     "release_facts_kept": 124
+    },
+    "CRL": {
+     "filings": 45,
+     "facts": 201,
+     "fiscal_periods": 16,
+     "release_facts_kept": 174
+    }
+   },
+   "release_facts": "1,241 kept and attached to company rows: the label gate changed none, the XBRL gate re-run dropped none, the release gates dropped none, and no revenue is held back",
+   "archives": "the 7 companies' companyfacts archived (raw deleted); 24 exhibits archived"
+  },
+  "fix_2_fiscal_year_convention": {
+   "change": "convention(): when the 10-K and 10-Q majorities disagree, the offset at least two thirds of all 10-Qs and 10-Ks share wins, else every label is dropped; both leave a gate-counter warning",
+   "tests": "tests/test_fiscal_labels.py: CrowdStrike and Kroger shapes, and the no-two-thirds gate",
+   "crwd": {
+    "stored": "every label a year later than before: FY2026 = 2025-02-01..2026-01-31, Q2 FY2027 = 2026-05-01..2026-07-31",
+    "store_facts_relabelled": 332,
+    "fiscal_periods_relabelled": 17,
+    "release_facts_relabelled": 237,
+    "own_releases": [
+     "'Third Quarter Fiscal Year 2026 ... ended October 31, 2025' -> Q3 FY2026",
+     "'Fourth Quarter and Fiscal Year 2026 ... ended January 31, 2026' -> Q4 FY2026, FY2026",
+     "'First Quarter Fiscal Year 2027 ... ended April 30, 2026' -> Q1 FY2027",
+     "'Second Quarter Fiscal Year 2027 ... ended July 31, 2026' -> Q2 FY2027"
+    ]
+   },
+   "kr": {
+    "stored": "every label a year earlier than before: FY2025 = 2025-02-02..2026-01-31, Q2 FY2026 = 2026-05-24..2026-08-15",
+    "store_facts_relabelled": 182,
+    "fiscal_periods_relabelled": 13,
+    "release_facts_relabelled": 82,
+    "own_releases": [
+     "'Kroger's third quarter 2025 ended on November 8, 2025' -> Q3 FY2025",
+     "'Fourth Quarter and Full-Year 2025 ... ended on January 31, 2026' -> Q4 FY2025, FY2025",
+     "'Kroger's second quarter 2026 ended on August 15, 2026' -> Q2 FY2026",
+     "the 16-week Q1 has no stored label and answers '?'"
+    ]
+   },
+   "fdxf": "re-ingested at the coordinator's request: one 10-K against one 10-Q, no two thirds, so every label is gated (7 facts lose FY2026, 1 fiscal period removed)",
+   "scan": "build_company over all 499 companies under the old and the new code: only CRWD, KR and FDXF change, and the old code reproduces every company's stored calendar"
+  },
+  "fix_3_misdated_figures": {
+   "rules": {
+    "a": "a reported quarter equal to the same concept's 10-K fiscal-year figure while another quarter of the year is non-zero",
+    "b": "Q1+Q2+Q3+Q4 against the 10-K year beyond rounding, only in a year none of whose figures was restated; in a restated year the sum fails for true Q4s on a new basis (about 50 recast years at DHR, DLTR, HON, GE and others)",
+    "c": "a Q4 of a metric never negative above every filed version of its 9M: L3Harris tagged no 12-month figure",
+    "d": "a 10-Q full-year figure no 10-K figure for the year matches, a quarter under a full-year date; rule a alone would have dropped Comfort Systems' true Q1 for its mis-dated full year"
+   },
+   "dropped": [
+    "AXON revenue FY FY2023 rule d 343.0M",
+    "FIX cost_of_revenue FY FY2025 rule d 1,427.9M",
+    "FIX gross_profit FY FY2025 rule d 403.4M",
+    "FIX operating_income FY FY2025 rule d 209.1M",
+    "FIX revenue FY FY2025 rule d 1,831.3M",
+    "LHX cost_of_revenue Q4 FY2024 rule a 15,801.0M",
+    "LHX cost_of_revenue Q4 FY2025 rule c 16,240.0M",
+    "LHX operating_income Q4 FY2024 rule a 1,918.0M",
+    "LHX operating_income Q4 FY2025 rule a 2,110.0M",
+    "LHX revenue Q4 FY2024 rule a 21,325.0M",
+    "LHX revenue Q4 FY2025 rule c 21,865.0M",
+    "MO dividend_per_share FY FY2023 rule d 0.0M",
+    "ROST dividend_per_share FY FY2023 rule d 0.0M",
+    "TSCO net_income Q4 FY2025 rule a 1,096.1M",
+    "WSM dividend_per_share FY FY2024 rule d 0.0M"
+   ],
+   "derived_after": [
+    "LHX operating income Q4 FY2025 $393M (the release's figure)",
+    "TSCO net income Q4 FY2025 $227.4M"
+   ]
+  },
+  "fix_4_derived_quarters": {
+   "rules": [
+    "component versions that differ only by rounding are one value, so a recast total paired with them is a restated total with stale components (MLM's 476 and 206)",
+    "when the component was restated and a total filed afterwards kept its value, only the latest pair is derived, public from the later filing (DLTR keeps 3,116.9 and 533.6; -4,377.1 and 504.9 go)",
+    "a derived quarter of revenue, cost of revenue, R&D or operating expenses lies between zero and its total",
+    "a derived Q4 of those metrics lies within 10-75% of its fiscal year. Above 75%: only Crown Castle's cost of revenue (86% and 95%, a narrower 9M concept), while real impairment quarters sit at 61-65%. Below 10%: only OXY revenue (8.1%) and Atmos and CenterPoint cost lines whose quarters do not add up (0-1%), while the most seasonal real quarter, Atmos' summer revenue, is 13.7%"
+   ],
+   "rows": {
+    "fix4 latest pair only (component restated, total re-filed unchanged)": 109,
+    "added: fix4 latest pair: same value, public from the later filing": 32,
+    "fix4 later version paired with a component that differs only by rounding": 78,
+    "fix4 outside 10-75% of its year": 6,
+    "fix3 misdated figure": 15,
+    "fix4 negative": 10,
+    "added: fix3 true Q4 derived after a misdated drop": 2
+   },
+   "reviewed_q4s": {
+    "OXY revenue Q4 FY2025 1,752M": "dropped, mixed basis: the FY2025 10-K drops OxyChem (FY2024 recast 26,725 -> 22,019) while the 9M 2025 (19,841) is the sum of the original quarters, later restated about $1.1B lower each",
+    "CCI cost of revenue Q4 FY2023 1,667M and Q4 FY2024 1,715M": "dropped, impossible: FY CostOfRevenue minus a 9M of the narrower CostOfGoodsAndServicesSold ($66M a quarter): 86% and 95% of the year",
+    "CCI operating expenses Q4 FY2024 6,154M and 549M": "kept: one concept and one basis per pair; the old-basis quarter carries the Fiber impairment, and 549M is the same quarter after the Fiber sale recast",
+    "EXE revenue 2,001M and operating expenses 2,387M, Q4 FY2024": "kept, real: the company's own release reports 'Total revenues and other | 2,001' and 'Total operating expenses | 2,387' for the quarter (the Southwestern merger closed on October 1, 2024)",
+    "side effects of the band": "ATO cost of revenue Q4 FY2023 (3.2M of 1,452M) and CNP cost of revenue Q4 FY2023 and FY2025 (1M and 0M) are no longer served"
+   },
+   "qa_implausible_derived_q4": "41 of 3,590 in acac293 -> 24 of 3,565 by the QA's own test (negative, or outside 0.4-2.5x every Q3); the rest are gross profit, which can be negative, or real per the QA (INTC, LMT, TFC, APO)"
+  },
+  "fix_5_noncontrolling_interests": {
+   "xbrl_side": "of the QA's 17 companies, 13 tag no NetIncomeLoss in any 10-Q or 10-K of the window (AEE, AMT, BALL, BSX, CF, ESS, IBKR, MA, SPG, TFC, VTR, WEC, WELL: the attributable figure is only NetIncomeLossAvailableToCommonStockholdersBasic or ProfitLoss less the NCI); BE, FCX, O and PNC tag it in some filings, and those facts were already stored. Nothing to add to ingest",
+   "release_rule": "a GAAP release net income with no XBRL net income for its period is dropped at a company with a noncontrolling interest in any 10-Q/10-K period (NCI net income not zero, or ProfitLoss differing from NetIncomeLoss), unless companyfacts shows it is the attributable figure (NetIncomeLoss, the available-to-common figure, or ProfitLoss less the NCI); that pairing keeps 29 correct figures, Costco's 8 among them",
+   "dropped": 265,
+   "companies": {
+    "ACGL": 1,
+    "AEE": 10,
+    "AEP": 6,
+    "AMT": 14,
+    "BALL": 6,
+    "BE": 6,
+    "BSX": 12,
+    "BXP": 1,
+    "CAH": 1,
+    "CAT": 2,
+    "CF": 14,
+    "CHTR": 6,
+    "CI": 3,
+    "CLX": 1,
+    "CMI": 1,
+    "COST": 2,
+    "CVNA": 3,
+    "D": 4,
+    "DOW": 2,
+    "DTE": 2,
+    "DUK": 2,
+    "ESS": 14,
+    "ETR": 3,
+    "EXC": 2,
+    "EXPE": 3,
+    "FCX": 6,
+    "FRT": 4,
+    "HUM": 2,
+    "IBKR": 14,
+    "IFF": 3,
+    "IVZ": 2,
+    "JCI": 2,
+    "KDP": 2,
+    "KIM": 2,
+    "KR": 2,
+    "MA": 14,
+    "MAA": 4,
+    "O": 3,
+    "PEP": 3,
+    "PFG": 2,
+    "PH": 1,
+    "PM": 1,
+    "PNC": 11,
+    "SKYD": 3,
+    "SPG": 8,
+    "SPGI": 1,
+    "TFC": 2,
+    "TSN": 3,
+    "UDR": 1,
+    "VMC": 6,
+    "VRSK": 2,
+    "VTR": 6,
+    "WEC": 10,
+    "WELL": 14,
+    "WMT": 10
+   },
+   "ma": {
+    "nci_net_income": "Q1-Q3 2025 $5M, $4M, $6M; FY2025 $21M; Q1-Q3 2026 $6M, $8M, $8M; 2023-2024 quarters $4-6M across two NCI concepts; none below $0.5M",
+    "decision": "kept dropping, with no materiality rule: MA's release net income is ProfitLoss including the NCI, and MA net income answers '?'"
+   }
+  },
+  "fix_6_gaap_rows_as_non_gaap": {
+   "rule": "a non-GAAP release fact of a metric with a GAAP definition is dropped when its row label names a GAAP measure: 'GAAP' with no 'non-GAAP', 'adjusted' or 'excluding' (any hyphen), whether or not a GAAP figure equals it",
+   "rejected": "dropping every non-GAAP figure equal to a GAAP figure (2,628 facts) also removed true non-GAAP figures (NVIDIA's $1.30 non-GAAP diluted EPS for Q3 FY2026 and its non-GAAP revenue) and changed the dev replay (2 claims) and the qualifier grid (48 rows)",
+   "dropped": 171,
+   "companies": {
+    "AMAT": 10,
+    "BLK": 18,
+    "COF": 11,
+    "CRM": 28,
+    "CSX": 1,
+    "CTSH": 1,
+    "DASH": 20,
+    "DLTR": 8,
+    "FTV": 6,
+    "GE": 10,
+    "HPE": 1,
+    "IBKR": 4,
+    "JBL": 8,
+    "NDAQ": 3,
+    "ON": 3,
+    "ORLY": 8,
+    "SKYD": 2,
+    "SOLV": 2,
+    "SYY": 1,
+    "UAL": 11,
+    "VLTO": 4,
+    "VTRS": 6,
+    "WAT": 4,
+    "WTW": 1
+   },
+   "the_34_left_by_the_first_pass": {
+    "dropped (the label names a GAAP measure), 28": {
+     "AMAT": "10 Applied Global Services rows: 'GAAP reported gross profit' and 'GAAP reported operating income'",
+     "HPE": "1 'GAAP gross profit margin' (FY2024)",
+     "NDAQ": "3 'U.S. GAAP Revenues less transaction-based expenses' (Nasdaq's GAAP net revenue)",
+     "ORLY": "6 trailing-twelve-month 'GAAP net income'",
+     "UAL": "6 'Net income (GAAP)' (trailing twelve months and FY2025) and 1 'Operating expenses (GAAP)' (H1 2025)",
+     "WTW": "1 'U.S. GAAP tax rate' (Q4 2025)"
+    },
+    "kept (a non-GAAP measure), 6": {
+     "FTNT": "6 'Non‐GAAP operating income' rows: the label says non-GAAP with a U+2010 hyphen, which the first pass missed; the rule now normalises hyphens"
+    }
+   }
+  },
+  "gates": {
+   "pytest": "1931 passed; 2 failed, both query-side tests reading the committed data/snapshot (test_entity_scale: ABT alias; test_handoff_a: Visa is now covered)",
+   "dev_replay": "the 693 claims are identical to the reference on the full data and on the frozen 62-company data",
+   "examples": {
+    "nvda-ai-story": "7/2/0/2",
+    "meta-ai-story": "5/3/0/0",
+    "q2-roundup-look-ahead": "6/1/2/0"
+   },
+   "recordings": "3 of 3 replay",
+   "qualifier_grid": "identical",
+   "xbrl_gate_rerun": "1,804 live release files, 96,726 facts: 0 dropped, 0 quarantined",
+   "label_gate": "0 changes",
+   "old_rows_against_batch_9": {
+    "companies": {
+     "before": 492,
+     "after": 499,
+     "by_cause": {
+      "removed/changed: re-ingest side effect: aliases from the merged alias code (no query-time key change)": 13,
+      "added: re-ingest side effect: aliases from the merged alias code (no query-time key change)": 13,
+      "added: fix1 (7 companies ingested)": 7
+     }
+    },
+    "filings": {
+     "before": 28157,
+     "after": 28531,
+     "by_cause": {
+      "added: fix1 (7 companies ingested)": 374
+     }
+    },
+    "facts": {
+     "before": 145198,
+     "after": 146942,
+     "by_cause": {
+      "removed/changed: fix3/4 (misdated figures, derived quarters)": 218,
+      "removed/changed: fix2 (fiscal labels)": 521,
+      "added: fix3/4 (misdated figures, derived quarters)": 34,
+      "added: fix1 (7 companies ingested)": 1928,
+      "added: fix2 (fiscal labels)": 521
+     }
+    },
+    "fiscal_periods": {
+     "before": 7961,
+     "after": 8076,
+     "by_cause": {
+      "removed/changed: fix2 (fiscal labels)": 31,
+      "added: fix1 (7 companies ingested)": 116,
+      "added: fix2 (fiscal labels)": 30
+     }
+    }
+   },
+   "company_rows_changed": "13, every one an alias list recomputed by the merged alias code on re-ingest; no query-time lookup key changed",
+   "release_files_changed": 355,
+   "fix_3_4_rows_per_company": {
+    "AES": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "AFL": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "AIG": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 3,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "AJG": {
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "ALB": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "ANET": {
+     "fix4 later version paired with a component that differs only by rounding": 10
+    },
+    "ARES": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "ATO": {
+     "fix4 outside 10-75% of its year": 1
+    },
+    "AXON": {
+     "fix3 misdated figure": 1
+    },
+    "BLK": {
+     "fix4 negative": 1
+    },
+    "BRO": {
+     "fix4 later version paired with a component that differs only by rounding": 4
+    },
+    "CAH": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 12,
+     "added: fix4 latest pair: same value, public from the later filing": 6
+    },
+    "CBRE": {
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "CCI": {
+     "fix4 outside 10-75% of its year": 2
+    },
+    "CFG": {
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "CNP": {
+     "fix4 outside 10-75% of its year": 2
+    },
+    "CPAY": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "CSGP": {
+     "fix4 later version paired with a component that differs only by rounding": 8
+    },
+    "CSX": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "CTAS": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "D": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "DD": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1,
+     "fix4 negative": 2
+    },
+    "DELL": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "DHR": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 4,
+     "added: fix4 latest pair: same value, public from the later filing": 2
+    },
+    "DLTR": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 3
+    },
+    "DOV": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "DRI": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "ECHO": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 6,
+     "added: fix4 latest pair: same value, public from the later filing": 3
+    },
+    "EQIX": {
+     "fix4 later version paired with a component that differs only by rounding": 7
+    },
+    "ETR": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "FIX": {
+     "fix3 misdated figure": 4
+    },
+    "FLEX": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "FTV": {
+     "fix4 negative": 2
+    },
+    "GE": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "GS": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "HAS": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "IFF": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "ITW": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "J": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2
+    },
+    "JCI": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 4
+    },
+    "JNJ": {
+     "fix4 negative": 3
+    },
+    "KMI": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "LHX": {
+     "fix3 misdated figure": 6,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1,
+     "added: fix3 true Q4 derived after a misdated drop": 1
+    },
+    "LLY": {
+     "fix4 later version paired with a component that differs only by rounding": 2
+    },
+    "MCD": {
+     "fix4 later version paired with a component that differs only by rounding": 2
+    },
+    "MLM": {
+     "fix4 later version paired with a component that differs only by rounding": 7
+    },
+    "MO": {
+     "fix3 misdated figure": 1
+    },
+    "MSCI": {
+     "fix4 later version paired with a component that differs only by rounding": 2
+    },
+    "MTB": {
+     "fix4 later version paired with a component that differs only by rounding": 1,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "NUE": {
+     "fix4 later version paired with a component that differs only by rounding": 2
+    },
+    "NWSA": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "OXY": {
+     "fix4 outside 10-75% of its year": 1
+    },
+    "PANW": {
+     "fix4 later version paired with a component that differs only by rounding": 6,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "PAYX": {
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "PGR": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1,
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "PH": {
+     "fix4 later version paired with a component that differs only by rounding": 2,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "PLD": {
+     "fix4 negative": 2
+    },
+    "PPG": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 3
+    },
+    "PSA": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "RCL": {
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "ROK": {
+     "fix4 later version paired with a component that differs only by rounding": 6,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2
+    },
+    "ROST": {
+     "fix3 misdated figure": 1
+    },
+    "RSG": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 4
+    },
+    "SMCI": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "STE": {
+     "fix4 later version paired with a component that differs only by rounding": 10,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 6
+    },
+    "SW": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "SYY": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 4,
+     "fix4 later version paired with a component that differs only by rounding": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 2
+    },
+    "TECH": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "TGT": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "TSCO": {
+     "fix3 misdated figure": 1,
+     "added: fix3 true Q4 derived after a misdated drop": 1
+    },
+    "TSLA": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "TWLO": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "UAL": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "UDR": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "VRT": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 1
+    },
+    "WAT": {
+     "fix4 later version paired with a component that differs only by rounding": 1
+    },
+    "WDAY": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "WMT": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    },
+    "WSM": {
+     "fix3 misdated figure": 1,
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 3
+    },
+    "XYZ": {
+     "fix4 latest pair only (component restated, total re-filed unchanged)": 2,
+     "added: fix4 latest pair: same value, public from the later filing": 1
+    }
+   }
+  },
+  "qa_checks_rerun": {
+   "T1": "L3Harris Q4 FY2025 revenue claims answer '?', Q4 operating income $393M is verified, and a wrong Q4 FY2024 revenue claim cites $5.523B; 10-K 'Q4' facts carrying a full-year value: 7 -> 0",
+   "T2": "CF net income $727M (Q2 2026) and $1.455B (FY2025) answer '?'; NCI-inclusive release net income that is the only figure for its period: 89 at 17 companies -> 0 (14 paired facts at 8 companies remain beside attributable XBRL)",
+   "T3_data_side": "Dollar Tree Q4 FY2024 cost of sales and operating income as of 2025-06-30 answer '?'; growth pairing (the verifier side) is with the query-side agent",
+   "T5": "non-GAAP facts whose label says GAAP: 177 at 25 companies -> 0"
+  },
+  "scratch_snapshot": {
+   "bytes": 87953423,
+   "facts_sqlite_bytes": 37294080,
+   "companies": 499,
+   "sqlite_facts": 146942,
+   "release_facts": 96726,
+   "fingerprint": "062cf4e867a6"
+  },
+  "artifacts": [
+   "<session-scratchpad>/sp500/postfix/pre_gate_backup: the 681 release files before any gate",
+   "<session-scratchpad>/sp500/postfix/release_gates_final.json: every dropped release fact",
+   "<session-scratchpad>/sp500/postfix/facts_scan_commit.json: old against new code, 499 companies",
+   "<session-scratchpad>/sp500/postfix/old_rows_final.json: the old-rows proof"
+  ],
+  "findings_status": {
+   "1 ingest KeyError": "fixed",
+   "2 driver exit codes": "not changed (scratch driver)",
+   "3 SEC companyfacts lag": "not changed (out of scope)",
+   "4 CRWD/KR convention": "fixed",
+   "5 orphan release facts": "resolved: the 7 companies have rows",
+   "6 DUK gate interaction": "not changed (out of scope)",
+   "QA round 2 (24 facts)": "fixed: true value or '?' for all 24 (fixes 7-9, ITW concept)",
+   "derived per-share dividends (coordinator, round 2)": "fixed: dividends served as filed (fix 10)",
+   "QA round 3 T1 (GAAP lines as non-GAAP)": "fixed (fix 11): 173 exposed periods -> 42, none verdict-changing",
+   "QA round 3 T2 (dividend timing)": "fixed (fix 12): 59 quarters -> 0",
+   "QA round 3 T3 (per-share slips)": "fixed (fix 13): 24 -> 0",
+   "QA round 3 T4 (splits)": "query side"
+  },
+  "round_2": {
+   "reviewed": "2026-10-31: the coordinator's review and the round-2 QA (a fresh sample of 40 Phase B companies plus snapshot-wide scans; .claude/judging/2026-10-31-sp500-qa-40-round2.md), which found 24 facts at 13 companies (25 with CRWD's cost of revenue)",
+   "commit": "0909ffe: receipts/release_gates.py, receipts/ingest.py, scripts/gate_release_facts.py and two test files. data/ is not committed, and data/snapshot was not rebuilt",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0,
+    "note": "every ingest offline, from the archived companyfacts and cached Submissions, with the run date held at 2026-10-31"
+   },
+   "fix_7_release_vs_all_same_period_xbrl": {
+    "rule": "every served release GAAP, company-level figure against every XBRL value the store holds for the same metric and dates, reported or derived. Agreement allows each side's rounding, and for a derived value the rounding of each filed figure it combines plus 0.05%. A disagreement is excused only by a documented restatement: the same concept reports the release value for that period in a 10-Q/10-K, a stock split the store documents (two reported per-share versions of one period at a whole ratio), or a release file whose other columns of the same row equal a later filing's restated figure and not the original. Against a reported value the release figure is dropped; a reported XBRL fact is never dropped. Against a derived value only, the release outranks it when the release came no more than 100 days after the derived value's filing, the same row (metric and normalised row label) agrees with reported XBRL in at least one period and disagrees in none, and the figure is not preliminary, not a x1000 or sign slip, not consolidated net income at a company with a noncontrolling interest, and no other release agrees with the derived value; the derived value then goes to data/derived_rejections.json, which ingest reads, and the companies are re-ingested. Otherwise the release figure is dropped",
+    "why_the_mapper_missed_them": "the mapper's gate compares a release with its paired 10-Q/10-K in companyfacts, and excuses a mismatch with an older filing as a possible recast ('recast?'); DOW's Q2 2026 10-Q is missing from companyfacts, so its swapped Q2 2025 column met only the Q2 2025 10-Q and was excused",
+    "release_facts_dropped_against_reported_xbrl": {
+     "count": 49,
+     "companies": {
+      "ADI": 2,
+      "AEP": 2,
+      "AMD": 5,
+      "AVGO": 1,
+      "BKR": 2,
+      "CHTR": 2,
+      "COHR": 3,
+      "DLR": 2,
+      "DLTR": 1,
+      "DOW": 3,
+      "DVA": 1,
+      "EQIX": 1,
+      "ESS": 5,
+      "HOOD": 1,
+      "LLY": 4,
+      "MMM": 1,
+      "O": 2,
+      "PRU": 2,
+      "SYY": 1,
+      "UAL": 1,
+      "UDR": 7
+     }
+    },
+    "release_facts_dropped_against_derived_xbrl": {
+     "count": 160,
+     "by_reason": {
+      "a later comparative: the release came over 100 days after the derived value's filing": 81,
+      "consolidated net income (ProfitLoss) at a company with a noncontrolling interest": 49,
+      "the release row has no clean record against reported XBRL": 17,
+      "a cost printed in parentheses (negative)": 10,
+      "another release agrees with the derived value": 1,
+      "a preliminary figure (ILMN)": 1,
+      "a x1000 scale slip (MOS)": 1
+     },
+     "companies": {
+      "ACGL": 2,
+      "ALL": 2,
+      "AMD": 1,
+      "AON": 2,
+      "APD": 2,
+      "ARE": 5,
+      "BA": 1,
+      "BG": 2,
+      "BKR": 1,
+      "BMY": 2,
+      "BNY": 1,
+      "BX": 1,
+      "BXP": 3,
+      "CAH": 2,
+      "CB": 2,
+      "CLX": 1,
+      "CMS": 2,
+      "COHR": 2,
+      "CPAY": 1,
+      "CPRT": 2,
+      "CRWD": 2,
+      "CVNA": 2,
+      "DHI": 2,
+      "DOC": 2,
+      "DVN": 2,
+      "EMR": 3,
+      "EQIX": 3,
+      "ESS": 2,
+      "EXR": 2,
+      "FERG": 1,
+      "FISV": 2,
+      "FRT": 2,
+      "GD": 2,
+      "GEHC": 2,
+      "GM": 2,
+      "GPN": 2,
+      "HST": 1,
+      "ICE": 2,
+      "ILMN": 1,
+      "IR": 2,
+      "J": 2,
+      "JCI": 2,
+      "KHC": 1,
+      "KO": 2,
+      "LDOS": 2,
+      "LLY": 6,
+      "MAA": 2,
+      "MAS": 2,
+      "MDLZ": 2,
+      "MGM": 2,
+      "MOS": 1,
+      "O": 2,
+      "PANW": 1,
+      "PCG": 2,
+      "PG": 2,
+      "PKG": 2,
+      "PLTR": 4,
+      "PM": 2,
+      "PRU": 1,
+      "PSA": 2,
+      "RJF": 3,
+      "SNA": 1,
+      "SNPS": 2,
+      "SPGI": 1,
+      "STE": 2,
+      "STLD": 3,
+      "SW": 2,
+      "T": 2,
+      "TMO": 2,
+      "UDR": 2,
+      "UNH": 2,
+      "VICI": 2,
+      "VLO": 2,
+      "VMC": 2,
+      "VMRK": 2,
+      "VST": 1,
+      "WM": 1,
+      "WMB": 3,
+      "WMT": 2,
+      "XYL": 1,
+      "XYZ": 3,
+      "ZBH": 1
+     },
+     "after_fix_10": {
+      "count": 153,
+      "companies": 80
+     }
+    },
+    "derived_values_rejected": {
+     "count": 19,
+     "companies": {
+      "BAC": 2,
+      "CRWD": 6,
+      "GEN": 1,
+      "GPN": 4,
+      "HAS": 2,
+      "NTAP": 1,
+      "TWLO": 2,
+      "VRT": 1
+     },
+     "detail": {
+      "BAC": [
+       "net_income 2025-10-01..2025-12-31: derived 7,528.0M -> release 7,647.0M (0000070858-26-000020; record 31 agree, 0 disagree)",
+       "revenue 2025-10-01..2025-12-31: derived 31,180.0M -> release 28,367.0M (0000070858-26-000222; record 27 agree, 0 disagree)"
+      ],
+      "CRWD": [
+       "cost_of_revenue 2025-11-01..2026-01-31: derived 311.7M -> release 315.9M (0001535527-26-000007; record 8 agree, 0 disagree)",
+       "gross_profit 2025-11-01..2026-01-31: derived 993.7M -> release 989.5M (0001535527-26-000007; record 8 agree, 0 disagree)",
+       "research_and_development 2025-11-01..2026-01-31: derived 356.4M -> release 367.7M (0001535527-26-000007; record 8 agree, 0 disagree)",
+       "operating_expenses 2025-11-01..2026-01-31: derived 979.9M -> release 996.4M (0001535527-26-000007; record 8 agree, 0 disagree)",
+       "operating_income 2025-11-01..2026-01-31: derived 13.8M -> release -6.9M (0001535527-26-000007; record 8 agree, 0 disagree)",
+       "net_income 2025-11-01..2026-01-31: derived 59.4M -> release 38.7M (0001535527-26-000007; record 2 agree, 0 disagree)"
+      ],
+      "GEN": [
+       "operating_cash_flow 2026-01-03..2026-04-03: derived 479.0M -> release 452.0M (0000849399-26-000014; record 4 agree, 0 disagree)"
+      ],
+      "GPN": [
+       "revenue 2025-10-01..2025-12-31: derived 1,932.8M -> release 1,896.8M (0001123360-26-000004; record 6 agree, 0 disagree)",
+       "revenue 2024-10-01..2024-12-31: derived 1,933.2M -> release 1,898.3M (0001123360-26-000004; record 6 agree, 0 disagree)",
+       "operating_income 2025-10-01..2025-12-31: derived 169.3M -> release 215.3M (0001123360-26-000004; record 6 agree, 0 disagree)",
+       "operating_income 2024-10-01..2024-12-31: derived 696.8M -> release 720.4M (0001123360-26-000004; record 6 agree, 0 disagree)"
+      ],
+      "HAS": [
+       "revenue 2025-09-29..2025-12-28: derived 2,110.5M -> release 1,445.9M (0000046080-26-000006; record 2 agree, 0 disagree)",
+       "revenue 2024-09-30..2024-12-29: derived 1,260.4M -> release 1,101.6M (0000046080-26-000006; record 2 agree, 0 disagree)"
+      ],
+      "NTAP": [
+       "revenue 2026-01-24..2026-04-24: derived 1,260.0M -> release 1,948.0M (0001193125-26-245196; record 4 agree, 0 disagree)"
+      ],
+      "TWLO": [
+       "research_and_development 2025-10-01..2025-12-31: derived 260.1M -> release 269.4M (0001447669-26-000010; record 8 agree, 0 disagree)",
+       "research_and_development 2024-10-01..2024-12-31: derived 244.0M -> release 252.6M (0001447669-26-000010; record 8 agree, 0 disagree)"
+      ],
+      "VRT": [
+       "operating_cash_flow 2025-10-01..2025-12-31: derived 978.9M -> release 1,004.9M (0001674101-26-000006; record 4 agree, 0 disagree)"
+      ]
+     },
+     "reingested": "BAC, CRWD, GEN, GPN, HAS, NTAP, TWLO, VRT, offline; each audit lists the outranked quarters under derivations_skipped"
+    },
+    "itw_cost_of_revenue": "ITW tags CostOfRevenue (Q2 2025 $1,914M, FY2025 $7,556M) beside the larger CostOfGoodsAndServicesSold its income statement and release call cost of revenue ($2,271M, $8,969M); ingest now takes a cost of revenue that the same filing reports beside a larger cost total as a component, so the larger stands. A build of all 499 companies under the old and new code: only ITW changes (27 rows), and the old code reproduces every stored company. ITW's derived Q4 2025 is now $2,284M, its release's figure",
+    "vouched_for_fix_5": "a release figure that outranked a derived value counts as paired for fix 5 once that value has left the store (CRWD's Q4 FY2026 net income attributable, $38.7M, would otherwise have gone)",
+    "kept_by_the_restatement_exception": "BAC's 2026 releases (Q3 2025 on the restated basis), BDX's recast continuing operations, TKO (restated-basis file), TPL (documented split), CCI, HOOD, TMUS, BX, ES (documented)"
+   },
+   "fix_8_labels_and_dates": {
+    "rule": "a release figure labelled FY or Q1-Q4 must cover that label's dates in the store's calendar (or the same label a year or two away moved by whole years) within 7 days; an unlabelled twelve-month figure that does not end within 7 days of a fiscal year end is a trailing-twelve-month figure. Both are dropped",
+    "dropped": 370,
+    "label_contradicted_by_dates": {
+     "count": 47,
+     "companies": {
+      "COST": 10,
+      "DPZ": 26,
+      "PEP": 11
+     },
+     "note": "possibly too blunt: COST, DPZ and PEP releases carry 13-week dates for fourth quarters the store holds as 16 weeks (Costco Q4 FY2026: 2026-05-31..08-30 against the store's 2026-05-11..08-30); the values are the true quarter's, the dates are not. Company-level GAAP claims still verify from XBRL (Costco's Q4 FY2025 revenue, $86.2 billion, from the 10-K's derived quarter, before and after); what goes is the release-only figures for those quarters: DPZ's 14 segment rows, gross margins and one PEP non-GAAP figure"
+    },
+    "trailing_twelve_months": {
+     "count": 323,
+     "companies": {
+      "ADI": 9,
+      "ADM": 2,
+      "AMZN": 22,
+      "AZO": 4,
+      "BX": 1,
+      "CBRE": 9,
+      "CF": 12,
+      "CHTR": 12,
+      "CVNA": 3,
+      "DAL": 2,
+      "DASH": 30,
+      "DVA": 12,
+      "ETR": 6,
+      "EXE": 2,
+      "EXPE": 4,
+      "FTV": 2,
+      "GOOGL": 12,
+      "KLAC": 18,
+      "LUV": 5,
+      "ON": 6,
+      "PANW": 2,
+      "PFG": 8,
+      "PLTR": 4,
+      "STX": 3,
+      "SYY": 2,
+      "TGT": 6,
+      "TMUS": 4,
+      "TPR": 3,
+      "TRV": 12,
+      "TXN": 24,
+      "UAL": 10,
+      "UBER": 4,
+      "VMC": 48,
+      "WMT": 10,
+      "XYZ": 10
+     },
+     "note": "correctly dated trailing-twelve-month figures (AMZN 22, GOOGL 12, VMC 48, DASH 30 among them) are removed as instructed; no claim in the dev sets cites one"
+    },
+    "chtr_ual": "CHTR's and UAL's mislabelled columns carried FY2025 dates as well as the FY label, so fix 8 cannot see them; fix 7 drops them against the 10-K (CHTR net income $5,194M and operating cash flow $15,454M, UAL operating cash flow $10,307M)"
+   },
+   "fix_9_scale_slips": {
+    "rule": "where no same-period XBRL can check it, a release figure about 1,000 times smaller or larger than the median of the company's other figures for the metric, basis, segment and duration within 400 days (other columns and files, and reported XBRL for a company-level GAAP figure), at a precision two or more places off the precision most of those figures use, is dropped; for the same dates, a figure exactly 1,000 times another release's, at a precision off the majority while the other is on it",
+    "dropped": 4,
+    "companies": {
+     "XYZ": 4
+    },
+    "also_caught": "XYZ's 2024 operating cash flow quarters (3) by fix 7's scale guard and its two trailing-twelve-month figures by fix 8; MOS's '$3.0' (billions read in millions) by fix 7",
+    "spot_checked_and_kept": "the ratio alone would also flag CMI operating cash flow (2), LUV non-GAAP operating income (1), HPE's Routing segment ($1M, 2), CBRE free cash flow ($2M) and PFE pre-tax income (-$10M); each is printed at its row's precision and is a real small figure"
+   },
+   "applied": {
+    "release_facts_dropped": 583,
+    "companies": 120,
+    "by_rule": {
+     "xbrl_derived": 160,
+     "label_dates": 370,
+     "xbrl_reported": 49,
+     "scale_slip": 4
+    },
+    "release_files_rewritten": 208,
+    "second_pass": "the release gates and the label gate change nothing; the XBRL gate re-run over 1,804 live release files (96,143 facts) drops and quarantines nothing",
+    "after_fix_10": {
+     "release_facts_dropped": 576,
+     "companies": 120,
+     "by_rule": {
+      "xbrl_derived": 153,
+      "label_dates": 370,
+      "xbrl_reported": 49,
+      "scale_slip": 4
+     },
+     "note": "round 2's 583 drops less the 7 dividends fix 10 restores"
+    }
+   },
+   "gates": {
+    "pytest": "1979 passed (after fix 10)",
+    "dev_replay": "the 693 claims are byte-identical to <session-scratchpad>/sp500/claims_final3.json (the baseline with the same-filing growth change), on the full data and on the frozen 62-company data, after fixes 7-9 and again after fix 10",
+    "examples": {
+     "nvda-ai-story": "7/2/0/2",
+     "meta-ai-story": "5/3/0/0",
+     "q2-roundup-look-ahead": "6/1/2/0"
+    },
+    "recordings": "3 of 3 replay",
+    "qualifier_grid": "identical",
+    "old_rows_against_7243253": {
+     "companies": {
+      "before": 499,
+      "after": 499,
+      "by_cause": {}
+     },
+     "filings": {
+      "before": 28531,
+      "after": 28531,
+      "by_cause": {}
+     },
+     "facts": {
+      "before": 146942,
+      "after": 146923,
+      "by_cause": {
+       "removed/changed: fix 7, derived value outranked by the company's release (NTAP)": 1,
+       "removed/changed: fix 7, derived value outranked by the company's release (GPN)": 4,
+       "removed/changed: fix 7, derived value outranked by the company's release (TWLO)": 2,
+       "removed/changed: fix 7, derived value outranked by the company's release (CRWD)": 6,
+       "removed/changed: fix 7, derived value outranked by the company's release (VRT)": 1,
+       "removed/changed: fix 7, derived value outranked by the company's release (HAS)": 2,
+       "removed/changed: fix 7, ITW cost of revenue from the larger CostOfGoodsAndServicesSold": 27,
+       "removed/changed: fix 7, derived value outranked by the company's release (BAC)": 2,
+       "removed/changed: fix 7, derived value outranked by the company's release (GEN)": 1,
+       "added: fix 7, ITW cost of revenue from the larger CostOfGoodsAndServicesSold": 27
+      }
+     },
+     "fiscal_periods": {
+      "before": 8076,
+      "after": 8076,
+      "by_cause": {}
+     },
+     "release_files": {
+      "before": 3909,
+      "after": 3909,
+      "changed": 416,
+      "added": [],
+      "removed": [],
+      "by_cause": {
+       "release file losing gated facts": 208,
+       "its report (release_gates entries)": 208
+      }
+     }
+    },
+    "second_pass_after_fix_10": "the release gates and the label gate change nothing; the XBRL gate re-run over 1,804 live release files (96,150 facts) drops and quarantines nothing"
+   },
+   "qa_checks_rerun": {
+    "scripts": "the round-2 QA's scripts, unchanged except pointed at the scratch snapshot",
+    "residual_facts": "all 24 come back as the true value or '?': BAC Q4 2025 revenue $28,367M and net income $7,647M verify and the derived $31,180M is wrong; NTAP Q4 FY2026 $1,948M, HAS Q4 2025 $1,445.9M, CRWD Q4 FY2026 operating loss -$6.9M verify and their derived artifacts are wrong; ITW Q4 2025 cost of revenue $2,284M verifies (10-K derived); CHTR FY2025 net income $5,194M and operating cash flow $15,454M and UAL's $10,307M are wrong against the 10-Ks, whose figures verify; DOW Inc. Q2 2025 diluted EPS $0.99 is wrong against the 10-Q's -$1.18 (the QA's own claim, naming 'Dow' alone, answers '?' for the name); BKR FY2024 operating income $3,265M is wrong against $3,081M; ACGL and CB 'net premiums earned' as Q4 2025 revenue are wrong against the derived totals; MOS $3.0M and XYZ Q2 2024 operating cash flow $519 thousand are scale_mismatch",
+    "scans": {
+     "release_vs_xbrl_mismatches": "52 at 20 companies -> 22 at 7: BDX 9 and BAC 8 restated-basis recasts kept, TKO restated-basis, TPL documented split, CCI and HOOD documented, HBAN's release total against a raw contract-revenue slice the store does not serve",
+     "derived_q4_vs_release": "unexplained 23 -> 4 (BDX's three recast continuing-operations quarters beside the original derived values, and MOS's $3.0B within its one-decimal billions); NCI net income 68 -> 2",
+     "x1000_versions": "0",
+     "t1_10k_q4_full_year": "0",
+     "t2_sole_source_nci_net_income": "0",
+     "t5_gaap_rows_as_non_gaap": "0",
+     "t3_implausible_derived_q4": "20 of 3,556 by the QA's own test (24 of 3,565 before); the rest are gross profit or real quarters",
+     "component_revenue_rows": "14 -> 11: VMRK 10 'Rental income' (about 0.2% below total revenue) and ACGL's Q4 2024 'Net premiums earned' $4,143M, whose quarter has no label in the store, so a Q4 2024 claim answers '?'"
+    }
+   },
+   "open_for_the_coordinator": [
+    "fix 7 trusts a release over a derived value only when contemporaneous (100 days), by row label rather than metric alone, and never for preliminary, scale/sign, consolidated net income or a figure another release contradicts: stricter than the brief, after GM's 'Automotive operating cash flow', ICE's net revenue, ILMN's preliminary revenue and year-later recasts (CRWD, CAH, DD) would otherwise have replaced correct derived values",
+    "derived comparisons allow 0.05% beyond rounding (as the QA did), so a company's own quarter a hair off FY - 9M (NVDA $36,190M against $36,188M) changes nothing",
+    "COST, DPZ and PEP Q4 release figures (47) are dropped for 13-week dates; XBRL still answers their company-level GAAP claims, and DPZ's segment rows and gross margins for those quarters are lost (see fix 8)",
+    "323 correctly dated trailing-twelve-month figures are dropped as instructed",
+    "dividends per share: release 'paid' figures (LLY, BX) conflict with XBRL 'declared' ones and are dropped; derived declared quarters of 0 (LLY Q3) remain, as before"
+   ],
+   "artifacts": [
+    "<session-scratchpad>/sp500/r2/gates_applied.json: every dropped release fact and every rejected derived value",
+    "<session-scratchpad>/sp500/r2/old_rows_r2.json: the old-rows proof against 7243253's data, by cause",
+    "<session-scratchpad>/sp500/r2/facts_scan_r2.json: old against new ingest, 499 companies",
+    "<session-scratchpad>/sp500/r2/backup: the release files and store before the release gates",
+    "<session-scratchpad>/qa40-r2-rerun: the QA's round-2 scripts and outputs on the scratch snapshot",
+    "<session-scratchpad>/sp500/r2/scan_dps.json: every derived dividend and its class",
+    "<session-scratchpad>/sp500/r2/old_rows_dps.json: the old-rows proof against 0909ffe's data"
+   ],
+   "fix_10_derived_dividends": {
+    "request": "the coordinator's review of round 2: a derived 'declared' dividend of 0 (LLY) answered a pasted 'Lilly declared a dividend of $1.73 per share' with a wrong $0.00 once round 2 had dropped the release figure against it",
+    "decision": "per-share dividends are served only as filed (10-Q quarters, 10-K years, release figures); ingest derives no dividend quarter (receipts/ingest.py NOT_DERIVED_METRICS). Chosen over extending the 10-75% band, which catches zeros and only in fourth quarters, and keeps twice-the-rate quarters",
+    "why": "a dividend tagged for a period is what the board declared during it, so FY - 9M and year-to-date differences are not the quarter's dividend whenever declarations do not follow quarters: LLY declares two dividends in its second and fourth quarters and none in its first and third (derived Q3 2025 $0, Q4 2025 $3.23 = its $1.50 and the next $1.73); CME's fourth quarter carries its annual variable dividend; a split inside the year leaves FY and 9M on two share counts (LRCX, NVDA, AVGO)",
+    "scan": {
+     "derived_dividends": 833,
+     "companies": 305,
+     "zero": {
+      "count": 57,
+      "companies": {
+       "AMGN": 2,
+       "BKNG": 7,
+       "CAT": 3,
+       "CL": 1,
+       "CLX": 2,
+       "DD": 3,
+       "FDX": 3,
+       "GEHC": 1,
+       "GIS": 3,
+       "HPQ": 1,
+       "INTC": 1,
+       "LLY": 4,
+       "MCD": 1,
+       "MOS": 3,
+       "MRSH": 2,
+       "NI": 3,
+       "PNW": 3,
+       "RCL": 1,
+       "ROK": 1,
+       "TKO": 1,
+       "TMUS": 1,
+       "V": 3,
+       "VRSK": 2,
+       "VRSN": 1,
+       "WMT": 4
+      }
+     },
+     "q4_outside_10_75_percent": {
+      "count": 24,
+      "companies": {
+       "AMCR": 2,
+       "AVGO": 1,
+       "BAX": 1,
+       "CEG": 2,
+       "COST": 1,
+       "CTAS": 1,
+       "FIS": 1,
+       "GL": 1,
+       "JBHT": 1,
+       "KLAC": 1,
+       "LRCX": 1,
+       "MOS": 1,
+       "NVDA": 1,
+       "PCAR": 2,
+       "PGR": 2,
+       "PLD": 2,
+       "STX": 1,
+       "TPL": 2
+      }
+     },
+     "off_the_regular_rate": {
+      "count": 56,
+      "companies": {
+       "AMCR": 1,
+       "ARE": 1,
+       "AVGO": 1,
+       "BAX": 1,
+       "CME": 2,
+       "CNP": 3,
+       "COP": 1,
+       "CTAS": 1,
+       "DD": 3,
+       "EOG": 1,
+       "F": 1,
+       "FAST": 2,
+       "FIS": 2,
+       "FIX": 1,
+       "HST": 1,
+       "IEX": 2,
+       "IFF": 1,
+       "KIM": 1,
+       "LRCX": 1,
+       "MKC": 3,
+       "MOS": 1,
+       "NEM": 1,
+       "NVDA": 1,
+       "ODFL": 1,
+       "PCAR": 1,
+       "PGR": 1,
+       "PLD": 1,
+       "RTX": 3,
+       "SW": 2,
+       "TRGP": 1,
+       "TSCO": 1,
+       "TT": 3,
+       "UDR": 1,
+       "WRB": 4,
+       "WSM": 1,
+       "ZTS": 3
+      },
+      "rule": "at least 25% off the median of the company's reported positive three-month dividends within a year"
+     },
+     "regular": 696
+    },
+    "removed": {
+     "derived_dividends": 833,
+     "companies": 305,
+     "reingested": "the 305 companies, offline in batches (companyfacts restored, then archived again); a build of all 499 under the old and new code differs in these 833 rows only"
+    },
+    "release_dividends_restored": {
+     "count": 7,
+     "companies": {
+      "LLY": 6,
+      "BX": 1
+     },
+     "why": "round 2 had dropped them only against derived dividends; LLY's and BX's release files were restored from before round 2 and gated again, which drops the other 5 round-2 dividend figures as before (LLY's 4 second quarters against the reported twice-the-rate figure, BX's trailing twelve months)"
+    },
+    "coverage": "106 of the 833 quarters keep a release dividend for the same period; the other 727 now answer '?' (Coca-Cola's Q4 2025 $0.51 verified from the derived quarter before). Measured, not adopted: serving a derived quarter only when it equals a filed neighbouring quarter would keep 646 of the 696 regular ones but also 29 irregular ones",
+    "claims": {
+     "LLY Q3 2026 $1.73": "verified (release)",
+     "LLY Q3 2025 $1.50": "verified (release)",
+     "LLY Q4 2025 $1.50": "verified (release)",
+     "BX Q4 2025 $1.49": "verified (release)",
+     "KO Q3 2025 $0.51": "verified (10-Q)",
+     "KO Q4 2025 $0.51": "'?' (no filing or release figure for the quarter)"
+    },
+    "company_rows": "45 company rows each gain one alias from the merged alias code on re-ingest (none removed, none shared with another company's alias or ticker): ABT +abbott; AOS +a o smith; APD +air products; BEN +franklin resources; BKNG +booking; BNY +bny mellon; CF +cf industries; CHRW +ch robinson; CI +cigna; CTSH +cognizant; DPZ +domino; EG +everest; EL +estee lauder; F +ford; GEHC +ge healthcare; GWW +w w grainger; HLT +hilton worldwide; HON +honeywell technologies; JBHT +jb hunt; LDOS +leidos; LH +labcorp; LOW +lowe; LYB +lyondellbasell; MLM +martin marietta; MRSH +marsh mclennan; NXPI +nxp semiconductors; OMC +omnicom; PEG +public service enterprise; PFG +principal financial; PKG +packaging corporation of america; PNC +pnc financial services; SCHW +charles schwab; SJM +jm smucker; SPG +simon property; STX +seagate technology; TFC +truist; TMO +thermo fisher; TMUS +t mobile; TROW +t rowe price; VZ +verizon; WAB +wabtec; WEC +wec energy; WMB +williams; WRB +w r berkley; ZBH +zimmer biomet",
+    "old_rows_against_0909ffe": {
+     "facts": "146,923 -> 146,090: the 833 derived dividends at 305 companies, nothing else",
+     "companies": "499, 45 alias lists extended (above)",
+     "filings": "28,531, unchanged",
+     "fiscal_periods": "8,076, unchanged",
+     "release_files": "3,909; 8 changed: LLY's 3 and BX's 1 release files with the restored dividends, and their reports"
+    },
+    "commit": "8ec60c2: receipts/ingest.py and tests/test_derived_rejections.py"
+   },
+   "scratch_snapshot_before_fix_10": {
+    "bytes": 87631401,
+    "companies": 499,
+    "sqlite_facts": 146923,
+    "release_facts": 96143,
+    "fingerprint": "9c9faf2ef66d"
+   },
+   "scratch_snapshot": {
+    "bytes": 87401554,
+    "companies": 499,
+    "filings": 28531,
+    "sqlite_facts": 146090,
+    "release_facts": 96150,
+    "fingerprint": "3e7fef17285b",
+    "built": "after fix 10, with scripts/build_snapshot.py --no-model into a scratch folder"
+   }
+  },
+  "round_3": {
+   "reviewed": "2026-10-31: the round-3 QA (.claude/judging/2026-10-31-sp500-qa-round3.md), which found the regression and the core GAAP path clean and four pre-existing trust-error classes; T1-T3 here, T4 (splits) on the query side",
+   "commit": "4746524: receipts/ingest.py, receipts/release_gates.py, scripts/gate_release_facts.py and three test files. data/ is not committed, and data/snapshot was not rebuilt",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0,
+    "note": "every ingest offline, from the archived companyfacts and cached Submissions, with the run date held at 2026-10-31"
+   },
+   "fix_11_gaap_lines_as_non_gaap": {
+    "finding": "T1: a GAAP line stored as a period's only non-GAAP figure, so a true adjusted claim got a wrong ✗ (Schwab adjusted net income $2.93B, Comcast $3.71B and $4.65B, Vulcan adjusted EPS $2.59); the QA counted 173 exposed company-metric-periods at 46 companies",
+    "cause": "the mapper marks a cell non-GAAP from its column header, row label, row section, the table heading or the model's row basis: a section header ('Expenses Excluding Interest' over Schwab's net income), a reconciliation heading ('Adjusted Diluted EPS' over Vulcan's GAAP first row), a footnote parsed as a heading ('* Non-GAAP financial measure.' over GE HealthCare's statement) or a press-release headline made GAAP lines non-GAAP",
+    "rule": "a non-GAAP figure of a measure with an adjusted variant (net income, EPS, operating income, gross profit) that equals the same-period GAAP filing value and whose row label has no non-GAAP marker is dropped, unless at its cell in the archived exhibit's parsed tables its column header says non-GAAP, or the table is titled non-GAAP (a short heading line, not a footnote or a sentence) with no row singled out as adjusted, or an adjusted row of the same measure shows the same number in that column. Revenue is left alone: its adjusted variant usually equals GAAP, and the qualifier grid's 48 non-GAAP verifications are NVIDIA's and AMD's revenue",
+    "candidates_measured": {
+     "label marker only (the QA's suggestion)": "drops 1,303 facts at 136 companies, clears all 173 periods, but drops NVIDIA's 30 equal figures (its $1.30 EPS and the revenue behind the grid's 48 rows)",
+     "label or column marker": "drops 1,182 at 118, leaves 14 periods, still drops NVIDIA's 30",
+     "adopted": "drops 214 at 33 companies, none at the original eleven; leaves 42 periods; the dev replay and the qualifier grid are unchanged"
+    },
+    "dropped_by_company": {
+     "ADM": 9,
+     "AMCR": 2,
+     "AXP": 6,
+     "BA": 1,
+     "CFG": 2,
+     "CI": 3,
+     "CL": 1,
+     "CMCSA": 4,
+     "DIS": 4,
+     "EXPE": 5,
+     "FIX": 2,
+     "GEHC": 14,
+     "GEV": 13,
+     "GRMN": 2,
+     "HCA": 5,
+     "HST": 13,
+     "IDXX": 10,
+     "MGM": 6,
+     "PKG": 6,
+     "PNC": 9,
+     "PSA": 1,
+     "RF": 6,
+     "RSG": 4,
+     "SCHW": 26,
+     "SKYD": 2,
+     "STLD": 9,
+     "TRGP": 14,
+     "TROW": 1,
+     "TT": 2,
+     "UBER": 4,
+     "VMC": 16,
+     "WY": 7,
+     "XEL": 5
+    },
+    "remaining_42": "by the QA's own strict check: 14 where the release's adjusted row equals GAAP (real equal values, kept), 24 with no adjusted row for the measure, and 4 'differs' that pair the wrong rows: WMT's consolidated operating income with Walmart U.S.'s adjusted operating income ($8,708M against $6,953M for Q4 FY2026, and the Q4 FY2024 comparative), and WSM's operating income with its 'Adjusted operating income after tax' (NOPAT)",
+    "probes": {
+     "SCHW Q2 2026 adjusted NI $2.93B (TRUE)": "unverifiable",
+     "SCHW Q2 2026 adjusted NI $2,930M (TRUE) basis None": "unverifiable",
+     "SCHW Q2 2026 adjusted NI $2.8B basis None (GAAP value)": "unverifiable",
+     "SCHW Q2 2026 adjusted EPS $1.62 (TRUE)": "verified",
+     "SCHW Q1 2026 adjusted NI $2,479M (GAAP value)": "unverifiable",
+     "VMC Q2 2026 adjusted EPS $2.59 (TRUE)": "unverifiable",
+     "VMC Q2 2026 adjusted EPS $2.48 (GAAP value)": "unverifiable",
+     "CMCSA Q2 2026 adjusted NI $3,710M (TRUE)": "unverifiable",
+     "CMCSA Q2 2025 adjusted NI $4,653M (TRUE)": "unverifiable",
+     "CMCSA Q2 2025 adjusted NI $11,123M (GAAP value)": "unverifiable",
+     "CMCSA Q2 2026 adjusted EPS $1.04 (TRUE)": "verified",
+     "WMT Q4 FY2026 adjusted OI $8,708M (TRUE, equals GAAP)": "verified",
+     "NVDA Q3 FY2026 non-GAAP EPS $1.30 (TRUE, equals GAAP)": "verified"
+    },
+    "note_vmc": "the QA's Vulcan claims answer '?' for their wording (the bare possessive 'Materials''), a known parser gap; the GAAP line they met is gone"
+   },
+   "fix_12_dividend_quarters": {
+    "finding": "T2: an as-filed 'declared in the quarter' value is not the quarterly rate ($0, or twice the rate when two declarations fall in one quarter): PFE, WMT, LLY, GIS, BX; the QA counted 59 quarters at 30 companies",
+    "rule": "a quarter's dividend per share is served only when it is positive and equals the filed dividend of the quarter before or after it, within $0.0051; years are served as filed and releases state the rate. Serving dividends only from releases was rejected: 6,485 of 7,920 filed quarterly dividend facts in the store matched a neighbour",
+    "removed": {
+     "facts": 1061,
+     "companies": 185,
+     "by_company": {
+      "AAPL": 5,
+      "ABT": 2,
+      "ADI": 5,
+      "ADP": 7,
+      "AEP": 1,
+      "AFL": 12,
+      "AIG": 6,
+      "AMCR": 1,
+      "AMT": 2,
+      "AON": 15,
+      "APD": 5,
+      "APH": 2,
+      "APO": 1,
+      "ARE": 4,
+      "AVY": 6,
+      "BG": 3,
+      "BKNG": 4,
+      "BLK": 1,
+      "BNY": 3,
+      "BX": 13,
+      "BXP": 2,
+      "CARR": 10,
+      "CAT": 5,
+      "CB": 4,
+      "CBOE": 7,
+      "CHD": 2,
+      "CHRW": 2,
+      "CINF": 1,
+      "CL": 2,
+      "CLX": 5,
+      "CME": 1,
+      "CNP": 12,
+      "COST": 4,
+      "CRH": 1,
+      "CSCO": 5,
+      "CTAS": 1,
+      "DAL": 20,
+      "DD": 10,
+      "DOW": 4,
+      "DRI": 1,
+      "DTE": 17,
+      "DUK": 5,
+      "DVN": 29,
+      "EFX": 2,
+      "EG": 4,
+      "EL": 2,
+      "ELV": 2,
+      "EOG": 8,
+      "ETR": 1,
+      "EVRG": 1,
+      "EXC": 1,
+      "EXE": 6,
+      "F": 12,
+      "FANG": 23,
+      "FAST": 2,
+      "FDX": 5,
+      "FE": 23,
+      "FERG": 4,
+      "FITB": 8,
+      "FIX": 25,
+      "FRT": 4,
+      "FTV": 3,
+      "GE": 6,
+      "GEHC": 6,
+      "GEV": 4,
+      "GIS": 15,
+      "GLW": 25,
+      "GM": 2,
+      "GOOGL": 4,
+      "GS": 4,
+      "GWW": 14,
+      "HON": 2,
+      "HPQ": 20,
+      "HST": 3,
+      "HWM": 7,
+      "IBKR": 17,
+      "IBM": 5,
+      "IEX": 12,
+      "INTC": 1,
+      "ITW": 7,
+      "JKHY": 5,
+      "JNJ": 5,
+      "JPM": 5,
+      "KDP": 5,
+      "KKR": 8,
+      "KLAC": 14,
+      "KR": 1,
+      "KVUE": 1,
+      "LLY": 5,
+      "LNT": 1,
+      "LOW": 6,
+      "LRCX": 1,
+      "LVS": 2,
+      "MA": 1,
+      "MAR": 14,
+      "MCD": 2,
+      "MCHP": 5,
+      "MCK": 11,
+      "MDLZ": 6,
+      "MDT": 1,
+      "MET": 11,
+      "MLM": 5,
+      "MMM": 7,
+      "MO": 10,
+      "MOS": 5,
+      "MRSH": 12,
+      "MS": 5,
+      "MSFT": 1,
+      "MTB": 3,
+      "NDAQ": 4,
+      "NEE": 1,
+      "NI": 5,
+      "NKE": 5,
+      "NRG": 1,
+      "NTAP": 1,
+      "NTRS": 3,
+      "NVDA": 5,
+      "O": 5,
+      "ORCL": 1,
+      "OTIS": 5,
+      "PAYX": 1,
+      "PCAR": 3,
+      "PEP": 5,
+      "PFE": 15,
+      "PFG": 15,
+      "PG": 1,
+      "PKG": 2,
+      "PLD": 1,
+      "PM": 7,
+      "PNC": 5,
+      "PNW": 5,
+      "PPG": 7,
+      "PPL": 1,
+      "PSX": 4,
+      "Q": 1,
+      "QCOM": 5,
+      "RCL": 6,
+      "REG": 1,
+      "RF": 3,
+      "RL": 1,
+      "RMD": 1,
+      "ROK": 1,
+      "RSG": 1,
+      "RTX": 17,
+      "SJM": 1,
+      "SKYD": 1,
+      "SO": 10,
+      "SPG": 8,
+      "SRE": 7,
+      "STE": 5,
+      "STT": 7,
+      "STX": 6,
+      "SW": 3,
+      "SWK": 5,
+      "SYF": 9,
+      "SYY": 1,
+      "TDG": 11,
+      "TEL": 5,
+      "TGT": 5,
+      "TMUS": 11,
+      "TPL": 2,
+      "TRGP": 6,
+      "TRV": 5,
+      "TT": 17,
+      "UDR": 1,
+      "UNH": 6,
+      "UNP": 5,
+      "URI": 2,
+      "USB": 3,
+      "VICI": 1,
+      "VLTO": 2,
+      "VMRK": 1,
+      "VRSK": 1,
+      "VRSN": 3,
+      "VZ": 6,
+      "WDC": 3,
+      "WELL": 5,
+      "WFC": 7,
+      "WMT": 21,
+      "WRB": 13,
+      "WSM": 1,
+      "WST": 6,
+      "WY": 2,
+      "XEL": 1,
+      "ZTS": 5
+     }
+    },
+    "cost": "a raise is served once the next quarter files the same rate, and a quarter beside a never-filed fourth quarter can lose its only neighbour, so those answer '?' unless a release states the rate",
+    "release_dividends_restored": "LLY's 4 second-quarter release dividends that fix 7 had dropped against the twice-the-rate filed quarters (LLY's release files restored from before round 2 and gated again)",
+    "qa_scan": "quarters whose only served dividend is 0 or a multiple of the rate: 59 at 30 companies -> 0",
+    "probes": {
+     "PFE Q1 2026 $0.43 (rate)": "unverifiable",
+     "PFE Q2 2026 $0.43 (rate)": "unverifiable",
+     "WMT Q2 FY2026 $0.235 (rate)": "unverifiable",
+     "LLY Q2 2026 $1.73 (rate)": "verified",
+     "GIS Q2 FY2026 $0.61 (rate)": "unverifiable",
+     "BX Q1 2026 $1.16 (release: declared a quarterly dividend of $1.16)": "unverifiable",
+     "KO Q3 2025 $0.51 (regular rate)": "verified"
+    }
+   },
+   "fix_13_per_share_slips": {
+    "finding": "T3: per-share values scaled a millionfold (Mosaic's $0.22 dividend as 220,000; Halliburton's EPS as 790,000)",
+    "rule": "per-share values beyond |EPS| 1,500 or a dividend of $60 are never served; release cells were already refused at 1,000",
+    "removed": {
+     "facts": 24,
+     "companies": {
+      "HAL": 18,
+      "HWM": 1,
+      "MOS": 4,
+      "STX": 1
+     }
+    },
+    "probes": {
+     "MOS Q3 2025 dividend $0.22 (fact 220000)": "unverifiable",
+     "HAL Q3 2024 diluted EPS $0.65 (fact 650000)": "verified",
+     "HWM Q4 2023 dividend $0.05 (fact 50000)": "verified",
+     "STX FY2024 dividend $2.80 (fact 2800000)": "verified"
+    }
+   },
+   "gates": {
+    "pytest": "1993 passed",
+    "dev_replay": "the 693 claims are byte-identical to <session-scratchpad>/sp500/claims_final4.json on the full data and on the frozen 62-company data",
+    "examples": {
+     "nvda-ai-story": "7/2/0/2",
+     "meta-ai-story": "5/3/0/0",
+     "q2-roundup-look-ahead": "6/1/2/0"
+    },
+    "recordings": "3 of 3 replay",
+    "qualifier_grid": "identical",
+    "second_pass": "the release gates and the label gate change nothing; the XBRL gate re-run over 1,804 live release files (95,940 facts) drops and quarantines nothing"
+   },
+   "old_rows_against_5d6f7ed": {
+    "facts": "146,090 -> 145,005: 1,061 dividend quarters (fix 12) and 24 per-share slips (fix 13), nothing else",
+    "companies": "499; 55 alias lists extended on re-ingest by the common-name code merged in 3f0c7d8 (57 aliases, none removed, none shared with another company)",
+    "filings": "28,531, unchanged",
+    "fiscal_periods": "8,076, unchanged",
+    "release_files": "3,909; 144 changed: the 70 files fix 11 rewrote and their reports, and LLY's 2 restored files and their reports"
+   },
+   "scratch_snapshot": {
+    "bytes": 87072819,
+    "companies": 499,
+    "filings": 28531,
+    "sqlite_facts": 145005,
+    "release_facts": 95940,
+    "fingerprint": "95679962d92f"
+   },
+   "artifacts": [
+    "<session-scratchpad>/sp500/r3/gates_applied_r3.json: every fact fix 11 dropped",
+    "<session-scratchpad>/sp500/r3/old_rows_r3.json: the old-rows proof against 5d6f7ed's data, by cause and company",
+    "<session-scratchpad>/sp500/r3/t1_rules.json and t1_rule5.json: the T1 candidate rules measured",
+    "<session-scratchpad>/qa40-r3-rerun: the QA's round-3 scripts and probes on the scratch snapshot"
+   ]
+  },
+  "round_4": {
+   "reviewed": "2026-10-31: the final code review (.claude/judging/2026-10-31-code-review.md); H2, M1 and M3 here, H1, H3, M2 and M4 on the query side",
+   "commit": "0d6cb12: receipts/ingest.py, receipts/release_gates.py and four test files. data/ is not committed, and data/snapshot was not rebuilt",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0,
+    "note": "every ingest offline, from the archived companyfacts and cached Submissions, with the run date held at 2026-10-31"
+   },
+   "fix_14_derived_quarters_of_one_concept": {
+    "finding": "H2: a derived quarter subtracted components of another concept: Ares' Q4 2023 net income was FY2023 NetIncomeLoss ($474.3M, 10-K 0001628280-26-011413) minus 9M ProfitLoss ($561.9M, which includes NCI): -$87.556M, so every claim about the quarter got ✗; Hasbro's Q4 2025 revenue was FY Revenues minus 9M contract revenue ($2,110.5M against a released $1,445.9M); the review counted 93 served derived values that mix concepts",
+    "cause": "receipts.ingest._latest prefers the total's concept but falls back to any concept (pool = same or ok), and the restated-component check counted another concept's figure as a restated version of the component",
+    "rule": "a total pairs only with components of its own concept, or of a concept its own filing reports for the same period at the same value (the same measure); a total restated since it was first filed under its concept derives nothing against the components of that filing; a skip is recorded when an input of the total's time is filed under another concept",
+    "review_93": {
+     "removed": 36,
+     "same value re-derived from a filing whose concept matches": 26,
+     "kept as one measure (the total's 10-K reports both concepts at one value)": 31
+    },
+    "removed": {
+     "facts": 65,
+     "companies": 39,
+     "by_company": {
+      "AEP": 1,
+      "ALLE": 4,
+      "AME": 1,
+      "APD": 3,
+      "ARES": 1,
+      "BDX": 1,
+      "CCI": 2,
+      "CME": 3,
+      "COST": 1,
+      "DIS": 1,
+      "EBAY": 1,
+      "EL": 1,
+      "GD": 1,
+      "GEHC": 3,
+      "HUBB": 1,
+      "IDXX": 1,
+      "INTU": 1,
+      "IP": 1,
+      "IR": 1,
+      "ITW": 1,
+      "LNT": 1,
+      "LVS": 2,
+      "MRK": 1,
+      "NEM": 1,
+      "OKE": 1,
+      "PHM": 2,
+      "PNR": 3,
+      "PPG": 3,
+      "RTX": 1,
+      "SPGI": 1,
+      "STE": 2,
+      "STLD": 1,
+      "SWKS": 4,
+      "T": 1,
+      "TECH": 2,
+      "VRSN": 4,
+      "VTRS": 3,
+      "WAT": 1,
+      "ZBH": 1
+     }
+    },
+    "kept_as_one_measure": {
+     "facts": 31,
+     "companies": {
+      "ADP": 3,
+      "APP": 4,
+      "AVGO": 1,
+      "BBY": 1,
+      "F": 2,
+      "GD": 3,
+      "HLT": 3,
+      "JPM": 3,
+      "LITE": 1,
+      "LNT": 1,
+      "MOS": 3,
+      "NTRS": 2,
+      "ORCL": 3,
+      "TRMB": 1
+     },
+     "concepts": "Revenues with contract revenue (ADP, APP, BBY, F, GD, HLT, INTU, LNT, MOS, ORCL, TRMB), Revenues with RevenuesNetOfInterestExpense (JPM, NTRS), contract revenue with and without assessed tax (LITE), NetIncomeLoss with ProfitLoss at a company without NCI (AVGO)"
+    },
+    "added": {
+     "facts": 36,
+     "stored": 35,
+     "same_value_new_source": "29, among them KMI's Q4 2023 operating expenses ($225M), now from the FY2024 10-K: the CostsAndExpenses 9M no longer counts as a restated version of its OperatingExpenses 9M",
+     "new": "BLK Q4 2024 revenue $5,677M (as released; nothing was served before), AEP Q4 2024 operating expenses $3,600M (from the FY2025 10-K; the $3,600.7M before paired FY CostsAndExpenses with 9M OperatingExpenses), and fix 15's Prologis and Duke fourth quarters",
+     "outranked": "HAS Q4 2025 revenue $1,635.8M (FY Revenues minus Q1-Q3 Revenues): its release ($1,445.9M, the contract-revenue line) outranks it under fix 7, a new rejection, and HAS was ingested again"
+    },
+    "first_filed_guard": "Crown Castle's FY2023 cost of goods sold is $316M in its FY2023 10-K (beside the CostOfRevenue served) and $304M, restated, in its FY2025 10-K, against an unchanged 9M of $268M: $36M would have been served; the quarter stays '?'",
+    "no_longer_derived": "NetApp's Q4 FY2026 and Hasbro's Q4 2025 revenue artifacts that round 2's fix 7 removed are no longer derived at all"
+   },
+   "fix_15_profitloss_as_net_income": {
+    "finding": "M1: ProfitLoss, which includes noncontrolling interests, served as net income: Ares' Q3 2023 $196.97M (10-Q 0001628280-23-036834) verified a $197.0M claim; the review counted 26 companies whose own filings show a material NCI",
+    "leaks": [
+     "periods whose filing tags no NCI concept at a company that has one (Ares' Q3 2023)",
+     "quarters derived from ProfitLoss (Ares' Q4 2023, Duke's and Prologis' fourth quarters)",
+     "a zero tag on only part of the NCI (APA tags its redeemable NCI as zero for Q3 2023; its next 10-Q reports $96M of nonredeemable NCI for the quarter; Aon and Estee Lauder likewise)",
+     "release net income lines equal to the stored ProfitLoss, which passed as checked",
+     "the release gates' attributable figure, ProfitLoss minus whatever NCI a context tags (no live release fact relied on it)"
+    ],
+    "rule": "ProfitLoss stands for net income only at a company whose 10-Qs and 10-Ks filed in the window show no NCI (release_gates.noncontrolling_interest, shared with the gates), or in a filing's period whose whole NCI is tagged as zero (the total concept, or both the redeemable and nonredeemable parts) when no filing shows an NCI for that period; otherwise '?'. The gates' attributable figure subtracts only the whole NCI",
+    "removed": {
+     "profitloss_facts": 830,
+     "profitloss_companies": 72,
+     "derived_from_profitloss": 12,
+     "derived_companies": {
+      "APA": 1,
+      "EIX": 2,
+      "EL": 1,
+      "ETR": 3,
+      "EXC": 2,
+      "IP": 1,
+      "KEYS": 1,
+      "OKE": 1
+     },
+     "by_company": {
+      "AEP": 9,
+      "AJG": 11,
+      "ALLE": 33,
+      "AON": 4,
+      "APA": 6,
+      "ARES": 3,
+      "BALL": 5,
+      "BRK-B": 11,
+      "BRO": 15,
+      "CARR": 15,
+      "CEG": 11,
+      "CHTR": 11,
+      "CME": 21,
+      "COHR": 15,
+      "CPAY": 10,
+      "CVNA": 15,
+      "CVS": 11,
+      "DELL": 3,
+      "DHI": 15,
+      "DTE": 3,
+      "DUK": 2,
+      "ECHO": 4,
+      "ED": 5,
+      "EIX": 15,
+      "EL": 8,
+      "ELV": 15,
+      "EQIX": 15,
+      "ES": 11,
+      "ETN": 11,
+      "ETR": 33,
+      "EVRG": 9,
+      "EW": 11,
+      "EXC": 31,
+      "EXPD": 1,
+      "F": 10,
+      "FANG": 11,
+      "FE": 9,
+      "FLEX": 2,
+      "GDDY": 5,
+      "GLW": 15,
+      "GM": 15,
+      "GWW": 11,
+      "HAL": 15,
+      "HAS": 6,
+      "IP": 13,
+      "IQV": 16,
+      "KEYS": 1,
+      "KR": 19,
+      "LDOS": 11,
+      "MDT": 11,
+      "MET": 6,
+      "NXPI": 15,
+      "OKE": 23,
+      "PH": 6,
+      "PLD": 16,
+      "PNC": 6,
+      "PPG": 15,
+      "PRU": 3,
+      "PWR": 15,
+      "RSG": 15,
+      "SMCI": 6,
+      "SO": 6,
+      "SPG": 16,
+      "STLD": 15,
+      "TECH": 18,
+      "TFC": 10,
+      "TT": 15,
+      "VICI": 15,
+      "VST": 11,
+      "WAB": 15,
+      "XYL": 4,
+      "XYZ": 11
+     }
+    },
+    "replaced": "Prologis' fourth quarters now derive from its attributable figures ($630.9M, $1,278.9M and $1,399.8M for 2023-2025, not $675.9M, $1,342.2M and $1,482.2M), Duke's Q4 2023 ($1,005M, not $996M), and Kroger's 16-week fourth quarters keep only their derived NetIncomeLoss ($736M, not the $739M ProfitLoss)",
+    "periods_without_xbrl": "120 net income periods at 22 companies lose their only XBRL value; 17 of them are still answered by a release figure, the rest answer '?'",
+    "release_side": {
+     "dropped": 44,
+     "nci_net_income": {
+      "ALLE": 10,
+      "CME": 4,
+      "EL": 2,
+      "ETR": 7,
+      "FLEX": 1,
+      "PH": 3,
+      "PNC": 2,
+      "SPG": 6,
+      "TECH": 2,
+      "TFC": 5
+     },
+     "nci_net_income_note": "fix 5: each equals the removed ProfitLoss at the release's precision ('Net earnings', 'Consolidated net income', 'CONSOLIDATED NET INCOME'); before, the ProfitLoss row was its XBRL check",
+     "xbrl_reported": "STLD 2: its release 'Net income' equals ProfitLoss and now meets the attributable NetIncomeLoss ($403.4M and $534.1M)",
+     "restored": "AEP's Q2 2025 release net income ($1,226M), which round 2's fix 7 dropped against ProfitLoss ($1,288.3M): AEP's release files restored from before round 2 and gated again; its Q3 2025 revenue goes again as before",
+     "unchanged": "STLD's 9 and TT's 2 fix-11 drops: STLD's cells equal the filed consolidated figure and stay dropped although that ProfitLoss leaves the store; TT's cite NetIncomeLoss"
+    },
+    "review_26_after": "the review's scan on the scratch snapshot lists 6: AIG, CAT and F, whose whole NCI is tagged as zero for those periods with no filing contradicting it, and AVGO, CBOE and VRSN, whose 10-Qs and 10-Ks filed since 2023-05-17 show no NCI (Broadcom's ended by 2020, Cboe's by 2022)",
+    "probes": {
+     "ARES Q3 2023 net income $197.0M": "unverifiable (was verified on ProfitLoss)",
+     "ARES Q4 2023 net income $134.6M": "unverifiable (was wrong against -$87.556M)",
+     "AEP Q2 2025 net income $1,226M": "verified (release)",
+     "AEP Q2 2025 net income $1,288.3M": "wrong",
+     "PLD Q4 2024 net income $1,278.9M": "verified",
+     "PLD Q4 2024 net income $1,342.2M": "wrong",
+     "DUK Q4 2023 net income $1,005M": "verified",
+     "HAS Q4 2025 revenue $1,445.9M": "verified (release)",
+     "HAS Q4 2025 revenue $1,635.8M": "wrong",
+     "BLK Q4 2024 revenue $5,677M": "verified"
+    }
+   },
+   "fix_16_release_quarters_from_another_period": {
+    "finding": "M3: fix 7 trusted a release quarter over a derived one on the row's record in other periods alone, so a twelve-month cell read as Q4 could remove the right derived quarter (synthetic: a release Q4 of $1,000M, the year, against FY $1,000M minus 9M $750M)",
+    "rule": "fix 7 trusts no release quarter that repeats another period's figure in its own release, or, for revenue, cost of revenue, R&D and operating expenses, that lies outside 10-75% of every reported version of the fiscal year ending with it (MIN_Q4_SHARE and MAX_Q4_SHARE now live in receipts.release_gates)",
+    "synthetic": "the review's repro now drops the release's $1,000M as xbrl_derived and keeps the derived $250M",
+    "live": "all 20 recorded decisions in data/derived_rejections.json (19 before, and HAS's new one) pass the new test; it changes no live decision"
+   },
+   "gates": {
+    "pytest": "2011 passed",
+    "dev_replay": "the 693 claims are byte-identical to <session-scratchpad>/sp500/claims_final5.json on the full data and on the frozen 62-company data",
+    "examples": {
+     "nvda-ai-story": "7/2/0/2",
+     "meta-ai-story": "5/3/0/0",
+     "q2-roundup-look-ahead": "6/1/2/0"
+    },
+    "recordings": "3 of 3 replay",
+    "qualifier_grid": "identical",
+    "second_pass": "the release gates drop nothing and record no new rejection; the label gate changes 0 of 95,897 release facts; the XBRL gate re-run over 1,804 live release files (95,897 facts) drops and quarantines nothing",
+    "split_table": "scripts/build_split_table.py --check: current against data/snapshot (29 splits); against the scratch snapshot receipts/splits.py and the 29 splits are identical and only the header of eval/evidence_expansion/sp500-splits-20261031.json (store path and fingerprint) would change, so regenerate it after data/snapshot is rebuilt",
+    "store_reproduced": "the working tree's ingest rebuilds every stored row; it differs from the store only by the 18 recorded derived values releases outrank (BAC 2, CRWD 6, GEN 1, GPN 4, HAS 2, TWLO 2, VRT 1)"
+   },
+   "old_rows_against_f26cd33": {
+    "facts": "145,005 -> 144,132: removed 830 ProfitLoss facts and 12 quarters derived from them (fix 15), 65 derived quarters mixing concepts (fix 14) and KMI's one quarter re-derived from an earlier 10-K; added 29 same values from one concept and 6 new derived quarters (BLK, AEP, DUK and PLD's three); nothing else",
+    "companies": "499; 18 alias lists extended on re-ingest by the committed alias code (22 aliases, none removed, none shared with another company)",
+    "filings": "28,531, unchanged",
+    "fiscal_periods": "8,076, unchanged",
+    "release_files": "3,909; 50 changed: 24 files that lost NCI-inclusive net income and their reports, and AEP's restored file and its report",
+    "reingested": "104 companies whose rows the working tree changes, then AON, APA and EL again after the whole-NCI rule, and HAS once more for its new rejection"
+   },
+   "scratch_snapshot": {
+    "bytes": 86907850,
+    "companies": 499,
+    "filings": 28531,
+    "sqlite_facts": 144132,
+    "release_facts": 95897,
+    "fingerprint": "9f5bcf79634c"
+   },
+   "known_limits": [
+    "Estee Lauder tags only its redeemable NCI for FY2025 and FY2026, so its XBRL net income for those years and their quarters answers '?' and its Q4 FY2025 release net loss ($546M) is dropped",
+    "36 derived quarters at 19 companies are gone without a replacement (net income 11, operating cash flow 8, revenue 6, R&D 6, cost of revenue 5); a release figure answers 7 of them",
+    "pre-existing, not changed here: Hasbro's 10-Qs tag a Revenues line larger than the net revenues its releases report ($1,006.1M against $887.1M for Q1 2025), and ingest serves it, so a true net revenue claim for those quarters gets ✗"
+   ],
+   "artifacts": [
+    "<session-scratchpad>/sp500/r4/classified.json: every removed or added fact by cause, with the derivation inputs",
+    "<session-scratchpad>/sp500/r4/review93_outcome.json and mixed_kept.json: the review's 93 mixed derived values and the 31 kept as one measure",
+    "<session-scratchpad>/sp500/r4/periods_effect.json: the company-metric-periods that lose every stored value",
+    "<session-scratchpad>/sp500/r4/gates_applied_r4.json and gates_applied_r4b.json: every release fact the gates dropped and HAS's new rejection",
+    "<session-scratchpad>/sp500/r4/old_rows_r4.json: the old-rows proof against f26cd33's data, by cause and company"
+   ]
+  },
+  "round_5": {
+   "reviewed": "2026-11-01: the final code review's data-side lows (L1, L2, L3, L10, L11, L12, L13) and the Hasbro revenue issue found while checking round 4",
+   "commit": "fa64420: receipts/ingest.py, receipts/release_gates.py, scripts/archive_companyfacts.py, scripts/archive_exhibits.py, scripts/confirm_revenue.py, scripts/gate_release_facts.py and three test files. data/ is not committed, and data/snapshot was not rebuilt",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0,
+    "note": "offline, from the archived companyfacts and cached Submissions, run date held at 2026-10-31"
+   },
+   "fix_17_broad_revenue_the_releases_contradict": {
+    "finding": "Hasbro's filings from 2025 tag a Revenues line 13-15% above its net revenues ($1,006.1M against $887.1M for Q1 2025, $4,745.9M against $4,135.5M for FY2024; the 2025 10-Q re-tags Q2 2024 as $1,142.2M where the 2024 10-Q had $995.3M, while contract revenue stays $995.3M), and ingest served it, so a true net revenue claim got ✗",
+    "cause": "where one filing reports a broad revenue concept (Revenues, SalesRevenueNet, RevenuesNetOfInterestExpense) and contract revenue for a period, the larger broad figure is taken as the total and outranks contract revenue in select_concepts; at banks and REITs that is right, at Hasbro and Republic Services it is not",
+    "scans": {
+     "release_total_below_served_xbrl": "10 company-periods at 3 companies serve XBRL revenue above the release's total line for the period: RSG 4 (its contract revenue equals the release), BDX 4 (restated continuing-operations comparatives in a later release; nothing to fix) and PRU 2 (no other concept equals the release)",
+     "concepts_equal_in_some_filings_and_different_in_others": "11 companies; where releases exist they back the broad figure at ADM, DLTR, SO, AEP and PPL, and contract revenue at HAS; OXY, CNP, ED, LYB and XYL have no release for the periods. A rule preferring contract revenue whenever the two differ would have been wrong at five companies"
+    },
+    "rule": "scripts/confirm_revenue.py decides per company: where a filing reports a broad figure above its contract revenue, the company's own release totals must equal the contract figure in at least 2 such periods (a fourth quarter derived as FY - 9M, or FY - Q1 - Q2 - Q3, for each concept) and the broad figure in none; the decision ('contract_revenue_is_total' in data/revenue_confirmations.json) makes ingest drop the broad figure where its filing's contract revenue for the period differs, so contract revenue serves. A later release that agrees with the broad figure revokes it",
+    "decided": {
+     "HAS": "3 periods: Q3 2025 ($1,387.5M), Q4 2025 ($1,445.9M = $4,701.3M - $3,255.4M) and Q4 2024 ($1,101.6M)",
+     "RSG": "4 periods: H1 and 9M of 2025 and 2026 (e.g. H1 2025 $8,244M against a gross $9,473M); its 2024 revenue is $16,032M, not $18,418M"
+    },
+    "facts": "57 revenue rows replaced by 59 (HAS 19 by 21: its two fourth quarters, outranked before, now derive as released; RSG 38 by 38)",
+    "probes": {
+     "HAS Q1 2025 revenue $887.1M": "verified (was wrong)",
+     "HAS Q1 2025 revenue $1,006.1M": "wrong",
+     "HAS Q4 2025 revenue $1,445.9M": "verified (release and derived)",
+     "RSG FY2024 revenue $16,032M": "verified (was wrong)",
+     "RSG FY2024 revenue $18,418M": "wrong"
+    }
+   },
+   "lows": {
+    "L1": "fixed: once a release outranks a period's derived value, the period's other release figures must agree with it, in this run and later ones (vouched); the review's repro now drops the year-later 777; no live figure dropped",
+    "L2": "fixed: the gate counts the figures earlier runs dropped against reported XBRL (each file's report) against their row's record, so a second run decides as the first; the review's repro run 2 no longer rejects the derived value; no live change",
+    "L3": "fixed: the companyfacts and exhibit archive scripts save their index for every item archived, even when a later one fails, and delete raw bodies only after that save; both review repros now leave the earlier items indexed and raw",
+    "L10": "not fixed: the revenue guard's ratio rules drop Moderna's small 2025 quarters, a '?' rather than a wrong answer; telling a collapsed total from a slice needs another signal, which could re-admit the slices the guard exists for (Fifth Third, Camden)",
+    "L11": "fixed: a confirmation whose re-check disagrees with the releases is revoked, and --recheck re-checks every confirmed company; a dry run re-checked the 13 confirmed companies: 12 still agree and LNT has no comparable period now, so it keeps its confirmation",
+    "L12": "fixed: gate_release_facts.py and confirm_revenue.py take --run-date, by default the store's own run date (its window: 2026-10-31), so records no longer depend on the clock",
+    "L13": "fixed: fix 11 reads the 'period row | measure column | cell' locators of transposed tables; all 16 such non-GAAP figures (Microsoft's) are now located, each marked non-GAAP by its own row, so none is dropped"
+   },
+   "gates": {
+    "pytest": "2020 passed",
+    "dev_replay": "the 693 claims are byte-identical to <session-scratchpad>/sp500/claims_final5.json on the full data and on the frozen 62-company data",
+    "examples": {
+     "nvda-ai-story": "7/2/0/2",
+     "meta-ai-story": "5/3/0/0",
+     "q2-roundup-look-ahead": "6/1/2/0"
+    },
+    "recordings": "3 of 3 replay",
+    "qualifier_grid": "identical",
+    "second_pass": "the release gates drop nothing and record no new rejection; the label gate changes 0 of 95,897 release facts; the XBRL gate re-run over 1,804 files drops and quarantines nothing",
+    "split_table": "current against data/snapshot; against the scratch snapshot only the header of sp500-splits-20261031.json (store path and fingerprint) would change"
+   },
+   "old_rows_against_round_4": {
+    "facts": "144,132 -> 144,134: HAS and RSG revenue rows only",
+    "companies": "499, unchanged",
+    "filings": "28,531, unchanged",
+    "fiscal_periods": "8,076, unchanged",
+    "release_files": "3,909, unchanged"
+   },
+   "scratch_snapshot": {
+    "bytes": 86911946,
+    "companies": 499,
+    "filings": 28531,
+    "sqlite_facts": 144134,
+    "release_facts": 95897,
+    "fingerprint": "fa1224e94464"
+   },
+   "resolves": "round_4's known limit on Hasbro's Revenues line",
+   "artifacts": [
+    "<session-scratchpad>/sp500/lows/revenue_above_release.json and revenue_concepts_diverge.json: the two revenue scans",
+    "<session-scratchpad>/sp500/lows/facts_scan_lows.json: the rows the change moves, per company"
+   ]
+  }
+ },
+ "coverage_improvements": {
+  "item_1_attributable_net_income": {
+   "approved": "2026-11-01, owner-approved coverage batch",
+   "commit": "cc28192: receipts/ingest.py and three test files",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "rule": "where one filing tags ProfitLoss and the whole noncontrolling interest for the same period (the total concept, both the redeemable and nonredeemable parts, or all three when they add up) and no NetIncomeLoss, net income is ProfitLoss less that NCI, stored as derived (derived_from: the filing; the locator names both tagged facts and values). One side alone, part of the NCI, or a zero NCI another filing contradicts stays '?'",
+   "facts": "144,191 -> 145,036: 764 ProfitLoss - NCI rows (351 quarters, 261 year-to-date, 152 years) and 87 quarters derived from them added; 6 derived quarters cited from an earlier, consistent pair at the same value (CARR, ECHO 2, F, SO, SRE)",
+   "companies": 35,
+   "by_company": "AEE 34, AEP 23, AMT 38, BALL 35, BE 37, BSX 26, CARR 7, CAT 22, CF 34, CI 14, CMI 34, DOW 9, ECHO 23, ES 32, ESS 34, F 25, FCX 30, IBKR 34, IFF 6, IRM 34, IVZ 19, MA 17, O 6, OXY 24, PH 25, PNC 24, PNW 34, Q 9, SO 15, SPG 13, SRE 3, TFC 19, VTR 38, WEC 36, WELL 38",
+   "mastercard": "17 rows, 10 of them quarters: Q3 2026 net income $4,620M = ProfitLoss $4,628M - NCI $8M (10-Q); a $4.620B claim verifies",
+   "verified": "all 764 rows equal ProfitLoss less the whole NCI of the same filing and dates in the archived companyfacts, with no NetIncomeLoss there",
+   "release_side": "5 release facts dropped: CI 2 under fix 11 (its 'Shareholders' Net Income' GAAP line stored as non-GAAP now meets the GAAP value), IVZ 3 under fix 7",
+   "caveat_invesco": "Invesco labels its after-preferred figure 'Net income/(loss) attributable to Invesco Ltd.' (Q2 2025 -$12.5M, equal to its NetIncomeLossAvailableToCommonStockholdersBasic), while ProfitLoss - NCI, the parent net income NoCap serves for every company, is $203.4M; the three release figures went under fix 7, so a claim quoting that headline now gets a cross where it got a tick. Owner's call",
+   "gates": {
+    "pytest": "2199 passed",
+    "dev_replay": "identical to claims_final6.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "release gates 0, label gate 0 of 96,166, XBRL gate 1,807 files 0/0",
+    "old_rows": "facts as above; 4 alias lists extended on re-ingest (BE bloom, ESS essex, IFF international flavors, OXY occidental); filings and fiscal periods unchanged; 10 release files (the 5 gated files and their reports)",
+    "qa_kit": "OVERALL FAIL: 35 are its check 2 meeting the new derived form, which it recomputes only as FY - 9M of the stored concept; 7 (Carrier and Qnity revenue growth, AEP, Essex and Sempra wording) reproduce identically on the committed snapshot"
+   },
+   "scratch_snapshot": {
+    "companies": 499,
+    "sqlite_facts": 145036,
+    "release_facts": 96166,
+    "bytes": 87338453,
+    "fingerprint": "06dfe20ca458"
+   }
+  },
+  "item_3_comparison_revenue_total": {
+   "commit": "ffaee74: receipts/ingest.py, scripts/confirm_revenue.py and tests/test_revenue_guard.py",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "rule": "scripts/confirm_revenue.py decides that a comparison total (RegulatedAndUnregulatedOperatingRevenue, RealEstateRevenueNet) is the company's revenue when its own release totals, quarantined files included, equal the filed value in at least 2 quarters or years and differ in none ('broad_revenue_is_total' in data/revenue_confirmations.json, revoked by a later release that differs); ingest then serves that concept where the filing tags no broader revenue (Revenues, SalesRevenueNet, RevenuesNetOfInterestExpense) for the period",
+   "decided": {
+    "DUK": "8 periods, e.g. Q1 2026 $9,178M ('Total operating revenues')",
+    "XEL": "8 periods",
+    "D": "6 periods; its filings tag Revenues for every period, so nothing changes",
+    "SRE": "3 periods"
+   },
+   "flipped_from_unanswered": {
+    "DUK": "14 quarters and years (31 rows)",
+    "XEL": "16 (38 rows)",
+    "SRE": "4 of 7 (12 rows; its 3 others were served from Revenues, at the same values)"
+   },
+   "facts": "145,036 -> 145,117: 81 RegulatedAndUnregulatedOperatingRevenue rows added (76 filed, 5 derived quarters), none removed",
+   "gates": {
+    "pytest": "2201 passed",
+    "dev_replay": "identical to claims_final6.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "release gates 0, label gate 0 of 96,166, XBRL gate 1,807 files 0/0",
+    "old_rows": "only the 81 revenue rows; companies, filings, fiscal periods and release files unchanged",
+    "qa_kit": "XEL PASS; DUK and SRE pass checks 2 and 4 and fail check 5 only: a calendar gap, a Q2 2026 release figure beyond the calendar because SEC's companyfacts lacks their Q2 2026 10-Qs"
+   },
+   "not_changed": "Duke's three quarantined release files stay quarantined (their non-GAAP and segment figures are still unread)",
+   "scratch_snapshot": {
+    "companies": 499,
+    "sqlite_facts": 145117,
+    "release_facts": 96166,
+    "bytes": 87350741,
+    "fingerprint": "090f982cdd7f"
+   }
+  },
+  "item_2_xom_two_registrants": {
+   "commit": "f2bb3cf: receipts/ingest.py, scripts/map_predecessor_releases.py, scripts/gate_release_facts.py, scripts/topup_latest_quarter.py, scripts/archive_exhibits.py and tests/test_predecessors.py",
+   "spend": {
+    "model_usd": 0.1042,
+    "model_calls": 5,
+    "ledger_usd": "49.7427 -> 49.8469 (guard 57.64)",
+    "sec_requests": "12 of the 30 approved: CIK 34088 Submissions and companyfacts (its older pages end before the window), then 4 8-K indexes and 6 exhibits"
+   },
+   "rule": "receipts.ingest.PREDECESSOR_CIKS = {2115436: (34088,)}: ExxonMobil Holdings Corp became XOM's registrant in the holding-company reorganization of 2026-07-01 (8-K12B 0001193125-26-291990) and Exxon Mobil Corp filed every earlier report. Ingest merges the predecessor's Submissions rows and companyfacts into one company row under CIK 2115436; each filing keeps the URL of a registrant whose Submissions list it, the current one first. The release gates, the XBRL gate re-run and the exhibit archive read the predecessor too; scripts/map_predecessor_releases.py maps such a company's releases with receipts.press_release's own functions (each 8-K's index read in its filer's folder, facts under the company's one CIK)",
+   "company_row": {
+    "cik": 2115436,
+    "ticker": "XOM",
+    "name": "ExxonMobil Holdings Corp",
+    "aliases": [
+     "exxon mobil",
+     "exxonmobil holdings",
+     "xom"
+    ],
+    "pending": "the coordinator adds 'ExxonMobil', 'Exxon' and the display name 'Exxon Mobil' in receipts/store.py at integration"
+   },
+   "xbrl": {
+    "filings": "72 (10-K 3, 10-Q 10, 8-K 57, 8-K/A 2): 65 in the 34088 folder, 7 in the 2115436 folder (the Q2 2026 10-Q, listed by both, and six 8-Ks)",
+    "facts": "231 (213 xbrl, 18 derived: 12 Q4 = FY - 9M for FY2023-FY2025, 6 Q2/Q3 from YTD)",
+    "quarters": "12, Q3 FY2023 .. Q2 FY2026; last 8 (Q3 FY2024 .. Q2 FY2026): revenue, net income, operating expenses and operating cash flow 8/8, EPS and dividends 6/8 (a Q4 per-share figure is never derived), R&D annual only",
+    "warnings": []
+   },
+   "continuity": {
+    "fiscal_periods": "16 (FY2023 Q2 .. FY2026 Q2), each label and each span once; every quarter starts the day after the one before; FY2026 Q1 (34088's 10-Q) runs into Q2 (2115436's 10-Q)",
+    "duplicate_fact_rows": 0,
+    "url_folders": "every filing in the folder of a registrant that lists it; every fact's URL is its filing's",
+    "both_registrants": "13 (metric, period) pairs are reported by filings of both registrants (the Q2 2026 10-Q's Q2 2025 and H1 2025 comparatives against 34088's originals): every value identical, e.g. Q2 2025 revenue $81,506M and net income $7,082M"
+   },
+   "releases": {
+    "mapped": "the latest four paired: Q2 2026 (8-K 0002115436-26-000006, EX-99.2), Q1 2026 (0000034088-26-000065), Q4 2025 (0000034088-26-000033, EX-99.1 and EX-99.2), Q3 2025 (0000034088-25-000059). The Q3 2026 release (0002115436-26-000018) waits for its 10-Q, as every unpaired release does",
+    "outcome": "all four quarantined by the XBRL gate (103 facts held, none served): the income-statement header's label cell has rowspan=2 and receipts.press_release's grid ignores rowspan, so the year row moves one column left (Q3 2025's 85,294 is read as 2024); 2-7 GAAP rows per column then equal the other year's XBRL",
+    "next": "after the rowspan fix lands in receipts/press_release.py (the week16 agent), re-run scripts/map_predecessor_releases.py XOM --quarters 4 --validate (about $0.10, no SEC request: the exhibits are archived)"
+   },
+   "gates": {
+    "pytest": "2209 passed",
+    "dev_replay": "identical to claims_final6.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "release gates 0, label gate 0 of 96,166, XBRL gate re-run 1,850 files and 96,166 facts 0/0",
+    "old_rows": "unchanged; added only XOM's company row, 72 filings, 231 facts, 16 fiscal periods and 8 release files (4 quarantined, 4 reports)",
+    "other_companies": "499 companies built with HEAD's and the new receipts/ingest.py: 0 rows differ (the 6 known store differences, BAC CRWD GEN GPN TWLO VRT, are the same under both)",
+    "qa_kit": "XOM PASS: XBRL 4/4, round trips 25/25, evidence-ends 1/1, scans 16/16; release and label checks SKIP (no live release file)"
+   },
+   "archives": {
+    "companyfacts": "CIK 34088 3,122,723 -> 209,539 bytes, CIK 2115436 78,880 -> 11,102 bytes",
+    "exhibits": "6 (4 in the 34088 folder, archived under that CIK)"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 145348,
+    "release_facts": 96166,
+    "bytes": 87416283,
+    "fingerprint": "86da5e75f9d2"
+   }
+  },
+  "rowspan_scan_and_gate": {
+   "commit": "112efaf (rowspan_header) and 39b4805 (old grid frozen in the gate, rowspan_unproven): scripts/gate_rowspan_headers.py and tests/test_rowspan_gate.py",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "defect": "receipts.press_release._grid_rows places each cell after the row's previous cell and ignores rowspan; under a unit label with rowspan=2 the next header row (the dates or years) is read one column to the left, so each column carries its neighbour's period",
+   "scan": {
+    "method": "every mapped release exhibit parsed twice, with the mapper's grid and with cells placed after the columns an earlier row's rowspan covers (as HTML lays a table out); a candidate table whose column headers or cells differ is affected",
+    "release_files": 1962,
+    "exhibits": 2049,
+    "affected_files": 239,
+    "a_quarantined": {
+     "files": 26,
+     "tickers": "AES 3, DHR 2, DIS 4, DOW 3, PFG 1, SPGI 1, TT 3, VLTO 1, WAB 4, XOM 4"
+    },
+    "b_served_unchecked_rows_in_moved_columns": {
+     "files": 73
+    },
+    "served_gaap_rows_only_in_moved_columns": {
+     "files": 40,
+     "note": "the XBRL gate checked these rows"
+    },
+    "c_served_period_columns_unaffected": {
+     "files": 98
+    },
+    "no_facts_file": 2,
+    "served_facts_in_moved_columns": {
+     "total": 1112,
+     "right": "1,059: the period agrees with the corrected header (635), or with one of the places the cell appears (422), or XBRL sides with the mapper's header (2)",
+     "dropped": "39, where XBRL proves the corrected header: KO 26 (Q2 and Q3 2024 segment revenue, 3 and 9 months, that are 2025's), DOW 9 (Q2 2026 cost of sales $9,521M, R&D $188M and diluted EPS -$1.18 that are Q2 2025's; H1 figures of the other year), CBOE 4 (Cash and Spot Markets net revenue with the years exchanged)",
+     "left_alone_unproven": "14, dropped by rowspan_unproven on the coordinator's decision: CAH 1, DOW 1 (H1, not served), EG 6, FERG 3, FISV 3"
+    }
+   },
+   "gate": {
+    "rule": "a table whose data rows read the same both ways but whose column headers name other periods is proven moved when a figure of 4+ significant digits in a moved column equals the company's XBRL value for the corrected header's period and none for the old header's, and no figure sides with an old header; in it, a served fact whose cell is found in exactly one column, whose period the old header allows and the corrected one does not, is dropped",
+    "result": "257 moved tables, 64 proven; 39 facts dropped as rowspan_header in 5 files (CBOE 2, DOW 1, KO 2) and 14 as rowspan_unproven in 5 files (CAH, DOW, EG, FERG, FISV), each recorded under release_gates in its report; a second pass drops 0",
+    "unproven_rule": "a served fact in a moved column of a table XBRL does not confirm as the mapper read it is dropped unless a place its cell appears has a corrected header allowing its period; a year-to-date header allows a first quarter unless it names six or nine months"
+   },
+   "gates": {
+    "pytest": "2309 passed (after b198cb0 and 43df1c4)",
+    "dev_replay": "identical to claims_final6.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "release gates 0, label gate 0 of 96,113, XBRL gate re-run 1,850 files and 96,113 facts 0/0",
+    "old_rows": "store rows unchanged; 10 release files lose exactly the 53 gated lines (every other line byte for byte) and their 10 reports gain the records",
+    "side_files": "no derived rejection or revenue confirmation of CBOE, DOW or KO",
+    "qa_kit": "DOW and KO PASS, FISV PASS, EG WARN, CBOE WARN; CAH and FERG FAIL, identical before and after the gate: CAH check 5 and FERG checks 3 and 5 (calendar gaps from 10-Qs missing in companyfacts, item 5; FERG's Q4 naming)"
+   },
+   "next": "re-map, with the rowspan-aware grid, XOM's 4 files, the 26 quarantined, the 5 rowspan_header and the 5 rowspan_unproven files (about $1) under the 57.64 guard",
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 184983,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96113,
+    "bytes": 94601578,
+    "fingerprint": "cab6147c9d69"
+   }
+  },
+  "item_1b_available_to_common_net_income": {
+   "commit": "5863dde: receipts/ingest.py, scripts/confirm_revenue.py and tests/test_available_to_common.py",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "rule": "scripts/confirm_revenue.py decides that a company's net income is NetIncomeLossAvailableToCommonStockholdersBasic when its releases' GAAP, company-level net income equals that figure in at least 2 quarters or years where it differs from NetIncomeLoss and from ProfitLoss less the whole NCI of one filing, and equals one of those in none ('available_to_common_is_net_income' in data/revenue_confirmations.json, with the release's own label). Evidence: the live release facts and the figures a gate dropped from a live file (the paired 10-Q/10-K XBRL gate, scripts/gate_release_facts.py), whose value and cell the reports keep; quarantined files and rowspan-gated figures are left out. A later release equal to the other figure revokes the decision (also on --recheck). Ingest then serves the available-to-common figure as net income, over a NetIncomeLoss the same filing tags, and never ProfitLoss; its receipt locator names it: '<release label> (after preferred dividends), as the company reports it: NetIncomeLossAvailableToCommonStockholdersBasic (<form> <accession>)'",
+   "decided": {
+    "IVZ": "5 periods: Q2 2025 -$12.5M (other $203.4M), Q3 2025 $301.3M ($345.7M), FY2025 -$726.3M (-$281.7M), Q1 2026 $230.4M ($268.6M), Q2 2026 $345.3M ($382.3M); label 'Net income/(loss) attributable to Invesco Ltd.'"
+   },
+   "not_decided": {
+    "BSX": "a release equals the other figure (Q3 2024 $468M against $469M available)",
+    "TFC": "its releases equal the other figure in 4 periods (Q1 2025 $1.26B: $1,261M, against $1,157M available)",
+    "BE, FCX, OXY, PNC, SO, SPG, SRE, WEC, WELL, CF, MA": "no period where the releases tell the two apart"
+   },
+   "facts": "IVZ only: 19 ProfitLoss-less-NCI net income rows removed, 18 available-to-common rows added (17 filed, the Q4 2025 quarter derived: -$1,186.2M, the release's figure); 145,348 -> 145,347",
+   "acceptance": {
+    "Invesco Q2 2025 net loss of $12.5 million": "verified (match), evidence NetIncomeLossAvailableToCommonStockholdersBasic, xbrl, with the locator naming it",
+    "Invesco Q2 2025 net income of $203.4 million": "wrong (value_mismatch)",
+    "Invesco Q3 2025 net income of $301.3 million / $345.7 million": "verified / wrong"
+   },
+   "release_figures": "restored on 2026-11-01 by re-mapping IVZ's 4 files from the response cache ($0) once the XBRL gate compared with the store's choice (fee90dc): see item_1b_ivz_release_remap",
+   "gates": {
+    "pytest": "2312 passed",
+    "dev_replay": "identical to claims_final6.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "release gates 0, label gate 0 of 96,113, XBRL gate re-run 1,850 files and 96,113 facts 0/0",
+    "old_rows": "only IVZ's net income rows (above); companies, filings, fiscal periods and release files unchanged; data/revenue_confirmations.json: only IVZ gains the decision (its revenue confirmation unchanged)",
+    "other_companies": "500 companies built with HEAD's and the new receipts/ingest.py: only IVZ differs; KR's fiscal periods differ from the store under both (the 16-week merge; KR's re-ingest is the next step)",
+    "qa_kit": "IVZ WARN: release check 1 notes 2 figures whose scale is not stated near the table; XBRL 6/6, round trips 25/25, scans 16/16"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 184982,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96113,
+    "bytes": 94605674,
+    "fingerprint": "ec4a183ddf7c"
+   }
+  },
+  "week16_restore_applied": {
+   "code": "b198cb0 and 43df1c4 (the coordinator's merge); applied to data here",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "steps": [
+    "scripts/relabel_release_facts.py --redate COST DPZ PEP KR: 22 Kroger release facts re-dated, 47 restored (COST 10, DPZ 26, PEP 11); a second dry run 0",
+    "Kroger re-ingested offline (window pinned to 2026-10-31): 4 fiscal periods added, its 16-week first quarters FY2023-FY2026 (Q1 FY2026 2026-02-01..2026-05-23, from FY and Q2); no fact row changed",
+    "label gate: 24 Kroger release facts labelled Q1 FY2025 (12) and Q1 FY2026 (12); a second dry run 0",
+    "release gates: 0 dropped, 0 new derived rejections"
+   ],
+   "release_facts": "96,113 -> 96,160",
+   "files": "COST, DPZ and PEP: every earlier line byte for byte, the restored facts appended; KR: 24 lines differ only in period_start and the fiscal label",
+   "gates": {
+    "pytest": "2312 passed",
+    "dev_replay": "identical to claims_final6.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "xbrl_gate_rerun": "1,850 files, 96,160 facts, 0/0",
+    "old_rows": "only Kroger's 4 fiscal periods and the 4 release files with their reports",
+    "qa_kit": "COST, DPZ and PEP PASS; KR WARN: check 2 finds the 16-week Q1 FY2026 10-Q's XBRL revenue, net income and diluted EPS not served as quarters (its release figures are)"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 184982,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96160,
+    "bytes": 94629678,
+    "fingerprint": "82031e1a7098"
+   }
+  },
+  "rowspan_remap": {
+   "commit": "633e9db: scripts/remap_releases.py and tests/test_remap_releases.py (the grid fix is a40299d)",
+   "spend": {
+    "model_usd": 1.0376,
+    "model_calls": 35,
+    "ledger_usd": "49.8469 -> 50.8845 (guard 57.64)",
+    "sec_requests": 0,
+    "note": "the first run's cap (ledger + 1.15 x the /bin/zsh.768 estimate) refused 3 of XOM's calls at /bin/zsh.96; they were re-run under a cap of 50.93 (/bin/zsh.074)"
+   },
+   "files": {
+    "re_mapped": 35,
+    "list": "XOM 4, the other 22 quarantined files the scan named, the 5 rowspan_header files and the 4 other rowspan_unproven files",
+    "served_now": "20: CAH/0000721371-26-000037, CBOE/0001628280-26-005944, CBOE/0001628280-26-029103, DHR/0000313616-26-000201, DIS/0001744489-25-000096, DIS/0001744489-25-000135, DOW/0001751788-26-000011, DOW/0001751788-26-000144, DOW/0001751788-26-000155, EG/0001095073-26-000003, FERG/0002011641-26-000038, FISV/0000798354-26-000028, KO/0000021344-25-000054, KO/0001628280-25-045577, PFG/0001104659-26-087091, TT/0001628280-26-003953, XOM/0000034088-25-000059, XOM/0000034088-26-000033, XOM/0000034088-26-000065, XOM/0002115436-26-000006",
+    "still_quarantined": "15: AES/0000874761-25-000037, AES/0000874761-25-000071, AES/0000874761-25-000086, DHR/0000313616-26-000163, DIS/0001744489-24-000275, DIS/0001744489-25-000154, DOW/0001751788-26-000131, SPGI/0000064040-26-000019, TT/0001466258-26-000001, TT/0001628280-26-050743, VLTO/0001967680-26-000003, WAB/0000943452-26-000017, WAB/0001628280-26-007113, WAB/0001628280-26-026384, WAB/0001628280-26-049105 (other unexplained GAAP mismatches)",
+    "recovered_from_quarantine": "11: XOM 4, DIS 2, DOW 2, DHR 1, PFG 1, TT 1"
+   },
+   "xom": "4 live files, 184 facts; validation 51/51 paired and 5/5 other figures match XBRL; the XBRL gate dropped Q1 2026 and Q1 2025 'Sales and other operating revenue' (not total revenues and other income), the release gates 4 more",
+   "after": [
+    "label gate: 14 CAH Q4 FY2026 facts unlabelled (the store's calendar has no label for that quarter: its Q3 FY2026 10-Q is missing from companyfacts); a second pass 0",
+    "release gates: 47 facts dropped, all in re-mapped files (PFG label_dates 12, DOW xbrl_derived 10, DIS gaap_line_as_non_gaap 8, TT 6, DOW nci 3, XOM 4, PFG nci 2, CAH 2); no derived rejection; a second pass 0",
+    "rowspan gate: 3 FERG year-to-date facts dropped again (rowspan_unproven: 334-day periods from its fiscal year change, which no header allows); a second pass 0",
+    "revenue confirmation: CBOE still held back (no comparable period)"
+   ],
+   "release_facts": "96,160 -> 96,874",
+   "gates": {
+    "pytest": "2396 passed (after 11ceff5)",
+    "dev_replay": "identical to claims_final7.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "xbrl_gate_rerun": "1,861 files, 96,874 facts, 0/0",
+    "old_rows": "store rows unchanged; 79 release paths changed, all of the 35 re-mapped files",
+    "qa_kit": "AES, DHR, DIS, DOW, FISV, PFG, SPGI, TT, VLTO, WAB and XOM PASS; CBOE and EG WARN; CAH, FERG and KO FAIL: CAH's calendar gap (item 5), FERG's known checks 3 and 5, and the kit reading a re-mapped release's comparative columns as KO's new quarter (KO's Q3 2025 file now holds revenue ,455M and Q3 2024 ,854M, both equal to XBRL); a Cardinal Q4 FY2026 claim reads the same before and after"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 184982,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96874,
+    "bytes": 95002932,
+    "fingerprint": "939392af8425"
+   }
+  },
+  "item_4_bank_revenue": {
+   "commit": "e137e1e: receipts/ingest.py, scripts/confirm_revenue.py and tests/test_bank_revenue.py",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "rule": "scripts/confirm_revenue.py decides that a company's revenue is InterestIncomeExpenseNet plus NoninterestIncome, both filed by one filing for one quarter or year, when its GAAP release totals (quarantined files included) equal that sum within the release's precision in at least 2 periods and differ in none ('nii_plus_noninterest_is_revenue' in data/revenue_confirmations.json; a later total that differs revokes it). Ingest then serves the sum as RevenuesNetOfInterestExpense, source derived, locator 'RevenuesNetOfInterestExpense = InterestIncomeExpenseNet <x> + NoninterestIncome <y> (<form> <accession>)', where the same filing tags no Revenues, RevenuesNetOfInterestExpense or SalesRevenueNet for the period",
+   "decided": {
+    "BNY": "9 periods (e.g. Q1 2025 $4,792M)",
+    "RF": "6 (Q2 2025 $1,905M)",
+    "TFC": "8 (FY2024 $13.28B)",
+    "NTRS": "2",
+    "BAC, C, CFG, COF, GS, JPM, MS, PNC, WFC": "8-12 each; they tag a broader revenue for every period, so nothing changes"
+   },
+   "not_decided": {
+    "FITB": "its releases print only 'Total revenue (FTE)', a non-GAAP total; no GAAP total to compare",
+    "HBAN": "1 comparable period",
+    "MTB": "no release revenue figure",
+    "SYF": "'Net revenue' differs (it also nets retailer share arrangements)",
+    "KEY": "its releases print the taxable-equivalent total (and it has no ingest audit file)",
+    "USB": "'Total net revenue' differs (taxable-equivalent)",
+    "STT": "4 of 6 periods differ"
+   },
+   "facts": "145,347 -> 145,465: revenue rows added for BNY 35, RF 34, TFC 39 and NTRS 11 (quarters, years and year-to-date); NTRS's Q4 2024 derived revenue ($1,959.6M) re-derived from other inputs at the same value",
+   "coverage": "last-8-quarter revenue: BNY 7/8, RF 8/8, TFC 8/8, NTRS 8/8 (0/8, 0/8, 0/8 and partial before)",
+   "gates": {
+    "pytest": "2399 passed",
+    "dev_replay": "identical to claims_final7.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "release gates 0 (no release revenue rejected), label gate 0 of 96,874, XBRL gate re-run 1,861 files 0/0",
+    "old_rows": "only the revenue rows above; data/revenue_confirmations.json: the 13 decided banks gain only the new key",
+    "other_companies": "the 13 decided banks built with HEAD's and the new receipts/ingest.py: only BNY, RF, TFC and NTRS change",
+    "qa_kit": "BNY WARN; NTRS, RF and TFC FAIL on the kit's re-derivation (it does not yet know the NII + noninterest income sum, as it first did not know ProfitLoss less the NCI) and on TFC's Q4 FY2025: derived $5,246M against the release's $5.25B (the release's own rounding)"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 185100,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96874,
+    "bytes": 95043892,
+    "fingerprint": "795d371095e0"
+   }
+  },
+  "item_5_companyfacts_holes": {
+   "commit": "9be0607: receipts/filing_xbrl.py, receipts/ingest.py (fill_holes), scripts/fetch_filing_xbrl.py and tests/test_filing_xbrl.py",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": "110 of the 300 approved: 104 for the holes' indexes and instances, 4 to check the parser on two filings companyfacts list, 2 to probe"
+   },
+   "holes": "53 stored 10-Qs and 10-Ks (47 10-Q, 3 10-K, 2 10-Q/A, 1 10-K/A) at 40 companies, filed in the window, whose accession the archived companyfacts (predecessors merged) lack",
+   "kept": "50 instances in data/archive/filing_xbrl (281,022,010 raw bytes, 10,637,705 gzipped), each with its URL, CIK, form, filing date and raw sha256; the raw cache bodies deleted",
+   "not_kept": "3 cover-page-only amendments with no financial facts: HSY's two 10-Q/As for Q1 2025 and SKYD's 10-K/A for FY2025",
+   "parser": "receipts.filing_xbrl reads every us-gaap and dei fact of a context with no dimension (the registrant, not a segment or a co-registrant subsidiary), the more precise of two values for one period, with the filing's DEI fiscal year and period, form and filing date; on AEP's and Essex's Q1 2026 10-Qs, which companyfacts list, it reproduced all 348 and 253 entries exactly",
+   "hook": "receipts.ingest.fill_holes merges a kept filing only where the companyfacts lack its accession; company_inputs and with_predecessors both apply it, so ingest, the release gates, revenue confirmation, the re-map and the XBRL gate re-run read the same facts",
+   "facts": "38 companies re-ingested offline: +1,511 rows (mostly xbrl, 76 derived), -22 rows: 21 of them the same rows re-added with the fiscal label their period now has (AOS and SPGI FY2024, EIX Q2 2026), and CAH's Q4 FY2025 operating cash flow re-derived from its newer 10-Q's recast nine months (,527M -> ,520M); fiscal periods +54; four company rows gain aliases the alias tables added since (dominion, cardinal, kimco, mid america apartment); 145,465 -> 146,954",
+   "calendars": "all 38 reach their newest 10-Q or 10-K",
+   "acceptance": {
+    "AEP Q2 2026 revenue ,445.0M": "verified, against its 10-Q (and its release)",
+    "Sempra Q2 2026 revenue ,997.0M": "verified, against its 10-Q (and its release)",
+    "Essex Q3 2026 revenue .3M": "wrong: the 10-Q reports total revenues of .69M; .3M is the release's 'Total rental and other property revenues', which fix 7 had dropped against XBRL for Essex's four earlier quarters too; .7M verifies",
+    "Essex Q3 2026 revenue $490.3M": "wrong: Essex's 10-Q reports total revenues of $492.7M for Q3 2026; $490.3M is the release's correct figure for 'Total rental and other property revenues' (without management fees), not total revenues, as fix 7 found for Essex's four earlier quarters; $492.7M verifies (accepted by the coordinator)"
+   },
+   "after": [
+    "label gate: 13 CAH Q4 FY2026 release facts labelled; a second pass 0",
+    "release gates: 2 facts dropped, DOW's Q2 2026 operating cash flow (,324M against ,331M derived from its Q2 10-Q) and Essex's Q3 2026 property revenues (above); no derived rejection; a second pass 0",
+    "revenue confirmation: ETR and NEE still held back",
+    "rowspan gate: 0",
+    "XBRL gate re-run (the mapper's paired-filing comparison): 4 would drop and 1 would quarantine, a blind spot of the mapper's gate, not applied (coordinator's decision): each newly readable 10-Q tags a concept the store does not serve, and the release agrees with what the store serves: AEP's Q2 and Q3 2025 net income ($1,226M and $972M, derived as ProfitLoss less the NCI, compared with ProfitLoss), Sempra's Q2 2026 and Q2 2025 revenue ($2,997M and $3,000M, the RegulatedAndUnregulatedOperatingRevenue the store serves, compared with contract revenue) and Duke's Q2 2026 release (the same comparison total); the store-based release gates are 0 unexplained; item 5b makes the mapper's gate compare with the store's choice"
+   ],
+   "gates": {
+    "pytest": "2403 passed",
+    "dev_replay": "identical to claims_final7.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "old_rows": "only the 38 companies' rows above and 3 release files (CAH relabelled, DOW and ESS each losing one fact) with 2 reports",
+    "other_companies": "the 38 built with HEAD's and the new receipts/ingest.py: exactly the rows above",
+    "qa_kit": "0 FAIL, 40 WARN: 36 are the kit reading check 2 from companyfacts, which lack these filings (it does not yet read data/archive/filing_xbrl), the other 4 known release-header and scan classes; with the kit reading data/archive/filing_xbrl (its own reader agreed with receipts.filing_xbrl on all 20,407 entries of the 50 instances), 0 FAIL and 8 known WARN"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 186589,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96872,
+    "bytes": 95329526,
+    "fingerprint": "3a888144149d"
+   }
+  },
+  "item_5b_xbrl_gate_store_choice": {
+   "commit": "fee90dc: receipts/press_release.py (the XBRL gate section only), scripts/topup_latest_quarter.py and tests/test_xbrl_gate_store.py",
+   "spend": {
+    "model_usd": 0,
+    "sec_requests": 0
+   },
+   "defect": "the mapper's paired-filing gate compared a release figure with the first concept its 10-Q tags, which need not be the figure the store serves; once item 5 made their 10-Qs readable, the gate re-run would have dropped AEP's Q2 and Q3 2025 attributable net income and Sempra's Q2 2026 and Q2 2025 revenue, and quarantined Duke's Q2 2026 release, all of them agreeing with the store",
+   "rule": "receipts.press_release.store_values(cik) reads the company-level XBRL and derived figures data/facts.sqlite serves per metric and period; xbrl_gate passes a figure that equals one of them within both precisions (store_agrees), so ProfitLoss less the NCI, a confirmed comparison total, net income after preferred dividends and a bank's summed revenue count as the store serves them; a figure equal to neither the paired filing nor the store is dropped (or quarantines its file) as before. apply_xbrl_gate reads the store by default; the top-up driver's XBRL gate re-run passes the same figures",
+   "tests": "AEP's attributable net income (ProfitLoss less the NCI), a comparison total that kept two rows of one column from quarantining the file, Invesco's available-to-common net income and Regions' summed revenue, and a figure off from both the filing and the store, which is still dropped",
+   "gates": {
+    "pytest": "2408 passed",
+    "xbrl_gate_rerun": "1,861 files, 96,872 facts: 0 would drop, 0 would quarantine (4 and 1 before)",
+    "dev_replay": "identical to claims_final7.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "label gate 0, release gates 0, rowspan gate 0",
+    "old_rows": "unchanged (no data change)",
+    "qa_kit": "AEP, DUK, RF and SRE PASS; IVZ and TFC WARN (known release-scale and ProfitLoss classes)"
+   },
+   "scratch_snapshot": {
+    "fingerprint": "3a888144149d",
+    "note": "data unchanged since item 5"
+   }
+  },
+  "item_1b_ivz_release_remap": {
+   "code": "none: scripts/remap_releases.py (633e9db) with the store-aware XBRL gate (fee90dc)",
+   "spend": {
+    "model_usd": 0,
+    "model_calls": "5, all from the response cache (cap set to the ledger, $50.8845, so a live call would have been refused)",
+    "sec_requests": 0
+   },
+   "files": "IVZ's 4 release files re-mapped: every earlier line byte for byte, plus 13 GAAP net income figures the gates had dropped against ProfitLoss, each equal to the available-to-common figure the store serves: Q2 2025 -$12.5M (twice), Q3 2025 $301.3M (twice), Q3 2024 $55.0M, Q4 2025 -$1,186.2M (twice), FY2025 -$726.3M, FY2024 $538.0M, Q1 2026 $230.4M (twice), Q1 2025 $171.1M and Q2 2026 $345.3M; their reports written afresh",
+   "release_facts": "96,872 -> 96,885",
+   "gates": {
+    "pytest": "2408 passed",
+    "dev_replay": "identical to claims_final7.json on the full and frozen-62 data",
+    "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+    "recordings": "3 of 3",
+    "qualifier_grid": "identical",
+    "second_pass": "label gate 0, release gates 0 (no figure dropped, no derived rejection), rowspan gate 0, XBRL gate re-run 1,861 files and 96,885 facts 0/0",
+    "decisions": "a dry run of scripts/confirm_revenue.py IVZ keeps both its revenue confirmation and its net-income decision; nothing written",
+    "old_rows": "store rows unchanged; only IVZ's 4 release files (13 lines added) and their reports",
+    "qa_kit": "IVZ WARN: XBRL 7/7 (the restored net income now checked), round trips 25/25; the 3 WARNs are the known 'scale not stated near the table' class"
+   },
+   "scratch_snapshot": {
+    "companies": 500,
+    "sqlite_facts": 186589,
+    "balance_sheet_facts": 39635,
+    "release_facts": 96885,
+    "bytes": 95336470,
+    "fingerprint": "17d540a5beba"
+   }
+  }
+ }
+}

@@ -1,0 +1,132 @@
+{
+ "step": "re-review preconditions before Phase B (ingest side)",
+ "validated_on": "2026-10-31",
+ "review": ".claude/judging/2026-10-31-sp500-phase-a-review.md (Re-review: ingest fixes)",
+ "code": {
+  "receipts/fiscal_labels.py": [
+   "every valid filing's (fiscal year, period) claim is recorded before the position check, so a quarter dropped by position still knocks out a label it shares",
+   "a fiscal year that fails containment drops its FY, its Q4 and the quarters out of place",
+   "naming offset +1 is never accepted and -1 only for January or February year ends; otherwise every label is dropped",
+   "GATE_MARKERS and gate_message(): label dropped, FY and Q4 labels dropped, not labelled, claimed for different periods, all labels dropped"
+  ],
+  "receipts/ingest.py": [
+   "non-positive contract revenue is dropped",
+   "RegulatedAndUnregulatedOperatingRevenue and RealEstateRevenueNet join the larger-concept comparison (compared, never served)",
+   "contract revenue is never served for SIC 6020-6036 banks",
+   "a company with a SIC revenue flag or a lease note of 10% or more has its contract revenue held back (AWAITING) until data/revenue_confirmations.json lists it"
+  ],
+  "receipts/press_release.py": [
+   "FiscalCalendar.label() never infers a label for a period a 10-Q or 10-K covers but the rules left unlabelled; it still infers for earnings-day periods"
+  ],
+  "scripts/relabel_release_facts.py": [
+   "also clears a release fact's label when a stored 10-Q/10-K with XBRL covers its period and the store has no label for it"
+  ],
+  "scripts/confirm_revenue.py (new)": [
+   "confirms held-back contract revenue against GAAP release totals: at least 2 periods, every one within the release figure's precision"
+  ],
+  "scripts/archive_companyfacts.py": [
+   "restore writes through a temporary file and rewrites a sidecar that describes other bytes"
+  ],
+  "scripts/archive_exhibits.py (new)": [
+   "gzip archive and restore of cached 8-K exhibits"
+  ]
+ },
+ "tests": {
+  "suite": "1771 passed",
+  "new_or_changed": [
+   "test_fiscal_labels: fiscal-year-end change inside the window, implausible offsets, the Dell-shaped Q4 case now also drops the stray Q3, the end-to-end test counts gate messages instead of the old strings",
+   "test_release_fiscal_labels: a dropped label is never inferred back; an earnings-day quarter still is",
+   "test_relabel_release_facts (new): relabel, clear a rejected label, keep an earnings-day label, bytes kept",
+   "test_revenue_guard: banks, non-positive, comparison concepts, held back until confirmed",
+   "test_archive_companyfacts (new): archive and restore round trip with a stale sidecar"
+  ]
+ },
+ "changes_on_the_62": {
+  "IRM": "34 revenue rows held back: SIC 6798, contract revenue served, no release tables to confirm it",
+  "other_companies": "none",
+  "label_gate_messages": "none",
+  "release_labels_changed": 0
+ },
+ "revenue_confirmations": {
+  "AON": {
+   "method": "press-release totals",
+   "periods": 8
+  },
+  "LNT": {
+   "method": "press-release totals",
+   "periods": 6
+  },
+  "MRSH": {
+   "method": "press-release totals",
+   "periods": 8
+  }
+ },
+ "held_back_for_you": {
+  "IRM": {
+   "reason": "no release tables, so no press-release total to compare",
+   "filing_evidence": "FY2025 10-K 0001020569-26-000013: Total Revenues $6,901,737 thousand (Storage Rental $4,052,510 + Service $2,849,227) equals the contract revenue tagged for 2025"
+  }
+ },
+ "costco_contract_revenue_periods": {
+  "result": "all five are total revenue (net sales plus membership fees), not net sales",
+  "periods": [
+   {
+    "period": "FY2024",
+    "value": 254453000000.0,
+    "filing": "10-K 0000909832-26-000093",
+    "also": "Revenues in 5 earlier filings, same value"
+   },
+   {
+    "period": "Q3 FY2025",
+    "value": 63205000000.0,
+    "filing": "10-Q 0000909832-26-000051",
+    "also": "Revenues in 0000909832-25-000033, same value"
+   },
+   {
+    "period": "FY2025",
+    "value": 275235000000.0,
+    "filing": "10-K 0000909832-26-000093",
+    "also": "Revenues in 0000909832-25-000101, same value"
+   },
+   {
+    "period": "Q3 FY2026",
+    "value": 70527000000.0,
+    "filing": "10-Q 0000909832-26-000051",
+    "filing_text": "Net sales $69,154 + Membership fees $1,373 = Total revenue $70,527 (millions)"
+   },
+   {
+    "period": "FY2026",
+    "value": 303154000000.0,
+    "filing": "10-K 0000909832-26-000093",
+    "filing_text": "Net sales $297,247 + Membership fees $5,907 = Total revenue $303,154 (millions)"
+   }
+  ]
+ },
+ "bax": "contract revenue served for every period, no drops (data/ingest_audit/BAX.json); every BAX row equals its pre-review row",
+ "gates_on_the_62": {
+  "dev_replay": "693 claims identical to claims_final2.json",
+  "pytest": "1771 passed",
+  "xbrl_gate": "326 files, 0 dropped, 0 quarantined, decisions unchanged",
+  "label_gate": 0,
+  "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+  "recordings": "slide, 10-K quote, Private replay",
+  "qualifier_grid": "identical",
+  "probes": "25 of 27 verified (IRM no longer probed: revenue held back)",
+  "scratch_snapshot_facts": 18886
+ },
+ "archives": {
+  "companyfacts": {
+   "companies": 62,
+   "gzip_mb": 16.9
+  },
+  "exhibits": {
+   "files": 459,
+   "raw_mb": 249.8,
+   "gzip_mb": 13.0
+  }
+ },
+ "spend": {
+  "model_usd": 0.0,
+  "sec_requests": 3
+ }
+}

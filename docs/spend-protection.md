@@ -23,15 +23,29 @@ The owner approved a free Neon shared database and a new authenticated Preview d
 |---|---|
 | Reservation accepted | Atomically debit the estimate and persist a unique token before model work. |
 | All started usage known | Replace the reservation with observed usage priced at configured rates. |
-| Any usage unknown or an admitted call missing from final statistics | Retain at least the entire reservation; observed costs above it increase the debit. |
+| Every admitted attempt accounted, some usage unknown (a failed, timed-out or abandoned attempt, or missing usage) | Settle at the accounted cost: observed usage plus each unknown attempt's own conservative estimate. Planned attempts that never started are refunded. |
+| An admitted attempt missing from final statistics (a worker died around the usage callback) | Retain at least the entire reservation; observed costs above it increase the debit. |
 | Worker crashes or settlement cannot commit | The persisted reservation remains charged. |
 | Worker cannot start | Settle the unused reservation at zero. |
 | Duplicate identical settlement | No additional debit or refund. Conflicting settlement is rejected. |
 | UTC midnight | New admissions use the new day's bucket; older tokens settle their original admission day. |
 
-Amounts are nonnegative integer micro-USD, rounded upward for admission. Displayed model costs round to six decimals, so a known-usage ledger debit can differ by one micro-USD. An unknown-usage budget charge can be higher than the displayed model estimate because the complete reservation is retained. Do not describe either value as a reconciled invoice.
+Amounts are nonnegative integer micro-USD, rounded upward for admission and settlement. Displayed model costs round to six decimals, so a ledger debit can differ from the displayed cost by about one micro-USD. When every attempt was accounted, the debit therefore matches the displayed cost, including each unknown attempt's estimate. Only when an admitted attempt went unaccounted is the complete reservation retained, and then the charge can be higher than the displayed estimate. Do not describe either value as a reconciled invoice.
+
+Each unknown attempt's estimate is an upper bound computed from the request itself (UTF-8 bytes plus framing as input tokens, the full output limit, no cached-input discount), never less than $0.05 ($0.15 for Wonder; Slide uses $0.10 per Spark vision call and $0.0025 per SAM call). A Check whose one passage hits a 429, a 503 or the deadline therefore costs about $0.05 per started attempt, not its whole $0.30–$0.50 reservation. This settlement rule was adopted on 2026-10-30 (Meta API audit P1-2, option a); earlier releases retained the whole reservation whenever any usage was unknown.
 
 There is no automatic timeout refund. Pending crash reservations remain in their original day; they are not moved to the next day or silently deleted. Changing the configured cap for an existing namespace/day is rejected, rather than allowing instances with inconsistent settings to race. The namespace and database must stay stable across deployments that use the same budget. Do not reset the namespace, delete budget rows or use automatically branched databases to reset spending allowance.
+
+## Daily sub-caps
+
+Two sub-caps share the same ledger tables and need no schema change. Both apply to every instance that uses the same ledger storage and namespace.
+
+| Sub-cap | Setting (default) | Rule |
+|---|---|---|
+| Check and Fix reserve | `RECEIPTS_CHECK_FIX_RESERVE_USD` (`1.5`) | A Slide, Ask or whole-filing reservation is admitted only if it leaves this much of the day's cap unused. Check and Fix may use the whole cap. It only narrows admission (`reserve(..., keep_usd=...)`); the stored cap and every settlement are unchanged. With the release cap of $5, Slide, Ask and quote search can use at most $3.50 a day, and the last $1.50 stays with Check and Fix. |
+| New whole-filing questions | `RECEIPTS_FILING_QUESTIONS_PER_DAY` (`5`) | At most this many new questions per UTC day. Each one is a one-micro-unit reservation in the namespace `<RECEIPTS_SPEND_NAMESPACE>.filing_questions` (for example `nocap.filing_questions`), whose day cap is the limit in micro-units; amounts in that namespace are counts, not dollars. A recorded sample replays at $0 and takes no slot. A question refused before its model call returns its slot; a dispatched question keeps it even if the provider fails, because it may still be billed. `0` turns new questions off. |
+
+A refused request gets a one-event error stream with `model_calls: 0`, `cost_usd: 0` and a `reason`: `daily_budget` (including the Check and Fix reserve), `filing_question_limit`, `rate_limited`, `live_paused` or `budget_unavailable` ([api-contract.md](api-contract.md#errors)). Like the dollar cap, a different count limit for a namespace/day that already exists is rejected, so whole-filing questions fail closed (`budget_unavailable`) for the rest of that UTC day. Change the count limit, like the dollar cap, only before the first admission of a UTC day; the Check and Fix reserve is not stored and can change at any time. Offline tests (`tests/test_spend_subcaps.py`) cover the reserve boundary, the shared count across two app instances, slot return and keeping, UTC rollover, a changed limit and recorded-sample replay after the limit.
 
 ## Storage modes
 

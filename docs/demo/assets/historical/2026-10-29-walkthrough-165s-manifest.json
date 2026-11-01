@@ -1,0 +1,656 @@
+{
+  "format": "continuous Playwright browser recording, caption band, local synthetic narration",
+  "video_probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "25/1"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "165.000000",
+      "size": "12443559"
+    }
+  },
+  "capture": {
+    "provider_calls": 0,
+    "new_provider_spend_usd": 0,
+    "source_commit": "f31cbf9e5f3c49a72322fd367bffd551271331bb",
+    "mode": "actual browser video; offline Check and exact historical model-response replay",
+    "sources": {
+      "fix": {
+        "path": "data/eval_runs/demo-fix-current-20261029/events.json",
+        "sha256": "30840f72749e5f7f1f8091ec749a1b510043dc8bce2ce44d7243c2891d8b7acb"
+      },
+      "slide": {
+        "path": "data/eval_runs/final_ui/live/slide-events.json",
+        "sha256": "e2f529929611f52e8effb823a00b5ae5d3d0ec1a9f826101b94c65dff1ccff04"
+      },
+      "ask": {
+        "path": "data/eval_runs/final_ui/live/ask-events.json",
+        "sha256": "37b7b194bba7c7e4a5c3180d8a6a6bff407c2255542c77c2c5161cd50d407cc2"
+      }
+    },
+    "image_sha256": "7e93576180457003522abf1c46a4cfb4889869d476cc9a735d72d81545fa7c7c",
+    "api_requests": [
+      {
+        "path": "/api/check",
+        "mode": "real offline verification with bundled extraction cache",
+        "input_sha256": "76c54e3034f2edf09067597093896f7da55864c68b9d6e1758dce5436a860aec",
+        "response_sha256": "21f3679099d8800533fa9d9a76843c91a9b3e444aa76c95ce75d03eb20abfa4a"
+      },
+      {
+        "path": "/api/fix",
+        "mode": "recorded Wonder + Spark Fix response",
+        "input_sha256": "dfd56a021e186b0a623fadbab3d2b5406963908523b136f1d67166dc2022b6b8",
+        "response_sha256": "ef45a0dc56859d73239981682db687754e86a26aef53745439c8fdc3285ed2c8"
+      },
+      {
+        "path": "/api/check",
+        "mode": "real offline verification with bundled extraction cache",
+        "input_sha256": "9583eaa9a6244524d2e72bf01815d9327d9d53c7c315b01dc1f95c14380f0a9b",
+        "response_sha256": "df2eae8a79dd91b5263c18367e30b6019afb0e82b711b6725c98c8f5ee7f6212"
+      },
+      {
+        "path": "/api/check",
+        "mode": "real offline verification with bundled extraction cache",
+        "input_sha256": "3c4e3cc5d7ce2f087cb60f1c57db23452dab3ae2b02fcaedcab3e2be35f127bb",
+        "response_sha256": "1653b11394232b824b56b59b913fe2824081191dd75dd1181adbeb30e1ac4f36"
+      },
+      {
+        "path": "/api/slide",
+        "mode": "recorded live response for these exact branded image bytes",
+        "input_sha256": "3fd4386ac4b20cee302fae29739f01edd8c8bf04bf3a3978df45a7b8502a9901",
+        "response_sha256": "d505b22fc30bd97f03c2bc5fc31bfa75998bebdabff22d98214de2d19885f495"
+      },
+      {
+        "path": "/api/ask",
+        "mode": "recorded Spark Ask response",
+        "input_sha256": "a7a99b96701c7607c6c3ff322c51874a804aaf54491a860042da6e5489ecf717",
+        "response_sha256": "2367258fa06a95e14139801a56f06dc47facd46ca702d744402fc948053abd54"
+      }
+    ],
+    "blocked_requests": [],
+    "page_errors": [],
+    "scenes": [
+      {
+        "name": "paste-and-check",
+        "start_s": 0.0
+      },
+      {
+        "name": "growth-receipt",
+        "start_s": 18.001
+      },
+      {
+        "name": "eps-receipt",
+        "start_s": 35.002
+      },
+      {
+        "name": "fix-and-recheck",
+        "start_s": 50.003
+      },
+      {
+        "name": "historical-cutoff",
+        "start_s": 94.002
+      },
+      {
+        "name": "slide-upload",
+        "start_s": 121.003
+      },
+      {
+        "name": "ask-with-sources",
+        "start_s": 147.004
+      },
+      {
+        "name": "closing",
+        "start_s": 157.531
+      }
+    ],
+    "actions": [
+      {
+        "action": "click-start",
+        "target": "",
+        "time_s": 0.018
+      },
+      {
+        "action": "click-done",
+        "target": "",
+        "time_s": 1.567
+      },
+      {
+        "action": "click-start",
+        "target": "Check",
+        "time_s": 8.01
+      },
+      {
+        "action": "click-done",
+        "target": "Check",
+        "time_s": 9.545
+      },
+      {
+        "action": "frame",
+        "target": "01-check",
+        "time_s": 9.547
+      },
+      {
+        "action": "click-start",
+        "target": "18%, Revenue growth: Wrong. Figure is from a different period. Filed figure: 105.85%. Open its receipt.",
+        "time_s": 18.009
+      },
+      {
+        "action": "click-done",
+        "target": "18%, Revenue growth: Wrong. Figure is from a different period. Filed figure: 105.85%. Open its receipt.",
+        "time_s": 19.605
+      },
+      {
+        "action": "frame",
+        "target": "02-growth",
+        "time_s": 20.749
+      },
+      {
+        "action": "click-start",
+        "target": "$2.22, GAAP earnings per diluted share: Wrong. GAAP and non-GAAP figures mixed up. Filed figure: $2.46. Open its receipt.",
+        "time_s": 35.01
+      },
+      {
+        "action": "click-done",
+        "target": "$2.22, GAAP earnings per diluted share: Wrong. GAAP and non-GAAP figures mixed up. Filed figure: $2.46. Open its receipt.",
+        "time_s": 36.572
+      },
+      {
+        "action": "frame",
+        "target": "03-eps",
+        "time_s": 37.679
+      },
+      {
+        "action": "click-start",
+        "target": "Fix with receipts",
+        "time_s": 50.01
+      },
+      {
+        "action": "click-done",
+        "target": "Fix with receipts",
+        "time_s": 51.552
+      },
+      {
+        "action": "frame",
+        "target": "04-fix",
+        "time_s": 52.173
+      },
+      {
+        "action": "frame",
+        "target": "05-corrections",
+        "time_s": 67.078
+      },
+      {
+        "action": "frame",
+        "target": "06-rechecked",
+        "time_s": 79.078
+      },
+      {
+        "action": "click-start",
+        "target": "Copy with receipts",
+        "time_s": 88.014
+      },
+      {
+        "action": "click-done",
+        "target": "Copy with receipts",
+        "time_s": 89.582
+      },
+      {
+        "action": "click-start",
+        "target": "Edit draft",
+        "time_s": 94.012
+      },
+      {
+        "action": "click-done",
+        "target": "Edit draft",
+        "time_s": 95.603
+      },
+      {
+        "action": "click-start",
+        "target": "NVIDIA Q2 FY2027 earnings story",
+        "time_s": 95.608
+      },
+      {
+        "action": "click-done",
+        "target": "NVIDIA Q2 FY2027 earnings story",
+        "time_s": 97.146
+      },
+      {
+        "action": "click-start",
+        "target": "June-quarter roundup, as of July 29\nMicrosoft, Alphabet and JPMorgan i",
+        "time_s": 97.154
+      },
+      {
+        "action": "click-done",
+        "target": "June-quarter roundup, as of July 29\nMicrosoft, Alphabet and JPMorgan i",
+        "time_s": 98.684
+      },
+      {
+        "action": "click-start",
+        "target": "Check",
+        "time_s": 98.687
+      },
+      {
+        "action": "click-done",
+        "target": "Check",
+        "time_s": 100.218
+      },
+      {
+        "action": "click-start",
+        "target": "$90.0 billion, fiscal fourth-quarter revenue: Not public yet. Not yet public at the as-of time. Open its receipt.",
+        "time_s": 100.221
+      },
+      {
+        "action": "click-done",
+        "target": "$90.0 billion, fiscal fourth-quarter revenue: Not public yet. Not yet public at the as-of time. Open its receipt.",
+        "time_s": 102.038
+      },
+      {
+        "action": "frame",
+        "target": "07-cutoff",
+        "time_s": 102.04
+      },
+      {
+        "action": "click-start",
+        "target": "Now",
+        "time_s": 110.01
+      },
+      {
+        "action": "click-done",
+        "target": "Now",
+        "time_s": 111.536
+      },
+      {
+        "action": "click-start",
+        "target": "Check",
+        "time_s": 111.539
+      },
+      {
+        "action": "click-done",
+        "target": "Check",
+        "time_s": 113.066
+      },
+      {
+        "action": "frame",
+        "target": "08-now",
+        "time_s": 113.067
+      },
+      {
+        "action": "click-start",
+        "target": "Slide",
+        "time_s": 121.024
+      },
+      {
+        "action": "click-done",
+        "target": "Slide",
+        "time_s": 122.554
+      },
+      {
+        "action": "click-start",
+        "target": "",
+        "time_s": 123.631
+      },
+      {
+        "action": "click-done",
+        "target": "",
+        "time_s": 125.179
+      },
+      {
+        "action": "click-start",
+        "target": "Check slide",
+        "time_s": 126.193
+      },
+      {
+        "action": "click-done",
+        "target": "Check slide",
+        "time_s": 127.751
+      },
+      {
+        "action": "frame",
+        "target": "09-slide",
+        "time_s": 127.756
+      },
+      {
+        "action": "click-start",
+        "target": "Reading 2: $2.22, Wrong. Open filing receipt.",
+        "time_s": 133.006
+      },
+      {
+        "action": "click-done",
+        "target": "Reading 2: $2.22, Wrong. Open filing receipt.",
+        "time_s": 134.548
+      },
+      {
+        "action": "frame",
+        "target": "10-slide-receipt",
+        "time_s": 135.351
+      },
+      {
+        "action": "click-start",
+        "target": "Ask",
+        "time_s": 147.017
+      },
+      {
+        "action": "click-done",
+        "target": "Ask",
+        "time_s": 148.538
+      },
+      {
+        "action": "click-start",
+        "target": "",
+        "time_s": 148.541
+      },
+      {
+        "action": "click-done",
+        "target": "",
+        "time_s": 150.065
+      },
+      {
+        "action": "click-start",
+        "target": "Ask with receipts",
+        "time_s": 150.077
+      },
+      {
+        "action": "click-done",
+        "target": "Ask with receipts",
+        "time_s": 151.647
+      },
+      {
+        "action": "frame",
+        "target": "11-ask",
+        "time_s": 153.508
+      },
+      {
+        "action": "click-start",
+        "target": "Draft",
+        "time_s": 156.006
+      },
+      {
+        "action": "click-done",
+        "target": "Draft",
+        "time_s": 157.53
+      },
+      {
+        "action": "frame",
+        "target": "12-end",
+        "time_s": 165.002
+      }
+    ],
+    "sync_marker": "magenta setup slate; trim through its final frame",
+    "timeline_offset_s": 1.4324442500001169,
+    "status": "captured",
+    "timeline_duration_s": 165.075,
+    "mode_changes": [
+      {
+        "mode": "Slide",
+        "time_s": 122.201
+      },
+      {
+        "mode": "Ask",
+        "time_s": 148.187
+      },
+      {
+        "mode": "Draft",
+        "time_s": 157.1772999999989
+      }
+    ]
+  },
+  "narration": {
+    "model": "hexgrad/Kokoro-82M v1.0",
+    "voice": "af_heart",
+    "runtime": "kokoro-onnx 0.6.1",
+    "execution": "local CPU",
+    "model_license": "Apache-2.0",
+    "runtime_license": "MIT",
+    "segments": [
+      {
+        "start_s": 0,
+        "end_s": 8,
+        "caption": "Here's an NVIDIA earnings draft. Two figures look plausible. Let's check them before publishing.",
+        "spoken_text": "Here's an NVIDIA earnings draft. Two figures look plausible. Let's check them before publishing.",
+        "raw_duration_s": 5.962666666666666,
+        "tempo": 1,
+        "speech_sha256": "695c1f3e4d65cbc8d9420547c8dcdad5fbef0759cdb71432ded9357c2100c1bd"
+      },
+      {
+        "start_s": 8,
+        "end_s": 18,
+        "caption": "Muse Spark extracts the claims. Code checks the SEC evidence. Seven pass, two are wrong, and two remain unverifiable.",
+        "spoken_text": "Muse Spark extracts the claims. Code checks the S E C evidence. Seven pass, two are wrong, and two remain unverifiable.",
+        "raw_duration_s": 8.528666666666666,
+        "tempo": 1,
+        "speech_sha256": "84cd0d94122b0eecb4ffe548b0ec0fa2fc497ceb37c5bfd151c19b6b931c5ba8"
+      },
+      {
+        "start_s": 18,
+        "end_s": 27,
+        "caption": "Click eighteen percent. The draft says year over year, but eighteen percent is quarter-over-quarter growth.",
+        "spoken_text": "Click eighteen percent. The draft says year over year, but eighteen percent is quarter-over-quarter growth.",
+        "raw_duration_s": 6.184666666666667,
+        "tempo": 1,
+        "speech_sha256": "3a28c7fe4a800fa1c362f4dca7d07fcec2760cfbe1611a83d6b6140b87622021"
+      },
+      {
+        "start_s": 27,
+        "end_s": 35,
+        "caption": "The receipt calculates the year-over-year change: about one hundred and six percent. We can inspect both filed values.",
+        "spoken_text": "The receipt calculates the year-over-year change: about one hundred and six percent. We can inspect both filed values.",
+        "raw_duration_s": 7.454666666666666,
+        "tempo": 1,
+        "speech_sha256": "58f255e85d50041282712dd17b62cc4eafd0aba57ee5af15584bbfbfd7b8a91c"
+      },
+      {
+        "start_s": 35,
+        "end_s": 42,
+        "caption": "Now click earnings per share. The draft labels two dollars and twenty-two cents as GAAP.",
+        "spoken_text": "Now click earnings per share. The draft labels two dollars and twenty-two cents as gap.",
+        "raw_duration_s": 5.406666666666666,
+        "tempo": 1,
+        "speech_sha256": "5dea77d16cd2b2ff8fd20bac65eccb029d72da2834414c1649ce505860a52255"
+      },
+      {
+        "start_s": 42,
+        "end_s": 50,
+        "caption": "That is the adjusted figure. The GAAP receipt says two dollars and forty-six cents, with the filing attached.",
+        "spoken_text": "That is the adjusted figure. The gap receipt says two dollars and forty-six cents, with the filing attached.",
+        "raw_duration_s": 6.729333333333333,
+        "tempo": 1,
+        "speech_sha256": "83ae4c91de17f8ac293bbe92fd9f1c4cb1940081381232af218a978654fa0e41"
+      },
+      {
+        "start_s": 50,
+        "end_s": 59,
+        "caption": "Let's fix both. Muse Wonder proposes numeric edits; code constrains them and verifies the revised draft again.",
+        "spoken_text": "Let's fix both. Muse Wonder proposes numeric edits; code constrains them and verifies the revised draft again.",
+        "raw_duration_s": 7.562666666666667,
+        "tempo": 1,
+        "speech_sha256": "d69927a5f4bbe9fef6535151fb5e8abed6c05c64167c90f542d9e1081ca28aee"
+      },
+      {
+        "start_s": 59,
+        "end_s": 66,
+        "caption": "The original stays on the left. The rechecked version shows exactly which numbers changed.",
+        "spoken_text": "The original stays on the left. The rechecked version shows exactly which numbers changed.",
+        "raw_duration_s": 5.3112916666666665,
+        "tempo": 1,
+        "speech_sha256": "a1a37bc640f2e6b3689b9a7707c5a1a4a43e32aa0d2df6c9c22558e057ebe686"
+      },
+      {
+        "start_s": 66,
+        "end_s": 78,
+        "caption": "Each correction keeps its receipt. This is a recorded successful response, replayed through the actual interface, not a live speed test.",
+        "spoken_text": "Each correction keeps its receipt. This is a recorded successful response, replayed through the actual interface, not a live speed test.",
+        "raw_duration_s": 8.744666666666667,
+        "tempo": 1,
+        "speech_sha256": "c1ab7eed3b108de07cfa9078824a22333591257750c9832ad2bfa0f6ae8b56c5"
+      },
+      {
+        "start_s": 78,
+        "end_s": 88,
+        "caption": "All eleven claims are checked again. The two errors are resolved. Guidance still has question marks; a forecast is not a filed fact.",
+        "spoken_text": "All eleven claims are checked again. The two errors are resolved. Guidance still has question marks; a forecast is not a filed fact.",
+        "raw_duration_s": 8.478666666666667,
+        "tempo": 1,
+        "speech_sha256": "836cce255db150ae77d6eb4d9920016a462ee6c92438c80660cef794de366649"
+      },
+      {
+        "start_s": 88,
+        "end_s": 94,
+        "caption": "Copy the revised draft with its correction receipts.",
+        "spoken_text": "Copy the revised draft with its correction receipts.",
+        "raw_duration_s": 3.018666666666667,
+        "tempo": 1,
+        "speech_sha256": "c06dd7f2f441e1d43d41c0d19210b4cef003776332a0f94670248b6a376443bd"
+      },
+      {
+        "start_s": 94,
+        "end_s": 104,
+        "caption": "A correct number can still arrive too late. Here is a roundup checked as of July twenty-ninth, sixteen hundred UTC.",
+        "spoken_text": "A correct number can still arrive too late. Here is a roundup checked as of July twenty-ninth, sixteen hundred U T C.",
+        "raw_duration_s": 7.605333333333333,
+        "tempo": 1,
+        "speech_sha256": "1a83551d524943ae4f31d911efa96f3ebe9edad570ebf23b256eb158e7682a7e"
+      },
+      {
+        "start_s": 104,
+        "end_s": 110,
+        "caption": "Microsoft's filing arrived later. These claims are marked not public yet.",
+        "spoken_text": "Microsoft's filing arrived later. These claims are marked not public yet.",
+        "raw_duration_s": 4.649958333333333,
+        "tempo": 1,
+        "speech_sha256": "53e687037e5a6fac2b9da44d36257e2a28d1e938faa9c43c45cd5753220bf5d4"
+      },
+      {
+        "start_s": 110,
+        "end_s": 121,
+        "caption": "Switch to Now and check again. Those two numbers become verifiable. The cutoff follows EDGAR acceptance time.",
+        "spoken_text": "Switch to Now and check again. Those two numbers become verifiable. The cutoff follows EDGAR acceptance time.",
+        "raw_duration_s": 6.986666666666666,
+        "tempo": 1,
+        "speech_sha256": "581f4308c3315fd48a6710f0df0e402698be8759d9ecb8d409777dee79232f45"
+      },
+      {
+        "start_s": 121,
+        "end_s": 133,
+        "caption": "The same workflow handles a slide. Upload this seeded earnings table and select Check slide. SAM proposes regions; Spark reads the figures.",
+        "spoken_text": "The same workflow handles a slide. Upload this seeded earnings table and select Check slide. SAM proposes regions; Spark reads the figures.",
+        "raw_duration_s": 9.705958333333333,
+        "tempo": 1,
+        "speech_sha256": "393bbc05bd8d81424a8d5f38bedfa6bd1a7dd9e7f6062b17716aff47fd9e3512"
+      },
+      {
+        "start_s": 133,
+        "end_s": 147,
+        "caption": "Click a numbered reading to open its receipt. Both planted errors are caught. Here Spark supplied the region after SAM found none. The image is a claim, not evidence.",
+        "spoken_text": "Click a numbered reading to open its receipt. Both planted errors are caught. Here Spark supplied the region after SAM found none. The image is a claim, not evidence.",
+        "raw_duration_s": 11.06,
+        "tempo": 1,
+        "speech_sha256": "4db04da2bd9e7927701906ad6d49db786446e6987e4b5a80fc00d3d97753ebd3"
+      },
+      {
+        "start_s": 147,
+        "end_s": 157,
+        "caption": "Ask for one figure. Spark proposes the lookup; code builds a verified answer. Inspect its SEC footnotes.",
+        "spoken_text": "Ask for one figure. Spark proposes the lookup; code builds a verified answer. Inspect its S E C footnotes.",
+        "raw_duration_s": 7.838666666666667,
+        "tempo": 1,
+        "speech_sha256": "a283834df15e220d87bb20209dd1eb0702a70a9ffb904e89e9772a84aba93302"
+      },
+      {
+        "start_s": 157,
+        "end_s": 165,
+        "caption": "NoCap: eleven companies, SEC receipts. Built during this hackathon by Robert Chang. Explore the saved examples.",
+        "spoken_text": "No Cap: eleven companies, S E C receipts. Built during this hackathon by Robert Chang. Explore the saved examples.",
+        "raw_duration_s": 8.056666666666667,
+        "tempo": 1.0531590413943355,
+        "speech_sha256": "57024cd861b36cf77ccbddaf915bb89cffc8138cfbcfd3d6815f8f0d308608a7"
+      }
+    ],
+    "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "new_provider_calls": 0,
+    "human_listening_approval": false
+  },
+  "setup_trim_seconds": 1.16,
+  "product_pixels": "Recorded browser video only; no screenshot/card substitution",
+  "new_provider_calls": 0,
+  "new_provider_spend_usd": 0,
+  "published": false,
+  "video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
+  "schema_version": 2,
+  "product_brand": "NoCap",
+  "voice": "Kokoro-82M af_heart, synthetic narration",
+  "source_take": "data/eval_runs/demo-walkthrough-20261029/take3",
+  "release_state": "Repository export prepared; deployment acceptance recorded separately",
+  "asset_sha256": {
+    "receipts-demo.mp4": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
+    "receipts-demo.gif": "89151e34b21dae8470442f08e4043c425f6612e5a620888fcab67dac2ed592a5",
+    "receipts-demo.en.srt": "22ff8023a91d3b3198fbbd402493f3d21d417776231c6a5dcb643258d7d56a65",
+    "receipts-demo.en.vtt": "7ddeb84e533a9570852435e16f8ac0debe9d96bdecdde0fe13e4c3420ca3ecca"
+  },
+  "script_sha256": {
+    "capture_walkthrough.py": "08ae65ab99bd9b7b971873e0f6523130bd7bae90067bb7793c043bfc87a4b376",
+    "render_walkthrough.py": "4c76f268f233a837948731e4b75714bb198d24383bf84f8b557952b5a36ef953",
+    "validate_walkthrough.py": "1c2982d981a1bf2e7d816b79719960fb2593909e95b6726b5216c8c8c0e1c0d3",
+    "export_walkthrough.py": "1e147a40b8c736c5b718870d76852323293fb7f458d35cf225a701647439215c"
+  },
+  "gif": {
+    "source": "receipts-demo.mp4",
+    "start_s": 8,
+    "end_s": 28,
+    "duration_s": 20,
+    "fps": 10,
+    "resolution": [
+      960,
+      540
+    ],
+    "speed": 1,
+    "audio": false,
+    "internal_cuts": false,
+    "content": "Actual Check click followed by the growth receipt"
+  },
+  "source_validation": {
+    "status": "passed",
+    "video_sha256": "8e8701cc6e0b33abecba1b93019789ba41f5b420819c672e35932520c9b92f1b",
+    "video_bytes": 12443559,
+    "duration_s": 165.0,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "full_decode": "passed",
+    "caption_count": 18,
+    "caption_bounds": "passed",
+    "srt_sha256": "22ff8023a91d3b3198fbbd402493f3d21d417776231c6a5dcb643258d7d56a65",
+    "vtt_sha256": "7ddeb84e533a9570852435e16f8ac0debe9d96bdecdde0fe13e4c3420ca3ecca",
+    "ask_tab_visible_s": 8.99,
+    "mean_volume_db": -16.8,
+    "peak_volume_db": -1.9,
+    "provider_calls_during_capture": 0,
+    "new_spend_during_capture_usd": 0,
+    "browser_page_errors": 0,
+    "unapproved_or_external_browser_requests": 0,
+    "product_footage": "continuous browser recording; no internal cuts",
+    "human_listening_or_editorial_approval": false,
+    "published": false
+  },
+  "privacy_review": "Only repository synthetic examples and public SEC facts; no participant draft, secret or account page",
+  "historical_exports": {
+    "manifest": "historical/2026-10-29-screenshot-manifest.json",
+    "validation": "historical/2026-10-29-screenshot-validation.json",
+    "scope": "Superseded 179.937663-second screenshot montage with licensed Kokoro narration"
+  },
+  "fresh_fix_evidence": "../fix-live-2026-10-29.json"
+}

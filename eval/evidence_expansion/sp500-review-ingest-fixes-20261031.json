@@ -1,0 +1,3654 @@
+{
+ "step": "review findings 1 and 2 (ingest side), press-release labels, ORCL/CRM re-ingest; Phase B not started",
+ "validated_on": "2026-10-31",
+ "review": ".claude/judging/2026-10-31-sp500-phase-a-review.md",
+ "code": {
+  "receipts/fiscal_labels.py (new)": "the shared calendar rules: DEI fp=FY on a 10-Q ignored; per-company convention = majority over 10-Ks (then all filings) of DEI fy - anchor year; a disagreeing fiscal year relabelled, a 10-Q whose quarter disagrees with its position dropped, a label two periods claim dropped, Q4 = Q3 end + 1 .. FY end only when 80-125 days, an FY that does not contain its quarters dropped with its Q4",
+  "receipts/ingest.py": "build_calendar uses receipts.fiscal_labels (the pairwise relabel is gone); the narrower contract-revenue guard, with the lease-income rule only for SIC 65xx and 6798 filers and a review note elsewhere at 10% or more; a revenue audit line per filing and period in build.stats and data/ingest_audit/<TICKER>.json; a warning when a SIC 6000-6799, 4900-4949 or 4991 filer is served contract revenue",
+  "receipts/press_release.py": "FiscalCalendar takes the stored fiscal_periods label when the period exists and the shared rules otherwise; main() passes stored_fiscal_periods(cik)",
+  "scripts/relabel_release_facts.py (new)": "rewrites only fiscal_year/fiscal_period of release facts whose period is stored",
+  "scripts/archive_companyfacts.py (new)": "gzip archive and offline restore of companyfacts per company",
+  "store.py concept order": "unchanged"
+ },
+ "deviations_from_the_review": {
+  "anchor year": "year(FY end - 7 days), not year(FY end - 182 days): the latter flips between consecutive years for 52/53-week years ending around July 1 (Seagate 2025-06-27 then 2026-07-03; Western Digital), which would relabel a correct FY2026 as FY2027. Pinned by test_a_52_53_week_year_ending_around_july_first_keeps_its_label",
+  "Q4 length": "a synthesized Q4 must run 80-125 days, not only start before it ends: Costco's Q4 is 16 or 17 weeks (112/119 days); an 80-100-day bound dropped all four Costco Q4s in the first dry run"
+ },
+ "tests": {
+  "suite": "1763 passed",
+  "new": [
+   "tests/test_fiscal_labels.py (11): ORCL, CRM, HD and TGT, NVDA conventions; 52/53-week years ending early January and around July 1; fp=FY 10-Q repeated a year later then the real 10-K; a premature label without cascade; a Q4 that would end before it starts; a quarter at the wrong position; Dell's case end to end (Q1 never stored under Q4)",
+   "tests/test_revenue_guard.py (5): the review's bank and IPR&D-quarter tests, a REIT lessor (SIC 6798, dropped and flagged), Baxter's shape (SIC 3841, lease income 3%, kept) and a non-real-estate lessor at 15% (kept with a review note)",
+   "tests/test_release_fiscal_labels.py (3): the CRM case (two periods in one release never share a label; fails on the previous calendar), the release calendar labels like ingest, the stored label wins"
+  ],
+  "changed": [
+   "tests/test_store.py: the two pairwise-relabel DEI tests now pin the convention rule and drop-on-clash; the bank case of the contract-revenue test reports net interest income"
+  ]
+ },
+ "dry_run_62": {
+  "identical": [
+   "AAPL",
+   "ADBE",
+   "AFL",
+   "AMD",
+   "AMZN",
+   "AON",
+   "ARES",
+   "ATO",
+   "AVGO",
+   "AXON",
+   "BAC",
+   "BRO",
+   "C",
+   "CL",
+   "COR",
+   "COST",
+   "CPT",
+   "CRM",
+   "CSCO",
+   "DELL",
+   "DIS",
+   "DLR",
+   "EXE",
+   "FITB",
+   "FLEX",
+   "GOOGL",
+   "GS",
+   "IBM",
+   "INTC",
+   "IRM",
+   "JNJ",
+   "JPM",
+   "KEY",
+   "KO",
+   "LIN",
+   "LLY",
+   "LNT",
+   "MCD",
+   "META",
+   "MPC",
+   "MRSH",
+   "MSFT",
+   "NFLX",
+   "NKE",
+   "NVDA",
+   "ORCL",
+   "ORLY",
+   "PLTR",
+   "PM",
+   "PNW",
+   "PSA",
+   "QCOM",
+   "STLD",
+   "TJX",
+   "TSLA",
+   "UBER",
+   "UNH",
+   "URI",
+   "WEC",
+   "WFC",
+   "WMT"
+  ],
+  "second_dry_run_differed_only_for": [
+   "BAX"
+  ],
+  "db_matches_final_code_for_all_62_after_bax_reingest": true,
+  "changed": {
+   "CRM": {
+    "why": "calendar: 10-K 0001108524-26-000060 reuses FY2025 for FY2026 (relabelled)",
+    "fiscal_periods_removed": [],
+    "fiscal_periods_added": [
+     {
+      "cik": 1108524,
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "source": "0001108524-26-000060"
+     },
+     {
+      "cik": 1108524,
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "source": "Q3+FY"
+     }
+    ],
+    "facts_removed": [
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 9270000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 0.416,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 7.85,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 7.8,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 32255000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 7457000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 14996000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 23924000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 8331000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 5993000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 41525000000.0,
+      "accession": "0001108524-26-000060"
+     }
+    ],
+    "facts_added": [
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 2508000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 9270000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 0.416,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 7.85,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 7.8,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 32255000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 8693000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 1943000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 7457000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 14996000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 5464000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 23924000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 6824000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 1869000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 8331000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 1619000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 5993000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2025-11-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "Q4",
+      "value": 11201000000.0,
+      "accession": "0001108524-26-000060"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2025-02-01",
+      "period_end": "2026-01-31",
+      "fiscal_year": 2026,
+      "fiscal_period": "FY",
+      "value": 41525000000.0,
+      "accession": "0001108524-26-000060"
+     }
+    ],
+    "warnings": [
+     "calendar: 0001108524-26-000060 tags FY FY2025 for 2025-02-01..2026-01-31; by the company's convention that period is FY FY2026: relabelled"
+    ]
+   },
+   "DELL": {
+    "why": "calendar: two FY2024 10-Qs tagged fp=FY are ignored; FY2024 is the real 10-K again and Q4 FY2024 no longer ends before it starts",
+    "fiscal_periods_removed": [
+     {
+      "cik": 1571996,
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "period_start": "2023-02-04",
+      "period_end": "2023-05-05",
+      "source": "0001571996-23-000019"
+     },
+     {
+      "cik": 1571996,
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "period_start": "2023-11-04",
+      "period_end": "2023-05-05",
+      "source": "Q3+FY"
+     }
+    ],
+    "fiscal_periods_added": [
+     {
+      "cik": 1571996,
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "source": "0001571996-24-000036"
+     },
+     {
+      "cik": 1571996,
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "source": "Q3+FY"
+     }
+    ],
+    "facts_removed": [
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 16946000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 67356000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 67356000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 67556000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 0.37,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.48,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.48,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.48,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.7,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 4.71,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 4.71,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.66,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 4.6,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 4.6,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 20869000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 21069000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 21069000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 5372000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1210000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 3211000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 3388000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 3388000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 8676000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 8676000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 8676000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 15658000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 15658000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 15658000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1547000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 5211000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 5411000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 5411000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 2801000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 2801000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 2801000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 22318000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 88425000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 88425000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 88425000000.0,
+      "accession": "0001571996-26-000008"
+     }
+    ],
+    "facts_added": [
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 16946000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 17002000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 67356000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 67356000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "cost_of_revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 67556000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 0.37,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 0.37,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 1.48,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 1.48,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 1.48,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1.7,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 4.71,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 4.71,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1.66,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 4.6,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 4.6,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 20869000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 21069000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 21069000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 5316000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "gross_profit",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 5372000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1160000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1210000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 3211000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 3388000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 3388000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1533000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 8676000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 8676000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 8676000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 15658000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 15658000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 15658000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 3825000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1491000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 1547000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 5211000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 5411000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 5411000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 2801000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 2801000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 2801000000.0,
+      "accession": "0001571996-26-000008"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 716000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 22318000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2023-11-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "Q4",
+      "value": 22318000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 88425000000.0,
+      "accession": "0001571996-24-000036"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 88425000000.0,
+      "accession": "0001571996-25-000034"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "annual",
+      "source": "xbrl",
+      "period_start": "2023-02-04",
+      "period_end": "2024-02-02",
+      "fiscal_year": 2024,
+      "fiscal_period": "FY",
+      "value": 88425000000.0,
+      "accession": "0001571996-26-000008"
+     }
+    ],
+    "warnings": [
+     "calendar: ignored DEI fp=FY on 10-Q 0001571996-23-000019 for 2023-02-04..2023-05-05",
+     "calendar: ignored DEI fp=FY on 10-Q 0001571996-23-000032 for 2023-05-06..2023-08-04"
+    ]
+   },
+   "ORCL": {
+    "why": "calendar: 10-Q 0001193125-26-389274 reuses Q1 FY2026 for Q1 FY2027 (relabelled)",
+    "fiscal_periods_removed": [],
+    "fiscal_periods_added": [
+     {
+      "cik": 1341439,
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "source": "0001193125-26-389274"
+     }
+    ],
+    "facts_removed": [
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 0.5,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.58,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 1.56,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 4760000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 23103000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 12617000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 6728000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "repurchase_authorization_remaining",
+      "period_kind": "instant",
+      "source": "xbrl",
+      "period_start": null,
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 6300000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 2401000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": null,
+      "fiscal_period": null,
+      "value": 19345000000.0,
+      "accession": "0001193125-26-389274"
+     }
+    ],
+    "facts_added": [
+     {
+      "metric": "dividend_per_share",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 0.5,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "eps_basic",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 1.58,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "eps_diluted",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 1.56,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "net_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 4760000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 23103000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "operating_expenses",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 12617000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "operating_income",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 6728000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "repurchase_authorization_remaining",
+      "period_kind": "instant",
+      "source": "xbrl",
+      "period_start": null,
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 6300000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "research_and_development",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 2401000000.0,
+      "accession": "0001193125-26-389274"
+     },
+     {
+      "metric": "revenue",
+      "period_kind": "quarter",
+      "source": "xbrl",
+      "period_start": "2026-06-01",
+      "period_end": "2026-08-31",
+      "fiscal_year": 2027,
+      "fiscal_period": "Q1",
+      "value": 19345000000.0,
+      "accession": "0001193125-26-389274"
+     }
+    ],
+    "warnings": [
+     "calendar: 0001193125-26-389274 tags Q1 FY2026 for 2026-06-01..2026-08-31; by the company's convention that period is Q1 FY2027: relabelled"
+    ]
+   },
+   "ORLY": {
+    "why": "calendar: 10-Q 0000898173-23-000044 tags Q2 FY2022 for Q2 2023 (relabelled)",
+    "fiscal_periods_removed": [
+     {
+      "cik": 898173,
+      "fiscal_year": 2022,
+      "fiscal_period": "Q2",
+      "period_start": "2023-04-01",
+      "period_end": "2023-06-30",
+      "source": "0000898173-23-000044"
+     }
+    ],
+    "fiscal_periods_added": [
+     {
+      "cik": 898173,
+      "fiscal_year": 2023,
+      "fiscal_period": "Q2",
+      "period_start": "2023-04-01",
+      "period_end": "2023-06-30",
+      "source": "0000898173-23-000044"
+     }
+    ],
+    "facts_removed": [],
+    "facts_added": [
+     {
+      "metric": "operating_cash_flow",
+      "period_kind": "quarter",
+      "source": "derived",
+      "period_start": "2023-07-01",
+      "period_end": "2023-09-30",
+      "fiscal_year": 2023,
+      "fiscal_period": "Q3",
+      "value": 866286000.0,
+      "accession": "0000898173-23-000058"
+     }
+    ],
+    "warnings": [
+     "calendar: 0000898173-23-000044 tags Q2 FY2022 for 2023-04-01..2023-06-30; by the company's convention that period is Q2 FY2023: relabelled"
+    ]
+   }
+  },
+  "warnings_does_not_fit_or_kept_earlier": 0,
+  "all_warnings": {
+   "AON": [
+    "revenue: SIC 6411 (financial or real estate) filer served 23 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "CRM": [
+    "calendar: 0001108524-26-000060 tags FY FY2025 for 2025-02-01..2026-01-31; by the company's convention that period is FY FY2026: relabelled"
+   ],
+   "DELL": [
+    "calendar: ignored DEI fp=FY on 10-Q 0001571996-23-000019 for 2023-02-04..2023-05-05",
+    "calendar: ignored DEI fp=FY on 10-Q 0001571996-23-000032 for 2023-05-06..2023-08-04"
+   ],
+   "IRM": [
+    "revenue: SIC 6798 (financial or real estate) filer served 21 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "LNT": [
+    "revenue: SIC 4931 (utility) filer served 5 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "MRSH": [
+    "revenue: SIC 6411 (financial or real estate) filer served 23 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "ORCL": [
+    "calendar: 0001193125-26-389274 tags Q1 FY2026 for 2026-06-01..2026-08-31; by the company's convention that period is Q1 FY2027: relabelled"
+   ],
+   "ORLY": [
+    "calendar: 0000898173-23-000044 tags Q2 FY2022 for 2023-04-01..2023-06-30; by the company's convention that period is Q2 FY2023: relabelled"
+   ]
+  }
+ },
+ "bax_lease_rule": {
+  "decision": "operating-lease income of 1% or more rules out contract revenue only for SIC 65xx and 6798 filers; elsewhere a served figure with lease income of 10% or more gets a review note",
+  "first_rule_effect": "47 Baxter figures dropped (36 stored rows): revenue for 6 quarters, 1 of the last 8",
+  "final": "BAX re-ingested: the 36 rows are back and every BAX row equals its pre-review row; no other company changed",
+  "review_notes_on_the_62": 0,
+  "evidence": "Baxter's contract revenue equals its release totals (Q3 2026 $2,976M; FY2025 $11,244M), lease income $88M a quarter"
+ },
+ "re_ingest": {
+  "tickers": [
+   "ORCL",
+   "CRM",
+   "DELL",
+   "ORLY",
+   "BAX (twice)"
+  ],
+  "offline": true,
+  "sec_requests": 0,
+  "rows_changed_equal_dry_run": true,
+  "original_32_rows_missing_or_altered": {
+   "ORCL": 10,
+   "CRM": 11
+  },
+  "other_original_companies_changed": 0
+ },
+ "press_release_labels": {
+  "changed": 91,
+  "of": 22748,
+  "by_file": {
+   "CRM/0001108524-26-000056.jsonl": 50,
+   "GOOGL/0001652044-26-000012.jsonl": 1,
+   "ORCL/0001193125-26-387905.jsonl": 20,
+   "STLD/0001104659-26-006889.jsonl": 20
+  },
+  "rows": [
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 1,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Subscription and support",
+    "period": "2025-11-01..2026-01-31",
+    "value": 10675000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 3,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Subscription and support",
+    "period": "2025-02-01..2026-01-31",
+    "value": 39388000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 5,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Professional services and other",
+    "period": "2025-11-01..2026-01-31",
+    "value": 526000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 7,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Professional services and other",
+    "period": "2025-02-01..2026-01-31",
+    "value": 2137000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 9,
+    "metric": "revenue",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 11201000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 11,
+    "metric": "revenue",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 41525000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 13,
+    "metric": "cost_of_revenue",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 2508000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 15,
+    "metric": "cost_of_revenue",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 9270000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 17,
+    "metric": "gross_profit",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 8693000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 19,
+    "metric": "gross_profit",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 32255000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 21,
+    "metric": "research_and_development",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 1619000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 23,
+    "metric": "research_and_development",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 5993000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 25,
+    "metric": "operating_expenses",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 6824000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 27,
+    "metric": "operating_expenses",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 23924000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 29,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 1869000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 31,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 8331000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 33,
+    "metric": "net_income",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 1943000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 35,
+    "metric": "net_income",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 7457000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 37,
+    "metric": "eps_basic",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 2.08,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 39,
+    "metric": "eps_basic",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 7.85,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 41,
+    "metric": "eps_diluted",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 2.07,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 43,
+    "metric": "eps_diluted",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 7.8,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 45,
+    "metric": "operating_cash_flow",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 5464000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 47,
+    "metric": "operating_cash_flow",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 14996000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 49,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce",
+    "period": "2025-11-01..2026-01-31",
+    "value": 2333000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 51,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce",
+    "period": "2025-02-01..2026-01-31",
+    "value": 9028000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 53,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce Service",
+    "period": "2025-11-01..2026-01-31",
+    "value": 2531000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 55,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce Service",
+    "period": "2025-02-01..2026-01-31",
+    "value": 9818000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 57,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce 360 Platform, Slack and Other",
+    "period": "2025-11-01..2026-01-31",
+    "value": 2655000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 59,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce 360 Platform, Slack and Other",
+    "period": "2025-02-01..2026-01-31",
+    "value": 8882000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 61,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce Marketing and Agentforce Commerce",
+    "period": "2025-11-01..2026-01-31",
+    "value": 1377000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 63,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce Marketing and Agentforce Commerce",
+    "period": "2025-02-01..2026-01-31",
+    "value": 5428000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 65,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce Integration and Agentforce Analytics",
+    "period": "2025-11-01..2026-01-31",
+    "value": 1779000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 67,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Agentforce Integration and Agentforce Analytics",
+    "period": "2025-02-01..2026-01-31",
+    "value": 6232000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 69,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Americas",
+    "period": "2025-11-01..2026-01-31",
+    "value": 7285000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 71,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Americas",
+    "period": "2025-02-01..2026-01-31",
+    "value": 27193000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 73,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Europe",
+    "period": "2025-11-01..2026-01-31",
+    "value": 2781000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 75,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Europe",
+    "period": "2025-02-01..2026-01-31",
+    "value": 10017000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 77,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Asia Pacific",
+    "period": "2025-11-01..2026-01-31",
+    "value": 1135000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 79,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Asia Pacific",
+    "period": "2025-02-01..2026-01-31",
+    "value": 4315000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 81,
+    "metric": "operating_income",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 3836000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 83,
+    "metric": "operating_income",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 14156000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 85,
+    "metric": "revenue",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 11201000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 87,
+    "metric": "revenue",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 41525000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 89,
+    "metric": "eps_basic",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 3.83,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 91,
+    "metric": "eps_basic",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 12.6,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 93,
+    "metric": "operating_cash_flow",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 5464000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 95,
+    "metric": "operating_cash_flow",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 14996000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 97,
+    "metric": "free_cash_flow",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-11-01..2026-01-31",
+    "value": 5323000000.0,
+    "old": [
+     2025,
+     "Q4"
+    ],
+    "new": [
+     2026,
+     "Q4"
+    ]
+   },
+   {
+    "file": "CRM/0001108524-26-000056.jsonl",
+    "line": 99,
+    "metric": "free_cash_flow",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-02-01..2026-01-31",
+    "value": 14402000000.0,
+    "old": [
+     2025,
+     "FY"
+    ],
+    "new": [
+     2026,
+     "FY"
+    ]
+   },
+   {
+    "file": "GOOGL/0001652044-26-000012.jsonl",
+    "line": 66,
+    "metric": "free_cash_flow",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-01-01..2025-12-31",
+    "value": 73266000000.0,
+    "old": [
+     null,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 1,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Cloud",
+    "period": "2026-06-01..2026-08-31",
+    "value": 11607000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 3,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Software",
+    "period": "2026-06-01..2026-08-31",
+    "value": 5550000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 5,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Hardware",
+    "period": "2026-06-01..2026-08-31",
+    "value": 774000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 7,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Services",
+    "period": "2026-06-01..2026-08-31",
+    "value": 1414000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 9,
+    "metric": "revenue",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 19345000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 11,
+    "metric": "research_and_development",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 2401000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 13,
+    "metric": "operating_expenses",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 12617000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 15,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 6728000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 17,
+    "metric": "net_income",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 4760000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 19,
+    "metric": "eps_basic",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 1.58,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 21,
+    "metric": "eps_diluted",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 1.56,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 23,
+    "metric": "operating_cash_flow",
+    "basis": "GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": 23103000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 34,
+    "metric": "free_cash_flow",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2026-06-01..2026-08-31",
+    "value": -5396000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 48,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Software license",
+    "period": "2026-06-01..2026-08-31",
+    "value": 655000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 54,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Software support",
+    "period": "2026-06-01..2026-08-31",
+    "value": 4895000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 76,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Cloud applications",
+    "period": "2026-06-01..2026-08-31",
+    "value": 4219000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 82,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Cloud infrastructure",
+    "period": "2026-06-01..2026-08-31",
+    "value": 7388000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 88,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Americas",
+    "period": "2026-06-01..2026-08-31",
+    "value": 13711000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 94,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Europe/Middle East/Africa",
+    "period": "2026-06-01..2026-08-31",
+    "value": 3726000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "ORCL/0001193125-26-387905.jsonl",
+    "line": 100,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Asia Pacific",
+    "period": "2026-06-01..2026-08-31",
+    "value": 1908000000.0,
+    "old": [
+     2026,
+     "Q1"
+    ],
+    "new": [
+     2027,
+     "Q1"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 44,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Steel",
+    "period": "2025-01-01..2025-12-31",
+    "value": 13021977000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 45,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Steel",
+    "period": "2024-01-01..2024-12-31",
+    "value": 12061484000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 51,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Steel Fabrication",
+    "period": "2025-01-01..2025-12-31",
+    "value": 1417890000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 52,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Steel Fabrication",
+    "period": "2024-01-01..2024-12-31",
+    "value": 1763502000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 58,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Metals Recycling",
+    "period": "2025-01-01..2025-12-31",
+    "value": 2041641000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 59,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Metals Recycling",
+    "period": "2024-01-01..2024-12-31",
+    "value": 2005134000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 65,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Aluminum",
+    "period": "2025-01-01..2025-12-31",
+    "value": 361094000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 66,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Aluminum",
+    "period": "2024-01-01..2024-12-31",
+    "value": 258547000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 72,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Other",
+    "period": "2025-01-01..2025-12-31",
+    "value": 1333979000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 73,
+    "metric": "segment_revenue",
+    "basis": "GAAP",
+    "segment": "Other",
+    "period": "2024-01-01..2024-12-31",
+    "value": 1451723000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 81,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Steel",
+    "period": "2025-01-01..2025-12-31",
+    "value": 1432390000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 82,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Steel",
+    "period": "2024-01-01..2024-12-31",
+    "value": 1586904000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 88,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Steel Fabrication",
+    "period": "2025-01-01..2025-12-31",
+    "value": 407425000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 89,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Steel Fabrication",
+    "period": "2024-01-01..2024-12-31",
+    "value": 666984000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 95,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Metals Recycling",
+    "period": "2025-01-01..2025-12-31",
+    "value": 97175000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 96,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Metals Recycling",
+    "period": "2024-01-01..2024-12-31",
+    "value": 76807000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 102,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Aluminum",
+    "period": "2025-01-01..2025-12-31",
+    "value": -172970000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 103,
+    "metric": "operating_income",
+    "basis": "GAAP",
+    "segment": "Aluminum",
+    "period": "2024-01-01..2024-12-31",
+    "value": -72331000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 111,
+    "metric": "net_income",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2025-01-01..2025-12-31",
+    "value": 1187311000.0,
+    "old": [
+     2025,
+     null
+    ],
+    "new": [
+     2025,
+     "FY"
+    ]
+   },
+   {
+    "file": "STLD/0001104659-26-006889.jsonl",
+    "line": 112,
+    "metric": "net_income",
+    "basis": "non-GAAP",
+    "segment": null,
+    "period": "2024-01-01..2024-12-31",
+    "value": 1549956000.0,
+    "old": [
+     2024,
+     null
+    ],
+    "new": [
+     2024,
+     "FY"
+    ]
+   }
+  ],
+  "only_label_fields_changed_byte_for_byte": true,
+  "gate_mismatches_after": 0,
+  "facts_whose_period_is_not_stored": 120,
+  "xbrl_gate_rerun_on_changed_files": {
+   "data/pr_facts/CRM/0001108524-26-000056.jsonl": {
+    "facts": 100,
+    "dropped": 0,
+    "quarantine": null,
+    "served_and_dropped_identical_apart_from_labels": true
+   },
+   "data/pr_facts/ORCL/0001193125-26-387905.jsonl": {
+    "facts": 100,
+    "dropped": 0,
+    "quarantine": null,
+    "served_and_dropped_identical_apart_from_labels": true
+   },
+   "data/pr_facts/STLD/0001104659-26-006889.jsonl": {
+    "facts": 115,
+    "dropped": 0,
+    "quarantine": null,
+    "served_and_dropped_identical_apart_from_labels": true
+   },
+   "data/pr_facts/GOOGL/0001652044-26-000012.jsonl": {
+    "facts": 74,
+    "dropped": 0,
+    "quarantine": null,
+    "served_and_dropped_identical_apart_from_labels": true
+   }
+  },
+  "xbrl_gate_rerun_all_files": {
+   "files": 326,
+   "dropped": 0,
+   "quarantined": 0
+  }
+ },
+ "revenue_audit": {
+  "flags": {
+   "AON": [
+    "revenue: SIC 6411 (financial or real estate) filer served 23 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "IRM": [
+    "revenue: SIC 6798 (financial or real estate) filer served 21 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "LNT": [
+    "revenue: SIC 4931 (utility) filer served 5 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ],
+   "MRSH": [
+    "revenue: SIC 6411 (financial or real estate) filer served 23 quarterly or annual revenue figures as RevenueFromContractWithCustomerExcludingAssessedTax; check that it is total revenue, not a slice"
+   ]
+  },
+  "flag_checks": {
+   "AON": "contract revenue equals the release total (Q3 2026 $4,101M; FY2025 $17,181M)",
+   "MRSH": "equals the release total (Q3 2026 $6,863M)",
+   "IRM": "no release tables; Revenues and lease income are not tagged; $6,902M for FY2025 is total-sized",
+   "LNT": "equals the same filing's Revenues ($1,184M Q1 2026; $4,362M FY2025)"
+  },
+  "served_concepts": {
+   "AAPL": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "ADBE": {
+    "Revenues": 21
+   },
+   "AFL": {
+    "Revenues": 23
+   },
+   "AMD": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "AMZN": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "AON": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "ARES": {
+    "Revenues": 21
+   },
+   "ATO": {
+    "Revenues": 21
+   },
+   "AVGO": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "AXON": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 36
+   },
+   "BAC": {
+    "Revenues": 21
+   },
+   "BAX": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 8
+   },
+   "BRO": {
+    "Revenues": 23
+   },
+   "C": {
+    "Revenues": 17
+   },
+   "CL": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "COR": {
+    "Revenues": 21
+   },
+   "COST": {
+    "Revenues": 19,
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 5
+   },
+   "CPT": {},
+   "CRM": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "CSCO": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "DELL": {
+    "Revenues": 27
+   },
+   "DIS": {
+    "Revenues": 21
+   },
+   "DLR": {
+    "Revenues": 19
+   },
+   "EXE": {
+    "Revenues": 23
+   },
+   "FITB": {},
+   "FLEX": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 31
+   },
+   "GOOGL": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 10,
+    "Revenues": 13
+   },
+   "GS": {
+    "RevenuesNetOfInterestExpense": 21
+   },
+   "IBM": {
+    "Revenues": 23
+   },
+   "INTC": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "IRM": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "JNJ": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 25
+   },
+   "JPM": {
+    "RevenuesNetOfInterestExpense": 15,
+    "Revenues": 6
+   },
+   "KEY": {
+    "Revenues": 21
+   },
+   "KO": {
+    "Revenues": 23
+   },
+   "LIN": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "LLY": {
+    "Revenues": 23
+   },
+   "LNT": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 5,
+    "Revenues": 14
+   },
+   "MCD": {
+    "Revenues": 21
+   },
+   "META": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "MPC": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "MRSH": {
+    "RevenueFromContractWithCustomerIncludingAssessedTax": 3,
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 20
+   },
+   "MSFT": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "NFLX": {
+    "Revenues": 23
+   },
+   "NKE": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "NVDA": {
+    "Revenues": 21
+   },
+   "ORCL": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 15,
+    "Revenues": 6
+   },
+   "ORLY": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "PLTR": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 21
+   },
+   "PM": {
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 23
+   },
+   "PNW": {
+    "Revenues": 21
+   },
+   "PSA": {
+    "Revenues": 23
+   },
+   "QCOM": {
+    "Revenues": 21
+   },
+   "STLD": {
+    "Revenues": 1,
+    "RevenueFromContractWithCustomerExcludingAssessedTax": 22
+   },
+   "TJX": {
+    "RevenueFromContractWithCustomerIncludingAssessedTax": 21
+   },
+   "TSLA": {
+    "Revenues": 23
+   },
+   "UBER": {
+    "Revenues": 21
+   },
+   "UNH": {
+    "Revenues": 21
+   },
+   "URI": {
+    "Revenues": 37
+   },
+   "WEC": {
+    "Revenues": 23
+   },
+   "WFC": {
+    "RevenuesNetOfInterestExpense": 23
+   },
+   "WMT": {
+    "Revenues": 21
+   }
+  }
+ },
+ "gates": {
+  "dev_replay": "693 claims identical to claims_final2.json (the 15 accepted reason changes included)",
+  "examples": "7/2/0/2, 5/3/0/0, 6/1/2/0",
+  "recordings": "slide, 10-K quote, Private replay",
+  "qualifier_grid": "identical",
+  "probes": "26 of 28 verified",
+  "scratch_snapshot": {
+   "companies": 62,
+   "sqlite_facts": 18920,
+   "press_release_facts": 22748,
+   "facts_sqlite_bytes": 4841472,
+   "total_mib": 16.44
+  },
+  "data_snapshot": "untouched"
+ },
+ "prompt_effect": {
+  "note": "FiscalCalendar.context_lines feeds the release-mapping prompt. Under the new calendar only these already-mapped releases would get different calendar lines, so only their cached mapping responses would miss if they were ever mapped again",
+  "releases": {
+   "CRM": [
+    "0001108524-26-000125",
+    "0001108524-26-000187"
+   ]
+  }
+ },
+ "companyfacts_archive": {
+  "companies": 30,
+  "raw_mb": 125.0,
+  "gzip_mb": 8.1,
+  "gzip_mb_per_company": 0.27,
+  "changed_at_sec_since_first_fetch": [
+   "DLR",
+   "FLEX"
+  ],
+  "note": "their stored rows rebuild identically from the newer bytes",
+  "exhibits_gzip_ratio_sample": 0.043
+ },
+ "fallback": {
+  "path": "scratchpad/fallback-62 (outside the repository)",
+  "counts": {
+   "companies": 62,
+   "filings": 3706,
+   "fiscal_periods": 1023,
+   "facts": 18920
+  },
+  "integrity_check": "ok",
+  "pr_files": 689,
+  "spark_ledger_usd": 9.429167
+ },
+ "spend": {
+  "model_usd": 0.0,
+  "sec_requests": 30
+ },
+ "phase_b": "not started; waiting for the re-review"
+}

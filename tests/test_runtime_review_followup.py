@@ -117,7 +117,7 @@ def test_malformed_proxy_configuration_cannot_create_trust():
 
 
 def test_rotating_spoofed_headers_cannot_obtain_a_new_allowance(tmp_path, monkeypatch):
-    monkeypatch.setattr(api.LocalLedger, "reserve", lambda *args: None)
+    monkeypatch.setattr(api.LocalLedger, "reserve", lambda *args, **kwargs: None)
     app = api.create_app(settings(tmp_path, rate_limit_checks=1, use_caches=False),
                          store=object(), client_factory=object)
     client = TestClient(app, client=("198.51.100.20", 30000))
@@ -157,7 +157,7 @@ def test_every_async_route_offloads_transactional_admission(tmp_path, monkeypatc
     threads = []
 
     class BlockingLedger:
-        def reserve(self, amount):
+        def reserve(self, amount, **_):
             threads.append(threading.get_ident())
             entered.set()
             assert release.wait(2), "event loop did not release the admission worker"
@@ -194,7 +194,7 @@ def test_cancellation_during_admission_cannot_dispatch_or_refund_an_unknown_comm
     entered, release, completed = threading.Event(), threading.Event(), threading.Event()
 
     class SlowLedger:
-        def reserve(self, amount):
+        def reserve(self, amount, **_):
             entered.set()
             assert release.wait(2)
             try:
@@ -227,7 +227,7 @@ def test_cancellation_during_admission_cannot_dispatch_or_refund_an_unknown_comm
 
 def test_offloaded_admission_still_fails_closed():
     class BrokenLedger:
-        def reserve(self, amount):
+        def reserve(self, amount, **_):
             raise BudgetUnavailable()
     with pytest.raises(api.Rejected) as caught:
         asyncio.run(api._reserve_async(BrokenLedger(), .1))
@@ -375,7 +375,7 @@ def test_private_settlement_failure_still_answers_with_a_private_error(tmp_path,
     from receipts import private
 
     class SettleFails:
-        def reserve(self, amount):
+        def reserve(self, amount, **_):
             return api.Reservation("op", "nocap", "2026-10-30", 1, 1_000_000)
 
         def settle(self, *args, **kwargs):

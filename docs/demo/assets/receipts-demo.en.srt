@@ -1,71 +1,103 @@
 1
-00:00:00,000 --> 00:00:08,000
-Here's an NVIDIA earnings draft. Two figures look plausible. Let's check them before publishing.
+00:00:00,350 --> 00:00:04,504
+One wrong number in an earnings story becomes a public correction.
 
 2
-00:00:08,000 --> 00:00:18,000
-Muse Spark extracts the claims. Code checks the SEC evidence. Seven pass, two are wrong, and two remain unverifiable.
+00:00:04,504 --> 00:00:11,157
+This AI-drafted story has two planted errors. NoCap flags both, with the filed figures.
 
 3
-00:00:18,000 --> 00:00:27,000
-Click eighteen percent. The draft says year over year, but eighteen percent is quarter-over-quarter growth.
+00:00:11,157 --> 00:00:16,157
+NoCap checks every financial number in a draft against SEC filings.
 
 4
-00:00:27,000 --> 00:00:35,000
-The receipt calculates the year-over-year change: about one hundred and six percent. We can inspect both filed values.
+00:00:16,157 --> 00:00:21,323
+Muse Spark pulls out each claim. Code checks every one against the filings.
 
 5
-00:00:35,000 --> 00:00:42,000
-Now click earnings per share. The draft labels two dollars and twenty-two cents as GAAP.
+00:00:23,014 --> 00:00:28,482
+Seven verified. Two wrong. Two unverifiable, because NoCap won't guess.
 
 6
-00:00:42,000 --> 00:00:50,000
-That is the adjusted figure. The GAAP receipt says two dollars and forty-six cents, with the filing attached.
+00:00:28,932 --> 00:00:34,014
+The draft says revenue grew 18% from a year ago. That's the quarterly rate.
 
 7
-00:00:50,000 --> 00:00:59,000
-Let's fix both. Muse Wonder proposes numeric edits; code constrains them and verifies the revised draft again.
+00:00:34,014 --> 00:00:39,569
+The receipt does the math from the filings: 105.85%.
 
 8
-00:00:59,000 --> 00:01:06,000
-The original stays on the left. The rechecked version shows exactly which numbers changed.
+00:00:40,719 --> 00:00:44,897
+Each receipt cites the filing, down to when EDGAR accepted it.
 
 9
-00:01:06,000 --> 00:01:18,000
-Each correction keeps its receipt. This is a recorded successful response, replayed through the actual interface, not a live speed test.
+00:00:45,397 --> 00:00:51,259
+And $2.22 is adjusted EPS. The GAAP figure was $2.46.
 
 10
-00:01:18,000 --> 00:01:28,000
-All eleven claims are checked again. The two errors are resolved. Guidance still has question marks; a forecast is not a filed fact.
+00:00:52,209 --> 00:00:58,766
+Fix with receipts: Muse Wonder proposes corrected numbers, and code lets only the digits change.
 
 11
-00:01:28,000 --> 00:01:34,000
-Copy the revised draft with its correction receipts.
+00:00:58,766 --> 00:01:03,109
+Then the whole draft is checked again: nine verified, zero wrong.
 
 12
-00:01:34,000 --> 00:01:44,000
-A correct number can still arrive too late. Here is a roundup checked as of July twenty-ninth, sixteen hundred UTC.
+00:01:04,159 --> 00:01:06,448
+Each correction keeps its receipt.
 
 13
-00:01:44,000 --> 00:01:50,000
-Microsoft's filing arrived later. These claims are marked not public yet.
+00:01:07,298 --> 00:01:13,243
+Time travel: check this roundup as of July 29, 4 p.m. UTC.
 
 14
-00:01:50,000 --> 00:02:01,000
-Switch to Now and check again. Those two numbers become verifiable. The cutoff follows EDGAR acceptance time.
+00:01:13,243 --> 00:01:20,365
+Microsoft's revenue figure is right, but its filing reached EDGAR hours later, so it's marked not public yet.
 
 15
-00:02:01,000 --> 00:02:13,000
-The same workflow handles a slide. Upload this seeded earnings table and select Check slide. SAM proposes regions; Spark reads the figures.
+00:01:21,615 --> 00:01:26,297
+Now a real SEC slide: Bank of America's earnings presentation.
 
 16
-00:02:13,000 --> 00:02:27,000
-Click a numbered reading to open its receipt. Both planted errors are caught. Here Spark supplied the region after SAM found none. The image is a claim, not evidence.
+00:01:26,297 --> 00:01:31,722
+Its recorded live run: three model calls, 21 seconds, about three cents.
 
 17
-00:02:27,000 --> 00:02:37,000
-Ask for one figure. Spark proposes the lookup; code builds a verified answer. Inspect its SEC footnotes.
+00:01:32,911 --> 00:01:39,240
+SAM 3.1 finds both bar charts, and Muse Spark reads 32 printed labels.
 
 18
-00:02:37,000 --> 00:02:45,000
-NoCap: eleven companies, SEC receipts. Built during this hackathon by Robert Chang. Explore the saved examples.
+00:01:39,240 --> 00:01:47,075
+Only the five GAAP bars verify. The rest are non-GAAP, untracked or ambiguous, so they stay unverifiable.
+
+19
+00:01:47,675 --> 00:01:49,839
+Each reading opens its receipt.
+
+20
+00:01:51,389 --> 00:01:56,673
+Ask a question of Meta's entire 10-K: more than half a million characters.
+
+21
+00:01:56,673 --> 00:02:05,766
+One Muse Spark request reads all of it in six seconds: 101,135 input tokens, no retrieval, no truncation.
+
+22
+00:02:06,416 --> 00:02:10,147
+Code keeps only exact quotes it can find in the filing.
+
+23
+00:02:11,197 --> 00:02:21,092
+Same verifier, four backends: Spark Open found all 27 gold claims, and Glimmer reads unpublished drafts on our own GPU.
+
+24
+00:02:21,342 --> 00:02:30,430
+Private check runs on Glimmer: one real run on our own Modal GPU, one figure verified, one planted error caught.
+
+25
+00:02:30,680 --> 00:02:39,854
+On held-out tests, NoCap caught 44 of 48 planted errors, with one false alarm in 47 clean sentences.
+
+26
+00:02:40,754 --> 00:02:50,076
+NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17.

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileImageIcon, Loader2Icon, ScanLineIcon, UploadIcon, XIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
+import { FileImageIcon, LandmarkIcon, Loader2Icon, ScanLineIcon, UploadIcon, XIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -10,11 +10,15 @@ import { StatusChip, StatusGlyph, statusLabel } from "@/components/status";
 import { Button } from "@/components/ui/button";
 import { useSlide } from "@/hooks/use-slide";
 import { fetchHealth, MOCK } from "@/lib/api";
-import { DISPLAY_STATUSES, STATUS_META, displayCounts, displayStatus } from "@/lib/claims";
-import { formatErrorCost, formatCost, formatLatency, formatUtcMinutes, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
+import { DISPLAY_STATUSES, STATUS_META, displayCounts, displayStatus, reasonText } from "@/lib/claims";
+import { formatDay, formatErrorCost, formatCost, formatLatency, formatUtcMinutes, fromUtcInputValue, toUtcInputValue } from "@/lib/format";
+import samples from "@/lib/samples.json";
 import { MAX_SLIDE_BYTES, slideDataUrl, validateSlideImage } from "@/lib/slide-image";
 import type { SlideClaim, SlideStage } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+// A real SEC slide whose live run is recorded: the server replays it at $0, even while live requests are paused.
+const SAMPLE = samples.slides[0];
 
 const STAGES: Record<SlideStage, string> = {
   segmenting: "SAM 3.1 is locating charts and tables…",
@@ -39,9 +43,11 @@ export function SlideApp() {
   const [asOf, setAsOf] = useState<AsOfState>({ mode: "now" });
   const [nowValue, setNowValue] = useState("");
   const [companies, setCompanies] = useState<string[]>([]);
+  const [snapshot, setSnapshot] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showRegions, setShowRegions] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const [sample, setSample] = useState<typeof SAMPLE | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const uploadVersion = useRef(0);
   const previewUrl = useRef<string | null>(null);
@@ -63,7 +69,7 @@ export function SlideApp() {
 
   useEffect(() => {
     const ac = new AbortController();
-    void fetchHealth(ac.signal).then((health) => { if (!ac.signal.aborted && health) setCompanies(health.companies); });
+    void fetchHealth(ac.signal).then((health) => { if (!ac.signal.aborted && health) { setCompanies(health.companies); setSnapshot(health.data_snapshot || null); } });
     const updateClock = () => setNowValue(toUtcInputValue(new Date()));
     const first = setTimeout(updateClock, 0);
     const timer = setInterval(updateClock, 60_000);
@@ -86,6 +92,7 @@ export function SlideApp() {
     invalidate();
     setPreparing(false);
     setUpload(null);
+    setSample(null);
     setZoomed(false);
     if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
     previewUrl.current = null;
@@ -109,6 +116,31 @@ export function SlideApp() {
       if (version === uploadVersion.current) setPreparing(false);
     }
   }
+  async function loadSample() {
+    clear();
+    const version = uploadVersion.current;
+    setPreparing(true);
+    try {
+      const response = await fetch(SAMPLE.image);
+      if (!response.ok) throw new Error("The sample slide could not be loaded. Try again.");
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const type = SAMPLE.image.endsWith(".png") ? "image/png" : "image/jpeg";
+      const dimensions = validateSlideImage(bytes, type);
+      if (version !== uploadVersion.current) return;
+      const url = URL.createObjectURL(new Blob([bytes], { type }));
+      previewUrl.current = url;
+      const dataUrl = slideDataUrl(bytes, type);
+      setUpload({ name: SAMPLE.title, url, dataUrl, ...dimensions });
+      setSample(SAMPLE);
+      setContext(SAMPLE.context);
+      setAsOf({ mode: "now" });
+      start({ image_data_url: dataUrl, context: SAMPLE.context, as_of: SAMPLE.as_of });
+    } catch (error) {
+      if (version === uploadVersion.current) setInputError(error instanceof Error ? error.message : "The sample slide could not be loaded. Try again.");
+    } finally {
+      if (version === uploadVersion.current) setPreparing(false);
+    }
+  }
   function check() {
     if (!upload || running || preparing) return;
     if (asOf.mode === "custom" && (!asOfIso || !Number.isFinite(Date.parse(asOfIso)))) { setInputError("Enter a complete as-of date and time, or choose Now."); return; }
@@ -127,7 +159,7 @@ export function SlideApp() {
       <div className="mb-5 flex flex-col gap-2">
         <h2 className="font-serif text-3xl font-medium tracking-tight">Check a slide</h2>
         <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">Upload an earnings chart or table. SAM locates the regions, Muse Spark reads the numbers, and code checks each reading against SEC filings.</p>
-        {companies.length ? <p className="text-xs leading-relaxed text-muted-foreground">Coverage: {companies.join(", ")}. An upload does not add new filing evidence.</p> : null}
+        {companies.length ? <p className="text-xs leading-relaxed text-muted-foreground">Evidence: {companies.length} S&amp;P 500 companies{snapshot ? ` in SEC data as of ${formatDay(snapshot)}` : ""}. An upload does not add new filing evidence.</p> : null}
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-8">
         <section aria-label="Slide input and readings" className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
@@ -142,7 +174,7 @@ export function SlideApp() {
             <input ref={fileInput} id="slide-file" type="file" accept="image/png,image/jpeg" aria-describedby="slide-file-hint" onChange={(event) => { const file = event.target.files?.[0]; if (file) void loadFile(file); }} className="block w-full min-w-0 rounded-lg border border-input text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-l-lg file:border-0 file:bg-muted file:px-3 file:py-2.5 file:font-medium file:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" />
             <div className="flex flex-col gap-1.5">
               <label htmlFor="slide-context" className="text-xs font-medium text-muted-foreground">Company and period <span className="font-normal">(optional if visible on the image)</span></label>
-              <input id="slide-context" value={context} maxLength={300} onChange={(event) => { invalidate(); setContext(event.target.value); }} placeholder="Bank of America, Q3 2026; GAAP unless labelled otherwise" className="h-10 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+              <input id="slide-context" value={context} maxLength={300} onChange={(event) => { invalidate(); setContext(event.target.value); }} placeholder="Bank of America, Q2 2026; GAAP unless labelled otherwise" className="h-10 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" />
             </div>
             <AsOfPicker asOf={asOf} nowValue={nowValue} onChange={(next) => { invalidate(); setAsOf(next); }} />
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -164,7 +196,9 @@ export function SlideApp() {
               <ul className="flex flex-wrap gap-x-4 gap-y-1.5" aria-label="Slide verdict counts">
                 {DISPLAY_STATUSES.filter((status) => status !== "look_ahead" || counts[status] > 0).map((status) => <li key={status} className="flex items-center gap-1 text-xs"><StatusGlyph status={status} size="sm" /><span className="font-semibold tabular-nums">{counts[status]}</span><span className="text-muted-foreground">{STATUS_META[status].label.toLowerCase()}</span></li>)}
               </ul>
-              <p className="text-xs text-muted-foreground">{formatLatency(state.done.latency_s)} · {state.done.cost_is_estimate ? "estimated " : ""}{formatCost(state.done.cost_usd)} · {state.done.model_calls} model calls · As of {state.meta?.as_of ? formatUtcMinutes(state.meta.as_of) : "latest filings"}</p>
+              {/* What the recorded sample's ? mean; only its exact recorded replay carries the note. */}
+              {sample?.note && state.meta?.cached ? <p className="max-w-3xl text-xs leading-relaxed text-foreground/80">{sample.note}</p> : null}
+              <p className="text-xs text-muted-foreground">{state.meta?.cached ? <>Recorded live run{state.meta.recorded_utc ? ` (${formatUtcMinutes(state.meta.recorded_utc)})` : ""} · $0 this replay · original run: {formatLatency(state.done.latency_s)} / {state.done.cost_is_estimate ? "estimated " : ""}{formatCost(state.done.cost_usd)}, {state.done.model_calls} model calls</> : <>{formatLatency(state.done.latency_s)} · {state.done.cost_is_estimate ? "estimated " : ""}{formatCost(state.done.cost_usd)} · {state.done.model_calls} model calls</>} · As of {state.meta?.as_of ? formatUtcMinutes(state.meta.as_of) : "the snapshot's latest filings"}</p>
               {state.done.warnings.map((warning, index) => <p key={index} className="text-xs leading-relaxed text-muted-foreground">{warning}</p>)}
             </div>
           ) : null}
@@ -172,7 +206,7 @@ export function SlideApp() {
           {upload && dimensions ? (
             <>
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
-                <p className="max-w-[65%] truncate text-xs text-muted-foreground" title={upload.name}>{upload.name}</p>
+                {sample ? <p className="max-w-[75%] text-xs leading-relaxed text-muted-foreground"><span className="font-medium text-foreground/80">{sample.title}</span> · real SEC filing: {sample.source.form}, accession {sample.source.accession}, accepted {formatUtcMinutes(sample.source.accepted_utc)} · <a className="underline underline-offset-4" href={sample.source.url} target="_blank" rel="noopener noreferrer">View on SEC</a> · {sample.attribution}</p> : <p className="max-w-[65%] truncate text-xs text-muted-foreground" title={upload.name}>{upload.name}</p>}
                 <Button size="sm" variant="ghost" aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOutIcon /> : <ZoomInIcon />}{zoomed ? "Fit slide" : "Zoom in"}</Button>
                 {state.regions.length ? <label className="flex w-full items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" checked={showRegions} onChange={(e) => setShowRegions(e.target.checked)} className="accent-foreground" />Show chart/table regions ({state.regions.filter((r) => r.source === "sam").length} SAM, {state.regions.filter((r) => r.source === "spark").length} Spark)</label> : null}
               </div>
@@ -192,7 +226,7 @@ export function SlideApp() {
               <p className="border-t border-border px-4 py-3 text-xs leading-relaxed text-muted-foreground">Boxes mark model readings and may be imprecise. Select a numbered box or a reading to see the filing receipt. Use Zoom in for small labels.</p>
             </>
           ) : (
-            <div className="flex min-h-64 flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground"><FileImageIcon className="size-10 stroke-1" aria-hidden /><p className="font-serif text-xl">Give every label a receipt.</p><p className="max-w-sm text-sm leading-relaxed">Choose a clear screenshot of one earnings chart or table, including its title, units and period.</p><Button variant="outline" onClick={() => fileInput.current?.click()}><UploadIcon />Choose slide image</Button></div>
+            <div className="flex min-h-64 flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground"><FileImageIcon className="size-10 stroke-1" aria-hidden /><p className="font-serif text-xl">Give every label a receipt.</p><p className="max-w-sm text-sm leading-relaxed">Choose a clear screenshot of one earnings chart or table, including its title, units and period.</p><div className="flex flex-wrap justify-center gap-2"><Button variant="outline" onClick={() => fileInput.current?.click()}><UploadIcon />Choose slide image</Button><Button variant="secondary" onClick={() => void loadSample()} disabled={preparing || MOCK}><LandmarkIcon />Try a real SEC slide</Button></div><p className="max-w-sm text-xs leading-relaxed">The sample is page 9 of Bank of America&apos;s 2Q26 earnings presentation, filed with the SEC. Its live SAM 3.1 and Muse Spark run is recorded and replays at $0.</p></div>
           )}
         </section>
 
@@ -205,7 +239,7 @@ export function SlideApp() {
           ) : (
             <>
               <h3 className="font-serif text-xl font-medium">{state.claims.length ? "Extracted readings" : "What the slide check confirms"}</h3>
-              {state.claims.length ? <><p className="mt-1 text-xs text-muted-foreground">Select a reading to inspect its SEC evidence.</p><ol className="mt-3 divide-y divide-border">{state.claims.map((claim, index) => <li key={claim.id}><button type="button" data-slide-list={claim.id} onClick={() => select(claim.id)} className="flex min-h-16 w-full items-start gap-2 rounded-md px-2 py-3 text-left hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"><span className="mt-1 font-mono text-xs text-muted-foreground">{index + 1}</span><span className="min-w-0 flex-1 space-y-1"><span className="block font-mono text-sm font-medium">{claim.value_text}</span><span className="block text-xs text-muted-foreground">{[claim.entity, claim.metric_text, claim.period_text, claim.basis].filter(Boolean).join(" · ")}</span><span className="block text-[11px] text-muted-foreground">{claim.reading === "axis_estimate" ? "Axis estimate · cannot verify exactly" : "Printed label"}</span></span><StatusChip status={displayStatus(state.verdicts[claim.id])} className="mt-0.5 shrink-0" /></button></li>)}</ol></> : <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground"><p><strong className="text-foreground">Printed labels.</strong> Each legible number is compared with the filing for its company, period, scale and accounting basis.</p><p><strong className="text-foreground">Axis estimates.</strong> A value inferred from a chart can be approximate or unverifiable; it can never earn a verified or wrong verdict.</p><p><strong className="text-foreground">Timing.</strong> The as-of cutoff checks when the filing became public, just as it does for a draft.</p></div>}
+              {state.claims.length ? <><p className="mt-1 text-xs text-muted-foreground">Select a reading to inspect its SEC evidence.</p><ol className="mt-3 divide-y divide-border">{state.claims.map((claim, index) => <li key={claim.id}><button type="button" data-slide-list={claim.id} onClick={() => select(claim.id)} className="flex min-h-16 w-full items-start gap-2 rounded-md px-2 py-3 text-left hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"><span className="mt-1 font-mono text-xs text-muted-foreground">{index + 1}</span><span className="min-w-0 flex-1 space-y-1"><span className="block font-mono text-sm font-medium">{claim.value_text}</span><span className="block text-xs text-muted-foreground">{[claim.entity, claim.metric_text, claim.period_text, claim.basis].filter(Boolean).join(" · ")}</span><span className="block text-[11px] text-muted-foreground">{state.verdicts[claim.id] ? reasonText(state.verdicts[claim.id].reason) : "Checking…"} · {claim.reading === "axis_estimate" ? "axis estimate, cannot verify exactly" : "printed label"}</span></span><StatusChip status={displayStatus(state.verdicts[claim.id])} className="mt-0.5 shrink-0" /></button></li>)}</ol></> : <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground"><p><strong className="text-foreground">Printed labels.</strong> Each legible number is compared with the filing for its company, period, scale and accounting basis.</p><p><strong className="text-foreground">Axis estimates.</strong> A value inferred from a chart can be approximate or unverifiable; it can never earn a verified or wrong verdict.</p><p><strong className="text-foreground">Timing.</strong> The as-of cutoff checks when the filing became public, just as it does for a draft.</p></div>}
               <p className="mt-5 rounded-lg border border-border bg-muted/40 p-3.5 text-xs leading-relaxed text-muted-foreground">The uploaded image is a claim to check, not filing evidence. Vision can miss or misread figures. Confirm each transcription and review its receipt before publishing.</p>
             </>
           )}

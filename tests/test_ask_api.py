@@ -38,7 +38,7 @@ def test_question_end_to_end_verification_and_usage_settlement(tmp_path):
     assert [r[0] for r in rows] == ["progress", "progress", "result"]
     result = rows[-1][1]
     assert result["as_of"] == "2026-08-26T20:36:00Z"
-    assert "$96221000000" in result["answer"] and result["items"][0]["verdict"]["status"] == "verified"
+    assert "$96,221,000,000" in result["answer"] and result["items"][0]["verdict"]["status"] == "verified"
     assert result["model_calls"] == len(model.calls) == 1
     assert ledger.spent_today() == pytest.approx(result["cost_usd"], abs=1e-6)
     assert ledger.pending_count() == 0

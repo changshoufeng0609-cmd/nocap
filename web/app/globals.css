@@ -260,6 +260,11 @@
 .claim-value[data-status="pending"] {
   color: inherit;
 }
+/* Verified figures stay legible but quiet; errors keep the full weight. */
+.claim-value[data-status="verified"]:not([data-hover]):not([data-selected]) {
+  font-weight: 560;
+  background-color: color-mix(in oklch, var(--tint) 55%, transparent);
+}
 
 /* Verdict mark after each checked number: a button, so Tab walks the claims. */
 .claim-mark {
@@ -289,6 +294,26 @@
 .claim-mark-glyph {
   font-size: 1.08em;
   line-height: 1;
+}
+.claim-mark-group {
+  display: inline-flex;
+  align-items: center;
+  margin-inline: 0.25em 0.1em;
+  vertical-align: 0.12em;
+}
+.claim-mark-group > .claim-mark {
+  margin-inline: 0;
+  vertical-align: 0;
+}
+.claim-mark-group > .claim-mark + .claim-mark {
+  margin-left: -0.3em;
+  box-shadow: 0 0 0 1.5px var(--card);
+}
+.claim-mark-group > .claim-mark[data-selected] {
+  z-index: 1;
+  box-shadow:
+    0 0 0 2px var(--card),
+    0 0 0 3.5px var(--foreground);
 }
 .claim-mark-fix {
   font-family: var(--font-mono);

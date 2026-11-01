@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { formatDay } from "@/lib/format";
 import data from "./results.json";
 
 export const metadata: Metadata = {
@@ -35,18 +36,41 @@ const REPO = "https://github.com/changshoufeng0609-cmd/nocap/blob/main/";
 const percent = (value: number | null) => value === null ? "N/A" : `${(value * 100).toFixed(1)}%`;
 const human = (value: string | null) => (value ?? "pending").replaceAll("_", " ");
 
+/** The headline, computed from the published records so it cannot drift from them. Null until every model is scored. */
+function conclusion() {
+  const scored = benchmark.runs.flatMap(run => run.sensitivity_score ? [{ run, score: run.sensitivity_score }] : []);
+  if (benchmark.status !== "complete" || scored.length !== benchmark.runs.length || !scored.length) return null;
+  const sum = (pick: (score: Score) => number) => scored.reduce((total, { score }) => total + pick(score), 0);
+  const coverage = scored.map(({ run, score }) => ({ label: run.label, value: score.verified_coverage }))
+    .sort((a, b) => b.value - a.value);
+  const share = (value: number) => `${Math.round(value * 100)}%`;
+  return { answers: benchmark.runs.reduce((total, run) => total + run.calls, 0), models: scored.length,
+    strict: benchmark.runs.reduce((total, run) => total + (run.primary_score?.verified_accepted ?? 0), 0),
+    passed: sum(score => score.unsafe_passed), accepted: sum(score => score.verified_accepted),
+    correct: sum(score => score.verified_correct), coverage, share,
+    range: `${Math.round(coverage[coverage.length - 1].value * 100)}–${share(coverage[0].value)}` };
+}
+
+const COUNT_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+
 export default function BenchmarksPage() {
   const completedCalls = benchmark.runs.reduce((sum, run) => sum + run.calls, 0);
+  const result = conclusion();
   return <>
     <SiteHeader />
     <main className="mx-auto w-full max-w-6xl flex-1 space-y-10 px-4 py-8 sm:px-6 sm:py-12">
       <header className="max-w-4xl space-y-4">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Development benchmark · public SEC snapshot</p>
-        <h2 className="font-serif text-3xl font-semibold tracking-tight sm:text-5xl">What reaches the answer?</h2>
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Development benchmark · {formatDay(benchmark.cutoff)} SEC snapshot</p>
+        {result ? <>
+          <h2 className="font-serif text-3xl font-semibold tracking-tight sm:text-5xl">{result.passed === 0 ? "No wrong number got through" : `${result.passed} wrong number${result.passed === 1 ? "" : "s"} got through`}</h2>
+          <p className="text-pretty text-lg leading-relaxed text-foreground">{result.answers} closed-book answers from {COUNT_WORDS[result.models] ?? result.models} Meta models. NoCap&apos;s gate let <strong>{result.passed} wrong number{result.passed === 1 ? "" : "s"}</strong> through and accepted <strong>{result.accepted === result.correct ? `${result.correct} correct answers` : `${result.accepted} answers, ${result.correct} of them correct`}</strong>, at <strong>{result.range} coverage</strong> per model.</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">Coverage: {result.coverage.map(({ label, value }) => `${label} ${result.share(value)}`).join(" · ")}. These counts use the post-hoc metadata policy described below; the pre-registered exact contract accepted {result.strict} of the {result.answers} answers.</p>
+        </> : <h2 className="font-serif text-3xl font-semibold tracking-tight sm:text-5xl">What reaches the answer?</h2>}
         <p className="text-pretty text-lg leading-relaxed text-muted-foreground">Four model backends answer the same 50 financial questions from their own knowledge. NoCap then checks each proposed number against SEC evidence and either accepts it or withholds it.</p>
         <p className="text-sm leading-relaxed text-muted-foreground"><strong className="text-foreground">Closed-book:</strong> models receive the question and an output schema, with no filings, retrieval, search or tools. This measures a specific workflow on development questions. It does not establish accuracy on arbitrary questions or gains for systems that retrieve evidence.</p>
         <div className="flex flex-wrap gap-2 text-xs">
-          {[`${benchmark.question_count} frozen questions`, `${Object.keys(benchmark.ticker_counts).length} companies`, "8 financial metrics", `${completedCalls} recorded calls`, "Held-out split not used"].map(label =>
+          {/* The question set's companies, not the workspace's current evidence coverage. */}
+          {[`${benchmark.question_count} frozen questions`, `Questions on ${Object.keys(benchmark.ticker_counts).length} companies (${formatDay(benchmark.cutoff)} snapshot)`, "8 financial metrics", `${completedCalls} recorded calls`, "Held-out split not used"].map(label =>
             <span key={label} className="rounded-full border border-border px-3 py-1.5">{label}</span>)}
         </div>
         {benchmark.status !== "complete" ? <p role="status" className="rounded-lg border border-border bg-muted/50 p-3 text-sm">The registered run is in progress. Missing model results and the offline sensitivity analysis are shown as pending, never as zero-cost or perfect accuracy.</p> : null}

@@ -120,7 +120,14 @@ class FilingTexts:
         return row, text
 
 
+def prompt_cache_key(filing: dict[str, Any]) -> str:
+    """One stable routing key per shared prefix: every question about a filing shares its complete text."""
+    return f"nocap-filing-{filing['sha256'][:16]}"
+
+
 def build_request(question: str, filing: dict[str, Any], text: str) -> dict[str, Any]:
+    """The filing comes before the question: Meta's prefix cache reuses everything up to the first differing
+    token, so a later question about the same filing recomputes only the question (docs: prompt-caching)."""
     question = validate_question(question)
     request = {
         "model": SPARK.model,
@@ -133,8 +140,11 @@ def build_request(question: str, filing: dict[str, Any], text: str) -> dict[str,
             "more than once. Return an empty list when no relevant passage is present. Do not treat a "
             "filing's assertion as independently proven or its forward-looking statements as facts."
         ),
-        "input": json.dumps({"question": question, "filing": filing, "complete_filing_text": text},
+        "input": json.dumps({"filing": filing, "complete_filing_text": text, "question": question},
                             ensure_ascii=False),
+        # Route questions that share this filing's prefix together, and ask for longer retention because
+        # judging traffic arrives in bursts. Both are hints; usage reports what was actually cached.
+        "prompt_cache_key": prompt_cache_key(filing), "prompt_cache_retention": "24h",
         "reasoning": {"effort": "minimal"}, "max_output_tokens": MAX_OUTPUT_TOKENS, "store": False,
         "text": {"format": {"type": "json_schema", "name": "filing_quotes",
                               "schema": extract.build_json_schema(QuoteProposal), "strict": True}},
@@ -183,6 +193,9 @@ def grounding_events(question: str, *, request: dict[str, Any], filing: dict[str
                        "the passage answers the question or proves a claim. Quoted numbers are not "
                        "independently verified here; use Check for numeric verdicts."),
             "offset_unit": "unicode_code_points", "whole_document": True,
+            # The provider's own count of what the one request read: the whole filing, not a retrieved snippet.
+            "usage": ({k: stats.tokens[k] for k in ("input_tokens", "output_tokens", "cached_tokens")
+                       if k in stats.tokens} or None),
             **stats.billing(), "latency_s": round(time.monotonic() - started, 2),
         }
     except (AskError, extract.ModelCallRejected) as exc:
@@ -194,7 +207,7 @@ def grounding_events(question: str, *, request: dict[str, Any], filing: dict[str
 
 def import_filing(store: Store, edgar: Edgar, *, ticker: str, form: str, directory: Path,
                   accession: Optional[str] = None) -> dict[str, Any]:
-    resolved = store.resolve_entity(ticker)
+    resolved = store.by_ticker(ticker)  # the stored ticker itself: "GS" or "FLEX" is a ticker here, not a word
     if resolved is None or form not in ("10-Q", "10-K"):
         raise AskError("Choose a covered ticker and form 10-Q or 10-K.")
     rows = store.filings(resolved[0], (form,))

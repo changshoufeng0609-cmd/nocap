@@ -1,7 +1,7 @@
 """Durable, conservative spend admission, not a provider-billing guarantee.
 
-Reservations are charged before work starts. Unknown usage retains at least that
-charge; a crash never refunds it. Each token belongs to its UTC admission day.
+Reservations are charged before work starts. A settlement marked uncertain retains
+at least that charge; a crash never refunds it. Each token belongs to its UTC admission day.
 SQLite coordinates processes sharing one file, not separate Vercel instances.
 PostgreSQL requires an explicitly initialized shared database; it never falls back.
 """
@@ -147,14 +147,19 @@ class _Ledger:
             raise BudgetUnavailable()
         return row
 
-    def reserve(self, estimate_usd: float) -> Reservation | None:
-        """Durably debit before dispatch. None means the daily allowance is insufficient."""
+    def reserve(self, estimate_usd: float, *, keep_usd: float = 0.0) -> Reservation | None:
+        """Durably debit before dispatch. None means the daily allowance is insufficient.
+
+        keep_usd is the end of today's cap that this admission may not use; it stays available to
+        other operations. It only narrows admission: the stored cap and every settlement are unchanged.
+        """
         estimate, day = _micros(estimate_usd, positive=True), _day(self._today())
+        keep = _micros(keep_usd)  # rounded up: at least this much stays unused
         token = Reservation(uuid4().hex, self.namespace, day, estimate, self._cap)
         try:
             with self._transaction() as connection:
                 cap, charged = self._ensure_day(connection, day)
-                if estimate > cap - charged:
+                if estimate + keep > cap - charged:
                     return None
                 self._execute(connection,
                     "UPDATE nocap_spend_days SET charged_micros=? WHERE namespace=? AND day=?",
@@ -230,6 +235,42 @@ class _Ledger:
                 return _stored_int(row[0])
         except Exception:
             raise BudgetUnavailable() from None
+
+
+COUNT_UNIT = Decimal("0.000001")  # one admission of a DailyCount, stored as one micro-unit
+
+
+class DailyCount:
+    """At most `limit` admissions per UTC day, shared by every instance using the same ledger storage.
+
+    The count lives in the existing ledger tables under its own namespace, so it needs no schema change:
+    each admission is a one-micro-unit reservation and the day's cap is `limit` micro-units. Amounts in
+    that namespace are counts, not dollars. As with spend, an admission belongs to its UTC day, a crash
+    keeps it, and an existing namespace/day rejects a different limit rather than racing.
+    """
+
+    def __init__(self, ledger: Any, limit: int):
+        self._ledger, self.limit = ledger, limit
+
+    @staticmethod
+    def cap(limit: int) -> Decimal:
+        """The ledger cap that stores `limit` admissions."""
+        return Decimal(limit) * COUNT_UNIT
+
+    def acquire(self) -> Reservation | None:
+        """Take one of today's admissions. None means they are used up; storage errors raise BudgetUnavailable."""
+        return self._ledger.reserve(COUNT_UNIT)
+
+    def keep(self, token: Reservation) -> None:
+        """Count the admission: its work was dispatched."""
+        self._ledger.settle(token, COUNT_UNIT)
+
+    def release(self, token: Reservation) -> None:
+        """Return an admission whose work never started."""
+        self._ledger.settle(token, 0)
+
+    def used_today(self) -> int:
+        return round(self._ledger.spent_today() * 1_000_000)
 
 
 class LocalLedger(_Ledger):

@@ -158,6 +158,8 @@ def test_provider_error_never_exposes_raw_message(monkeypatch):
     # Source-complete values keep their written sign or enclosing parentheses unchanged.
     ("+14%", "+15%", 15), ("+14%", "-15%", None), ("14%", "+15%", None),
     ("($2.22 billion)", "($2.46 billion)", -2.46), ("–$2.22", "–$2.46", -2.46),
+    ("$US2.22", "$US2.46", 2.46), ("$2.22 Million", "$2.46 Million", 2.46),
+    ("$(2.22) million", "$(2.46) million", -2.46), ("$2.22 B", "$2.46 B", 2.46),
 ])
 def test_only_digit_characters_can_change(before, after, value):
     assert rewrite.numeric_replacement(before, after) == value

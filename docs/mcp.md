@@ -44,6 +44,10 @@ does not override the host's privacy policy.
 | `nocap_search_evidence` | `query`: exact entity, metric; optional period end, basis, segment, timezone-aware `as_of`, `limit` and `offset` | Filing versions with receipt provenance, `total`, `next_offset`, `truncated`. |
 | `nocap_verify_claim` | `query`: one fully typed `claim`; optional context and timezone-aware `as_of` | Deterministic status, reason, explanation, expected value and evidence. |
 
+`nocap_verify_claim` reports one verdict, not counts. Evidence accepted after `as_of` returns `reason: "look_ahead"`
+with the verifier's status (`wrong` for a printed figure); NoCap's web UI and CLI show that as ◷ not public yet, and
+Check, Fix and Slide count it as `not_public`, never as wrong. A host summarizing several results should do the same.
+
 Every tool advertises read-only, non-destructive, idempotent, closed-world annotations. Query and claim inputs reject
 unknown fields, non-finite values, oversized text, invalid pagination, naive timestamps and numeric
 fields that contradict their quoted value. The verifier owns verdicts; the input cannot set a status.

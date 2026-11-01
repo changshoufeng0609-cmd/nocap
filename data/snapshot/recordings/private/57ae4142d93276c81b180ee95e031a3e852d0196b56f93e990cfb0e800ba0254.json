@@ -1,0 +1,273 @@
+{
+ "version": 1,
+ "kind": "private",
+ "key": "57ae4142d93276c81b180ee95e031a3e852d0196b56f93e990cfb0e800ba0254",
+ "request": {
+  "sample_id": "nvda-q2-fy2027-private",
+  "text": "NVIDIA reported revenue of $96.2 billion and GAAP diluted EPS of $2.22 in Q2 FY2027.",
+  "context": "NVIDIA Q2 FY2027",
+  "as_of": "2026-10-29T00:00:00Z"
+ },
+ "recorded_utc": "2026-10-30T18:17:48Z",
+ "source_commit": "5dd78c3",
+ "events": [
+  {
+   "event": "meta",
+   "data": {
+    "cached": false,
+    "passages": 1,
+    "as_of": "2026-10-29T00:00:00Z",
+    "private": true,
+    "backend": "modal",
+    "model": "muse-glimmer",
+    "hosting": "Operator's Modal workspace",
+    "persistence": "no_response_cache"
+   }
+  },
+  {
+   "event": "claim",
+   "data": {
+    "claim": {
+     "id": "c1",
+     "metric": "revenue",
+     "metric_text": "revenue",
+     "value_text": "$96.2 billion",
+     "value": 96.2,
+     "unit": "USD",
+     "scale": "billions",
+     "period_text": "Q2 FY2027",
+     "period_type": "quarter",
+     "comparison": "none",
+     "basis": null,
+     "forward_looking": false,
+     "entity": "NVIDIA",
+     "segment": null,
+     "span_text": "NVIDIA reported revenue of $96.2 billion",
+     "span_start": 0,
+     "span_end": 40
+    }
+   }
+  },
+  {
+   "event": "claim",
+   "data": {
+    "claim": {
+     "id": "c2",
+     "metric": "eps_diluted",
+     "metric_text": "GAAP diluted EPS",
+     "value_text": "$2.22",
+     "value": 2.22,
+     "unit": "USD/share",
+     "scale": "units",
+     "period_text": "Q2 FY2027",
+     "period_type": "quarter",
+     "comparison": "none",
+     "basis": "GAAP",
+     "forward_looking": false,
+     "entity": "NVIDIA",
+     "segment": null,
+     "span_text": "GAAP diluted EPS of $2.22",
+     "span_start": 45,
+     "span_end": 70
+    }
+   }
+  },
+  {
+   "event": "verdict",
+   "data": {
+    "claim_id": "c1",
+    "verdict": {
+     "claim_id": "c1",
+     "status": "verified",
+     "reason": "match",
+     "explanation": "Matches NVIDIA's 10-Q: revenue was $96.221 billion for Q2 FY2027 (quarter ended Jul 26, 2026).",
+     "expected_value": null,
+     "evidence": [
+      {
+       "cik": 1045810,
+       "ticker": "NVDA",
+       "metric": "revenue",
+       "concept": null,
+       "basis": "GAAP",
+       "segment": null,
+       "value": 96221000000.0,
+       "unit": "USD",
+       "period_start": "2026-04-27",
+       "period_end": "2026-07-26",
+       "fiscal_year": 2027,
+       "fiscal_period": "Q2",
+       "source": "press_release",
+       "derived_from": [],
+       "form": "8-K",
+       "accession": "0001045810-26-000073",
+       "accepted_at": "2026-08-26T20:21:19Z",
+       "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+       "locator": "Revenue | $96,221",
+       "decimals": -6
+      },
+      {
+       "cik": 1045810,
+       "ticker": "NVDA",
+       "metric": "revenue",
+       "concept": "us-gaap:Revenues",
+       "basis": "GAAP",
+       "segment": null,
+       "value": 96221000000.0,
+       "unit": "USD",
+       "period_start": "2026-04-27",
+       "period_end": "2026-07-26",
+       "fiscal_year": 2027,
+       "fiscal_period": "Q2",
+       "source": "xbrl",
+       "derived_from": [],
+       "form": "10-Q",
+       "accession": "0001045810-26-000075",
+       "accepted_at": "2026-08-26T20:36:00Z",
+       "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+       "locator": null,
+       "decimals": -6
+      }
+     ],
+     "as_of": "2026-10-29T00:00:00Z"
+    }
+   }
+  },
+  {
+   "event": "verdict",
+   "data": {
+    "claim_id": "c2",
+    "verdict": {
+     "claim_id": "c2",
+     "status": "wrong",
+     "reason": "basis_mismatch",
+     "explanation": "$2.22 is NVIDIA's non-GAAP diluted EPS for Q2 FY2027 (quarter ended Jul 26, 2026); the GAAP figure is $2.46.",
+     "expected_value": 2.46,
+     "evidence": [
+      {
+       "cik": 1045810,
+       "ticker": "NVDA",
+       "metric": "eps_diluted",
+       "concept": null,
+       "basis": "non-GAAP",
+       "segment": null,
+       "value": 2.22,
+       "unit": "USD/share",
+       "period_start": "2026-04-27",
+       "period_end": "2026-07-26",
+       "fiscal_year": 2027,
+       "fiscal_period": "Q2",
+       "source": "press_release",
+       "derived_from": [],
+       "form": "8-K",
+       "accession": "0001045810-26-000073",
+       "accepted_at": "2026-08-26T20:21:19Z",
+       "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+       "locator": "Diluted earnings per share | $2.22",
+       "decimals": 2
+      },
+      {
+       "cik": 1045810,
+       "ticker": "NVDA",
+       "metric": "eps_diluted",
+       "concept": "us-gaap:EarningsPerShareDiluted",
+       "basis": "GAAP",
+       "segment": null,
+       "value": 2.46,
+       "unit": "USD/share",
+       "period_start": "2026-04-27",
+       "period_end": "2026-07-26",
+       "fiscal_year": 2027,
+       "fiscal_period": "Q2",
+       "source": "xbrl",
+       "derived_from": [],
+       "form": "10-Q",
+       "accession": "0001045810-26-000075",
+       "accepted_at": "2026-08-26T20:36:00Z",
+       "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+       "locator": null,
+       "decimals": 2
+      }
+     ],
+     "as_of": "2026-10-29T00:00:00Z"
+    }
+   }
+  },
+  {
+   "event": "done",
+   "data": {
+    "counts": {
+     "verified": 1,
+     "wrong": 1,
+     "not_public": 0,
+     "unverifiable": 0,
+     "approximate": 0
+    },
+    "latency_s": 25.72,
+    "cost_usd": 0.05,
+    "model": "muse-glimmer",
+    "coverage": {
+     "version": 1,
+     "candidate_count": 2,
+     "covered_count": 2,
+     "excluded_count": 0,
+     "uncovered": []
+    },
+    "cost_is_estimate": true,
+    "model_calls": 1,
+    "private": true,
+    "billing_note": "Estimated admission only; Modal bills GPU time separately."
+   }
+  }
+ ],
+ "runtime": {
+  "backend": "modal",
+  "model": "muse-glimmer",
+  "modal_app": "receipts-glimmer",
+  "server": "deploy/modal_glimmer.py",
+  "server_sha256": "022319157f9bebd0fc1e395e610ff32d32c34fcfb71edf458239daff3bf69e96",
+  "weights": "meta-models/Muse-Glimmer-30B",
+  "weights_revision": "cec94fcfd6512f2cfe708138c32533b346ea4f69",
+  "vllm_command": [
+   "vllm",
+   "serve",
+   "meta-models/Muse-Glimmer-30B",
+   "--served-model-name",
+   "muse-glimmer",
+   "--host",
+   "0.0.0.0",
+   "--port",
+   "8000",
+   "--tensor-parallel-size",
+   "1",
+   "--max-model-len",
+   "32768",
+   "--max-num-seqs",
+   "4",
+   "--gpu-memory-utilization",
+   "0.9",
+   "--enforce-eager",
+   "--enable-auto-tool-choice",
+   "--tool-call-parser",
+   "muse_glimmer",
+   "--reasoning-parser",
+   "muse_glimmer",
+   "--generation-config",
+   "auto",
+   "--limit-mm-per-prompt",
+   "{\"image\":0}",
+   "--no-enable-log-requests",
+   "--no-enable-log-outputs",
+   "--disable-uvicorn-access-log"
+  ],
+  "warm_wait_s": 157.1,
+  "request_wall_s": 25.76,
+  "source_dirty": false,
+  "route_sha256": {
+   "receipts/api.py": "2b5a0e15177bddfedffaf5d3f3d491be6835cfde2206af6678c86de38ed408db",
+   "receipts/private.py": "898011acb42fa465fd119d5fcf3030239bc59a82e3147656ffdbd544b3293860"
+  },
+  "code_fingerprint": "f1ca0d60179c7b98",
+  "data_dir": "data/snapshot",
+  "data_fingerprint": "51c18eeb54efe9124a5adddb"
+ }
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from "@/lib/utils";
 
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -19,28 +20,40 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-const BUILT_ON = "Built on Meta Muse Spark · SEC EDGAR";
+// The hosted Meta models the public site calls live: Spark (Draft, Slide, Ask), Wonder (Fix), SAM 3.1 (Slide).
+const META_MODELS = "Muse Spark, Muse Wonder & SAM 3.1";
+
+const NAV_LINK =
+  "rounded-md px-2 py-1 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2";
+
+function BuiltOn({ className }: { className?: string }) {
+  return (
+    <p className={cn("w-fit max-w-full rounded-full border border-border bg-card/60 px-2.5 py-0.5 text-[11px] text-muted-foreground", className)}>
+      <span className="max-[379px]:hidden">Built on </span>Meta {META_MODELS} · SEC EDGAR
+    </p>
+  );
+}
 
 export function SiteHeader() {
   return (
     <header className="border-b border-border/80">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-4 px-4 py-5 sm:flex-row sm:px-6 sm:py-7">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2.5">
+      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-7">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
             <LogoMark className="size-7 shrink-0" />
             <h1 className="font-serif text-[1.7rem] leading-none font-semibold tracking-[-0.015em]"><Link href="/">NoCap</Link></h1>
           </div>
-          <p className="mt-2.5 text-[0.95rem] text-pretty text-muted-foreground">
-            Check financial numbers against SEC filings before you publish.
-          </p>
-          <p className="mt-1.5 text-xs text-muted-foreground sm:hidden">{BUILT_ON}</p>
+          <nav aria-label="Main navigation" className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <BuiltOn className="mr-2 hidden lg:block" />
+            <Link href="/demo" className={NAV_LINK}>Demo</Link>
+            <Link href="/benchmarks" className={NAV_LINK}>Benchmarks</Link>
+            <ThemeToggle />
+          </nav>
         </div>
-        <nav aria-label="Main navigation" className="flex w-full shrink-0 items-center gap-4 sm:w-auto sm:gap-3">
-          <p className="hidden text-xs text-muted-foreground sm:block">{BUILT_ON}</p>
-          <Link href="/demo" className="rounded-sm text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Demo</Link>
-          <Link href="/benchmarks" className="rounded-sm text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4">Benchmarks</Link>
-          <ThemeToggle />
-        </nav>
+        <p className="mt-2.5 text-[0.95rem] text-pretty text-muted-foreground">
+          Check financial numbers against the SEC filings of S&amp;P 500 companies before you publish.
+        </p>
+        <BuiltOn className="mt-2 lg:hidden" />
       </div>
     </header>
   );

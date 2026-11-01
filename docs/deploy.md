@@ -1,26 +1,26 @@
-# Deploy and run NoCap (updated 2026-10-29)
+# Deploy and run NoCap (updated 2026-10-31)
 
 ## Current deployment state
 
 [NoCap](https://receipts-nocap.vercel.app), the [2:45 demo](https://receipts-nocap.vercel.app/demo)
-and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public.
-The [current acceptance record](public-release-fix-2026-10-30.json) binds the source, deployment,
+and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public. <!-- verify-at-release -->
+The [current acceptance record](public-release-fix-2026-10-30.json) <!-- verify-at-release --> binds the source, deployment,
 real browser checks and file hashes. The [October 29 record](public-release-update-2026-10-29.json)
 remains for the previous deployment.
 
 | Setting | Current state |
 |---|---|
 | Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
-| Production deployment | `dpl_DWzZqy43YFywgeQTrW5S9REN9jz3`, READY, about 27-second build; previous `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` kept for rollback |
-| Deployed public source | `9db6cfcd058d81c59b87e165caaedaaf8f2f381d` (review fixes; private `04e5450`) |
+| Production deployment | `dpl_DWzZqy43YFywgeQTrW5S9REN9jz3`, READY, about 27-second build; previous `dpl_34X9vCXnCGf3SHSYTvs1uQezGKji` kept for rollback <!-- verify-at-release --> |
+| Deployed public source | `9db6cfcd058d81c59b87e165caaedaaf8f2f381d` (review fixes; private `04e5450`) <!-- verify-at-release --> |
 | Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
-| Live access | Paused. Saved examples, recorded demo and benchmark inspection are available. |
-| Shared admission | Existing free Neon primary, namespace `nocap`, $1 per UTC admission day; no configuration or allowance reset in this release |
+| Live access | Paused. Saved examples, recorded demo and benchmark inspection are available. <!-- verify-at-release --> |
+| Shared admission | Existing free Neon primary, namespace `nocap`, $1 per UTC admission day; no configuration or allowance reset in this release <!-- verify-at-release --> |
 | Model-quality evidence | [One-time held-out results](../eval/heldout_results.md) and [separate four-model Q&A](../eval/qa_results.md) |
 | Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
 
-The base release `de534ca` / `dpl_CNhaupwwUJDBGcvsDxhpD6ML7UCe` passed six saved-example
+**Previous deployment (October 29 media and benchmark update).** The base release `de534ca` / `dpl_CNhaupwwUJDBGcvsDxhpD6ML7UCe` passed six saved-example
 checks, two zero-call Check/Ask pause responses, SEC receipt inspection, unavailable Private/whole-filing
 states, media checks and the 200-record benchmark on desktop and 390px mobile. R4's five desktop POST
 responses were preserved after a harness JSON-unwrapping error; R6 submitted only the three mobile
@@ -39,7 +39,7 @@ These checks verify playback start, metadata, files and sampled frames, not full
 or editorial approval. Public acceptance added **0 model calls / $0 provider usage**. The local integrated
 suite passed **1,246 Python tests**, **144 frontend checks**, typecheck and lint; the final Vercel production
 build passed. Known batch model/GPU usage is **$3.30454604**, subject to delayed provider metering.
-Whole-filing live validation still needs a real SEC contact; formal submission remains unsubmitted.
+Whole-filing live validation was completed on 2026-10-30 ([record](ask.md#whole-filing-live-validation-2026-10-30)); formal submission remains unsubmitted.
 
 ## Runtime review follow-up (deployed October 30)
 
@@ -344,7 +344,7 @@ project. Confirm Services, Node 24.x, the repository root, and All Deployments p
    service build results. A successful smoke test does not authorize promotion, `--prod`, or a Git production
    deployment.
 4. **Smoke-test with Vercel Authentication.** In a signed-in browser, verify `/api/health` reports `ok: true`,
-   the snapshot fingerprint and 10 companies; `/api/examples` returns the bundled examples; and the homepage can
+   the snapshot fingerprint and 500 companies; `/api/examples` returns the bundled examples; and the homepage can
    replay a cached example through its final `done` event. A signed-out browser must receive the Vercel login
    gate, including for `/api/health`. Plain unauthenticated `curl` returning login HTML is not an API failure.
 
@@ -371,7 +371,7 @@ project. Confirm Services, Node 24.x, the repository root, and All Deployments p
 
 ## Local development
 
-Complete the [README's Python setup](../README.md#quickstart-a-cached-example-in-five-commands) first. Run the API
+Complete the [README's Python setup](../README.md#quickstart) first. Run the API
 and frontend in separate terminals, both starting at the repository root.
 
 Terminal 1 — API:
@@ -468,12 +468,14 @@ share that proxy's allowance. Client IPs are not logged; rate limits remain per 
 
 | Guard | Setting | Behavior |
 |---|---|---|
-| Text request limits | `/api/check` and `/api/fix`: 6,000 characters, 64 KiB body | Read chunks only while the accumulated body fits; reject before retaining the crossing chunk or consuming the remainder. Invalid requests receive a terminal `error` event without a model call. |
+| Text request limits | `/api/check` and `/api/fix`: 12,000 characters, 64 KiB body | Read chunks only while the accumulated body fits; reject before retaining the crossing chunk or consuming the remainder. Invalid requests receive a terminal `error` event without a model call. |
 | Image request limits | `/api/slide`: 3 MiB JSON body; 2 MiB PNG/JPEG | Images must be single-frame, 32–4,096 pixels per side, and at most 8 megapixels. Pillow checks dimensions before decoding, applies orientation, strips metadata, and reduces the longest side to 2,048 pixels. Images are not stored. |
 | Per-instance per-IP rate limit | Preview: 10 live operations per 600 seconds | Check, Fix, Slide, Ask, whole-filing quotation and Private share one limiter. Paused requests consume no allowance. Rejection sends a retryable `error`; identity follows the trusted proxy boundary above. |
-| Durable estimated spend admission | Chosen Preview budget: $1 per UTC admission day; code default: $5 | Precharge planned attempts before work; check every SDK dispatch against that reservation. Text estimates use request size plus the output ceiling, with a $0.05 floor ($0.15 for Wonder); Fix covers both extraction passes and Wonder. Unknown usage retains at least the reservation; actual costs above it increase the debit. See [full semantics](spend-protection.md). |
+| Durable estimated spend admission | `RECEIPTS_DAILY_BUDGET_USD`: Preview $1 per UTC admission day; judging-window release $5; code default $5 | Precharge planned attempts before work; check every SDK dispatch against that reservation. Text estimates use request size plus the output ceiling, with a $0.05 floor ($0.15 for Wonder); Fix covers both extraction passes and Wonder. An attempt with unknown usage settles at its own estimate; only an attempt missing from the request's accounting retains the whole reservation. Actual costs above it increase the debit. See [full semantics](spend-protection.md). |
+| Check and Fix reserve | `RECEIPTS_CHECK_FIX_RESERVE_USD`, default `1.5` | A Slide, Ask or whole-filing reservation must leave this much of the day's cap unused; Check and Fix may use the whole cap. A refusal is an `error` with `reason: "daily_budget"`, zero calls and zero cost. Not stored, so it can change at any time. |
+| Whole-filing question limit | `RECEIPTS_FILING_QUESTIONS_PER_DAY`, default `5` (`0` turns new questions off) | New whole-filing questions per UTC day across all instances, counted in the same ledger storage under `<RECEIPTS_SPEND_NAMESPACE>.filing_questions` with no schema change. Recorded sample questions take no slot; a question refused before its model call returns its slot. A refusal has `reason: "filing_question_limit"`. Like the dollar cap, change it only before the first admission of a UTC day; a mid-day change fails closed until the next day. See [daily sub-caps](spend-protection.md#daily-sub-caps). |
 | Ledger storage | SQLite locally; shared PostgreSQL required by default on Vercel | Processes sharing a SQLite file coordinate transactionally. PostgreSQL locks each namespace/day row across instances. Admission runs in a worker thread so database waits do not block the ASGI event loop. Missing driver/database, invalid configuration or failed transactions reject paid work without local fallback. Crashes retain pending precharges. |
-| Check model calls | Default Meta: 30 s per HTTP attempt, at most one retry | Only eligible rate-limit/server/connection failures retry. The operation has a 100 s deadline. |
+| Check model calls | Default Meta: 30 s per HTTP attempt, at most one retry | Only eligible rate-limit/server/connection failures retry. A `Retry-After` longer than 4 s is not retried: the retryable `error` says how long Meta asked NoCap to wait and carries `retry_after_s`. The operation has a 100 s deadline. |
 | Fix and slide model calls | No automatic Wonder/slide retry | Each SDK attempt is accounted, including extraction format fallback. Wonder/Spark use the remaining operation time and configured per-call timeout. SAM receives at most a 15 s per-call timeout; this is not a strict wall-clock bound. A slide makes at most two SAM calls and one Spark call. |
 | Logs | Counts, timing, usage and safe error metadata | No draft text, image content, keys, raw provider errors, or client IPs. |
 
@@ -533,7 +535,7 @@ its claim/verdict stream and ends with `done` or `error`.
   writes. It also copies every valid line of `data/pr_facts/*/*.jsonl`; half-written lines from a running writer are
   dropped.
 - **What it records.** It records each entry of `examples/examples.json` through the real pipeline, then swaps the
-  new snapshot in only if it is complete and under 10 MB.
+  new snapshot in only if it is complete and under 112 MiB (raised from 10 MiB to 16 MiB, then to 112 MiB for the S&P 500, on 2026-10-31).
 - **Re-runs.** If nothing changed, the files come out byte for byte the same. If the data or the verifier changed,
   the examples are re-recorded from the model-response cache at no cost. Model calls happen only for edited example
   passages, at about $0.004 each.
@@ -567,6 +569,60 @@ its claim/verdict stream and ends with `done` or `error`.
   still require operational validation; offline SQLite/mock tests do not establish those guarantees.
 
 
+## Judging window (approved 2026-10-30)
+
+The owner approved opening live requests from the submission release through the community vote:
+`RECEIPTS_LIVE_UNTIL=2026-11-17T16:00:00Z` (2026-11-18 00:00 Taipei) and a **US$5 per UTC day** shared
+allowance (raised from US$3 on 2026-10-30), paid from the Meta $150 hackathon credit. Two sub-caps inside that
+allowance keep a burst of large requests from locking judges out of Check and Fix
+([spend protection](spend-protection.md#daily-sub-caps)); their code defaults are the release values, so they
+need no environment change:
+
+- Slide, Ask and whole-filing questions may not use the last **US$1.50** of the day
+  (`RECEIPTS_CHECK_FIX_RESERVE_USD=1.5`); that end of the allowance stays with Check and Fix.
+- At most **5 new whole-filing questions** per UTC day across all instances
+  (`RECEIPTS_FILING_QUESTIONS_PER_DAY=5`); the recorded Meta 10-K question still replays at $0.
+
+Everything else stays as configured: the same PostgreSQL ledger and namespace `nocap`, the shared-budget
+requirement and the per-instance rate limit. While the window is open the workspace shows an "open until" notice
+instead of the pause notice. At the deadline, live work pauses on its own without a redeploy; saved examples,
+the video and benchmarks keep working.
+
+**Keep Preview paused for the whole window.** Production and the protected Preview share the ledger namespace
+`nocap`, and a namespace/day rejects a different cap (Preview is configured at US$1). Whichever environment admits
+a live request first on a UTC day would fail the other closed (`budget_unavailable`) until the next UTC day. Set
+`RECEIPTS_LIVE_REQUESTS_ENABLED=false` for Preview, or give Preview its own `RECEIPTS_SPEND_NAMESPACE`, and redeploy Preview before the release deployment: an environment change does not reach an existing deployment. Until then, do not open the old Preview.
+Change a cap or the filing-question limit only before the first admission of a UTC day.
+
+Production environment changes take effect only in a new deployment, so the owner applies them right before the
+release deployment:
+
+```bash
+SCOPE=changshoufeng0609-cmds-projects
+vercel env rm RECEIPTS_LIVE_REQUESTS_ENABLED production --scope $SCOPE -y
+printf 'true' | vercel env add RECEIPTS_LIVE_REQUESTS_ENABLED production --scope $SCOPE
+vercel env rm RECEIPTS_LIVE_UNTIL production --scope $SCOPE -y 2>/dev/null || true
+printf '2026-11-17T16:00:00Z' | vercel env add RECEIPTS_LIVE_UNTIL production --scope $SCOPE
+vercel env rm RECEIPTS_DAILY_BUDGET_USD production --scope $SCOPE -y
+printf '5' | vercel env add RECEIPTS_DAILY_BUDGET_USD production --scope $SCOPE
+```
+
+After the release deployment:
+
+1. `GET /api/health` reports `"live_requests_paused": false` and `"live_until": "2026-11-17T16:00:00Z"`.
+2. One live smoke each for Check (a built-in example with one number changed), Fix, Slide and Ask. At
+   historical prices this is about $0.04–0.05 in total. Record the ledger's spend for the UTC day.
+3. Rerun the anonymous acceptance harness. Saved examples and the three recorded samples (Slide → Try a real SEC slide, the recorded Meta 10-K question, Private → Replay a recorded Private check) must replay at $0 with `cached: true`.
+4. The owner sets a spend notification on dev.meta.ai.
+
+Three recorded samples stay available whatever the window: the real Bank of America slide, the Meta 10-K
+question and the synthetic Private draft replay their recorded live runs at $0 from `data/snapshot/recordings/`,
+and only for those exact requests (`receipts/recordings.py`). They skip the rate limit and the ledger because they
+make no call; the Private replay also needs no Modal configuration ([Private mode](private-mode.md#recorded-sample)).
+
+To close the window early, set `RECEIPTS_LIVE_REQUESTS_ENABLED` back to `false` and redeploy. Lowering the
+daily allowance also needs a redeploy.
+
 ## Public release controls (2026-10-29)
 
 The owner authorized public publication in the completion scope. The new Production configuration sets
@@ -580,7 +636,8 @@ It does not reset budgets or substitute a new ledger. Cached examples and the de
   fractional seconds. Missing timezone, non-UTC offsets and invalid values pause live work.
 - Both admission and each queued model dispatch check the policy. Already-running calls still settle their
   observed/uncertain usage. In-flight provider requests cannot be cancelled merely by reaching the cutoff.
-- `/api/health` exposes `live_requests_paused`. A false value means the policy permits live work; it does not
+- `/api/health` exposes `live_requests_paused` and, while a window with a deadline is open, `live_until`
+  (UTC ISO, otherwise `null`). A false `live_requests_paused` means the policy permits live work; it does not
   guarantee model credentials, the ledger or the private GPU endpoint are available.
 - Check, Fix, Slide, Ask, whole-filing quotation and Private share this policy. Static examples and recorded
   Check or extraction-cache replays remain usable while paused. The current source rejects paused

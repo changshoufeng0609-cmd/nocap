@@ -1,4 +1,5 @@
 import { API_BASE, costFields } from "./api";
+import { countsMatch } from "./claims";
 import { readSSE } from "./sse";
 import { STATUSES, type ErrorEvent, type Fact, type SlideBox, type SlideClaim, type SlideDone, type SlideMeta, type SlideRegion, type SlideRequest, type SlideStage, type Verdict } from "./types";
 
@@ -86,7 +87,7 @@ export async function streamSlide(request: SlideRequest, handlers: SlideHandlers
       if (message.event === "meta") {
         if (meta || !object(data.image) || !Number.isInteger(data.image.width) || !Number.isInteger(data.image.height) ||
           (data.image.width as number) < 1 || (data.image.height as number) < 1 || (data.image.width as number) > 2048 || (data.image.height as number) > 2048 ||
-          data.cached !== false || !Array.isArray(data.models) || !data.models.length || !data.models.every((m) => text(m, 100)) ||
+          typeof data.cached !== "boolean" || (data.cached && data.recorded_utc != null && !date(data.recorded_utc)) || !Array.isArray(data.models) || !data.models.length || !data.models.every((m) => text(m, 100)) ||
           (data.as_of !== null && !date(data.as_of)) ||
           (request.as_of ? Date.parse(data.as_of as string) !== Date.parse(request.as_of) : data.as_of !== null)) { invalid(); return; }
         meta = data as unknown as SlideMeta;
@@ -111,10 +112,8 @@ export async function streamSlide(request: SlideRequest, handlers: SlideHandlers
         verdicts.set(data.claim_id, data);
         handlers.onVerdict(data);
       } else if (message.event === "done") {
-        const actual = { verified: 0, wrong: 0, unverifiable: 0, approximate: 0 };
-        for (const verdict of verdicts.values()) actual[verdict.status]++;
         if (claims.size !== verdicts.size || data.claims !== claims.size || !object(data.counts) ||
-          !STATUSES.every((s) => data.counts && (data.counts as Record<string, unknown>)[s] === actual[s]) ||
+          !countsMatch(data.counts, verdicts.values()) ||
           !finite(data.latency_s) || data.latency_s < 0 || !finite(data.cost_usd) || data.cost_usd < 0 ||
           !Number.isInteger(data.model_calls) || (data.model_calls as number) < 0 || (data.model_calls as number) > 3 ||
           typeof data.cost_is_estimate !== "boolean" || !Array.isArray(data.warnings) || !data.warnings.every((w) => text(w, 2000))) { invalid(); return; }

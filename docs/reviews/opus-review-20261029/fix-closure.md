@@ -36,7 +36,7 @@ not measurements of this version.
 
 ## Validation
 
-- **Python:** full suite **1,535 passed** (previous release baseline 1,246). New coverage:
+- **Python:** full suite **1,548 passed** (previous release baseline 1,246). New coverage:
   `tests/test_extract_review_followup.py`, `tests/test_verify_review_followup.py`,
   `tests/test_runtime_review_followup.py`, plus Fix grammar cases in `tests/test_rewrite.py`.
 - **Frontend:** **165 client checks** (the 144 existing plus 21 request-lifecycle checks), typecheck,
@@ -115,9 +115,11 @@ Reviewed and left as documented behavior: IPv6 clients are limited per address r
 non-Vercel hosts; a 503 health response hides the cache policy in the browser (it shows the conservative
 wording); a reservation committed just before a client disconnects stays pending without refund, as the
 fail-closed accounting requires; no idle-in-transaction timeout is set on the shared ledger; validation
-toasts without actions remain until they time out. Extraction residuals: "$US96B", a scale word after a
-closing parenthesis ("$(96.2) million") and spaced abbreviations (" M", " B") are not parsed. A model-stated
-GAAP basis still wins over fronted "On an adjusted basis," wording.
+toasts without actions remain until they time out. A follow-up commit also reads "$US96B", a scale word
+after an accounting parenthesis ("$(96.2) million") and spaced scale abbreviations after an amount ("$96.2 B",
+"96.2 bn") without treating "5 M&A" or "2 B2B" as scales. A model-stated GAAP basis no longer wins over a
+basis phrase bound to the number (closed October 30): such a figure is `?`, while sentences stating both bases and
+other figures' modifiers are unaffected ([qualifier robustness](../../../eval/qualifier_robustness.md)).
 
 ## Integration findings
 

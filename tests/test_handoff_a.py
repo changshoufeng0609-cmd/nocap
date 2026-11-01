@@ -90,8 +90,12 @@ def test_real_apple_month_period_and_lookahead():
         c = c.model_copy(update={"span_text": "June-quarter revenue of $109.4 billion"})
         assert verify(c, s, context="Amazon second quarter 2026").status == "verified"
         assert verify(c, s, context="Amazon second quarter 2026", as_of="2026-07-30T20:15:00Z").reason == "look_ahead"
-        v = verify(claim("$10 billion", 10, entity="IBM"), s)
-        assert "NoCap covers 11 companies today:" in v.explanation
-        assert v.status == "unverifiable" and "IBM" in v.explanation
+        # Spotify files 20-F and 6-K, never a 10-Q or 10-K (a foreign private issuer), so it stays uncovered
+        for name in ("Spotify", "Spotify Technology S.A.", "SPOT"):
+            assert s.resolve_entity(name) is None and s.suggestion(name) is None, name
+        v = verify(claim("$10 billion", 10, entity="Spotify"), s)
+        assert "NoCap couldn't match \"Spotify\" to a company it covers" in v.explanation
+        assert "companies today" not in v.explanation  # hundreds of companies: no list (LIST_COVERED_UP_TO)
+        assert v.status == "unverifiable"
     finally:
         s.close()

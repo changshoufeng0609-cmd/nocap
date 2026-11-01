@@ -1,0 +1,28 @@
+WEBVTT
+
+00:00:00.100 --> 00:00:03.954
+One wrong number in an earnings story becomes a public correction.
+
+00:00:03.954 --> 00:00:10.657
+This AI-drafted story has two planted errors. NoCap flags both, with the filed figures.
+
+00:00:10.657 --> 00:00:15.957
+NoCap checks every financial number in a draft against SEC filings.
+
+00:00:15.957 --> 00:00:20.988
+The draft says revenue grew 18% from a year ago. That's the quarterly rate.
+
+00:00:20.988 --> 00:00:26.544
+The receipt does the math from the filings: 105.85%.
+
+00:00:27.044 --> 00:00:33.551
+Fix with receipts: Muse Wonder proposes corrected numbers, and code lets only the digits change.
+
+00:00:33.551 --> 00:00:37.894
+Then the whole draft is checked again: nine verified, zero wrong.
+
+00:00:38.744 --> 00:00:45.272
+SAM 3.1 finds both bar charts, and Muse Spark reads 32 printed labels.
+
+00:00:45.572 --> 00:00:54.894
+NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17.

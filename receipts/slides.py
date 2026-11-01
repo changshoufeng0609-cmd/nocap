@@ -21,7 +21,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract, verify
-from receipts.types import SCALE_FACTOR, Claim, EvidenceStore, Verdict
+from receipts.types import COUNT_KEYS, SCALE_FACTOR, Claim, EvidenceStore, Verdict, count_key
 
 SAM_MODEL = "sam-3.1"
 SAM_CONCEPTS = ("bar chart", "table")
@@ -38,7 +38,6 @@ MAX_OUTPUT_TOKENS = 8192
 RESERVE_USD = 0.12
 SAM_PRICE_USD = 0.0025
 SPARK_UNKNOWN_USAGE_USD = 0.10
-STATUSES = ("verified", "wrong", "unverifiable", "approximate")
 Event = tuple[str, dict[str, Any]]
 Box = list[int]
 
@@ -514,7 +513,7 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
         if empty_regions:
             notes.append(f"{empty_regions} returned region(s) had no financial readings and have not been verified.")
         yield "progress", {"stage": "verifying"}
-        counts = {status: 0 for status in STATUSES}
+        counts = dict.fromkeys(COUNT_KEYS, 0)
         assigned: dict[int, dict[str, Any]] = {}
         for region, rbox, reading, box, claims in prepared:
             key = id(region)
@@ -531,7 +530,7 @@ def slide_events(image: SlideImage, *, store: EvidenceStore, context: Optional[s
                 yield "claim", {**claim.model_dump(mode="json"), "box": box,
                                 "region_id": selected["id"], "reading": reading.reading}
                 verdict = reading_verdict(claim, reading, store, as_of=as_of, context=context)
-                counts[verdict.status] += 1
+                counts[count_key(verdict)] += 1  # a look-ahead ◷ is not_public, never wrong
                 yield "verdict", verdict.model_dump(mode="json")
         if not prepared:
             notes.append("No legible financial figures were found. Try a clearer crop or paste the text instead.")

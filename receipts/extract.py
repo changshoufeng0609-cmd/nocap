@@ -68,6 +68,7 @@ MODEL = "muse-spark-1.3"
 ALLOWED_MODELS = frozenset({MODEL, "muse-spark-1.2", "muse-spark-1.1", "muse-wonder-1.0"})
 EFFORT = "minimal"
 CONCURRENCY = 10
+MAX_PASSAGE_CHARS = 6000             # preserve old request sizes when accepting longer drafts
 MAX_OUTPUT_TOKENS = 8000             # per passage; reasoning and JSON share the budget
 TIMEOUT_S = 120.0                    # per HTTP attempt
 SCHEMA_NAME = "receipts_claims"
@@ -517,9 +518,9 @@ _MASKS = (  # spans whose numbers are not claims; anything inside them is report
     ("doc_ref", re.compile(r"\b(?:Forms?|Items?|Exhibits?|Notes?|Sections?|Rules?|Regulation|Schedules?)\s+\d[\w.\-]*")),
 )
 NUMBER_RE = re.compile(
-    r"(?<![\w.,/:])(?<![A-Za-z]-)"  # not glued to a word, decimal, list, date, time, or "COVID-19"
+    r"(?:(?<=\$US)|(?<![\w.,/:]))(?<![A-Za-z]-)"  # not glued to a word, decimal, list, date, time, or "COVID-19"
     r"(?P<num>(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)"
-    r"(?:(?P<scale>[\s-]?(?i:trillion|billion|million|thousand)s?\b|\s?(?:bln|mln)\b|(?:bn|mn|MM|B|M|K)(?![A-Za-z]))"
+    r"(?:(?P<scale>[\s-]?(?i:trillion|billion|million|thousand)s?\b|\s?(?:bln|mln|bn|mn)\b|(?:bn|mn|MM|B|M|K)(?![A-Za-z]))"
     r"|x(?![A-Za-z0-9])"  # multiples such as 1.2x
     r"|(?![A-Za-z0-9_]|[.,]\d|:\d|/\d|-[A-Za-z]))"  # not an ordinal, code, time, date or form id
 )
@@ -530,8 +531,8 @@ _SCALE_WORDS = {"trillion": "trillions", "billion": "billions", "million": "mill
 # Currency written next to a number. "$", "US$" and "USD" are US dollars; anything else ("C$", "NT$", "€",
 # "EUR", "euros") is another currency, which the USD evidence store never converts (unit "other", so "?").
 _ISO_CURRENCIES = (r"USD|EUR|GBP|JPY|CNY|RMB|CAD|AUD|NZD|HKD|TWD|SGD|CHF|INR|KRW|BRL|MXN|SEK|NOK|DKK|ZAR")
-_CURRENCY = rf"(?:US\s?\$|U\.S\.\s?\$|Rs\.?|[A-Z]{{1,3}}\$|\$|[€£¥₹₩₽₺₪₫₱฿]|(?:{_ISO_CURRENCIES}))\s?"
-_USD_SPELLINGS = frozenset({"$", "US$", "USD", "USD$", "U.S.$"})
+_CURRENCY = rf"(?:US\s?\$|U\.S\.\s?\$|\$US|Rs\.?|[A-Z]{{1,3}}\$|\$|[€£¥₹₩₽₺₪₫₱฿]|(?:{_ISO_CURRENCIES}))\s?"
+_USD_SPELLINGS = frozenset({"$", "US$", "USD", "USD$", "U.S.$", "$US"})
 
 
 def _attached_lead(gap: str) -> re.Pattern[str]:
@@ -554,6 +555,10 @@ _CURRENCY_WORDS = re.compile(
     rf"|(?-i:{_ISO_CURRENCIES}))\b", re.I)
 
 
+_PAREN_SCALE_RE = re.compile(r"\)\s?((?i:trillion|billion|million|thousand)s?\b|bn|mn|MM|B|M|K)(?![A-Za-z0-9&])")
+_SPACED_SCALE_RE = re.compile(r"\s(MM|B|M|K)(?![A-Za-z0-9&])")
+
+
 def scan_numbers(text: str) -> list[dict[str, Any]]:
     """Every number token in text. `ignored` is None for tokens a claim should cover."""
     masked = [(m.start(), m.end(), reason) for reason, rx in _MASKS for m in rx.finditer(text)]
@@ -564,12 +569,25 @@ def scan_numbers(text: str) -> list[dict[str, Any]]:
         scale_raw = (m.group("scale") or "").strip().lstrip("-").lower()
         scale = _SCALE_WORDS.get(scale_raw.rstrip("s") if len(scale_raw) > 2 else scale_raw)
         before, after = text[max(0, ns - 5):ns], text[m.end():m.end() + 24]
-        cur = re.search(r"(?:US)?\$\s?\(?$|USD\s?\(?$", before)
+        cur = re.search(r"(?:US)?\$\s?\(?$|\$US\s?\(?$|USD\s?\(?$", before)
+        tail = 0
+        if scale is None and before.endswith("("):
+            # "$(96.2) million": the scale follows the accounting parenthesis.
+            word = _PAREN_SCALE_RE.match(after)
+            if word:
+                scale, tail = _SCALE_WORDS[word.group(1).lower().rstrip("s") if len(word.group(1)) > 2
+                                           else word.group(1).lower()], word.end()
+        elif scale is None and cur:
+            # "$96.2 B": a spaced single-letter scale counts after an amount, not after a bare count.
+            letter = _SPACED_SCALE_RE.match(after)
+            if letter:
+                scale, tail = _SCALE_WORDS[letter.group(1).lower()], letter.end()
+        after = text[m.end() + tail:m.end() + tail + 24]
         pts = re.match(r"\s?(?:percentage points?|basis points?|bps)\b", after)
         pct = re.match(r"\s?(?:%|percent\b|per cent\b)", after)
         kind = "points" if pts else "percent" if pct else "money" if cur else "number"
         start = ns - len(cur.group(0)) if cur else ns
-        end = m.end() + (len(pts.group(0)) if pts else len(pct.group(0)) if pct else 0)
+        end = m.end() + tail + (len(pts.group(0)) if pts else len(pct.group(0)) if pct else 0)
         ignored = next((reason for ms, me, reason in masked if ms < ne and ns < me), None)
         if ignored is None and kind == "number" and not scale:
             if re.fullmatch(r"\d{4}", num) and 1900 <= int(num) <= 2100:
@@ -619,13 +637,28 @@ def _close(a: float, b: float) -> bool:
 # Passages and the document-context line
 # ---------------------------------------------------------------------------
 def split_passages(text: str) -> list[tuple[int, str]]:
-    """Blank-line separated passages as (start offset in text, passage text)."""
+    """Blank-line passages, bounded to 6,000 characters, with exact source offsets.
+
+    Existing passages keep their request bytes. Oversized paragraphs split at the
+    last whitespace in the latter half of the window, or at the hard size bound
+    when no such boundary exists. Leading/trailing whitespace is never sent.
+    """
     out: list[tuple[int, str]] = []
     pos = 0
     for m in [*re.finditer(r"\n[ \t]*\n\s*", text), None]:
         chunk = text[pos:m.start() if m else len(text)]
         if chunk.strip():
-            out.append((pos + len(chunk) - len(chunk.lstrip()), chunk.strip()))
+            start = pos + len(chunk) - len(chunk.lstrip())
+            remaining = chunk.strip()
+            while len(remaining) > MAX_PASSAGE_CHARS:
+                boundaries = list(re.finditer(r"\s+", remaining[MAX_PASSAGE_CHARS // 2:MAX_PASSAGE_CHARS + 1]))
+                end = MAX_PASSAGE_CHARS // 2 + boundaries[-1].start() if boundaries else MAX_PASSAGE_CHARS
+                out.append((start, remaining[:end].rstrip()))
+                tail = remaining[end:]
+                start += end + len(tail) - len(tail.lstrip())
+                remaining = tail.lstrip()
+            if remaining:
+                out.append((start, remaining))
         if m:
             pos = m.end()
     return out
@@ -796,6 +829,7 @@ class RequestUsage:
         self.before_call = before_call
         self._lock = threading.Lock()
         self._entries: list[tuple[float, bool]] = []
+        self._tokens: dict[str, int] = {}
         self._finished = False
 
     def call(self, fn: Callable[[], Any], request: Mapping[str, Any]) -> Any:
@@ -814,6 +848,11 @@ class RequestUsage:
         response = fn()
         usage = _usage(response)
         token_priced = not self.backend.self_hosted and any(p > 0 for p in self.backend.prices.values())
+        if usage is not None:
+            with self._lock:
+                if not self._finished:
+                    for key, count in usage.items():
+                        self._tokens[key] = self._tokens.get(key, 0) + count
         if usage is not None and token_priced:
             actual = cost_usd(usage, self.backend.prices)
             if math.isfinite(actual) and actual >= 0:
@@ -821,6 +860,11 @@ class RequestUsage:
                     if not self._finished:
                         self._entries[index] = (actual, False)
         return response
+
+    def observed_tokens(self) -> dict[str, int]:
+        """Provider-reported token counts summed over attempts that completed before finish(); {} if none."""
+        with self._lock:
+            return dict(self._tokens)
 
     def finish(self) -> dict[str, Any]:
         with self._lock:
@@ -1681,12 +1725,26 @@ class PassageResult:
         return float(self.call.get("cost_usd") or 0.0)
 
 
+def wait_phrase(seconds: float) -> str:
+    """'about 15 seconds', 'about a minute', 'about 3 minutes': how long Meta asked us to wait, for a person."""
+    s = max(1, math.ceil(seconds))
+    if s < 60:
+        return f"about {s} second{'s' if s != 1 else ''}"
+    m = math.ceil(s / 60)
+    return "about a minute" if m == 1 else f"about {m} minutes" if m < 120 else f"about {math.ceil(m / 60)} hours"
+
+
 def call_with_deadline(fn: Callable[[], Any], *, sleep: Callable[[float], None],
                        max_attempts: int = INTERACTIVE_ATTEMPTS, deadline: Optional[float] = None,
                        max_sleep_s: float = INTERACTIVE_MAX_SLEEP_S) -> _CallOutcome:
     """call_with_retry() for an interactive request: at most max_attempts attempts, short backoff, and no retry that
     would start after `deadline` (a time.monotonic() value). The same failures are retried (429/500/502/503, honoring
-    Retry-After up to max_sleep_s, and connection errors); a client timeout or a 504 is not, as it would recur."""
+    Retry-After, and connection errors); a client timeout or a 504 is not, as it would recur.
+
+    When Meta's Retry-After asks for longer than max_sleep_s (503 service_overloaded sends 60 s), there is no retry:
+    an earlier one would spend an admitted attempt on an almost certain repeat. The error then carries
+    retry_after_s, so the caller can say how long Meta asked us to wait; a short Retry-After (server_shutting_down)
+    is still honored and retried."""
     t0 = time.monotonic()
     attempts = max(1, max_attempts)
     err: Optional[dict[str, Any]] = None
@@ -1711,7 +1769,13 @@ def call_with_deadline(fn: Callable[[], Any], *, sleep: Callable[[float], None],
                    "message": str(body.get("message") or e.message)[:300]}
             if e.status_code in RETRYABLE_STATUS:
                 after = _retry_after_s(getattr(e.response, "headers", None))
-                wait = after if after is not None else 2.0 ** (attempt - 1)
+                if after is not None and math.isfinite(after):
+                    wait = max(0.0, after)
+                    err["retry_after_s"] = round(wait, 3)
+                    if wait > max_sleep_s:
+                        break  # Meta asked for a longer wait than a person here can sit through
+                else:
+                    wait = 2.0 ** (attempt - 1)
         except openai.APITimeoutError:
             err = {"kind": "client_timeout", "status": None, "message": "no response before the per-call timeout"}
         except openai.APIConnectionError as e:

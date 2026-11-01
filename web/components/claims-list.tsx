@@ -5,7 +5,7 @@ import { ChevronRightIcon } from "lucide-react";
 import { markLabel } from "@/components/highlighted-draft";
 import { StatusGlyph } from "@/components/status";
 import { displayStatus, reasonText, valueIsWrong } from "@/lib/claims";
-import { formatValue, inClaimTermsToFull } from "@/lib/format";
+import { formatExpectedValue } from "@/lib/format";
 import type { Claim, Verdict } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,17 @@ interface Props {
   panelId: string;
 }
 
+/** The claim's basis, unless its metric text already names that one basis ("GAAP net income"). Two rows that share
+ *  "GAAP and non-GAAP gross margins" then read "GAAP" and "non-GAAP" instead of looking identical. */
+function basisLabel(c: Claim): string | null {
+  if (!c.basis) return null;
+  const text = c.metric_text.toLowerCase();
+  const nonGaap = text.includes("non-gaap");
+  const gaap = text.replaceAll("non-gaap", "").includes("gaap");
+  const named = nonGaap && !gaap ? "non-GAAP" : gaap && !nonGaap ? "GAAP" : null;
+  return named === c.basis ? null : c.basis;
+}
+
 export function ClaimsList({ claims, verdicts, selectedId, onSelect, streaming, panelId }: Props) {
   return (
     <ol className="flex flex-col">
@@ -27,7 +38,7 @@ export function ClaimsList({ claims, verdicts, selectedId, onSelect, streaming, 
         const status = displayStatus(v);
         const struck = valueIsWrong(v);
         const filed =
-          struck && v?.expected_value != null ? formatValue(inClaimTermsToFull(c, v.expected_value), c.unit) : null;
+          struck && v?.expected_value != null ? formatExpectedValue(c, v.expected_value) : null;
         return (
           <li key={c.id} className="rise border-b border-border/70 last:border-b-0">
             <button
@@ -58,7 +69,7 @@ export function ClaimsList({ claims, verdicts, selectedId, onSelect, streaming, 
                   ) : null}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {[c.entity, c.metric_text, c.period_text].filter(Boolean).join(" · ")}
+                  {[c.entity, basisLabel(c), c.metric_text, c.period_text].filter(Boolean).join(" · ")}
                 </span>
                 <span className={cn("text-xs", status === "pending" ? "text-muted-foreground" : "text-foreground/80")}>
                   {v ? reasonText(v.reason) : "Checking against filings…"}

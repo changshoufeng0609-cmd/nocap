@@ -476,6 +476,30 @@ def test_aggregate_estimate_covers_retry_and_chat_fallback_without_cache_assumpt
     assert extract.extraction_estimate("", "", backend=backend) == 0
 
 
+def test_12000_character_estimate_scales_with_passages_context_and_attempts():
+    text, context = "x" * 12000, "c" * 300
+    passages, requests, _ = extract._requests_for(text, context, extract.EFFORT,
+                                                 extract.MAX_OUTPUT_TOKENS, META)
+    assert len(passages) == len(requests) == 2
+    assert all(context in request["input"] for request in requests)
+    expected = sum(extract.estimate_request_cost(request, META) * 2 for request in requests)
+    assert extract.extraction_estimate(text, context, max_attempts=2, backend=META) == pytest.approx(expected)
+    half = extract.extraction_estimate(text[:6000], context, max_attempts=2, backend=META)
+    assert expected == pytest.approx(2 * half)
+    assert extract.extraction_estimate(text, context, max_attempts=4, backend=META) == pytest.approx(2 * expected)
+    # More expensive configured prices and output limits must reach admission too.
+    expensive = extract.make_backend("meta", prices={"input": 5, "cached_input": 1, "output": 20})
+    assert extract.extraction_estimate(text, context, max_output_tokens=16000, backend=expensive) > expected
+
+
+@pytest.mark.parametrize("context,character", [("", "x"), ("\U0001f600" * 300, "x"), ("\x00" * 300, "\x00")])
+def test_12000_character_high_fanout_estimate_includes_every_passage(context, character):
+    text = f"{character}\n\n" * 4000
+    assert len(text) == 12000 and len(extract.split_passages(text)) == 4000
+    estimate = extract.extraction_estimate(text, context, max_attempts=2, backend=META)
+    assert estimate == pytest.approx(400.0, abs=.000001)
+
+
 @pytest.mark.parametrize("backend", [
     extract.make_backend("modal", base_url="https://offline.invalid/v1"),
     extract.make_backend("meta", self_hosted=True),

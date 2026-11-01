@@ -11,8 +11,9 @@ const compiled = mkdtempSync(join(tmpdir(), "receipts-presentation-"));
 let passed = 0;
 try {
   execFileSync(process.execPath, [join(root, "node_modules/typescript/bin/tsc"), "--noEmit", "false", "--incremental", "false", "--outDir", compiled, "--module", "commonjs", "--target", "es2020", "--skipLibCheck", "lib/claims.ts", "lib/calculations.ts"], { cwd: root, stdio: "pipe" });
-  const { displayCounts, displayStatus, valueIsWrong, filedValue } = await import(pathToFileURL(join(compiled, "claims.js")).href);
+  const { displayCounts, displayStatus, valueIsWrong, filedValue, correction } = await import(pathToFileURL(join(compiled, "claims.js")).href);
   const { receiptCalculation } = await import(pathToFileURL(join(compiled, "calculations.js")).href);
+  const { formatClaimed, formatExpectedValue, formatValue } = await import(pathToFileURL(join(compiled, "format.js")).href);
   const claim = { metric: "revenue_growth", unit: "%", comparison: "YoY", metric_text: "revenue growth", value: 20, scale: "units" };
   const current = { cik: 1, ticker: "NVDA", metric: "revenue", value: 1200000000, unit: "USD", basis: "GAAP", period_start: "2026-04-01", period_end: "2026-06-30" };
   const prior = { ...current, value: 1000000000, period_start: "2025-04-01", period_end: "2025-06-30" };
@@ -61,6 +62,42 @@ try {
   check("operating margin keeps its numerator distinct", () => {
     const c = { ...claim, metric: "other", metric_text: "operating margin", comparison: "none" };
     assert.equal(receiptCalculation(c, { ...verdict, evidence: [{ ...current, metric: "operating_income", value: 600000000 }, current] }).value, 50);
+  });
+  for (const [metricText, valueText, expected, unit, label] of [
+    ["gross margin expanded", "120 basis points", 125, "bps", "125 bps"],
+    ["operating margin rose", "2.1 percentage points", 2.3, "pp", "2.3 pp"],
+    ["net profit margin fell", "50 bps", -60, "bps", "−60 bps"],
+    ["net margin rose", "2.1 pts", 2.15, "pp", "2.15 pp"],
+  ]) {
+    check(`${valueText} corrections keep the source unit despite percent or scaled model metadata`, () => {
+      for (const modelUnit of ["%", "other", "USD"]) {
+        const c = { ...claim, metric: "other", metric_text: metricText, value_text: valueText, unit: modelUnit, scale: "millions", value: 999 };
+        const wrong = { ...verdict, status: "wrong", expected_value: expected };
+        const filed = filedValue(c, wrong);
+        assert.deepEqual(filed, { value: expected, unit });
+        assert.equal(formatValue(filed.value, filed.unit), label);  // ReceiptDetail's Filed value
+        assert.equal(correction(c, wrong), label);  // inline annotation
+        assert.equal(formatExpectedValue(c, expected), label);  // ClaimsList's correction
+        assert.equal(formatClaimed(c), valueText);
+      }
+    });
+  }
+  check("margin changes never display a coincidentally matching level or growth calculation", () => {
+    const operating = { ...claim, metric: "other", metric_text: "operating margin rose", value_text: "50 bps" };
+    const levelFacts = [{ ...current, metric: "operating_income", value: 600000000 }, current];
+    assert.equal(receiptCalculation(operating, { ...verdict, expected_value: 50, evidence: levelFacts }), null);
+    const net = { ...claim, metric: "other", metric_text: "net margin rose", value_text: "20 bps" };
+    const growthFacts = [current, prior].map((f) => ({ ...f, metric: "net_income" }));
+    assert.equal(receiptCalculation(net, { ...verdict, expected_value: 20, evidence: growthFacts }), null);
+    const gross = { ...claim, metric: "gross_margin", metric_text: "gross margin expanded", value_text: "120 bps" };
+    const filedLevel = { ...current, metric: "gross_margin", unit: "%", value: 75 };
+    assert.equal(filedValue(gross, { ...verdict, evidence: [filedLevel] }), null);
+    assert.equal(filedValue(gross, { ...verdict, status: "unverifiable", expected_value: 120 }), null);
+  });
+  check("source point units do not change unrelated percentage or money presentation", () => {
+    assert.equal(formatExpectedValue({ ...claim, value_text: "20%" }, 21), "21%");
+    const money = { ...claim, metric_text: "net income", value_text: "$2 million", unit: "USD", scale: "millions" };
+    assert.equal(formatExpectedValue(money, 3), "$3M");
   });
   check("margin does not combine GAAP and non-GAAP operands", () => {
     for (const [metric, metricText, numeratorMetric] of [["gross_margin", "gross margin", "gross_profit"], ["other", "operating margin", "operating_income"]]) {

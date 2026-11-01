@@ -180,6 +180,31 @@ try {
     }
   }
 
+  for (const client of clients.slice(0, 2)) {
+    await check(`${client.name} error keeps a known refusal reason and Meta's requested wait, and drops malformed ones`, async () => {
+      const zero = { cost_usd: 0, cost_is_estimate: false, model_calls: 0 };
+      assert.deepEqual(await run(client, frame("error", { ...errorBase, ...zero, reason: "daily_budget" })),
+        [["error", { ...errorBase, ...zero, reason: "daily_budget" }]]);
+      assert.deepEqual(await run(client, frame("error", { ...errorBase, ...validCost, retry_after_s: 60 })),
+        [["error", { ...errorBase, ...validCost, retry_after_s: 60 }]]);
+      for (const extra of [{ reason: "free_money" }, { reason: 1 }, { retry_after_s: -1 }, { retry_after_s: "60" }, { retry_after_s: Infinity }]) {
+        assert.deepEqual(await run(client, frame("error", { ...errorBase, ...zero, ...extra })), [["error", { ...errorBase, ...zero }]]);
+      }
+    });
+  }
+
+  await check("Check and Fix accept counts with not_public and older counts without it", async () => {
+    for (const client of clients.slice(0, 2)) {
+      for (const shape of [counts, { ...counts, not_public: 1 }]) {
+        const seen = await run(client, client.prefix + frame(client.terminal, { ...client.success, counts: shape }));
+        assert.equal(seen.at(-1)[0], client.terminal);
+      }
+    }
+    const fix = clients[1];
+    const bad = await run(fix, frame("result", { ...fix.success, counts: { ...counts, not_public: "1" } }));
+    assert.equal(bad.at(-1)[0], "error");
+  });
+
   await check("cost parser rejects non-finite values without fabricating zero", () => {
     for (const cost_usd of [NaN, Infinity, -Infinity]) assert.deepEqual(costFields({ ...validCost, cost_usd }), {});
     for (const model_calls of [NaN, Infinity, -Infinity]) assert.deepEqual(costFields({ ...validCost, model_calls }), {});

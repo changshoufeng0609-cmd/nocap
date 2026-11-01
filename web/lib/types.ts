@@ -95,9 +95,18 @@ export interface NumericCoverage {
   uncovered: { start: number; end: number; text: string }[];
 }
 
+/** done/result `counts` buckets (receipts.types.count_key): a ◷ look-ahead verdict is not_public, never wrong.
+ * Servers and recordings from before 2026-10-31 omit not_public and count a look-ahead verdict under its status. */
+export type Counts = Record<Status, number> & { not_public?: number };
+export const COUNT_KEYS = ["verified", "wrong", "not_public", "unverifiable", "approximate"] as const;
+
+/** Admission refusals (docs/api-contract.md#errors): no model call started, and the $0 samples still work. */
+export type RefusalReason = "live_paused" | "budget_unavailable" | "daily_budget" | "rate_limited" | "filing_question_limit";
+export const REFUSAL_REASONS: readonly RefusalReason[] = ["live_paused", "budget_unavailable", "daily_budget", "rate_limited", "filing_question_limit"];
+
 export interface DoneEvent extends CostReport {
   coverage?: NumericCoverage;
-  counts: Record<Status, number>;
+  counts: Counts;
   latency_s: number;
   cost_usd: number;
   model: string;
@@ -106,6 +115,10 @@ export interface DoneEvent extends CostReport {
 export interface ErrorEvent extends CostReport {
   message: string;
   retryable: boolean;
+  /** Present only on an admission refusal. */
+  reason?: RefusalReason;
+  /** How long Meta's API asked NoCap to wait, when the message says so. */
+  retry_after_s?: number;
 }
 
 export interface CheckRequest {
@@ -139,7 +152,7 @@ export interface FixResult extends CostReport {
   changes: FixChange[];
   remaining: { claim_id: string; reason: string; explanation: string }[];
   results: { claim: Claim; verdict: Verdict }[];
-  counts: Record<Status, number>;
+  counts: Counts;
   cost_usd: number;
   latency_s: number;
   model: string;
@@ -157,6 +170,8 @@ export interface Example {
 
 export interface Health {
   live_requests_paused?: boolean;
+  /** Scheduled end (UTC ISO) of an open live window, or null when none is set or live work is paused. */
+  live_until?: string | null;
   draft_cache_policy?: "snapshot_only" | "persistent" | "disabled";
   ok: boolean;
   data_snapshot: string;
@@ -174,7 +189,9 @@ export interface SlideRequest {
 export interface SlideMeta {
   models: string[];
   image: { width: number; height: number };
-  cached: false;
+  /** true for a built-in sample replaying its recorded live run at $0 */
+  cached: boolean;
+  recorded_utc?: string | null;
   as_of: string | null;
 }
 export interface SlideRegion {
@@ -189,7 +206,7 @@ export interface SlideClaim extends Claim {
   reading: "printed" | "axis_estimate";
 }
 export interface SlideDone {
-  counts: Record<Status, number>;
+  counts: Counts;
   claims: number;
   model_calls: number;
   latency_s: number;
@@ -201,4 +218,4 @@ export interface SlideDone {
 export const STATUSES: Status[] = ["verified", "wrong", "unverifiable", "approximate"];
 
 /** Same limit as the API: longer drafts are rejected. */
-export const MAX_DRAFT_CHARS = 6000;
+export const MAX_DRAFT_CHARS = 12000;

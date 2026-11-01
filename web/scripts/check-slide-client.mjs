@@ -85,6 +85,14 @@ try {
   await check("does not expose an unsafe filing link as evidence", () => rejects(initial + frame("claim", claim) + frame("verdict", { ...verdict, evidence: [{ ...fact, url: "javascript:alert(1)" }] })));
   await check("a missing verdict cannot be marked complete", () => rejects(initial + frame("claim", claim) + frame("done", done)));
   await check("a mismatched summary cannot be marked complete", () => rejects(initial + frame("claim", claim) + frame("verdict", verdict) + frame("done", { ...done, counts: { ...done.counts, verified: 2 } })));
+  await check("a look-ahead reading counts as not_public, and older streams keep their status buckets", async () => {
+    const ahead = { ...verdict, status: "wrong", reason: "look_ahead", explanation: "Filed after the cutoff." };
+    const body = (counts) => initial + frame("claim", claim) + frame("verdict", ahead) + frame("done", { ...done, counts });
+    const current = { verified: 0, wrong: 0, not_public: 1, unverifiable: 0, approximate: 0 };
+    assert.equal((await run(body(current))).at(-1)[0], "done");
+    assert.equal((await run(body({ verified: 0, wrong: 1, unverifiable: 0, approximate: 0 }))).at(-1)[0], "done");  // a recording from before not_public
+    await rejects(body({ ...current, wrong: 1, not_public: 0 }));  // a server that reports not_public never counts it as wrong
+  });
   await check("a response for a different cutoff is rejected", async () => assert.equal((await run(full, { request: { as_of: "2026-01-01T00:00:00Z" } })).at(-1)[0], "error"));
   await check("EOF and malformed JSON report an incomplete check", async () => { await rejects(initial); await rejects(initial + "event: claim\ndata: {bad}\n\n"); });
   await check("error is terminal even if later events look successful", async () => {
@@ -121,6 +129,15 @@ try {
   await check("data URL conversion preserves every image byte", () => {
     const bytes = new Uint8Array(20_001).map((_, i) => i % 256);
     assert.deepEqual(new Uint8Array(Buffer.from(slideDataUrl(bytes, "image/png").split(",")[1], "base64")), bytes);
+  });
+  await check("a recorded sample replay is accepted and keeps its cached label", async () => {
+    const seen = await run(frame("meta", { ...meta, cached: true, recorded_utc: "2026-10-30T07:20:42Z" }) + frame("region", region) + frame("claim", claim) + frame("verdict", verdict) + frame("done", done));
+    assert.equal(seen[0][1].cached, true);
+    assert.equal(seen.at(-1)[0], "done");
+  });
+  await check("a malformed cached flag or recording time is rejected", async () => {
+    await rejects(frame("meta", { ...meta, cached: "yes" }) + frame("done", done));
+    await rejects(frame("meta", { ...meta, cached: true, recorded_utc: "not a time" }) + frame("done", done));
   });
   console.log(`\n${passed} slide client checks passed; no network or model calls.`);
 } catch (error) {

@@ -18,8 +18,9 @@ against the image before publishing.
 - Uncertain readings and unresolved company, metric, period or basis remain ?. Guidance remains ?.
 - `as_of` uses SEC acceptance timestamps exactly as in text checks. An axis estimate whose evidence was not yet
   public remains `unverifiable` with the `look_ahead` reason. The UI shows its blue “Not public yet” badge and
-  retains the axis-estimate label; the API's `done.counts` includes it under `unverifiable`.
-- Financial labels are compared with existing evidence for the same 10 supported companies. Uploading a slide
+  retains the axis-estimate label; the API's `done.counts` includes it under `not_public`, like every ◷ look-ahead
+  result, and not under `unverifiable`.
+- Financial labels are compared with existing evidence for the same 11 supported companies. Uploading a slide
   does not ingest a filing or expand the evidence coverage.
 
 ## API
@@ -122,6 +123,23 @@ region on the NVIDIA table, so the UI honestly shows a Spark region; this is the
 Total Meta usage across all three runs was **$0.07012575**. These two example images do not measure general image-reading accuracy or
 coverage. The older Spike C 12/12 result is not a measurement of this endpoint. See the
 [smoke record](../eval/slide_dev_validation.json) and [seeded image](../examples/slides/nvda-draft.png).
+
+### Real SEC slide sample (2026-10-30)
+
+The Slide workspace's **Try a real SEC slide** button loads page 9 of Bank of America's 2Q26 earnings
+presentation as filed with the SEC, used unmodified (8-K 0000070858-26-000353, Exhibit 99.2, accepted 2026-07-14 10:45:08 UTC;
+[source image](https://www.sec.gov/Archives/edgar/data/70858/000007085826000353/bac06302026ex992009.jpg)).
+Its live run through the shipped endpoint is recorded and replays at $0 for that exact request, also while live
+requests are paused (`receipts/recordings.py`).
+
+| Run | Regions | Readings | Verdicts | Wall time | Meta cost |
+| --- | --- | ---: | --- | ---: | ---: |
+| BAC 2Q26, page 9 (the shipped sample) | 2 SAM bar charts; Spark added the line chart and the commentary box | 32 (reading limit reached) | 5 verified: every GAAP net-interest-income bar, 2Q25–2Q26, against BAC's 10-Qs and 10-K; 27 unverifiable; 0 wrong | 21.02 s | $0.030198 |
+| BAC 3Q26, page 9 (first attempt, not shipped) | 2 SAM, 2 Spark | 32 | 4 verified, 28 unverifiable: the 3Q26 bar is ? because the snapshot has no BAC 3Q26 filing yet | 22.83 s | $0.033016 |
+
+The FTE totals are non-GAAP; they return ? and the explanation says the wording "FTE" qualifies the figure.
+Yields and the net-interest-income mix are not tracked metrics. Each run made two SAM requests and one Spark
+request. This is one real slide, not an accuracy or coverage measurement.
 
 The frontend passed 22 client checks and 9 browser acceptance groups using recorded real responses, with
 zero extra provider calls. Desktop/mobile, selectable overlays, receipts, invalid files, keyboard access and

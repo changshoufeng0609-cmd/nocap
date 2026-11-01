@@ -26,7 +26,8 @@ def test_slide_expiry_after_first_sam_cannot_start_remaining_models_or_erase_cha
             return response
 
     model = ExpiringModel(sam="box" if known_usage else "truncated")
-    config = settings(tmp_path, live_until=until, daily_budget_usd=1,
+    # A $1 cap with no Check/Fix reserve keeps this a live-window test, not a test of that reserve.
+    config = settings(tmp_path, live_until=until, daily_budget_usd=1, check_fix_reserve_usd=0,
                       spend_namespace="same-namespace-after-expiry")
     app = api.create_app(config, store=FakeStore(), slide_client_factory=lambda: model)
     events = parse_sse(TestClient(app).post("/api/slide", json={"image_data_url": image_url()}).text)
@@ -38,9 +39,9 @@ def test_slide_expiry_after_first_sam_cannot_start_remaining_models_or_erase_cha
     assert events[-1][1]["cost_is_estimate"] is not known_usage
     assert all(response.closed for response in model.streams)
 
-    # Known usage settles the first request. Missing usage retains the original
-    # operation reservation, including when the time gate is subsequently reopened.
-    expected = slides.SAM_PRICE_USD if known_usage else slides.RESERVE_USD
+    # Known usage settles the first request at its price. Missing usage keeps that accounted attempt's own
+    # one-image estimate, not the whole operation reservation, also after the time gate is reopened.
+    expected = slides.SAM_PRICE_USD
     assert app.state.ledger.spent_today() == pytest.approx(expected)
     assert app.state.ledger.pending_count() == 0
     reopened = api._ledger(replace(config, live_until=None))

@@ -56,6 +56,17 @@ UTF-8 request bytes plus 4,096 framing tokens and the full 3,000-token output li
 1,048,576-token context window. This bound is deliberately conservative; a token tokenizer or a character/4
 guess is not treated as a safe upper bound. No silent document truncation occurs.
 
+The request puts the stable part first: instructions, then the filing metadata and its complete text, and the
+question last. Meta's prefix cache reuses a request up to its first differing token, so a later question about
+the same filing should recompute only the question. Each request also carries
+`prompt_cache_key: "nocap-filing-<first 16 hex digits of the text's SHA-256>"`, one key per shared prefix so
+questions about one filing route together, and `prompt_cache_retention: "24h"` because judging traffic comes in
+bursts. Both are hints, not guarantees ([prompt-caching](https://dev.meta.ai/docs/prompt-caching.md), checked
+2026-10-30); the provider-reported `cached_tokens` says what was reused. The recorded run below predates this
+order and reported 0 cached tokens. A cached repeat is not yet measured live: at Spark's cached-input price, about
+100K cached tokens should bring a second question on that 10-K from about $0.129 to about $0.018. The recorded
+sample's replay key is `(filing_id, question, as_of)`, so the new request layout does not change it.
+
 Spark can select up to five quotes, each 24–1,600 characters. Code rejects missing, repeated, duplicate and
 oversized quotes. Accepted offsets are Unicode code-point positions in the normalized filing text, not raw HTML
 bytes or JavaScript UTF-16 offsets. Quotes have no `verified` financial status. Readers must inspect context;
@@ -85,14 +96,21 @@ produces an empty list; a damaged index or file fails closed.
 ## Accounting and integration
 
 Install `receipts.ask_api.create_router(settings=settings, get_store=get_store, get_client=get_slide_client,
-limiter=limiter, ledger=ledger)` in the existing FastAPI application. Reusing `get_slide_client` deliberately
+limiter=limiter, ledger=ledger, filing_quota=...)` in the existing FastAPI application (`filing_quota` defaults to
+one built from `settings`). Reusing `get_slide_client` deliberately
 selects Standard Meta Spark even when the draft extractor uses an open-weight backend. Ask/quote search does
 not claim to run in private Glimmer mode; the question and selected public evidence go to Meta.
 
 Both routes share the app's rate limiter and persistent spending ledger. Before starting the worker, the
-route reserves `extract.estimate_request_cost` for the exact request. `RequestUsage` and `OperationBudget`
-check each dispatch and settle known usage; unknown usage or failures after dispatch retain conservative
-charges. A wall-time worker deadline seals the usage meter and withholds late responses, even if a provider
+route reserves `extract.estimate_request_cost` for the exact request, and that reservation must leave the last
+`RECEIPTS_CHECK_FIX_RESERVE_USD` (default $1.50) of the daily cap unused: that end of the budget stays with Check
+and Fix. A whole-filing question also takes one of `RECEIPTS_FILING_QUESTIONS_PER_DAY` (default 5) new questions
+per UTC day, counted in the same ledger storage under `<namespace>.filing_questions`, so the count is shared by
+every instance. Recorded sample questions replay at $0 and take no slot; a question that is refused before its
+model call returns its slot. Refusals carry an error `reason` (`filing_question_limit`, `daily_budget`, ...; see
+[api-contract.md](api-contract.md)). `RequestUsage` and `OperationBudget` check each dispatch and settle known
+usage; an attempt with unknown usage or a failure after dispatch settles at its own conservative estimate.
+A wall-time worker deadline seals the usage meter and withholds late responses, even if a provider
 ignores the requested HTTP timeout. There is one attempt, no SDK retry, and `store: false`. The application does not cache question
 text or generated quote responses. A disconnect does not bypass settlement.
 
@@ -109,3 +127,23 @@ complete-question binding (including parenthetical restrictions and unknown enti
 budget and rate rejection, path/URL restrictions, file hashes, Unicode spans, duplicate/nonverbatim quotes,
 context overflow and importer provenance. They do not run the held-out split or establish human relevance
 judgments. Live smoke results, full-regression counts and deployment evidence belong in the current handoff.
+
+### Whole-filing live validation (2026-10-30)
+
+The snapshot now packages one complete filing: Meta's 2025 Form 10-K (accession 0001628280-26-003942,
+accepted 2026-01-29 00:13:46 UTC, 516,028 normalized characters). It was imported with the declared SEC
+User-Agent in one live SEC request. One live question then went through `/api/grounding` with Standard
+`muse-spark-1.3`: *"What does Meta plan to spend on capital expenditures in 2026, and what does it expect for
+Reality Labs operating losses?"*
+
+| Measure | Result |
+|---|---|
+| Requests | 1 model call carrying the complete filing (no retrieval, chunking or truncation) |
+| Provider-reported usage | 101,135 input tokens, 509 output tokens, 0 cached |
+| Wall time / cost | 6.14 s / $0.128582 |
+| Quotations | 4 exact, unique spans accepted, 0 rejected: 2026 capital expenditures of approximately $115–135 billion; Reality Labs losses expected to remain similar to 2025 (found at two separate locations); Reality Labs expected to operate at a loss for the foreseeable future |
+
+The run is recorded (`receipts/recordings.py`) and replays at $0 as the Ask workspace's recorded question,
+also while live requests are paused. An earlier identical run ($0.128374, 3 quotes) predates token reporting
+and is kept only as a local record. The filing uses about 10% of the 1,048,576-token window: this
+demonstrates whole-document reading, not the window limit. Quotes establish provenance, not truth.

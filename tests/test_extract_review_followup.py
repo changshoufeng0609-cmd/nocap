@@ -460,3 +460,36 @@ def test_a_later_repeat_of_the_value_is_cut_from_the_quote(store):
               "unchanged from $59.688 billion a year ago.")
     claim, verdict, _ = one(source, income(source), store)
     assert claim.span_text.count("$59.688 billion") == 1 and verdict.status == "unverifiable"
+
+
+# --- Remaining tokenizer limits ----------------------------------------------------------------------
+
+@pytest.mark.parametrize("written,scale,status", [
+    ("$US96.221 billion", "billions", "verified"),
+    ("$96.221 B", "billions", "verified"),
+    ("$96.221 M", "millions", "wrong"),
+    ("96.221 bn", "billions", "verified"),
+])
+def test_dollar_us_and_spaced_scale_abbreviations(store, written, scale, status):
+    source = f"NVIDIA Q2 FY2027 revenue was {written}."
+    claim, verdict, _ = one(source, proposal(source, "96.221"), store)
+    assert claim.value_text == written and claim.scale == scale and claim.unit == "USD"
+    assert verdict.status == status
+
+
+def test_dollar_us_keeps_a_strict_bound(store):
+    source = "NVIDIA Q2 FY2027 revenue was more than $US96.221 billion."
+    claim, verdict, _ = one(source, proposal(source, "96.221 billion"), store)
+    assert verify.hedge_of(claim) is not None and verdict.status == "wrong"
+
+
+def test_a_scale_after_accounting_parentheses_is_read(store):
+    source = "NVIDIA Q2 FY2027 revenue was $(96.221) million."
+    claim, verdict, _ = one(source, proposal(source, "$(96.221)", -96.221), store)
+    assert claim.value_text == "$(96.221) million" and claim.scale == "millions"
+    assert claim.value == pytest.approx(-96.221) and verdict.status == "wrong"
+
+
+@pytest.mark.parametrize("text", ["completed 5 M&A deals", "a 2 B2B pilot", "7 K-12 schools"])
+def test_spaced_letters_after_a_count_are_not_scales(text):
+    assert [t["scale"] for t in extract.scan_numbers(text)] == [None]

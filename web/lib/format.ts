@@ -9,6 +9,22 @@ const SCALE_FACTOR: Record<Scale, number> = { units: 1, thousands: 1e3, millions
 
 const MINUS = "−";
 
+export type DisplayUnit = Unit | "bps" | "pp";
+
+// Keep the number and point-unit grammar aligned with receipts.verify._MARGIN_CHANGE_VALUE.
+const SOURCE_NUMBER = String.raw`(?:\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?|\.\d+)`;
+// No lookbehind (Safari before 16.4 rejects it): the character before the number is matched instead.
+const MARGIN_CHANGE_VALUE = new RegExp(String.raw`(?:^|[^\w.])[+−-]?${SOURCE_NUMBER}\s*(basis\s+points?|bps?|percentage\s+points?|pp|pts)(?!\w)`, "gi");
+
+/** Margin differences keep the draft's point unit, even when cached extraction says % or millions. */
+export function marginChangeUnit(claim: Claim): "bps" | "pp" | null {
+  if (!/\b(?:(?:gross|net)\s+(?:profit\s+)?|operating\s+)margins?\b/i.test(claim.metric_text)) return null;
+  const text = claim.value_text ?? "";
+  const units = [...text.matchAll(MARGIN_CHANGE_VALUE)];
+  if (units.length !== 1 || [...text.matchAll(new RegExp(SOURCE_NUMBER, "g"))].length !== 1) return null;
+  return /^(?:basis|bp)/i.test(units[0][1]) ? "bps" : "pp";
+}
+
 function trimmed(x: number, maxDecimals: number): string {
   return x
     .toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: maxDecimals })
@@ -16,9 +32,10 @@ function trimmed(x: number, maxDecimals: number): string {
 }
 
 /** $96.221B, $592M, $2.46, 19.8%: a value in full units, compact and exact to three decimals. */
-export function formatValue(value: number, unit: Unit): string {
+export function formatValue(value: number, unit: DisplayUnit): string {
   const sign = value < 0 ? MINUS : "";
   const a = Math.abs(value);
+  if (unit === "bps" || unit === "pp") return `${sign}${trimmed(a, 6)} ${unit}`;
   if (unit === "%") return `${sign}${trimmed(a, 2)}%`;
   if (unit === "USD/share") return `${sign}$${a.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
   const prefix = unit === "USD" ? "$" : "";
@@ -47,7 +64,14 @@ export function inClaimTermsToFull(claim: Claim, x: number): number {
 }
 
 export function formatClaimed(claim: Claim): string {
+  if (marginChangeUnit(claim)) return claim.value_text;
   return formatValue(claimFullValue(claim), claim.unit);
+}
+
+/** Server margin-change expectations are already in source bps/pp; model scale is irrelevant. */
+export function formatExpectedValue(claim: Claim, value: number): string {
+  const marginUnit = marginChangeUnit(claim);
+  return marginUnit ? formatValue(value, marginUnit) : formatValue(inClaimTermsToFull(claim, value), claim.unit);
 }
 
 function pad(n: number): string {

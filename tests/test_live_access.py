@@ -158,7 +158,10 @@ def test_expiry_blocks_queued_dispatch_but_settles_inflight_work_without_reset(t
     stats = stream.CheckStats(cost_usd=record["cost_usd"], model_calls=record["model_calls"],
                               estimated_calls=record["estimated_calls"])
     operation.finish(stats)
-    expected = record["cost_usd"] if known_usage else .2
+    # The in-flight attempt was accounted: known usage settles at its price, unknown usage at that attempt's own
+    # conservative estimate ($0.05 floor), never at zero and no longer at the whole $0.20 reservation.
+    expected = record["cost_usd"]
+    assert known_usage or (record["estimated_calls"] == 1 and expected == pytest.approx(.05))
     assert ledger.spent_today() == pytest.approx(expected, abs=1e-6) and ledger.pending_count() == 0
     reopened = api._ledger(replace(config, live_until=None))
     assert reopened.cap_usd == 1 and reopened.namespace == "fixed-shared"
@@ -173,7 +176,7 @@ def test_health_reports_policy_without_claiming_model_availability(tmp_path, mon
     app = api.create_app(settings(tmp_path, live_until=UNTIL), store=object(), client_factory=forbidden)
     c = TestClient(app)
     assert c.get("/api/health").json() == {**info, "live_requests_paused": False,
-                                           "draft_cache_policy": "persistent"}
+                                           "live_until": "2026-11-05T02:00:00Z", "draft_cache_policy": "persistent"}
     now[0] = UNTIL
-    assert c.get("/api/health").json() == {**info, "live_requests_paused": True,
+    assert c.get("/api/health").json() == {**info, "live_requests_paused": True, "live_until": None,
                                            "draft_cache_policy": "persistent"}

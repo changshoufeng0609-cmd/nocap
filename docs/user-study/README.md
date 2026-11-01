@@ -8,8 +8,9 @@ Recruit **2–3 financial journalists or equity analysts** who regularly work wi
 - [Session guide](session-script.md): fifteen-minute protocol, tasks and neutral follow-ups.
 - [Anonymous notes template](session-template.md): copy once per session with an ID such as P01.
 - [Results register](results.md): explicitly empty until real observations exist.
+- Traditional Chinese facilitator materials for sessions with Taiwanese participants: [session script](session-script.zh-TW.md), [invitation](invite.zh-TW.md) and [notes sheet](notes-sheet.zh-TW.md).
 
-Use the tested private preview if participants can access it. Otherwise arrange a local or screen-sharing session and record who operated the mouse. Use only the supplied public/seeded examples. Do not ask participants to upload confidential work. Recording and quote permission are optional and separate from participation.
+Run sessions on the released public site (https://receipts-nocap.vercel.app) or by screen sharing, and record who operated the mouse. Use only the supplied public/seeded examples. Do not ask participants to upload confidential work. Recording and quote permission are optional and separate from participation.
 
 ## Decisions this study should inform
 

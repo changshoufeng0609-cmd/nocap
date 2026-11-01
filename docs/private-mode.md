@@ -28,7 +28,8 @@ ports, queries or fragments are accepted. Server regions are the six documented 
 The [official Server architecture](https://modal.com/blog/serverless-servers) describes this domain format. The operator is
 responsible for selecting their own deployment and reviewing its logging settings.
 
-`GET /api/private/status` reports **configured availability**, not a successful live probe. Missing or
+`GET /api/private/status` reports **configured availability**, not a successful live probe, and lists the
+`recorded_samples` it replays at $0 ([recorded sample](#recorded-sample)). Missing or
 invalid setup disables private checks without sending the draft elsewhere. `POST /api/private/check`
 accepts only `text`, optional `context`, and optional `as_of`. Inputs are bounded like ordinary Check;
 requests cannot supply endpoints, models or verdicts. Both routes return `Cache-Control: no-store`.
@@ -51,15 +52,46 @@ Fix with receipts, Ask, and Check a slide use their own routes and may use Meta.
 silently offer those paid hosted-model actions for the private draft. Switching modes must clear the
 private component rather than copy its text into another workflow.
 
+## Recorded sample
+
+**Private → Replay a recorded Private check** replays one real run of a public synthetic NVIDIA draft
+(`web/lib/samples.json`, id `nvda-q2-fy2027-private`) at $0. `POST /api/private/check` replays a recording
+only for that exact text, whitespace included, with the same context and as-of time. The replay comes before
+the live gate and the Modal configuration check, so it works on the public site and while live requests are
+paused. It sends nothing to Modal or any model and takes no rate-limit slot or ledger reservation. `meta`
+carries `cached: true` and `recorded_utc`; the claims, verdicts and `done` accounting are the original run's.
+The browser accepts a cached Private stream only for the bundled sample's exact text, so a user's own draft
+is never shown as a recorded result. The UI labels the replay **Recorded Private check** with its recording
+time. A replay is not re-verified against later code. Nothing is written or logged for any other draft.
+
+The recording (`data/snapshot/recordings/private/57ae4142….json`) came from one bounded run on 2026-10-30
+(`scripts/record_samples.py --private --confirm-spend`) from committed source `5dd78c3` with a clean tree:
+
+| | |
+|---|---|
+| Result | 2 claims: revenue $96.2 billion **✓** (10-Q: $96.221 billion); GAAP diluted EPS $2.22 **✗**, basis mismatch (GAAP $2.46; $2.22 is the non-GAAP figure) |
+| Model | `meta-models/Muse-Glimmer-30B` at revision `cec94fcfd6512f2cfe708138c32533b346ea4f69`, BF16 on one H100 with vLLM `v0.28.0` (`deploy/modal_glimmer.py`, sha256 `02231915…`) |
+| Evidence | `data/snapshot`, fingerprint `51c18eeb54efe9124a5adddb`; code fingerprint `f1ca0d60179c7b98` |
+| Access | an unauthenticated request got **401** |
+| Timing | cold start to healthy 157.1 s; request 25.8 s; per vLLM `/metrics`: time to first token 1.28 s, 2,223 prompt and 519 output tokens, 22.4 output tokens/s while decoding |
+| Cost | Modal reported **$0.2418** for the app (H100 $0.2238, CPU $0.0107, memory $0.0073), deploy to stop 4 min 18 s, covered by credits. One warm sequential request uses about $0.03 of GPU time (25.8 s at $4.27/h). |
+| Shutdown | a 900 s watchdog was armed before deployment; the app was stopped right after the request and confirmed **stopped with 0 tasks and 0 containers** |
+
+These are one-run observations, not latency or cost guarantees. The run record keeps its provenance in the
+recording's `runtime` field.
+
 ## Integration and validation
 
-`create_private_router()` in `receipts/private.py` receives the app's settings, shared ledger, rate limiter
-and evidence-store loader. The frontend component is `PrivateCheck` in `web/components/private-check.tsx`.
+`create_private_router()` in `receipts/private.py` receives the app's settings, shared ledger, rate limiter,
+evidence-store loader and read-only recordings. The frontend component is `PrivateCheck` in
+`web/components/private-check.tsx`.
 
 Offline tests exercise the actual SDK wire format against a local fake HTTP transport: fixed Modal route,
 cache isolation, unavailable setup, rejection of caller-supplied destinations, budget rejection and schema
-fallback accounting. Browser-client tests reject public-model attribution, incomplete streams, fabricated
-spans, unsafe receipt URLs and mismatched time cutoffs, with no fallback request. The focused private-routing
+fallback accounting. Recording tests replay the sample with Modal unconfigured, live or paused, and with no
+backend, client or reservation. Browser-client tests reject public-model attribution, incomplete streams,
+fabricated spans, unsafe receipt URLs and mismatched time cutoffs, with no fallback request, and accept a cached
+stream only for the bundled recorded sample. The focused private-routing
 and deployment suite passed **38 tests** in the 2026-10-29 follow-up.
 
 ### Earlier pipeline smoke

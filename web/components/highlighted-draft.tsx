@@ -50,7 +50,13 @@ export function HighlightedDraft({ text, claims, verdicts, selectedId, onSelect,
       return sa === sb ? 0 : worst([sa, sb]) === sa ? -1 : 1;
     })[0];
 
-  const marksAt = (pos: number): ReactNode[] =>
+  const marksAt = (pos: number): ReactNode[] => {
+    const marks = markButtons(pos);
+    // Several claims on one number (GAAP and non-GAAP) keep their own buttons but read as one unit.
+    return marks.length > 1 ? [<span key={`marks-${pos}`} className="claim-mark-group">{marks}</span>] : marks;
+  };
+
+  const markButtons = (pos: number): ReactNode[] =>
     (layout.marks.get(pos) ?? []).map((id) => {
       const claim = byId.get(id);
       if (!claim) return null;

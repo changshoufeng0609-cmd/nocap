@@ -9,7 +9,7 @@
     "build:mock": "NEXT_PUBLIC_RECEIPTS_MOCK=1 next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test:fix": "node scripts/check-fix-client.mjs",
     "test:presentation": "node scripts/check-presentation.mjs",
     "test:slide": "node scripts/check-slide-client.mjs",

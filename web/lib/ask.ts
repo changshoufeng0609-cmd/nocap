@@ -1,6 +1,6 @@
-import { API_BASE, costFields } from "./api";
+import { API_BASE, costFields, refusalFields } from "./api";
 import { readSSE } from "./sse";
-import { STATUSES, type Claim, type ErrorEvent, type Verdict } from "./types";
+import { STATUSES, type Claim, type ErrorEvent, type RefusalReason, type Verdict } from "./types";
 
 export type AskMode = "numbers" | "filing_quotes";
 export type AskStage = "planning" | "verifying" | "reading_filing";
@@ -18,6 +18,8 @@ export interface AskItem { sentence: string; claim: Claim; verdict: Verdict; wit
 interface ResultBase {
   question: string; as_of: string | null; model: string; latency_s: number;
   cost_usd: number; cost_is_estimate: boolean; model_calls: number; notice: string | null;
+  /** A built-in sample replaying its recorded live run at $0; cost and latency are the original run's. */
+  cached?: boolean; recorded_utc?: string | null;
 }
 export interface NumberAnswer extends ResultBase {
   kind: "numbers"; answer: string; items: AskItem[]; footnotes: Footnote[];
@@ -27,10 +29,14 @@ export interface NumberAnswer extends ResultBase {
 export interface FilingAnswer extends ResultBase {
   kind: "filing_quotes"; filing: Filing; quotes: { text: string; start: number; end: number }[];
   rejected_quotes: number; offset_unit: "unicode_code_points"; whole_document: true;
+  /** Provider-reported tokens of the one request that read the whole filing. */
+  usage?: { input_tokens: number; output_tokens: number; cached_tokens?: number } | null;
 }
+export interface FilingSample { filing_id: string; question: string; as_of: string | null; recorded_utc: string | null }
 export type AskResult = NumberAnswer | FilingAnswer;
 export class AskClientError extends Error {
-  constructor(message: string, readonly accounting: Partial<ErrorEvent> = {}) { super(message); }
+  /** reason: the server's admission refusal (paused, budget, daily filing-question limit), when it sent one. */
+  constructor(message: string, readonly accounting: Partial<ErrorEvent> = {}, readonly reason?: RefusalReason) { super(message); }
 }
 
 const object = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x);
@@ -65,14 +71,34 @@ export async function fetchAskOptions(signal: AbortSignal): Promise<AskOptions> 
   const d: unknown = await response.json();
   if (!response.ok || !object(d) || !Array.isArray(d.companies) || !strings(d.metrics) || !strings(d.examples) ||
       !d.companies.every((c) => object(c) && text(c.ticker, 12) && text(c.name, 200) && Array.isArray(c.periods) &&
-        c.periods.every((p) => object(p) && integer(p.fiscal_year) && text(p.fiscal_period, 5)))) throw new AskClientError("The available companies could not be loaded.");
+        c.periods.every((p) => object(p) && integer(p.fiscal_year) && p.fiscal_year > 0 && p.fiscal_year <= 9999 &&
+          ["Q1", "Q2", "Q3", "Q4", "FY"].includes(p.fiscal_period as string)))) throw new AskClientError("The available companies could not be loaded.");
   return d as unknown as AskOptions;
 }
-export async function fetchFilings(signal: AbortSignal): Promise<Filing[]> {
+
+/** FY is annual coverage, not evidence for a quarter. Do not rely on response ordering. */
+export function latestCoveredQuarter(periods: AskOptions["companies"][number]["periods"]): string | null {
+  const quarters = periods.filter((p) => /^Q[1-4]$/.test(p.fiscal_period));
+  const latest = quarters.reduce<(typeof quarters)[number] | null>((held, p) =>
+    !held || p.fiscal_year > held.fiscal_year ||
+      (p.fiscal_year === held.fiscal_year && p.fiscal_period > held.fiscal_period) ? p : held, null);
+  return latest ? `${latest.fiscal_period} ${latest.fiscal_year}` : null;
+}
+
+export async function fetchFilingIndex(signal: AbortSignal): Promise<{ filings: Filing[]; samples: FilingSample[] }> {
   const response = await fetch(`${API_BASE}/grounding/filings`, { signal, cache: "no-store" });
   const d: unknown = await response.json();
   if (!response.ok || !object(d) || !Array.isArray(d.filings) || !d.filings.every(isFiling)) throw new AskClientError("The filing list could not be loaded.");
-  return d.filings;
+  const listed = new Set(d.filings.map((f) => f.id));
+  // Recorded sample questions are optional; an unusable entry is dropped rather than failing the filing list.
+  const samples = (Array.isArray(d.samples) ? d.samples : []).filter((x): x is FilingSample => object(x) &&
+    text(x.filing_id, 64) && listed.has(x.filing_id) && text(x.question, 1500) && !!x.question.trim() &&
+    (x.as_of === null || timestamp(x.as_of)) && (x.recorded_utc === null || timestamp(x.recorded_utc)));
+  return { filings: d.filings, samples };
+}
+
+export async function fetchFilings(signal: AbortSignal): Promise<Filing[]> {
+  return (await fetchFilingIndex(signal)).filings;
 }
 
 function isNumberAnswer(d: Record<string, unknown>, req: AskRequest): d is Record<string, unknown> & NumberAnswer {
@@ -119,6 +145,8 @@ function isFilingAnswer(d: Record<string, unknown>, req: AskRequest, selected?: 
   if (!isFiling(d.filing) || d.filing.id !== req.filing_id || !selected ||
       ["id", "sha256", "characters", "url", "accession", "accepted_at"].some((k) => d.filing && (d.filing as unknown as Record<string, unknown>)[k] !== (selected as unknown as Record<string, unknown>)[k]) ||
       !eligible(d.filing.accepted_at, req.as_of) || d.whole_document !== true || d.offset_unit !== "unicode_code_points" ||
+      !(d.usage == null || (object(d.usage) && integer(d.usage.input_tokens) && integer(d.usage.output_tokens))) ||
+      !(d.cached === undefined || typeof d.cached === "boolean") || !(d.recorded_utc == null || timestamp(d.recorded_utc)) ||
       !integer(d.rejected_quotes) || d.rejected_quotes > 5 || !Array.isArray(d.quotes) || d.quotes.length > 5 ||
       d.quotes.length + d.rejected_quotes > 5) return false;
   const quotes = new Set();
@@ -146,7 +174,8 @@ export async function streamAsk(mode: AskMode, req: AskRequest, onProgress: (sta
     let d: unknown;
     try { d = JSON.parse(message.data); } catch { throw invalid(); }
     if (!object(d)) throw invalid();
-    if (message.event === "error") throw new AskClientError(text(d.message, 2000) ? d.message : "The question failed.", costFields(d));
+    if (message.event === "error") throw new AskClientError(text(d.message, 2000) ? d.message : "The question failed.", costFields(d),
+      refusalFields(d).reason);
     if (message.event === "progress") {
       if (!(mode === "numbers" ? ["planning", "verifying"] : ["reading_filing"]).includes(d.stage as string)) throw invalid();
       onProgress(d.stage as AskStage);

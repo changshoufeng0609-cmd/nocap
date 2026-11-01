@@ -1,6 +1,6 @@
-import { formatValue, inClaimTermsToFull } from "./format";
+import { formatExpectedValue, inClaimTermsToFull, marginChangeUnit, type DisplayUnit } from "./format";
 import { receiptCalculation } from "./calculations";
-import type { Claim, Fact, ReasonCode, Status, Unit, Verdict } from "./types";
+import { COUNT_KEYS, STATUSES, type Claim, type Fact, type ReasonCode, type Status, type Verdict } from "./types";
 
 export type ResolvedDisplayStatus = Status | "look_ahead";
 export type DisplayStatus = ResolvedDisplayStatus | "pending";
@@ -22,7 +22,7 @@ export const REASON_TEXT: Record<ReasonCode, string> = {
   period_mismatch: "Figure is from a different period",
   scale_mismatch: "Scale is off (thousands, millions, billions)",
   basis_mismatch: "GAAP and non-GAAP figures mixed up",
-  entity_mismatch: "Figure belongs to another company",
+  entity_mismatch: "Figure belongs to another company named in the draft or context",
   look_ahead: "Not yet public at the as-of time",
   forward_looking: "Guidance: no filing can confirm it yet",
   no_evidence: "No filed figure to check against",
@@ -40,11 +40,20 @@ export function displayStatus(verdict: Verdict | undefined): DisplayStatus {
   return verdict ? verdict.reason === "look_ahead" ? "look_ahead" : verdict.status : "pending";
 }
 
-/** Presentation only: API status and evaluation counts keep their original meaning. */
+/** The API's `counts` buckets, with not_public shown as look_ahead (◷). Evaluation keeps the API status. */
 export function displayCounts(verdicts: Iterable<Verdict>): Record<ResolvedDisplayStatus, number> {
   const counts: Record<ResolvedDisplayStatus, number> = { verified: 0, wrong: 0, look_ahead: 0, unverifiable: 0, approximate: 0 };
   for (const verdict of verdicts) counts[verdict.reason === "look_ahead" ? "look_ahead" : verdict.status] += 1;
   return counts;
+}
+
+/** Whether a stream's reported `counts` match its verdicts, in the server's buckets: with not_public when the server
+ * reports it (a look-ahead verdict is never wrong), otherwise the status buckets of older servers and recordings. */
+export function countsMatch(reported: Record<string, unknown>, verdicts: Iterable<Pick<Verdict, "status" | "reason">>): boolean {
+  const legacy = reported.not_public === undefined;
+  const expected: Record<string, number> = { verified: 0, wrong: 0, not_public: 0, unverifiable: 0, approximate: 0 };
+  for (const v of verdicts) expected[!legacy && v.reason === "look_ahead" ? "not_public" : v.status] += 1;
+  return (legacy ? STATUSES : COUNT_KEYS).every((key) => reported[key] === expected[key]);
 }
 
 export function worst(statuses: DisplayStatus[]): DisplayStatus {
@@ -59,7 +68,7 @@ export const SOURCE_LABEL: Record<Fact["source"], string> = {
 
 export interface FiledValue {
   value: number;
-  unit: Unit;
+  unit: DisplayUnit;
   /** How a percentage was computed from the receipts, e.g. "$81.615B vs $68.127B". */
   note?: string;
 }
@@ -71,9 +80,12 @@ export interface FiledValue {
  */
 export function filedValue(claim: Claim, verdict: Verdict): FiledValue | null {
   if (verdict.status === "unverifiable") return null;
+  const marginUnit = marginChangeUnit(claim);
   if (verdict.expected_value != null && Number.isFinite(verdict.expected_value)) {
+    if (marginUnit) return { value: verdict.expected_value, unit: marginUnit };
     return { value: inClaimTermsToFull(claim, verdict.expected_value), unit: claim.unit };
   }
+  if (marginUnit) return null;  // a filed margin level is not the period-to-period change
   const ev = verdict.evidence ?? [];
   if (!ev.length) return null;
   const direct = ev.find((f) => f.unit === claim.unit && f.metric === claim.metric) ?? ev.find((f) => f.unit === claim.unit);
@@ -87,7 +99,7 @@ export function filedValue(claim: Claim, verdict: Verdict): FiledValue | null {
 export function correction(claim: Claim, verdict: Verdict): string | null {
   if (verdict.status !== "wrong") return null;
   const filed =
-    verdict.expected_value != null ? formatValue(inClaimTermsToFull(claim, verdict.expected_value), claim.unit) : null;
+    verdict.expected_value != null ? formatExpectedValue(claim, verdict.expected_value) : null;
   if (verdict.reason === "look_ahead") return filed ? `${filed} · not public yet` : "not public yet";
   return filed;
 }

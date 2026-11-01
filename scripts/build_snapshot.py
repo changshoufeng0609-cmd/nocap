@@ -4,7 +4,12 @@
     .venv/bin/python scripts/build_snapshot.py --no-model  # fail rather than call the model for an uncached passage
 
 What it writes (docs/deploy.md):
-  facts.sqlite        a consistent copy of data/facts.sqlite (SQLite backup API, VACUUM, journal_mode DELETE)
+  facts.sqlite        a consistent copy of data/facts.sqlite (SQLite backup API, VACUUM, journal_mode DELETE) with
+                      its balance-sheet facts rebuilt from data/archive/companyfacts (receipts.balance_sheet), whose
+                      common-stockholder and consolidated income alternatives are rebuilt from the hash-checked
+                      companyfacts and filing_xbrl archives (receipts.net_income_common; evidence-only metrics), and whose
+                      facts rows are stored without the columns their filing and company rows repeat and are read
+                      back, unchanged, through a view named facts (compact_facts)
   pr_facts/           every data/pr_facts/<TICKER>/*.jsonl, keeping only lines that parse as receipts.types.Fact
   manifest.json       a content fingerprint of the evidence, counts, and the snapshot date /api/health reports
   api_cache/          each example in examples/examples.json recorded through the real pipeline (receipts.stream),
@@ -12,7 +17,7 @@ What it writes (docs/deploy.md):
   spark_cache/        the examples' Muse Spark responses, so an as-of re-check of an example costs nothing
   examples.json       the examples with their texts inlined, matching the recordings exactly
 
-The snapshot is built beside the old one and swapped in only when complete and under 10 MB. A recording whose
+The snapshot is built beside the old one and swapped in only when complete and under MAX_BYTES. A recording whose
 draft, evidence and code are unchanged is reused as is, so a re-run with nothing new rewrites nothing. Model calls
 happen only for passages missing from data/cache/spark (and the old snapshot): about $0.004 per passage.
 """
@@ -28,6 +33,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 REPO = Path(__file__).resolve().parents[1]
 if str(REPO) not in sys.path:
@@ -35,7 +41,7 @@ if str(REPO) not in sys.path:
 
 from pydantic import ValidationError  # noqa: E402
 
-from receipts import api, extract, stream  # noqa: E402
+from receipts import api, balance_sheet, extract, net_income_common, recordings, stream  # noqa: E402
 from receipts.edgar import Edgar  # noqa: E402
 from receipts.grounding import FilingTexts, normalize_filing_html  # noqa: E402
 from receipts.store import Store  # noqa: E402
@@ -44,15 +50,28 @@ from receipts.verify import to_utc  # noqa: E402
 
 DATA = REPO / "data"
 OUT = DATA / "snapshot"
-MAX_BYTES = 10 * 1024 * 1024
+# 2026-10-31: 112 MiB for the S&P 500 build, about 87 MiB projected; the owner approved up to 160 MiB that day.
+# (Earlier the same day it went from 10 to 16 MiB for the 35-company coverage.)
+MAX_BYTES = 112 * 1024 * 1024
 EXAMPLES = REPO / "examples" / "examples.json"
+BALANCE_SHEET_ARCHIVE = DATA / "archive" / "companyfacts"  # the companyfacts receipts.balance_sheet reads
+# Snapshot facts are stored in FACTS_COMPACT without the columns their filing and company rows repeat; a view named
+# facts joins them back in the table's own column order, so Store and the API read the snapshot unchanged. At the
+# full S&P 500 this keeps facts.sqlite near 38 MB rather than 56 MB, under GitHub's 50 MB per-file warning.
+FACTS_COMPACT = "facts_compact"
+FACTS_JOINED = {"ticker": "c.ticker", "form": "g.form", "accepted_at": "g.accepted_at", "url": "g.url"}
 
 
 def fail(message: str) -> "SystemExit":
     return SystemExit(f"build_snapshot: {message}")
 
 
-def copy_sqlite(src: Path, dst: Path) -> None:
+def copy_sqlite(src: Path, dst: Path, *, balance_sheet_archive: Optional[Path] = None,
+                net_income_archive: Optional[Path] = None) -> Optional[dict]:
+    """Copy src to dst as a snapshot database. With balance_sheet_archive, every balance-sheet fact in the copy is
+    rebuilt from that companyfacts archive first (receipts.balance_sheet.add_to_db), and its summary is returned.
+    net_income_archive separately rebuilds evidence-only common-stockholder and consolidated income alternatives."""
+    summary = None
     if not src.exists():
         raise fail(f"{src.relative_to(REPO)} is missing; build it with python -m receipts.ingest")
     source = sqlite3.connect(src.resolve().as_uri() + "?mode=ro", uri=True)
@@ -60,27 +79,98 @@ def copy_sqlite(src: Path, dst: Path) -> None:
     try:
         source.backup(target)  # consistent even while another process writes the source
         target.execute("PRAGMA journal_mode=DELETE")  # no -wal/-shm files: opens on a read-only filesystem
+        if balance_sheet_archive is not None:  # balance-sheet instants, from the same filings as the other facts
+            summary = balance_sheet.add_to_db(target, balance_sheet_archive)
+        if net_income_archive is not None:
+            alternatives = net_income_common.add_to_db(target, net_income_archive)
+            if summary is None:
+                summary = {}
+            summary["net_income_alternatives"] = alternatives
+            summary.update(alternatives["by_metric"])
+        compact_facts(target)
         target.execute("VACUUM")
         target.commit()
     finally:
         source.close()
         target.close()
+    return summary
+
+
+def facts_digest(con: sqlite3.Connection, columns: list[str]) -> tuple[str, int]:
+    """sha256 of the facts rows (the table or its view) in id order, and how many there are."""
+    h, n = hashlib.sha256(), 0
+    for row in con.execute(f'SELECT {", ".join(columns)} FROM facts ORDER BY id'):
+        h.update(json.dumps(row, separators=(",", ":"), default=str).encode())
+        n += 1
+    return h.hexdigest(), n
+
+
+def compact_facts(con: sqlite3.Connection) -> None:
+    """Move the facts rows into FACTS_COMPACT without the FACTS_JOINED columns, rebuild the table's indexes there, and
+    put a view named facts in the table's place that joins those columns back from filings and companies.
+
+    The build fails unless the view returns exactly the rows the table held, in id order: a fact whose ticker, form,
+    acceptance time or URL differed from its company or filing row, or that had no such row, would otherwise change.
+    The digest is taken from this backup copy, which is the source as it was at backup time. CHECK constraints are
+    not carried over: nothing writes to a snapshot."""
+    info = con.execute("PRAGMA table_info(facts)").fetchall()  # cid, name, type, notnull, default, pk
+    columns = [r[1] for r in info]
+    if [r[1] for r in info if r[5]] != ["id"] or not set(FACTS_JOINED) <= set(columns):
+        raise fail("data/facts.sqlite has no facts table in the layout compact_facts expects")
+    kept = [r for r in info if r[1] not in FACTS_JOINED]
+    ddl = ", ".join(f'"{name}" {type_}' + (" PRIMARY KEY" if pk else " NOT NULL" if notnull else "")
+                    for _, name, type_, notnull, _, pk in kept)
+    indexes = []
+    for _, name, unique, origin, partial in con.execute("PRAGMA index_list(facts)").fetchall():
+        cols = [r[2] for r in con.execute(f'PRAGMA index_info("{name}")')]
+        if origin != "c" or partial or None in cols or set(cols) & set(FACTS_JOINED):
+            raise fail(f"index {name} on facts cannot move to {FACTS_COMPACT}")
+        quoted = ", ".join(f'"{c}"' for c in cols)
+        indexes.append(f'CREATE {"UNIQUE " if unique else ""}INDEX "{name}" ON {FACTS_COMPACT} ({quoted});')
+    before = facts_digest(con, columns)
+    names = ", ".join(f'"{r[1]}"' for r in kept)
+    selected = ", ".join(FACTS_JOINED.get(c, f'f."{c}"') for c in columns)
+    # Each join is one primary-key probe per fact row; Store's lookups still go through ix_facts_lookup. A fact the
+    # joins could not complete would read back with NULLs, which the digest check below rejects.
+    con.executescript(f"""
+        BEGIN;
+        CREATE TABLE {FACTS_COMPACT} ({ddl});
+        INSERT INTO {FACTS_COMPACT} ({names}) SELECT {names} FROM facts ORDER BY id;
+        DROP TABLE facts;
+        {" ".join(indexes)}
+        CREATE VIEW facts ({", ".join(f'"{c}"' for c in columns)}) AS
+            SELECT {selected} FROM {FACTS_COMPACT} AS f
+            LEFT JOIN filings AS g ON g.accession = f.accession
+            LEFT JOIN companies AS c ON c.cik = f.cik;
+        COMMIT;
+    """)
+    after = facts_digest(con, columns)
+    if after != before:
+        raise fail(f"the compact facts view does not reproduce data/facts.sqlite ({after[1]} rows read back of "
+                   f"{before[1]}): a fact's {', '.join(FACTS_JOINED)} must equal its company's and filing's")
 
 
 def sqlite_digest(db: Path) -> tuple[str, dict[str, int]]:
-    """A digest of the database's rows (not its bytes, which VACUUM may lay out differently) and row counts."""
+    """A digest of the database's rows (not its bytes, which VACUUM may lay out differently) and row counts.
+
+    A compacted snapshot is digested and counted through its facts view, in id order, in place of FACTS_COMPACT, so
+    it digests exactly as the database it was copied from."""
     h = hashlib.sha256()
     counts: dict[str, int] = {}
     con = sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)
     try:
-        tables = [r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
-        for table in tables:
+        objects = dict(con.execute("SELECT name, type FROM sqlite_master WHERE type = 'table' "
+                                   "OR (type = 'view' AND name = 'facts')"))
+        if objects.get("facts") == "view":
+            objects.pop(FACTS_COMPACT, None)
+        for name in sorted(objects):
             n = 0
-            h.update(f"\n#{table}\n".encode())
-            for row in con.execute(f'SELECT * FROM "{table}" ORDER BY rowid'):
+            h.update(f"\n#{name}\n".encode())
+            order = "rowid" if objects[name] == "table" else "id"
+            for row in con.execute(f'SELECT * FROM "{name}" ORDER BY {order}'):
                 h.update(json.dumps(row, separators=(",", ":"), default=str).encode())
                 n += 1
-            counts[table] = n
+            counts[name] = n
     finally:
         con.close()
     return h.hexdigest(), counts
@@ -127,7 +217,7 @@ def copy_filing_texts(src: Path, dst: Path, evidence: Store, edgar: Edgar) -> tu
     h = hashlib.sha256()
     for entry in entries:
         row, text = texts.load(entry["id"])
-        company = evidence.resolve_entity(row["ticker"])
+        company = evidence.by_ticker(row["ticker"])  # the packaged ticker itself, also when it is a word ("FLEX")
         if company is None or str(company[0]) != str(row["cik"]):
             raise fail("filing-text company does not match the evidence store")
         filings = [f for f in evidence.filings(company[0], (row["form"],))
@@ -144,6 +234,31 @@ def copy_filing_texts(src: Path, dst: Path, evidence: Store, edgar: Edgar) -> tu
     if entries:
         stream.write_json_atomic(dst / "index.json", {"version": 1, "filings": entries})
     return h.hexdigest() if entries else "", len(entries)
+
+
+def copy_recordings(src: Path, dst: Path, filing_texts: Path) -> int:
+    """Package the recorded sample runs (receipts.recordings), each bound to the input it replays: a Slide recording
+    to the committed sample image's bytes, a quote recording to a filing text packaged in this snapshot, a Private
+    recording to its exact draft text (checked by Recordings.load itself)."""
+    store = recordings.Recordings([src])
+    listed = {entry["id"] for entry in FilingTexts(filing_texts).entries()} if filing_texts.exists() else set()
+    count = 0
+    for kind in recordings.KINDS:
+        for path in sorted((src / kind).glob("*.json")) if (src / kind).is_dir() else []:
+            record = store.load(kind, path.stem)
+            if record is None:
+                raise fail(f"recording {os.path.relpath(path, REPO)} is damaged or does not match its key")
+            request = record.get("request", {})
+            if kind == "slide":
+                image = REPO / "web/public" / str(request.get("image", "")).lstrip("/")
+                if not image.is_file() or hashlib.sha256(image.read_bytes()).hexdigest() != request.get("image_sha256"):
+                    raise fail(f"recording {path.name} no longer matches its sample image")
+            elif kind == "grounding" and request.get("filing_id") not in listed:
+                raise fail(f"recording {path.name} quotes a filing that is not packaged in this snapshot")
+            (dst / kind).mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, dst / kind / path.name)
+            count += 1
+    return count
 
 
 def dir_bytes(path: Path) -> int:
@@ -209,7 +324,9 @@ def main(argv=None) -> int:
     shutil.rmtree(build, ignore_errors=True)
     build.mkdir(parents=True)
     try:
-        copy_sqlite(DATA / "facts.sqlite", build / "facts.sqlite")
+        balance = copy_sqlite(DATA / "facts.sqlite", build / "facts.sqlite",
+                              balance_sheet_archive=BALANCE_SHEET_ARCHIVE,
+                              net_income_archive=BALANCE_SHEET_ARCHIVE)
         db_digest, rows = sqlite_digest(build / "facts.sqlite")
         pr_digest, pr_facts, dropped = copy_pr_facts(DATA / "pr_facts", build / "pr_facts")
         evidence = Store(db_path=build / "facts.sqlite", pr_dir=build / "pr_facts")
@@ -219,6 +336,7 @@ def main(argv=None) -> int:
         finally:
             evidence.close()
             edgar.close()
+        recorded = copy_recordings(DATA / "recordings", build / "recordings", build / "filing_texts")
         material = f"{db_digest}|{pr_digest}" + (f"|{text_digest}" if text_count else "")
         fingerprint = hashlib.sha256(material.encode()).hexdigest()[:24]
         previous = read_json(OUT / "manifest.json")
@@ -232,7 +350,7 @@ def main(argv=None) -> int:
             con.close()
         manifest = {"fingerprint": fingerprint, "built_at": built_at or now, "source_built_at": source_built,
                     "companies": companies, "facts": {"sqlite": rows.get("facts", 0), "press_release": pr_facts},
-                    "filings": rows.get("filings", 0), "filing_texts": text_count}
+                    "filings": rows.get("filings", 0), "filing_texts": text_count, "recordings": recorded}
         stream.write_json_atomic(build / "manifest.json", manifest)  # the fingerprint the recordings are keyed to
         report = bake_examples(build, OUT, allow_model=not args.no_model)
         size = dir_bytes(build)
@@ -246,13 +364,16 @@ def main(argv=None) -> int:
     except BaseException:
         shutil.rmtree(build, ignore_errors=True)
         raise
-    print(f"data/snapshot: {size / 1e6:.2f} MB · {len(companies)} companies · {rows.get('facts', 0)} SQLite facts · "
+    print(f"data/snapshot: {size / 1e6:.2f} MB · {len(companies)} companies · {rows.get('facts', 0)} SQLite facts "
+          f"({balance['facts'] if balance else 0} balance-sheet) · "
+          f"{balance['net_income_to_common']['facts']} common-stockholder alternatives · "
+          f"{balance['net_income_including_nci']['facts']} consolidated-income alternatives · "
           f"{pr_facts} press-release facts" + (f" ({dropped} bad lines dropped)" if dropped else "")
           + f" · fingerprint {fingerprint[:12]} · {time.monotonic() - t0:.1f} s")
     for row in report:
         c = row["counts"]
         print(f"  {row['id']:<24} {row['recorded']:<6} {row['claims']:>2} claims  {c['verified']} ✓ {c['wrong']} ✗ "
-              f"{c['unverifiable']} ? {c['approximate']} ≈  ${row['cost_usd']:.4f}  ({row['key']})")
+              f"{c.get('not_public', 0)} ◷ {c['unverifiable']} ? {c['approximate']} ≈  ${row['cost_usd']:.4f}  ({row['key']})")
     return 0
 
 

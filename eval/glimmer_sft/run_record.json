@@ -1,0 +1,446 @@
+{
+ "experiment": "Muse Glimmer 30B LoRA SFT on NoCap claim extraction (eval/glimmer_sft)",
+ "note": "Account slug redacted as <account>. No API key, prompt text or model output text is stored here.",
+ "run": {
+  "run_id": "r20261030-190510",
+  "session_id": "ts-904120baaa334a9e9cb23f3e211d61a1",
+  "training_run_id": "run-1f77d4809720402e86b857399aa598b0",
+  "snapshots": {
+   "base": "<account>/run-1f77d4809720402e86b857399aa598b0/nocap-base-86a82420",
+   "tuned": "<account>/run-1f77d4809720402e86b857399aa598b0/nocap-tuned-86a82420"
+  },
+  "steps": 26,
+  "training_started_utc": "2026-10-30T19:05:15+00:00",
+  "training_finished_utc": "2026-10-30T19:07:25+00:00",
+  "promoted_model_id": "nocap-glimmer-sft-r20261030-190510",
+  "promoted_from": "run-1f77d4809720402e86b857399aa598b0-nocap-tuned-86a82420",
+  "promoted_utc": "2026-10-30T19:07:53+00:00",
+  "sampled_utc": "2026-10-30T19:15:05+00:00",
+  "session_deleted_utc": "2026-10-30T19:15:06+00:00",
+  "phase": "done"
+ },
+ "promoted_model": "accounts/<account>/models/nocap-glimmer-sft-r20261030-190510",
+ "deployment_created": false,
+ "config": {
+  "base_model": "accounts/fireworks/models/muse-glimmer-30b",
+  "lora": {
+   "rank": 8,
+   "alpha": 32,
+   "train_mlp": true,
+   "train_attn": true,
+   "train_unembed": true
+  },
+  "epochs": 2,
+  "batch_size": 16,
+  "learning_rate": 0.0001,
+  "seed": 0,
+  "max_seq_len": 4096,
+  "max_tokens": 4096,
+  "temperature": 0.0,
+  "stop": [
+   "<|eot|>"
+  ],
+  "reasoning_strength": "low",
+  "budget_usd": 1.0,
+  "margin_usd": 0.05,
+  "plan": {
+   "train_rows": 203,
+   "test_rows": 70,
+   "epochs": 2,
+   "batch_size": 16,
+   "steps": 26,
+   "max_seq_len": 4096,
+   "longest_train_row": 2854,
+   "oversized_rows": 0,
+   "train_tokens_per_epoch": 501860,
+   "trained_tokens_per_epoch": 45224,
+   "training_usd_if_not_promotional": 5.8818,
+   "promotion_window_open": true,
+   "sampling": {
+    "max_tokens": 4096,
+    "temperature": 0.0,
+    "reasoning_strength": "low",
+    "budget_usd": 1.0,
+    "guard_cap_usd": 0.95,
+    "prompt_tokens": {
+     "min": 2223,
+     "median": 2246.5,
+     "max": 2310,
+     "sum_per_model": 157563
+    },
+    "pairs_admitted_in_the_worst_case": 19,
+    "expected_usd_all_pairs": {
+     "base_500_tokens_uncached": 0.9289,
+     "base_500_tokens_cached": 0.4483,
+     "base_1500_tokens_uncached": 1.2705,
+     "base_1500_tokens_cached": 0.7899
+    }
+   }
+  }
+ },
+ "software": {
+  "fireworks-ai": "1.2.30 [training-sdk]",
+  "tokenizers": "0.22.2",
+  "tokenizer": "meta-models/Muse-Glimmer-30B@cec94fcfd6512f2cfe708138c32533b346ea4f69",
+  "cookbook_reference": "fw-ai/cookbook@57968a2237b663be33078d2747a28463983ae134 (muse_glimmer_starter, renderer)"
+ },
+ "training_steps": [
+  {
+   "step": 1,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.1164,
+   "grad_norm": 4416.0,
+   "utc": "2026-10-30T19:05:27+00:00"
+  },
+  {
+   "step": 2,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0472,
+   "grad_norm": 2800.0,
+   "utc": "2026-10-30T19:05:32+00:00"
+  },
+  {
+   "step": 3,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0383,
+   "grad_norm": 1920.0,
+   "utc": "2026-10-30T19:05:37+00:00"
+  },
+  {
+   "step": 4,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0252,
+   "grad_norm": 1808.0,
+   "utc": "2026-10-30T19:05:42+00:00"
+  },
+  {
+   "step": 5,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0305,
+   "grad_norm": 3536.0,
+   "utc": "2026-10-30T19:05:45+00:00"
+  },
+  {
+   "step": 6,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0277,
+   "grad_norm": 1256.0,
+   "utc": "2026-10-30T19:05:50+00:00"
+  },
+  {
+   "step": 7,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0266,
+   "grad_norm": 840.0,
+   "utc": "2026-10-30T19:05:54+00:00"
+  },
+  {
+   "step": 8,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0221,
+   "grad_norm": 552.0,
+   "utc": "2026-10-30T19:05:59+00:00"
+  },
+  {
+   "step": 9,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0248,
+   "grad_norm": 688.0,
+   "utc": "2026-10-30T19:06:04+00:00"
+  },
+  {
+   "step": 10,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0154,
+   "grad_norm": 1192.0,
+   "utc": "2026-10-30T19:06:09+00:00"
+  },
+  {
+   "step": 11,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0276,
+   "grad_norm": 864.0,
+   "utc": "2026-10-30T19:06:13+00:00"
+  },
+  {
+   "step": 12,
+   "epoch": 1,
+   "rows": 16,
+   "loss": 0.0219,
+   "grad_norm": 1160.0,
+   "utc": "2026-10-30T19:06:18+00:00"
+  },
+  {
+   "step": 13,
+   "epoch": 1,
+   "rows": 11,
+   "loss": 0.0238,
+   "grad_norm": 728.0,
+   "utc": "2026-10-30T19:06:23+00:00"
+  },
+  {
+   "step": 14,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0162,
+   "grad_norm": 556.0,
+   "utc": "2026-10-30T19:06:27+00:00"
+  },
+  {
+   "step": 15,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0168,
+   "grad_norm": 848.0,
+   "utc": "2026-10-30T19:06:32+00:00"
+  },
+  {
+   "step": 16,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0193,
+   "grad_norm": 492.0,
+   "utc": "2026-10-30T19:06:37+00:00"
+  },
+  {
+   "step": 17,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.011,
+   "grad_norm": 5664.0,
+   "utc": "2026-10-30T19:06:42+00:00"
+  },
+  {
+   "step": 18,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0193,
+   "grad_norm": 596.0,
+   "utc": "2026-10-30T19:06:46+00:00"
+  },
+  {
+   "step": 19,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0173,
+   "grad_norm": 620.0,
+   "utc": "2026-10-30T19:06:51+00:00"
+  },
+  {
+   "step": 20,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0185,
+   "grad_norm": 676.0,
+   "utc": "2026-10-30T19:06:55+00:00"
+  },
+  {
+   "step": 21,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0152,
+   "grad_norm": 864.0,
+   "utc": "2026-10-30T19:07:00+00:00"
+  },
+  {
+   "step": 22,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0121,
+   "grad_norm": 596.0,
+   "utc": "2026-10-30T19:07:05+00:00"
+  },
+  {
+   "step": 23,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.021,
+   "grad_norm": 740.0,
+   "utc": "2026-10-30T19:07:09+00:00"
+  },
+  {
+   "step": 24,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0163,
+   "grad_norm": 2160.0,
+   "utc": "2026-10-30T19:07:14+00:00"
+  },
+  {
+   "step": 25,
+   "epoch": 2,
+   "rows": 16,
+   "loss": 0.0206,
+   "grad_norm": 744.0,
+   "utc": "2026-10-30T19:07:18+00:00"
+  },
+  {
+   "step": 26,
+   "epoch": 2,
+   "rows": 11,
+   "loss": 0.0178,
+   "grad_norm": 394.0,
+   "utc": "2026-10-30T19:07:23+00:00"
+  }
+ ],
+ "sampling": {
+  "ledger": {
+   "spent_usd": 0.469988,
+   "requests": 140,
+   "cap_usd": 0.95,
+   "updated_utc": "2026-10-30T19:15:05+00:00"
+  },
+  "per_model": {
+   "base": {
+    "requests": 70,
+    "ok": 70,
+    "attempts": [
+     1
+    ],
+    "finish_reasons": [
+     "stop"
+    ],
+    "prompt_tokens": 157563,
+    "server_prompt_tokens_equal_client": true,
+    "cached_prompt_tokens": 147968,
+    "completion_tokens": 50735,
+    "visible_tokens": 14429,
+    "reasoning_tokens_approx": 35606,
+    "cost_usd": 0.3241,
+    "wall_s": {
+     "median": 11.27,
+     "p90": 17.31,
+     "max": 50.42
+    }
+   },
+   "tuned": {
+    "requests": 70,
+    "ok": 70,
+    "attempts": [
+     1
+    ],
+    "finish_reasons": [
+     "stop"
+    ],
+    "prompt_tokens": 157563,
+    "server_prompt_tokens_equal_client": true,
+    "cached_prompt_tokens": 147968,
+    "completion_tokens": 14216,
+    "visible_tokens": 13936,
+    "reasoning_tokens_approx": 0,
+    "cost_usd": 0.145883,
+    "wall_s": {
+     "median": 3.38,
+     "p90": 5.66,
+     "max": 37.26
+    }
+   }
+  }
+ },
+ "billing_before": {
+  "checked_utc": "2026-10-30T19:05:08+00:00",
+  "http_status": 200,
+  "month_to_date_usd": 0.1395,
+  "line_items": [
+   {
+    "series": "SERVERLESS",
+    "category": "LLM input tokens (cached)",
+    "group": "Muse Spark Open",
+    "quantity": 34048,
+    "usd": 0.005107
+   },
+   {
+    "series": "SERVERLESS",
+    "category": "LLM input tokens (uncached)",
+    "group": "Muse Spark Open",
+    "quantity": 22684,
+    "usd": 0.028355
+   },
+   {
+    "series": "SERVERLESS",
+    "category": "LLM output tokens",
+    "group": "Muse Spark Open",
+    "quantity": 24950,
+    "usd": 0.106038
+   }
+  ]
+ },
+ "billing_after": {
+  "checked_utc": "2026-10-30T19:15:06+00:00",
+  "http_status": 200,
+  "month_to_date_usd": 0.1395,
+  "line_items": [
+   {
+    "series": "SERVERLESS",
+    "category": "LLM input tokens (cached)",
+    "group": "Muse Spark Open",
+    "quantity": 34048,
+    "usd": 0.005107
+   },
+   {
+    "series": "SERVERLESS",
+    "category": "LLM input tokens (uncached)",
+    "group": "Muse Spark Open",
+    "quantity": 22684,
+    "usd": 0.028355
+   },
+   {
+    "series": "SERVERLESS",
+    "category": "LLM output tokens",
+    "group": "Muse Spark Open",
+    "quantity": 24950,
+    "usd": 0.106038
+   }
+  ]
+ },
+ "base_model_info": {
+  "http_status": 200,
+  "name": "accounts/fireworks/models/muse-glimmer-30b",
+  "displayName": "Muse Glimmer 30B",
+  "state": "READY",
+  "kind": "HF_BASE_MODEL",
+  "contextLength": 131072,
+  "supportsLora": true,
+  "supportsServerless": false,
+  "baseModelDetails": {
+   "checkpointFormat": "HUGGINGFACE",
+   "defaultPrecision": "BF16",
+   "huggingfaceFiles": [
+    "config.json"
+   ],
+   "modelType": "muse_glimmer_text",
+   "moe": false,
+   "parameterCount": "29776626688",
+   "supportsFireattention": true,
+   "supportsMtp": false,
+   "tunable": false,
+   "worldSize": 1
+  },
+  "public": true,
+  "deprecationDate": null
+ },
+ "promotion_window_open_at_launch": true,
+ "evidence_store_sha256": {
+  "data/facts.sqlite": "30c102a5935c5e600c3b49aac036f6d583af33ad32edbdeb9d69653cddc920ae",
+  "data/pr_facts (83 files, path+content)": "65aaece8130519116768bd9e0a844489006169e1c9140ee0ff0a2d5d307eee14",
+  "receipts/coverage.py": "8f76769f78853cf2d4378de5c8ffc4715c4279440f7e1e340fadc4c4fd48caf5"
+ },
+ "run_files_sha256": {
+  "samples.jsonl": "f02e28505d653d24bfdb4442e58721efdea1d40010702717d7b58f5968da4727",
+  "metrics.jsonl": "db8dca3f5e8c275c0f02c8e6ceac847c55a012db802a80a0902e01cb1f9ea72c",
+  "state.json": "b5580118d771119b0746a638a3fa6ebb70cc6057a66302cd9a2a9153f15deccd",
+  "ledger.json": "967f91f2c21b42267bee6726bc67f6b9543ac91917e3208730fc8c1574dca45c"
+ },
+ "requests_file": "run_requests.jsonl: one row per sampling request (passage key prefix, model, prompt/cached/completion tokens, wall seconds, estimated USD, Fireworks request id). All 140 terminated in one attempt."
+}

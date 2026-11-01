@@ -1,7 +1,7 @@
 """Command line: python -m receipts check draft.txt [--as-of ISO] [--context "NVIDIA Q2 FY2027"] [--json]
 
-Prints the draft with a marker after every checked number (✓ verified, ✗ wrong, ? unverifiable,
-≈ approximate), then one line per claim with its explanation and its receipt: form, accession,
+Prints the draft with a marker after every checked number (✓ verified, ✗ wrong, ◷ not public yet at the as-of
+time, ? unverifiable, ≈ approximate), then one line per claim with its explanation and its receipt: form, accession,
 EDGAR acceptance time and filing URL. Exit status: 0 when the check ran, 2 when it could not.
 """
 from __future__ import annotations
@@ -15,7 +15,9 @@ from typing import Any, Optional, Sequence
 from receipts.extract import ExtractionError
 from receipts.types import Claim, Verdict
 
-MARK = {"verified": "✓", "wrong": "✗", "unverifiable": "?", "approximate": "≈"}
+MARK = {"verified": "✓", "wrong": "✗", "look_ahead": "◷", "unverifiable": "?", "approximate": "≈"}
+LABEL = {"verified": "verified", "wrong": "wrong", "look_ahead": "not public yet", "unverifiable": "unverifiable",
+         "approximate": "approximate"}
 _SCALE_WORD = {"thousands": "thousand", "millions": "million", "billions": "billion"}
 MAX_RECEIPTS = 3
 
@@ -33,13 +35,18 @@ def _fmt_expected(claim: Claim, x: float) -> str:
     return f"{num} {word}" if word else num
 
 
+def shown(verdict: Verdict) -> str:
+    """The displayed status. As in the web UI, evidence filed after the as-of time is ◷, apart from numerical errors."""
+    return "look_ahead" if verdict.reason == "look_ahead" else verdict.status
+
+
 def annotate(text: str, results: Sequence[tuple[Claim, Verdict]]) -> str:
     """The draft with '[✓c1]' markers right after each claim's number (claims sharing a number share a marker)."""
     at: dict[int, list[str]] = {}
     for claim, verdict in results:
         k = text.find(claim.value_text, claim.span_start, claim.span_end) if claim.value_text else -1
         pos = k + len(claim.value_text) if k >= 0 else claim.span_end
-        at.setdefault(pos, []).append(f"{MARK.get(verdict.status, '?')}{claim.id}")
+        at.setdefault(pos, []).append(f"{MARK.get(shown(verdict), '?')}{claim.id}")
     out = text
     for pos in sorted(at, reverse=True):
         out = f"{out[:pos]} [{' '.join(at[pos])}]{out[pos:]}"
@@ -49,11 +56,12 @@ def annotate(text: str, results: Sequence[tuple[Claim, Verdict]]) -> str:
 def _receipt_lines(verdict: Verdict) -> list[str]:
     from receipts.verify import fmt_ts, form_phrase
 
-    lines = []
-    for f in verdict.evidence[:MAX_RECEIPTS]:
-        lines.append(f"receipt: {form_phrase(f)} {f.accession} · accepted {fmt_ts(f.accepted_at)} · {f.url}")
-    if len(verdict.evidence) > MAX_RECEIPTS:
-        lines.append(f"         (+{len(verdict.evidence) - MAX_RECEIPTS} more)")
+    # A derived figure's inputs often come from one document; each document is listed once.
+    documents = list(dict.fromkeys(f"receipt: {form_phrase(f)} {f.accession} · accepted {fmt_ts(f.accepted_at)} · {f.url}"
+                                   for f in verdict.evidence))
+    lines = documents[:MAX_RECEIPTS]
+    if len(documents) > MAX_RECEIPTS:
+        lines.append(f"         (+{len(documents) - MAX_RECEIPTS} more)")
     return lines
 
 
@@ -71,16 +79,15 @@ def render(path_label: str, text: str, res: Any, *, inferred: bool) -> str:
     for claim, v in res.results:
         period = claim.period_text or "no period"
         basis = f" · {claim.basis}" if claim.basis else ""
-        w.append(f"{MARK.get(v.status, '?')} {claim.id:<4} {claim.metric}{basis} · {claim.value_text} · {claim.entity} "
+        w.append(f"{MARK.get(shown(v), '?')} {claim.id:<4} {claim.metric}{basis} · {claim.value_text} · {claim.entity} "
                  f"· {period}  [{v.reason}]")
         w.append(f"       {v.explanation}")
         if v.expected_value is not None:
             w.append(f"       expected: {_fmt_expected(claim, v.expected_value)}")
         w.extend(f"       {line}" for line in _receipt_lines(v))
-    counts = {s: sum(v.status == s for _, v in res.results) for s in MARK}
+    counts = {s: sum(shown(v) == s for _, v in res.results) for s in MARK}
     w.append("─" * 78)
-    w.append(f"{counts['verified']} ✓ verified · {counts['wrong']} ✗ wrong · {counts['unverifiable']} ? unverifiable"
-             f" · {counts['approximate']} ≈ approximate")
+    w.append(" · ".join(f"{counts[s]} {MARK[s]} {LABEL[s]}" for s in MARK if s != "look_ahead" or counts[s]))
     coverage = getattr(res, "coverage", None)
     if coverage is not None:
         w.append(f"number coverage: {coverage['covered_count']}/{coverage['candidate_count']} digit-based "

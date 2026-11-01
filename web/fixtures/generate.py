@@ -31,6 +31,8 @@ PY = ROOT / ".venv" / "bin" / "python"
 sys.path.insert(0, str(ROOT))
 
 from receipts import extract as ex  # noqa: E402  (read-only: request hashes and cached usage)
+from receipts import ask  # noqa: E402
+from receipts.store import Store  # noqa: E402
 
 NVDA_Q1_CONTEXT = "NVIDIA (NVDA), first quarter of fiscal 2027, the quarter ended April 26, 2026"
 # Three sentences from NVIDIA's Q1 FY2027 earnings release (eval corpus v0, dev split). Two carry
@@ -205,6 +207,19 @@ def health() -> dict:
     return {"ok": True, "data_snapshot": built, "companies": tickers, "facts": n}
 
 
+def ask_options() -> dict:
+    """The same bounded company periods as GET /api/ask/options; no model call."""
+    store = Store()
+    try:
+        return {"companies": ask.companies(store), "metrics": list(ask.ASK_METRICS), "examples": [
+            "What was NVIDIA's GAAP revenue in Q2 FY2027?",
+            "What was Meta's GAAP net income in Q3 FY2026?",
+            "What was Apple's GAAP diluted EPS in Q3 FY2026?",
+        ]}
+    finally:
+        store.close()
+
+
 def main() -> None:
     (OUT / "checks").mkdir(exist_ok=True)
     by_id = {}
@@ -218,6 +233,7 @@ def main() -> None:
                  "context": next(f["context"] for f in FIXTURES if f["id"] == e["fixture"])} for e in EXAMPLES]
     (OUT / "examples.json").write_text(json.dumps(examples, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     (OUT / "health.json").write_text(json.dumps(health(), indent=1) + "\n", encoding="utf-8")
+    (OUT / "ask-options.json").write_text(json.dumps(ask_options(), indent=1) + "\n", encoding="utf-8")
     print("wrote", ", ".join(str(p.relative_to(OUT)) for p in sorted(OUT.rglob("*.json"))))
 
 
