@@ -2,8 +2,9 @@
 
 Source-only checks; no verifier, extraction or provider is involved. The full
 source rebuild needs the gitignored SEC archive and runs only when
-SPOT500_DATA_ROOT names it (about two minutes).
+SPOT500_DATA_ROOT names it (about four minutes).
 """
+from collections import Counter
 from copy import deepcopy
 from dataclasses import asdict
 import hashlib
@@ -12,6 +13,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+from types import SimpleNamespace
 
 import pytest
 
@@ -20,8 +22,9 @@ from eval import build_spot500 as spot
 from eval import spot500
 
 ROOT = Path(__file__).resolve().parents[1]
-V1, V2, V3 = spot.SETS["v1"], spot.SETS["v2"], spot.SETS["v3"]
-FREEZE_COMMITS = {"v1": "050be2e5fe97f9920308e9d63643b7ee8c9771c7", "v2": "7bdcb11ccb371e897e58ed710dd58ee68a267162"}
+V1, V2, V3, FULL = spot.SETS["v1"], spot.SETS["v2"], spot.SETS["v3"], spot.SETS["full"]
+FREEZE_COMMITS = {"v1": "050be2e5fe97f9920308e9d63643b7ee8c9771c7", "v2": "7bdcb11ccb371e897e58ed710dd58ee68a267162",
+                  "v3": "02d6e41f7f140c54db2e04fa03a5a0bbf9544576"}
 DOC = {"doc_id": "EXCO-FY2026Q3", "ticker": "EXCO", "fy": 2026, "fp": "Q3", "period_end": "2026-09-30",
        "context": "Example Co (EXCO), third quarter of fiscal 2026", "quarter_days": 91}
 
@@ -84,7 +87,7 @@ def test_v1_set_matches_its_frozen_manifest_and_pins_only_its_own_builder():
         assert hashes[path] == sha((ROOT / path).read_bytes()), f"{path} changed; v1 no longer rebuilds identically"
 
 
-@pytest.mark.parametrize("spot_set", [V1, V2], ids=["v1", "v2"])
+@pytest.mark.parametrize("spot_set", [V1, V2, V3], ids=["v1", "v2", "v3"])
 def test_pinned_builder_hash_is_the_freezing_commit_blob(spot_set):
     if shutil.which("git") is None:
         pytest.skip("git is unavailable")
@@ -270,7 +273,7 @@ def test_committed_v2_passes_the_runner_freeze_and_the_oracle_scores_by_construc
 
 
 @pytest.mark.skipif(not os.environ.get("SPOT500_DATA_ROOT"),
-                    reason="set SPOT500_DATA_ROOT to the source data root for the full rebuild (about two minutes)")
+                    reason="set SPOT500_DATA_ROOT to the source data root for the full rebuild (about four minutes)")
 def test_full_source_rebuild_reproduces_every_set_byte_for_byte():
     from eval.spot500_sources import load_sources
 
@@ -279,6 +282,10 @@ def test_full_source_rebuild_reproduces_every_set_byte_for_byte():
         raw, manifest = spot.build_from_sources(*deepcopy(sources), spot=spot_set)
         assert raw == (ROOT / "eval" / spot_set.corpus).read_bytes(), spot_set.name
         assert manifest == (ROOT / "eval" / spot_set.manifest).read_bytes(), spot_set.name
+    # The full set's frame also screens the original development companies.
+    raw, manifest = spot.build(Path(os.environ["SPOT500_DATA_ROOT"]), FULL)
+    assert raw == (ROOT / "eval" / FULL.corpus).read_bytes()
+    assert manifest == (ROOT / "eval" / FULL.manifest).read_bytes()
 
 
 # ---------------------------------------------------------------- runner
@@ -327,15 +334,21 @@ def test_runner_defaults_to_v1_and_passes_the_set_through(monkeypatch, tmp_path)
         seen.append(("load", spot_set))
         return {}, []
 
-    def fake_run(items, output, *, stub, evidence_dir, budget, spot_set="v1"):
-        seen.append(("run", spot_set))
+    def fake_run(items, output, *, stub, evidence_dir, budget, spot_set="v1", concurrency=1):
+        seen.append(("run", spot_set, concurrency))
         return {"summary": {"total": {"gold_claims": 0}}, "cost_usd": 0, "estimated_cost_usd": 0,
                 "inputs_unchanged": True}
     monkeypatch.setattr(spot500, "load_items", fake_load)
     monkeypatch.setattr(spot500, "run", fake_run)
     assert spot500.main(["--stub", "oracle", "--output", str(tmp_path / "o.json")]) == 0
     assert spot500.main(["--set", "v2", "--stub", "oracle", "--output", str(tmp_path / "o.json")]) == 0
-    assert seen == [("load", "v1"), ("run", "v1"), ("load", "v2"), ("run", "v2")]
+    assert spot500.main(["--set", "full", "--stub", "oracle", "--concurrency", "4",
+                         "--output", str(tmp_path / "o.json")]) == 0
+    assert seen == [("load", "v1"), ("run", "v1", 1), ("load", "v2"), ("run", "v2", 1),
+                    ("load", "full"), ("run", "full", 4)]
+    for bad in ("0", "5"):
+        with pytest.raises(SystemExit):
+            spot500.main(["--stub", "oracle", "--concurrency", bad, "--output", str(tmp_path / "o.json")])
     with pytest.raises(SystemExit):
         spot500.main(["--set", "v9", "--stub", "oracle", "--output", str(tmp_path / "o.json")])
 
@@ -446,7 +459,8 @@ def test_v3_excludes_both_earlier_sets_and_every_derived_company():
     tests = record["verifier_fix_tests"]
     assert tests["listed"] == ["tests/test_spot500_sets.py", "tests/test_wording_gaps.py"]
     assert [row["path"] for row in tests["scanned"]] == ["tests/test_wording_gaps.py"]
-    assert not V3.frozen_builder_hashes
+    # The builder changed after the v3 freeze, so v3 pins its freezing builder too, as v1 and v2 do.
+    assert spot.builder_hashes(V3) == frozen_manifest(V3)["builder_hashes"]
 
 
 def test_exclusion_derivation_reproduces_from_git_history():
@@ -583,7 +597,7 @@ def test_committed_v3_passes_the_runner_freeze_and_the_oracle_scores_by_construc
     assert total["false_alarm_original_items"] == total["verified_guidance"] == total["extra_claims"] == 0
 
 
-@pytest.mark.parametrize("spot_set", ["v2", "v3"])
+@pytest.mark.parametrize("spot_set", ["v2", "v3", "full"])
 def test_each_later_set_has_its_own_single_use_live_run(tmp_path, monkeypatch, spot_set):
     rows = [item("original", version=f"spot500_{spot_set}")]
     corpus, manifest = freeze(tmp_path / "frozen", rows, version=f"spot500_{spot_set}")
@@ -607,3 +621,265 @@ def test_each_later_set_has_its_own_single_use_live_run(tmp_path, monkeypatch, s
     with pytest.raises(ValueError, match=f"must be eval/spot500_runs/{spot_set}-live-"):
         spot500.run(rows, runs / f"{other}-live-20261104.json", stub=False, evidence_dir=runs, budget=.95,
                     spot_set=spot_set)
+
+
+# ---------------------------------------------------------------- full: every eligible company, about 1,000 items
+
+def full_derivation():
+    return json.loads((ROOT / "eval" / FULL.derivation[0]).read_bytes())
+
+
+def test_full_set_excludes_no_company_and_tags_the_development_ones():
+    groups = {key: companies for key, companies, _ in FULL.development_groups}
+    record, v3_record = full_derivation(), derivation_record()
+    assert FULL.seed == 20261104 and FULL.full and FULL.exclude_sentences_of == ("v1", "v2", "v3")
+    assert FULL.excluded == frozenset() and not FULL.exclude_original and not FULL.exclusion_groups
+    assert groups["original_development_companies"] == spot.EXCLUDED
+    assert groups["spot500_v3_fix_test_companies"] == set(v3_record["verifier_fix_tests"]["companies"])
+    assert groups["spot500_v3_fix_code_companies"] == set(v3_record["verifier_fix_code"]["companies"])
+    assert groups["verifier_fix_test_companies"] == set(record["verifier_fix_tests"]["companies"])
+    assert groups["verifier_fix_code_companies"] == set(record["verifier_fix_code"]["companies"])
+    assert groups["reviewer_probe_companies"] == {"ADI", "BAX", "CSGP", "TGT"} == set(record["reviewer_probes"]["companies"])
+    assert groups["owner_named_probe_companies"] == {"LNT"}
+    assert FULL.in_development == frozenset().union(*groups.values()) and len(FULL.in_development) == 52
+    assert sha((ROOT / "eval" / FULL.derivation[0]).read_bytes()) == FULL.derivation[1]
+    # The later scan re-reads everything v3's did, so nothing v3 found drops out.
+    assert groups["spot500_v3_fix_test_companies"] <= groups["verifier_fix_test_companies"]
+    assert groups["spot500_v3_fix_code_companies"] <= groups["verifier_fix_code_companies"]
+    found = groups["verifier_fix_test_companies"] | groups["verifier_fix_code_companies"]
+    later = {"VLO", "HPE", "MRK", "CARR", "PFE", "FDS", "CMCSA", "GEHC", "MSI", "INTC", "WMT", "WSM", "FRT", "ITW",
+             "SNA", "DAL", "IVZ"}
+    assert later <= found and "LNT" not in found  # the owner names Alliant; no scanned line does
+
+
+def test_full_exclusion_derivation_reproduces_from_git_history():
+    from eval import spot500_exclusions as exclusions
+
+    record = full_derivation()
+    _, table = exclusions.companies_table(ROOT / "data/snapshot/facts.sqlite")
+    if table != record["companies_table"]:
+        pytest.skip("the snapshot companies table changed after the full derivation")
+    if shutil.which("git") is None or subprocess.run(
+            ["git", "cat-file", "-e", f"{exclusions.DERIVATIONS['full'][1]}^{{commit}}"], cwd=ROOT,
+            capture_output=True).returncode:
+        pytest.skip("the derivation range is not in this clone's history")
+    assert exclusions.encode(exclusions.derive(ROOT / "data/snapshot/facts.sqlite", "full")) == (
+        ROOT / "eval" / FULL.derivation[0]).read_bytes()
+
+
+def test_superseded_first_freeze_is_recorded_and_matches_git():
+    manifest = frozen_manifest(FULL)
+    assert manifest["superseded"] == spot.FULL_SUPERSEDED
+    assert manifest["superseded"]["note"] == (
+        "the first freeze was superseded before any run, at the owner's request, to include every company")
+    assert manifest["superseded"]["corpus_sha256"] != manifest["corpus_sha256"]
+    for record in (ROOT / "eval/spot500_runs").glob("full-live-*.json"):  # the first freeze never ran live
+        assert json.loads(record.read_text()).get("corpus_sha256") != manifest["superseded"]["corpus_sha256"]
+    if shutil.which("git") is None:
+        pytest.skip("git is unavailable")
+    old = spot.FULL_SUPERSEDED
+    blobs = [subprocess.run(["git", "cat-file", "blob", f"{old['commit']}:eval/{path}"], cwd=ROOT, capture_output=True)
+             for path in (FULL.corpus, FULL.manifest)]
+    if any(blob.returncode for blob in blobs):
+        pytest.skip("the first full freeze is not in this clone's history")
+    assert [sha(blob.stdout) for blob in blobs] == [old["corpus_sha256"], old["manifest_sha256"]]
+
+
+def test_frozen_full_set_meets_its_design_and_reuses_nothing():
+    raw = (ROOT / "eval" / FULL.corpus).read_bytes()
+    manifest, items = frozen_manifest(FULL), frozen_items(FULL)
+    scale = spot.FULL_SCALE
+    assert manifest["corpus_sha256"] == sha(raw) and manifest["version"] == "spot500_full"
+    assert manifest["items"] == [{"item_id": it["item_id"], "sha256": sha(spot.canonical(it))} for it in items]
+    assert {it["corpus_version"] for it in items} == {"spot500_full"}
+    assert all(it["item_id"].startswith("spot500-full-") for it in items) and len(items) == scale["total"]
+    assert manifest["excluded_tickers"] == [] and manifest["exclusions"]["companies"] == []
+    companies = set(manifest["selection"]["selected_companies"])
+    assert companies == {it["ticker"] for it in items} and len(companies) == manifest["counts"]["companies"] == 391
+    # The frame is v1's plus the original development companies (TSLA has no stored pair).
+    frame = manifest["frame"]
+    assert frame["source_pool_without_original_sha256"] == frozen_manifest(V1)["source_pool_sha256"]
+    assert frame["original_companies_added"] == sorted(spot.EXCLUDED - {"TSLA"}) and frame["original_companies_absent"] == ["TSLA"]
+    assert spot.EXCLUDED - {"TSLA"} <= companies
+    # Company history: exactly one tag per item, from the development list; every absence has a reason.
+    for item in items:
+        tags = {"company_in_development", "company_fresh"} & set(item["features"])
+        assert tags == {"company_in_development" if item["ticker"] in FULL.in_development else "company_fresh"}
+    history = manifest["company_history"]
+    assert set(history["in_development"]) == FULL.in_development
+    assert set(manifest["selection"]["in_development_companies"]) == companies & FULL.in_development
+    assert set(history["in_development_absent_from_set"]) == FULL.in_development - companies
+    slices = manifest["counts"]["by_company_history"]
+    for tag, entry in slices.items():
+        tagged = [it for it in items if tag in it["features"]]
+        assert entry["items"] == len(tagged) and entry["companies"] == len({it["ticker"] for it in tagged})
+        assert entry["gold_claims"] == sum(len(it["gold_claims"]) for it in tagged)
+    assert slices["company_in_development"]["items"] + slices["company_fresh"]["items"] == len(items)
+    originals = [it for it in items if it["mutator"] == "none"]
+    per_company = Counter(it["ticker"] for it in originals)
+    assert set(per_company) == companies and max(per_company.values()) <= scale["per_company"]
+    mutants = [it for it in items if it["mutator"] in spot.MUTATORS]
+    candidates = manifest["selection"]["mutation_candidate_counts"]
+    assert Counter(it["mutator"] for it in mutants) == {**{m: scale["mutants"] for m in spot.MUTATORS},
+                                                        "basis": candidates["basis"]}
+    original_ids = {it["item_id"] for it in originals}
+    assert all(it["original_item_id"] in original_ids for it in mutants)
+    assert max(Counter(it["original_item_id"] for it in mutants).values()) <= 2
+    controls = [it for it in items if it["mutator"] == "forward_looking_control"]
+    assert len(controls) == len({it["ticker"] for it in controls}) == scale["controls"]
+    # No source sentence of v1, v2 or v3 returns, by record, by id or by identical text.
+    earlier_records = {r["sha256"] for s in (V1, V2, V3) for r in frozen_manifest(s)["source_records"] if r["kind"] == "sentence"}
+    full_records = {r["sha256"] for r in manifest["source_records"] if r["kind"] == "sentence"}
+    assert not full_records & earlier_records
+    earlier_items = [it for s in (V1, V2, V3) for it in frozen_items(s)]
+    assert not {it["source"]["sentence_id"] for it in items} & {it["source"]["sentence_id"] for it in earlier_items}
+    assert not {it["source"]["original_text"] for it in items} & {it["source"]["original_text"] for it in earlier_items}
+    assert not {it["item_hash"] for it in items} & {it["item_hash"] for it in earlier_items}
+    removed = manifest["sentence_exclusions"]
+    assert {v: len(removed[v]) for v in ("spot500_v1", "spot500_v2", "spot500_v3")} == {
+        "spot500_v1": 40, "spot500_v2": 39, "spot500_v3": 37}
+    # Coverage: recorded counts equal the items', and every short feature says why.
+    by_feature = Counter(f for it in items for f in it["features"])
+    for feature, entry in manifest["selection"]["feature_coverage"].items():
+        assert entry["items"] == by_feature[feature], feature
+        assert (entry["items"] >= scale["feature_target"]) != ("short_because" in entry), feature
+    short = {f for f, e in manifest["selection"]["feature_coverage"].items() if "short_because" in e}
+    changes = manifest["procedure"]["changes_from_spot500_v1"]
+    assert all(any(line.startswith(f"{f}: ") for line in changes) for f in short)
+    assert any(line.startswith(f"basis mutants lowered from 60 to {candidates['basis']}: ") for line in changes)
+    for item in items:
+        for gold in item["gold_claims"]:
+            assert item["text"][slice(*gold["span"])] == gold["value_text"]
+    for ref, earlier in zip(manifest["reference_sets"], (V1, V2, V3)):
+        assert ref["manifest_sha256"] == sha((ROOT / "eval" / earlier.manifest).read_bytes())
+    assert manifest["company_history_derivation"] == {"file": "eval/spot500_full_exclusions.json",
+                                                      "sha256": FULL.derivation[1], "record": full_derivation()}
+    assert manifest["cost_estimate"]["total_usd"] == 5.0 <= manifest["cost_estimate"]["estimate_limit_usd"] == 5.5
+    assert manifest["builder_hashes"] == spot.builder_hashes(FULL), "builder changed after the full freeze"
+
+
+def test_committed_full_passes_the_runner_freeze_and_the_oracle_scores_by_construction():
+    manifest, items = spot500.load_items("full")
+    total = spot500.score(items, {it["item_id"]: {"pairs": spot500.oracle_pairs(it)} for it in items})["total"]
+    assert total["status_and_reason_correct"] == total["gold_claims"] == manifest["counts"]["gold_claims"]
+    assert total["caught_errors"] == total["expected_reasons"] == total["target_claims"] == sum(
+        n for m, n in manifest["counts"]["by_mutator"].items() if m in spot.MUTATORS)
+    assert total["false_alarm_original_items"] == total["verified_guidance"] == total["extra_claims"] == 0
+    # The runner's by_feature summary yields both company-history slices from the same run.
+    result = spot500.score(items, {it["item_id"]: {"pairs": spot500.oracle_pairs(it)} for it in items})
+    slices = manifest["counts"]["by_company_history"]
+    for tag in ("company_in_development", "company_fresh"):
+        assert result["by_feature"][tag]["items"] == slices[tag]["items"]
+
+
+@pytest.fixture
+def full_frozen(tmp_path, monkeypatch):
+    def frozen(count=3):
+        rows = [item(f"original{i}", version="spot500_full") for i in range(count)]
+        corpus, manifest = freeze(tmp_path / f"frozen{count}", rows, version="spot500_full")
+        monkeypatch.setattr(spot500, "FULL_CORPUS", corpus)
+        monkeypatch.setattr(spot500, "FULL_MANIFEST", manifest)
+        return rows
+    runs = tmp_path / "spot500_runs"
+    runs.mkdir()
+    monkeypatch.setattr(spot500, "RUNS", runs)
+    return frozen, runs
+
+
+@pytest.mark.parametrize("budget,allowed", [(6.0, True), (1.5, True), (6.01, False), (0, False), (float("nan"), False)])
+def test_full_budget_allowance_is_explicit_and_bounded(full_frozen, budget, allowed):
+    frozen, runs = full_frozen
+    rows = frozen()
+    output = runs / "full-oracle-20261102.json"
+    if allowed:
+        assert spot500.run(rows, output, stub=True, evidence_dir=runs, budget=budget, spot_set="full")["inputs_unchanged"]
+    else:
+        with pytest.raises(ValueError, match="at most \\$6"):
+            spot500.run(rows, output, stub=True, evidence_dir=runs, budget=budget, spot_set="full")
+        assert list(runs.iterdir()) == []
+
+
+@pytest.mark.parametrize("spot_set", ["v1", "v2", "v3"])
+def test_every_other_set_still_refuses_a_cap_of_one_dollar_or_more(tmp_path, monkeypatch, spot_set):
+    rows = [item("original", version=f"spot500_{spot_set}")]
+    with pytest.raises(ValueError, match="below \\$1"):
+        spot500.run(rows, tmp_path / f"{spot_set}-oracle-x.json", stub=True, evidence_dir=tmp_path, budget=1.0,
+                    spot_set=spot_set)
+    assert not list(tmp_path.iterdir())
+
+
+def test_full_estimate_limit_and_guard_cap_limit(full_frozen, tmp_path):
+    from receipts import extract as ex
+
+    frozen, runs = full_frozen
+    rows = frozen(1101)  # 1,101 x $0.005 = $5.505, over the $5.50 estimate limit
+    with pytest.raises(ValueError, match="estimate exceeds"):
+        spot500.run(rows, runs / "full-oracle-20261102.json", stub=True, evidence_dir=runs, budget=6.0, spot_set="full")
+    backend = ex.make_backend("meta")
+    key = ex.request_key(ex.build_request("Example revenue was $2 billion.", "Example Q2 FY2026", backend=backend), backend)
+    assert spot500.spark_guard(tmp_path / "a.json", backend, {key}, 5.5, cap_limit=6.0).cap_usd == 5.5
+    for cap, limit in ((1.5, None), (6.5, 6.0), (0, 6.0)):
+        with pytest.raises(ValueError, match="admission cap"):
+            spot500.spark_guard(tmp_path / f"b{cap}.json", backend, {key}, cap, cap_limit=limit)
+
+
+@pytest.mark.parametrize("concurrency", [0, 5, 1.5, True])
+def test_concurrency_is_one_to_four_and_checked_before_any_file(full_frozen, concurrency):
+    frozen, runs = full_frozen
+    with pytest.raises(ValueError, match="Concurrency"):
+        spot500.run(frozen(), runs / "full-oracle-20261102.json", stub=True, evidence_dir=runs, budget=.95,
+                    spot_set="full", concurrency=concurrency)
+    assert list(runs.iterdir()) == []
+
+
+def test_live_concurrency_keeps_one_dispatch_per_request_and_an_exact_ledger(full_frozen, monkeypatch):
+    """Four workers over items where originals and look-ahead mutants share a request; no provider call."""
+    import threading
+    import time
+    from receipts import check as checker
+    from receipts import extract as ex
+    from receipts import store as stores
+
+    frozen, runs = full_frozen
+    rows = frozen(8)
+    for i in range(4):  # look-ahead mutants: the same text and context as an original, another cutoff
+        rows.append({**rows[i], "item_id": f"spot500-full-original{i}-look_ahead", "mutator": "look_ahead",
+                     "as_of": "2026-01-01T00:00:00Z", "item_hash": spot500.digest(f"la{i}".encode())})
+    corpus, manifest = freeze(runs.parent / "with-pairs", rows, version="spot500_full")
+    monkeypatch.setattr(spot500, "FULL_CORPUS", corpus)
+    monkeypatch.setattr(spot500, "FULL_MANIFEST", manifest)
+    monkeypatch.setenv("MODEL_API_KEY", "SYNTHETIC_TEST_KEY")
+    monkeypatch.setattr(ex, "_load_api_key", lambda *args: pytest.fail("Dotenv read"))
+    monkeypatch.setattr(spot500, "evidence_hashes", lambda path: {"facts.sqlite": "synthetic"})
+    monkeypatch.setattr(spot500.harness, "install_sdk_hooks", lambda: True)
+    monkeypatch.setattr(stores, "Store", lambda db, pr: SimpleNamespace(close=lambda: None))
+    monkeypatch.setattr(ex, "make_client", lambda **kwargs: SimpleNamespace(close=lambda: None))
+    by_text = {row["text"]: row for row in rows if row["mutator"] == "none"}
+    cache, lock, busy, overlaps, peak = {}, threading.Lock(), Counter(), [], [0]
+
+    def fake_check(text, *, context, backend, cache_dir, extra_cache_dirs, concurrency, **kwargs):
+        assert concurrency == 1
+        request = ex.build_request(text, context, backend=backend)
+        key = ex.request_key(request, backend)
+        with lock:
+            busy[key] += 1
+            overlaps.append(busy[key] > 1)
+            peak[0] = max(peak[0], sum(busy.values()))
+        try:
+            time.sleep(0.05)
+            if key not in cache:
+                cache[key] = ex.RequestUsage(backend).call(
+                    lambda: SimpleNamespace(usage={"input_tokens": 100, "output_tokens": 50}), request)
+        finally:
+            with lock:
+                busy[key] -= 1
+        return SimpleNamespace(results=spot500.oracle_pairs(by_text[text]), extraction=SimpleNamespace(calls=[]),
+                               warnings=[], coverage={})
+    monkeypatch.setattr(checker, "check_detailed", fake_check)
+    result = spot500.run(rows, runs / "full-live-20261102.json", stub=False, evidence_dir=runs, budget=6.0,
+                         spot_set="full", concurrency=4)
+    assert peak[0] > 1 and not any(overlaps)   # concurrent, never the same request twice at once
+    assert result["summary"]["total"]["errors"] == 0 and len(result["records"]) == 12
+    assert result["metering"]["calls"] == len(cache) == 8 and result["concurrency"] == 4
+    assert all(row["status"] == "completed" for row in result["metering"]["attempts"])
+    assert result["cost_usd"] == pytest.approx(8 * .0003375) and not result["cost_is_estimate"]

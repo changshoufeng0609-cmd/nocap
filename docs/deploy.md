@@ -21,7 +21,7 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
 | Live access | Check, Fix, Slide and Ask are open until 2026-11-17 16:00 UTC (Nov 18 00:00 Taipei). Saved examples, recordings and benchmark inspection stay at $0. <!-- verify-at-release --> |
 | Shared admission | Existing free Neon primary, namespace `nocap`, US$5 per UTC admission day. Preview is paused with `RECEIPTS_LIVE_REQUESTS_ENABLED=false`, and the allowance was not reset <!-- verify-at-release --> |
-| Model-quality evidence | [One-time held-out results](../eval/heldout_results.md), [separate four-model Q&A](../eval/qa_results.md) and the [one-shot 500-company spot check](../eval/spot500_methods.md) |
+| Model-quality evidence | [One-time held-out results](../eval/heldout_results.md), [separate four-model Q&A](../eval/qa_results.md) and the [one-shot comprehensive 500-company test](../eval/spot500_methods.md#results-of-the-one-live-run-november-2-2026-all-companies) |
 | Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
 
 **This deployment (November 1, all 500 companies).**

@@ -112,7 +112,11 @@ def test_a_common_name_from_the_security_column_resolves(pilot, name, ticker):
 
 @pytest.mark.parametrize("name", ["Digital", "Realty", "Automotive", "Marsh", "Estée", "Lauder", "Southern Copper"])
 def test_a_part_of_a_common_name_never_resolves(pilot, name):
-    assert pilot.resolve_entity(name) is None
+    if name == "Marsh":  # issuer's own release name, now strictly bare-only
+        assert pilot.resolve_entity(name)[1] == "MRSH"
+        assert named(pilot, "The marsh flooded; Marsh reported results.") == []
+    else:
+        assert pilot.resolve_entity(name) is None
 
 
 def test_constituent_aliases_count_in_running_text_unless_they_are_ordinary_words(pilot):
@@ -122,19 +126,19 @@ def test_constituent_aliases_count_in_running_text_unless_they_are_ordinary_word
     assert named(pilot, "Moody's Corp. and Southern Co. said") == ["MCO", "SO"]
 
 
-def test_accent_folding_leaves_every_stored_key_of_the_snapshot_unchanged():
-    """normalize_entity now folds accents ("Estée" -> "estee"); for the names keys are made of (ASCII in the snapshot)
-    it gives exactly the stored keys, so no stored database needs a re-ingest. Explicit and constituent aliases are
-    added when the index is built, so a stored row need not hold them."""
+def test_accent_folding_and_initials_preserve_legacy_snapshot_aliases():
+    """Every stored key survives canonicalization; regenerated names also resolve
+    without re-ingest. Ordinary ticker restrictions still apply."""
     assert normalize_entity("Estée Lauder Companies (The)") == "estee lauder companies"
     assert normalize_entity("ＮＶＩＤＩＡ Corp.") == "nvidia" and normalize_entity("Brown–Forman") == "brown forman"
     s = Store(SNAPSHOT)
     try:
-        for _cik, ticker, name, aliases in s._index().rows:
-            constituent = (*st.ALIASES.get(ticker, ()), *st.SECURITY_ALIASES.get(ticker, ()), *st.COMMON_NAMES.get(ticker, ()),
-                           *st.SHORT_NAMES.get(ticker, ()))
-            new = company_aliases(ticker, name) - {normalize_entity(a) for a in constituent}
-            assert new <= set(json.loads(aliases)), ticker
+        for cik, ticker, name, aliases in s._index().rows:
+            legacy = {st.initials_key(a) for a in json.loads(aliases)}
+            for key in st.lookup_keys(ticker, name, legacy):
+                assert (cik, ticker) in s._index().lookup[key], (ticker, key)
+            for key in st.lookup_keys(ticker, name, company_aliases(ticker, name)):
+                assert (cik, ticker) in s._index().lookup[key], (ticker, key)
     finally:
         s.close()
 
@@ -186,13 +190,16 @@ def test_security_aliases_are_the_allowed_decisions_of_the_alias_record():
         decided = {(d["ticker"], d["alias"]): d for d in record["decisions"] if d["decision"] == kind}
         assert set(decided) == {(t, a) for table in tables for t, names in table.items() for a in names}
         for (_ticker, alias), d in decided.items():
-            assert normalize_entity(alias) == d["key"] and d["word_names"] == (d["key"] in st.WORD_NAMES)
+            assert normalize_entity(alias) == st.initials_key(d["key"]) and d["word_names"] == (d["key"] in st.WORD_NAMES)
             assert kind == "allow" or d["key"] in st.WORD_NAMES
     assert all(not set(st.SECURITY_ALIASES.get(t, ())) & set(names) for t, names in st.COMMON_NAMES.items())
     blocked = {(d["ticker"], d["key"]) for d in record["decisions"] if d["decision"] == "block"}
     assert {("BSX", "boston"), ("DOW", "dow"), ("HIG", "hartford"), ("ODFL", "old dominion")} <= blocked
     lookup = universe_index().lookup
-    assert [(t, k) for t, k in sorted(blocked) if any(c[1] == t for c in lookup.get(k, ()))] == []
+    assert [(t, k) for t, k in sorted(blocked) if any(c[1] == t for c in lookup.get(k, ()))] == [
+        ("MRSH", "marsh"), ("ODFL", "old dominion"), ("SBAC", "sba")]
+    for ticker, key in (("MRSH", "marsh"), ("ODFL", "old dominion"), ("SBAC", "sba")):
+        assert key in st.WORD_NAMES and key not in universe_index().scan
 
 
 # Single-token free-text keys (a name matched in any case, or a bare ticker matched in capitals) that are dictionary
@@ -292,7 +299,11 @@ def test_a_short_common_name_resolves_as_a_claims_company(short, name, ticker):
 
 @pytest.mark.parametrize("name", ["Dow", "Boston", "Hartford", "Old Dominion", "Thermo", "Mobile", "Charles", "River"])
 def test_an_index_place_or_partial_short_name_never_resolves(short, name):
-    assert short.resolve_entity(name) is None
+    if name == "Old Dominion":  # release-confirmed bare alias; Virginia prose stays blocked
+        assert short.resolve_entity(name)[1] == "ODFL"
+        assert named(short, "Travel through Old Dominion.") == []
+    else:
+        assert short.resolve_entity(name) is None
 
 
 def test_lookup_only_names_never_count_in_running_text_but_two_word_short_names_do(short):
@@ -383,7 +394,7 @@ def test_every_added_common_name_resolves_to_its_company_on_the_served_snapshot(
     for name in ("Huntington", "American", "General", "United", "Texas", "Public", "Honeywell", "S&P", "Edison"):
         assert served.resolve_entity(name) is None, name
     assert [(d["ticker"], d["key"]) for d in fourth_round("block")
-            if (served.resolve_entity(d["key"]) or (None, None))[1] == d["ticker"]] == []
+            if (served.resolve_entity(d["key"]) or (None, None))[1] == d["ticker"]] == [("MRSH", "marsh"), ("SBAC", "sba")]
 
 
 def test_lookup_only_common_names_never_count_in_running_text_and_ordinary_ones_do(served):

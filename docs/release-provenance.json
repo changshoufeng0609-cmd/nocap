@@ -1,14 +1,14 @@
 {
   "exported_on": "2026-11-02",
   "development_began": "2026-10-27",
-  "source_private_commit": "8d69d3c19c3bdfbc3825b48df3e1cb8e7b0edfa0",
+  "source_private_commit": "8c2fd7815ccd0d1108a5df39428f6b0f091a0c65",
   "source_private_branch": "wip/day3-handoff",
-  "source_archive_sha256": "8e0595b1a5a702bde79b1c94292544c51e1d45dddeec0fede2287684a6e15fab",
+  "source_archive_sha256": "7cf77bbde7386da1e2388850f5324212b4525d593af9394c1736915fc1fb7277",
   "public_history": "Clean main release updates; filtered source-only reconstructed development history is published separately on source-history. Private original history remains unchanged.",
   "public_video_sha256": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
   "public_x_cut_sha256": "3b03ca6cb3e7d37936f0710139d1a68f72039be32381b0e48b1725de5dffa714",
   "snapshot_fingerprint": "1381a6507b55e7322c8b369e",
-  "export_file_count": 2713,
+  "export_file_count": 3675,
   "removed_from_public_tree": 0,
   "largest_file_bytes": 46940160,
   "known_credentials_and_token_patterns": "No undisclosed matches; exact documented DUMMY_KEY fixture digest excluded. This is not a guarantee that every unknown credential is detectable."

@@ -63,7 +63,8 @@ def check_detailed(text: str, *, as_of: Any = None, context: Optional[str] = Non
     named = _verify.named_in_draft(text, store)  # the only companies a wrong figure may be attributed to
     for claim in extraction.claims:
         try:
-            verdict = _verify.verify(claim, store, as_of=as_of_dt, context=ctx, **({"named": named} if named else {}))
+            verdict = _verify.verify(claim, store, as_of=as_of_dt, context=ctx, draft=text,
+                                     **({"named": named} if named else {}))
         except Exception as e:  # one bad claim must not sink the whole draft
             log.exception("verify failed for %s", claim.id)
             verdict = Verdict(claim_id=claim.id, status="unverifiable", reason="no_evidence", as_of=as_of_dt,

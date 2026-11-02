@@ -90,6 +90,17 @@ BANK_TICKERS = (
     "NTRS",                                         # Northern Trust: net interest income and revenue on an FTE basis
 )
 BASIS_SENSITIVE_AT_BANKS = frozenset({"revenue", "net_interest_income"})
+# Companies whose own earnings releases report net sales below a larger total revenue in the same table, from an
+# offline survey of the archived EX-99.1 exhibits (round 8): Costco (net sales plus membership fees), Walmart (plus
+# membership and other income), Dollar Tree (plus other revenue), Incyte (product net sales plus royalties and
+# milestones), Snap-on (plus financial services revenue) and Viatris (plus other revenues). The revenue NoCap holds for
+# them is that total, so a figure the draft calls (net) sales is checked only against a net-sales fact, and with none
+# held it is "?" (_Check.sales_only). Companies whose top line is net sales (Apple, Amazon, Home Depot, Target) are
+# checked as before. Static on purpose, as BANK_TICKERS: ingest needs no flag.
+NET_SALES_BELOW_TOTAL_REVENUE = frozenset({"COST", "DLTR", "INCY", "SNA", "VTRS", "WMT"})
+_SALES_NOUN_RE = re.compile(r"\bsales\b", re.I)
+_REVENUE_NOUN_RE = re.compile(r"\brevenues?\b", re.I)
+_NET_SALES_ROW_RE = re.compile(r"\s*(?:total\s+)?(?:net\s+)?sales\s*(?:\(\w{1,3}\)\s*|\d{1,2}\s*)*[.:]*\s*", re.I)
 # The bank revenue receipts.ingest serves as net interest income plus noninterest income, as its locator writes it.
 _BANK_REVENUE_FORMULA_RE = re.compile(r"RevenuesNetOfInterestExpense = InterestIncomeExpenseNet "
                                       r"(?P<nii>-?\d[\d,]*(?:\.\d+)?) \+ NoninterestIncome "
@@ -716,6 +727,7 @@ class Reading:
     segment: Optional[str]           # segment the wording names, if any
     alternatives: tuple[str, ...] = ()  # other metrics the same wording may mean: unqualified "EPS" is basic or diluted
     derived: Optional[str] = None    # company margin, computed from income / revenue
+    absolute: bool = False           # the change of growth_base in dollars or per share ("up $0.32"), not a percent
 
 
 def _eps_alternatives(metric: str, claim: Claim) -> tuple[str, ...]:
@@ -878,6 +890,46 @@ def _level_metric_phrases(metric: str, text: str, segment: Optional[str] = None)
         if not any(hit[0] < b and hit[1] > a for a, b in chosen):
             chosen.append(hit)
     return sorted(chosen)
+
+
+# Where a clause's subject ends: its verb, or "of"/"at"/"to" leading into a figure.
+_SUBJECT_END_RE = re.compile(r"\b(?:was|were|is|are|has|have|had|rose|fell|grew|increas\w*|decreas\w*|declin\w*|expand\w*"
+                             r"|contract\w*|improv\w*|reach\w*|total\w*|came|stood|jump\w*|climb\w*|dropp?\w*|narrow\w*"
+                             r"|widen\w*|of|at|to)\b|[:=]", re.I)
+
+
+def _clause_subject(claim: Claim) -> Optional[str]:
+    """The subject of this figure's clause when other figures stand between the metric it names and the number, so
+    _local_level_description reads nothing: "Adjusted operating margin in the region" of "Adjusted operating margin in
+    the region decreased 40 basis points to 13.9%" (Allegion). Its words up to the clause's verb qualify every figure
+    the clause states, as they qualify the first; words after the verb that belong to another figure ("rose 24%, or 23%
+    FX-neutral, to $119.8B") don't. None when the clause names the metric nowhere before the number."""
+    pos = _value_pos(claim)
+    if pos is None:
+        return None
+    before = claim.span_text[:pos]
+    phrases = _level_metric_phrases(claim.metric, before, claim.segment)
+    if not phrases:
+        return None
+    start, end = phrases[-1]
+    # Only one clause may run from the metric to the number ("in the region decreased 40 basis points to"): an aside,
+    # a comma or a connector there means the metric is another figure's ("Despite net income of $4.43 billion a year
+    # ago, Merck posted a loss of $1.34 billion").
+    between = re.sub(rf"(?<![A-Za-z]){_FIGURE_RE.pattern}", " ", _without_period_phrases(before[end:]), flags=re.I)
+    if re.search(r"[,;:()—–]|\b(?:and|but|or|while|whereas|which|that|despite|although|though|after|before)\b",
+                 between, re.I):
+        return None
+    boundaries = sentence_breaks(before[:start])
+    boundaries += [hit.end() for hit in re.finditer(r",\s*(?:and|but|while|whereas|as)\b", before[:start])]
+    boundaries += [hit.end() for hit in _FIGURE_RE.finditer(_without_period_phrases(before[:start]))
+                   if re.search(r"\d", hit.group(0))]
+    verb = _SUBJECT_END_RE.search(before, end)
+    if verb is None:
+        return None
+    subject = before[max(boundaries, default=0):verb.start()]
+    if any(re.search(r"\d", hit.group(0)) for hit in _FIGURE_RE.finditer(_without_period_phrases(subject))):
+        return None
+    return subject
 
 
 def _local_level_description(claim: Claim, *, growth: bool = False) -> Optional[str]:
@@ -1202,6 +1254,8 @@ def _level_reading(claim: Claim, company: set[str], segment: Optional[str], *, g
     local = _local_level_description(claim, growth=growth)
     if local:
         descriptions.append(local)
+    elif subject := _clause_subject(claim):
+        descriptions.append(subject)  # the clause's subject qualifies this figure across the figures between them
     for index, text in enumerate(descriptions):
         text = re.sub(r"(?:'s|’s)\b", "", text)
         text = _without_defined_acronyms(_without_period_phrases(text))
@@ -1248,6 +1302,220 @@ def _growth_reading(claim: Claim, base: str, company: set[str], segment: Optiona
     metric = "revenue_growth" if base in ("revenue", "segment_revenue") else base
     return Reading(metric, "revenue" if metric == "revenue_growth" else base, checked.segment,
                    checked.alternatives)
+
+
+# A dollar or per-share amount that its own words make the change of a level, not the level: "up $0.32", "a decrease of
+# $192 million", "was up $32 million", "increased by $36 million", "an increase in revenue of $1.2 billion", "a $192
+# million decrease", "$0.24 lower than prior year". It is the change across a filing's two periods, never the level
+# (Day 13 full set: Charter, Norfolk Southern and Truist changes were compared with the level). Words that lead to a
+# level stay levels: "rose to $26.5 billion", "up from $25.2 billion"; so do "made up $35 billion" and the figure a
+# restated percent change ends at ("up 5%, or $1.2 billion" is the change; "up 5% to $26.5 billion" the level).
+_ABS_CHANGE_WORDS = (r"up|down|increas(?:e|ed|es|ing)|decreas(?:e|ed|es|ing)|ris(?:e|es|en|ing)|rose|gr[eo]w(?:s|n|ing)?"
+                     r"|growth|fell|fall(?:s|en|ing)?|declin(?:e|ed|es|ing)|dropp?(?:ed|s|ing)?"
+                     r"|improv(?:ed|es|ing|ement)|jump(?:ed|s)?|climb(?:ed|s)?|surg(?:e|ed|es)|reduc(?:ed|es|tion)"
+                     r"|change[ds]?|(?:higher|lower)\s+by")
+_ABS_CHANGE_BEFORE_RE = re.compile(
+    rf"\b(?:{_ABS_CHANGE_WORDS})(?:\s+(?:of|by))?\s*$"
+    r"|\b(?:increase|decrease|decline|rise|drop|reduction|improvement|growth|change)s?\s+in\s+(?:[\w&'’.-]+\s+){1,6}?"
+    r"of\s*$", re.I)
+_ABS_CHANGE_AFTER_RE = re.compile(
+    r"\s*(?:per\s+(?:diluted\s+|basic\s+)?share\s+)?(?:(?:year[\s-]+over[\s-]+year|yoy|y/y|quarter[\s-]+over[\s-]+quarter"
+    r"|sequential)\s+)?(?:increase|decrease|rise|decline|drop|reduction|improvement|jump)s?\b"
+    r"|\s*(?:higher|lower|more|less|greater|smaller)(?:\s+than\b|\s+(?:from|compared|versus|vs\.?)\b|\s*[,.;]|\s*$)",
+    re.I)
+_NOT_A_CHANGE_RE = re.compile(r"\b(?:made|make|makes|making|picked|ramped|built|set|signed|wrapped|summed|add(?:ed|s)?"
+                              r"|paid|broken|broke|took|booked)\s+(?:up|down)\s*$", re.I)
+# An earlier figure this one restates ("up 5%, or $1.2 billion", "rose 5% (or $1.2 billion)") or is listed with ("a
+# charge of $22 million, $22 million and $0.49 per ton, respectively"): the words before the first figure lead into
+# every one of them.
+_RESTATEMENT_LINK_RE = re.compile(r"(?:\(\s*or|,\s*or|\bor|\()\s*$", re.I)
+_LIST_LINK_RE = re.compile(r"(?:,\s*(?:(?:and|or)\b)?|\s+(?:and|or)\b|\s*&)\s*$", re.I)
+
+
+def _leading_words(text: str, pos: int, value_text: str) -> str:
+    """The words that lead into the figure at pos in text: currency and a hedge stripped ("increased approximately
+    $36 million"), and walked back over the earlier figures it restates or is listed with (above)."""
+    number = re.search(r"\d", value_text)
+    before = strip_bound_currency_prefix(text[:pos] + (value_text[:number.start()] if number else ""))
+    for _ in range(8):
+        for _kind, _inclusive, pattern in _HEDGES:
+            if hit := re.search(pattern.pattern, before, re.I):
+                before = before[:hit.start()]
+                break
+        link = _RESTATEMENT_LINK_RE.search(before) or _LIST_LINK_RE.search(before)
+        head = before[:link.start()].rstrip() if link else ""
+        last = [m for m in _FIGURE_RE.finditer(head) if re.search(r"\d", m.group(0)) and m.end() == len(head)]
+        if not last:
+            break
+        before = strip_bound_currency_prefix(head[:last[-1].start()])
+    return before.rstrip()
+
+
+class DraftLine(NamedTuple):
+    """The draft sentence that holds a claim's number (a semicolon doesn't end it), and the number's place in it."""
+
+    text: str
+    start: int
+    end: int
+
+
+def draft_line(claim: Claim, draft: Optional[str]) -> Optional[DraftLine]:
+    """The claim's DraftLine when the draft is given and the claim's span sits at its offsets in it, else None."""
+    if not draft or not 0 <= claim.span_start <= claim.span_end <= len(draft):
+        return None
+    if draft[claim.span_start:claim.span_end] != claim.span_text or (pos := _value_pos(claim)) is None:
+        return None
+    a = claim.span_start + pos
+    b = a + len(claim.value_text)
+    breaks = [x for x in sentence_breaks(draft) if draft[x - 1] != ";"]
+    start = max([x for x in breaks if x <= a], default=0)
+    end = min([x for x in breaks if x >= b], default=len(draft))
+    return DraftLine(draft[start:end], a - start, b - start)
+
+
+def _needs_its_sentence(claim: Claim, reading: Reading) -> bool:
+    """Whether the quote alone can't show what the figure is of: neither the words before its number nor its
+    metric_text name the base ("an increase of 3%", described as "increase"). A quote that names the base is read as it
+    stands: the words a sentence puts before it are mostly a dateline, a cause or a comparison ("Driven by robust
+    client engagement, ...", "Compared with the prior year, ..."), not the figure's own qualifiers."""
+    base = reading.derived or reading.growth_base or reading.metric
+    base = "revenue" if base == "revenue_growth" else base
+    pos = _value_pos(claim)
+    if pos is None or reading.segment:  # a quote that names its segment ("Fixed Income Markets up 21%") describes it
+        return False
+    return not (_level_metric_phrases(base, _without_period_phrases(claim.span_text[:pos]), reading.segment)
+                or _level_metric_phrases(base, claim.metric_text or "", reading.segment))
+
+
+def _sentence_subject_words(claim: Claim, reading: Reading, line: DraftLine) -> list[str]:
+    """The qualifying words of the base metric its draft line names last before the figure (_needs_its_sentence): a
+    segment, a region, a same-store measure or other words beyond framing, as _level_reading reads them. [] when the
+    line names the base plainly ("Target revenue was $26.5 billion, an increase of 5.3%") or not at all."""
+    base = reading.derived or reading.growth_base or reading.metric
+    base = "revenue" if base == "revenue_growth" else base
+    text = _without_period_phrases(re.sub(r"(?:'s|’s)\b", "  ", line.text[:line.start]))
+    phrases = _level_metric_phrases(base, text)
+    if not phrases:
+        return []
+    start, end = phrases[-1]
+    boundaries = sentence_breaks(text[:start]) + [hit.end() for hit in _FIGURE_RE.finditer(text[:start])
+                                                  if re.search(r"\d", hit.group(0))]
+    left = max(boundaries, default=0)
+    verb = _SUBJECT_END_RE.search(text, end)
+    subject = text[left:verb.start() if verb else end]
+    phrase = (start - left, end - left)
+    company = _company_words(claim)
+    segment = _qualifier_before(subject, phrase[0], company)
+    known = reading.segment  # a segment the reading already checks the figure against is no qualifier
+    named = " ".join(filter(None, (segment, known)))
+    words = _leftover_words(_level_sentence_framing(subject, phrase), phrase, company, named or None)
+    if segment and _seg_norm(segment) != _seg_norm(known):
+        words = [segment, *words]
+    if (distinct := _DISTINCT_SALES_RE.search(subject)) and not any(distinct.group(0) in w for w in words):
+        words.append(distinct.group(0))
+    return words
+
+
+def _lead_source(claim: Claim, line: Optional[DraftLine]) -> Optional[tuple[str, int]]:
+    """The text and offset to read a figure's leading words from: its span, or its draft line when the span holds
+    nothing before the number but a list separator (", $22 million"): a list item takes the list's head from there."""
+    pos = _value_pos(claim)
+    if pos is None:
+        return None
+    if line is not None and not re.sub(r"(?:\band\b|\bor\b|[\s,;&$])", "", claim.span_text[:pos], flags=re.I):
+        return line.text, line.start
+    return claim.span_text, pos
+
+
+def absolute_change(claim: Claim) -> bool:
+    """A dollar or per-share figure its own words make a change (see above), not a level."""
+    if claim.unit not in ("USD", "USD/share") or _MARGIN_CHANGE_UNIT.search(claim.value_text or ""):
+        return False
+    pos = _value_pos(claim)
+    if pos is None:
+        return False
+    span = claim.span_text
+    before = _leading_words(span, pos, claim.value_text)
+    if _ABS_CHANGE_BEFORE_RE.search(before) and not _NOT_A_CHANGE_RE.search(before):
+        return True
+    after = span[pos + len(claim.value_text):]
+    if restated := _RESTATED_AFTER_RE.match(after):
+        after = after[restated.end():]  # "$1.3 billion, or 5.3%, lower"
+    return bool(_ABS_CHANGE_AFTER_RE.match(after))
+
+
+# A figure the draft describes as an item within a reported figure, not the figure: "gross profit ... included a charge
+# of $22 million" (Martin Marietta, compared with aggregates gross profit), "an impact of $0.11 per share", "a $300
+# million impairment", "including $1.2 billion from acquisitions". NoCap holds no filing fact for such items, so the
+# figure is "?". A loss or cost noun is not one: "a net loss of $50 million" and "operating costs of $5 billion" are
+# levels.
+_ITEM_NOUNS = r"(?:charges?|impacts?|benefits?|gains?|headwinds?|tailwinds?|impairments?|write-?downs?|write-?offs?)"
+_ITEM_MODIFIERS = (r"(?:pre-?tax|after-?tax|non-?cash|one-?time|favou?rable|unfavou?rable|negative|positive|net|total"
+                   r"|tax|special|discrete|restructuring|acquisition-related|related|estimated|cumulative|unrealized"
+                   r"|realized|mark-to-market|currency|foreign\s+exchange|fx|tariff)")
+_ITEM_BEFORE_RE = re.compile(rf"(?P<words>(?:\b(?:an?|the)\s+)?(?:\b{_ITEM_MODIFIERS}\s+){{0,3}}\b{_ITEM_NOUNS})"
+                             r"\s+(?:of|totall?ing|amounting\s+to)\s*$"
+                             r"|\b(?P<verb>includ(?:ed|es|ing)|reflect(?:ed|s|ing)|exclud(?:ed|es|ing))\s*$", re.I)
+# After the number only words that describe the item may come before its noun ("$22 million restructuring charge",
+# "$0.11 per share tax benefit"), never a clause ("$26.5 billion despite currency headwinds").
+_ITEM_GAP_WORD = (r"(?!(?:despite|driven|due|as|amid|with|from|on|by|and|or|but|while|which|that|after|before|including"
+                  r"|excluding|reflecting|led|thanks|helped|primarily|mainly|largely|partly|compared|versus|vs|than|to"
+                  r"|for|at|was|were|is|are|its|their|our|of)\b)[a-z][\w-]*")
+_ITEM_AFTER_RE = re.compile(rf"\s*(?:per\s+(?:diluted\s+|basic\s+)?share\s+)?(?:in\s+)?(?:{_ITEM_GAP_WORD}\s+){{0,3}}?"
+                            rf"{_ITEM_NOUNS}\b", re.I)
+
+
+def item_wording(claim: Claim, line: Optional[DraftLine] = None) -> Optional[str]:
+    """The words that make this figure an item within a reported figure (above), or None. A list item reads them from
+    the list's head in its draft line ("a charge of $22 million, $22 million and $0.49 per ton")."""
+    source = _lead_source(claim, line)
+    if source is None:
+        return None
+    text, pos = source
+    if hit := _ITEM_BEFORE_RE.search(_leading_words(text, pos, claim.value_text)):
+        return " ".join((hit["words"] or hit["verb"]).split())
+    after = text[pos + len(claim.value_text):]
+    if hit := _ITEM_AFTER_RE.match(after):
+        return " ".join(hit.group(0).split())
+    return None
+
+
+def _absolute_change_reading(claim: Claim, company: set[str], segment: Optional[str],
+                             why: Optional[list[str]]) -> Optional[Reading]:
+    """The change in dollars or per share of the base metric the claim names (absolute_change), or None when that is no
+    base metric NoCap computes changes of. A change of income or EPS described as a loss ("net loss decreased $50
+    million") is never read: a smaller loss is a rise in income, and the draft's sign can't be told."""
+    m = claim.metric
+    if m == "other":
+        mt = _without_defined_acronyms(claim.metric_text or "")
+        phrases = _metric_phrases(mt)
+        if len(phrases) != 1 or _TO_COMMON_RE.search(mt) or _MARGIN_RE.search(mt):
+            return None
+        base, start, end = phrases[0]
+        segment = segment or _qualifier_before(mt, start, company)
+        if leftover := _leftover_words(mt, (start, end), company, segment):
+            if why is not None:
+                why.extend(leftover)
+            return None
+    else:
+        base = "revenue" if m == "revenue_growth" else m
+    if base not in GROWTH_BASES:
+        return None
+    if base in ("net_income", "operating_income", "eps_diluted", "eps_basic") and _LOSS_RE.search(
+            f"{claim.metric_text} {_change_clause(claim)}".lower()):
+        return None
+    # Unlike a percent change ("up 5%"), a dollar change is read only where its words name the base, as a level is:
+    # "cash from operations increased $3.0 billion" names no tracked base phrase.
+    typed = claim.model_copy(update={"metric": base})
+    local = _local_level_description(typed, growth=True)
+    if not any(_level_metric_phrases(base, _without_period_phrases(text), segment)
+               for text in (claim.metric_text or "", local or "")):
+        return None
+    checked = _growth_reading(claim, base, company, segment, why)
+    if checked is None:
+        return None
+    level = "revenue" if base == "segment_revenue" else base
+    return Reading(level, checked.growth_base, checked.segment, checked.alternatives, absolute=True)
 
 
 def _is_change(claim: Claim) -> bool:
@@ -1391,6 +1659,8 @@ def interpret(claim: Claim, why: Optional[list[str]] = None) -> Optional[Reading
             or (_MARGIN_CHANGE_UNIT.search(claim.value_text)
                 and any(_level_metric_phrases(metric, claim.metric_text) for metric in _MARGIN_METRICS))):
         return _margin_reading(claim, company, why)
+    if absolute_change(claim):  # "up $0.32": the change, checked as one, never against the level
+        return _absolute_change_reading(claim, company, seg, why)
     if m == "revenue_growth":
         # A named segment's own wording ("Gaming business revenue") is segment revenue wording.
         return _growth_reading(claim, "segment_revenue" if seg else "revenue", company, seg, why)
@@ -2022,6 +2292,41 @@ def _comparable_period_text(claim: Claim, context: Optional[str]) -> Optional[st
     return f"{ordinal} quarter of {'fiscal ' if fiscal or hit['fiscal'] else ''}{hit['year']}"
 
 
+# An exchange listing in parentheses ("(NYSE: GS)", "(Nasdaq: AAPL)") names the company its sentence is about. A sentence
+# whose listings name only another covered company than the claim's ("The Goldman Sachs Group, Inc. (NYSE: Vertex
+# Pharmaceuticals) today reported net revenues of $17.23 billion", the full set's planted entity copy) can't say whose
+# figure it gives, so the figure is "?" (listing_conflict).
+_EXCHANGE_LISTING_RE = re.compile(r"\(\s*(?:NYSE(?:\s+(?:American|Arca|MKT))?|NASDAQ|Nasdaq|AMEX|Cboe|CBOE|TSX)"
+                                  r"(?:\s*(?:GS|GM|CM)\b|\s+Global\s+(?:Select\s+)?Market|\s+Capital\s+Market)?"
+                                  r"\s*:\s*(?P<listing>[^():]{1,60}?)\s*\)")
+
+
+def listing_conflict(claim: Claim, store: EvidenceStore, context: Optional[str], line: Optional[DraftLine],
+                     entity: Optional[tuple[int, str]] = None) -> Optional[str]:
+    """The exchange listing in the claim's draft sentence that names another covered company, when no listing there
+    names the claim's own company; else None. A ticker in a listing is a ticker even where it is a word ("KEY")."""
+    listings = list(_EXCHANGE_LISTING_RE.finditer(line.text)) if line is not None else []
+    if not listings:
+        return None
+    own = entity or resolve_claim_entity(claim, store, context)
+    if own is None:
+        return None
+    by_ticker = getattr(store, "by_ticker", None)
+    other = None
+    for m in listings:
+        listed = " ".join(m["listing"].split())
+        if re.fullmatch(r"[A-Z]{1,5}(?:[.-][A-Z]{1,2})?", listed) and callable(by_ticker):
+            hit = by_ticker(listed)
+        else:
+            hit = _resolve(store, listed)
+        if hit is None:
+            continue
+        if int(hit[0]) == int(own[0]):
+            return None
+        other = other or " ".join(m.group(0).split())
+    return other
+
+
 def resolve_claim_entity(claim: Claim, store: EvidenceStore, context: Optional[str] = None) -> Optional[tuple[int, str]]:
     """(cik, ticker) for the claim's company. A generic subject ('the company') falls back to a context that
     names exactly one company; a named company the store doesn't know is never swapped for the context's."""
@@ -2037,13 +2342,17 @@ def resolve_claim_entity(claim: Claim, store: EvidenceStore, context: Optional[s
 # ---------------------------------------------------------------------------
 def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Optional[str] = None,
            named: Optional[Sequence[tuple[int, str, str]]] = None,
-           entity: Optional[tuple[int, str]] = None) -> Verdict:
+           entity: Optional[tuple[int, str]] = None, draft: Optional[str] = None) -> Verdict:
     """The verdict for one claim. as_of: datetime or ISO string; evidence accepted later is look-ahead.
     context: the document-context line (company and fiscal period) used for extraction.
     named: the companies the same draft names (named_in_draft): the only ones a wrong figure may be attributed to,
     besides those its context line names.
     entity: (cik, ticker) when the caller already knows the company, as Ask does for a claim it wrote from one stored
-    fact (Store.by_ticker): the claim's entity text is then not resolved again. A draft's claims never pass it."""
+    fact (Store.by_ticker): the claim's entity text is then not resolved again. A draft's claims never pass it.
+    draft: the text the claim's span offsets point into, as receipts.check passes it. Only the sentence holding the
+    claim's number is read (draft_line), and only where the claim's own span can't show what a rule needs: a list
+    item's shared head ("a charge of $22 million, $22 million"). Without it, or when the span isn't at its offsets,
+    the verdict is read from the claim alone, as before."""
     as_of_dt = to_utc(as_of)
 
     def plain(status: str, reason: str, explanation: str) -> Verdict:
@@ -2071,13 +2380,21 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
         return plain("unverifiable", "ambiguous",
                      f"The wording “{wording}” puts {claim.value_text} on a non-GAAP basis, but it was read as GAAP. "
                      f"With its basis unclear, NoCap doesn't check it.")
+    line = draft_line(claim, draft)  # read before any rewrite below: the span must sit at its offsets
+    # Whether the draft itself names a period anywhere: a story's "third-quarter 2026" covers its later sentences, but a
+    # context line passed beside a draft that names none does not (_Check._line_names_a_period).
+    draft_period = bool(draft) and bool(periods.find_period_phrase(draft) or _PERIOD_WORDS_RE.search(draft))
+    if conflict := listing_conflict(claim, store, context, line, entity):
+        return plain("unverifiable", "ambiguous",
+                     f"The sentence gives {claim.value_text} for {claim.entity or 'its company'}, but its exchange "
+                     f"listing “{conflict}” names another company, so NoCap can't tell whose figure it is.")
     # "attributable to <its own company>" is read as plain net income; the draft's own words stay for display
     original, claim = claim, _without_parent_attribution(claim, _own_company_names(claim, store, context, entity))
     income_line = _named_income_line(claim)
     if income_line == "ambiguous":
         return plain("unverifiable", "ambiguous", "The draft names both consolidated and common-stockholder "
                      "net income for this amount, so its intended line is unclear.")
-    if income_line and (claim.unit == "%" or claim.basis == "non-GAAP"):
+    if income_line and (claim.unit == "%" or claim.basis == "non-GAAP" or absolute_change(claim)):
         return plain("unverifiable", "no_evidence", "NoCap's alternative net-income evidence covers GAAP "
                      "level amounts, not changes or non-GAAP versions of the named line.")
     if not income_line and not _per_share_wording(claim) and (
@@ -2108,18 +2425,35 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
             return plain("unverifiable", "no_evidence",
                          f"The wording “{' '.join(qualifiers)}” qualifies this figure{what} in a way NoCap can't "
                          f"match to a filing fact, so there is nothing to check it against.")
+        if absolute_change(original):
+            return plain("unverifiable", "no_evidence",
+                         f"{original.value_text} is a change{what}, not its level, and NoCap computes changes only of "
+                         f"the base figures it tracks, so it doesn't check this one against a filing.")
         return plain("unverifiable", "no_evidence",
                      f"NoCap doesn't track this kind of figure{what} yet, so there is no filing fact to check.")
+    if line is not None and _needs_its_sentence(reading_claim, reading) and (
+            sentence_words := _sentence_subject_words(reading_claim, reading, line)):
+        # A quote that names nothing ("an increase of 3%") is a change of its sentence's subject, and that subject's
+        # qualifiers are its own: "Same-store revenue (adjusted for dispositions) of $904 million ..., an increase of 3%".
+        what = f" ({original.metric_text})" if original.metric_text else ""
+        return plain("unverifiable", "no_evidence",
+                     f"The wording “{' '.join(sentence_words)}” in its sentence qualifies this figure{what} in a way NoCap "
+                     f"can't match to a filing fact, so there is nothing to check it against.")
+    if words := item_wording(original, line):  # a figure NoCap would read: never check an item within it as it
+        return plain("unverifiable", "no_evidence",
+                     f"“{words}” makes {original.value_text} an item within a reported figure, not the figure itself, "
+                     f"and NoCap holds no filing fact for that item, so it can't check it.")
     entity = entity or resolve_claim_entity(claim, store, context)
     if entity is None:
         return unresolved_entity(claim, store, as_of_dt)
     own = (int(entity[0]), str(entity[1]))
-    verdict = _Check(claim, store, own, as_of_dt, context, reading, named).run()
+    verdict = _Check(claim, store, own, as_of_dt, context, reading, named, line=line, draft_period=draft_period).run()
     if (verdict.status == "wrong" and verdict.reason != "look_ahead" and claim.unit != "%"
             and claimed_value(claim, change=False) != claimed_value(claim, change=False, loss_scope=False)):
         # Its own clause reads the figure as income while a loss word elsewhere in its span would read it as a loss
         # (_income_subject). The figure stays "✗" only when that loss reading is wrong too.
-        loss = _Check(claim, store, own, as_of_dt, context, reading, named, loss_scope=False).run()
+        loss = _Check(claim, store, own, as_of_dt, context, reading, named, loss_scope=False, line=line,
+                      draft_period=draft_period).run()
         if loss.status == "unverifiable":
             verdict = loss
         elif loss.status != "wrong" or loss.reason == "look_ahead":
@@ -2191,11 +2525,50 @@ def unresolved_entity(claim: Claim, store: EvidenceStore, as_of: Optional[dateti
                                 f"data to check it against{listed}.")
 
 
+# Period words in a figure's own sentence: with none, its period is only the context's (_Check._line_names_a_period).
+_PERIOD_WORDS_RE = re.compile(r"\b(?:quarters?|quarterly|years?|yearly|annual(?:ly)?|fiscal|f?y\d{2,4}|fy|q[1-4]|[1-4]q"
+                              r"|h[12]|halves|half|months?|monthly|periods?|ytd|year-to-date|weeks?|ended|ending|ago"
+                              r"|prior|previous|preceding|last|sequential(?:ly)?|yoy|qoq|y/y|q/q|(?:19|20)\d{2}"
+                              r"|jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?"
+                              r"|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b", re.I)
+# The two sides of a stated basis (_Check._sibling_basis): reported or GAAP, and the company's adjusted measures.
+_NON_GAAP_SIDE_RE = re.compile(r"\b(?:non[\s‐‑-]?gaap|adjusted|comparable|core|underlying|managed|organic"
+                               r"|(?:fully[\s-])?taxable[\s-]equivalent|fte)\b", re.I)
+_GAAP_SIDE_RE = re.compile(r"\b(?:gaap|reported)\b", re.I)
+
+
+def _sibling_figure(text: str, claim: Claim) -> Optional[tuple[float, float]]:
+    """(value, half unit) in full units of a figure written like the claim's (a percent for a percent, dollars for
+    dollars, a per-share amount for a per-share amount), or None."""
+    number = _NUM_RE.search(text)
+    if number is None:
+        return None
+    digits = number.group(0)
+    decimals = len(digits.split(".", 1)[1]) if "." in digits else 0
+    value, half = float(digits.replace(",", "")), 0.5 * 10.0 ** -decimals
+    percent = bool(re.search(r"%|percent", text, re.I))
+    if claim.unit == "%":
+        return (value, half) if percent else None
+    if percent or "$" not in text:
+        return None
+    word = re.search(r"(trillion|billion|million|thousand|[BMK])\b", text, re.I)
+    if claim.unit == "USD/share":
+        return None if word else (value, half)
+    if claim.unit != "USD":
+        return None
+    factor = {"t": 1e12, "trillion": 1e12, "b": 1e9, "billion": 1e9, "m": 1e6, "million": 1e6, "k": 1e3,
+              "thousand": 1e3}.get(word.group(1).lower(), 1.0) if word else SCALE_FACTOR.get(claim.scale, 1.0)
+    return value * factor, half * factor
+
+
 class _Check:
     def __init__(self, claim: Claim, store: EvidenceStore, entity: tuple[int, str], as_of: Optional[datetime],
                  context: Optional[str], reading: Optional[Reading] = None,
-                 named: Optional[Sequence[tuple[int, str, str]]] = None, *, loss_scope: bool = True):
+                 named: Optional[Sequence[tuple[int, str, str]]] = None, *, loss_scope: bool = True,
+                 line: Optional[DraftLine] = None, draft_period: bool = False):
         self.c, self.store, self.as_of, self.context = claim, store, as_of, context
+        self.line = line  # the draft sentence holding the number, when the draft was given (draft_line)
+        self.draft_period = draft_period  # the draft names a period somewhere (verify)
         self.named = list(named or ())
         self.cik, self.ticker = entity
         context_companies = context_entities(context, store)
@@ -2212,6 +2585,7 @@ class _Check:
         r = reading or interpret(claim) or Reading(claim.metric, None, None)
         terms = span_terms(claim, r)
         self.growth_base = terms.growth_base  # a percent change of this metric, or None for a level figure
+        self.absolute = r.absolute  # the change in dollars or per share ("up $0.32"), not a percent
         self.comparison_ambiguous = terms.comparison_ambiguous
         self.comparison = terms.comparison
         self.derived = terms.derived
@@ -2225,6 +2599,11 @@ class _Check:
         self.metric = terms.metric
         self.basis_stated = claim.basis is not None
         self.basis = terms.basis
+        # The draft calls the figure (net) sales of a company whose total revenue includes more (above)
+        own_words = _own_wording(claim)
+        self.sales_only = (self.ticker in NET_SALES_BELOW_TOTAL_REVENUE and self.metric in ("revenue", "revenue_growth")
+                           and not self.segment and bool(_SALES_NOUN_RE.search(own_words))
+                           and not _REVENUE_NOUN_RE.search(own_words))
         self.claimed = claimed_value(claim, change=self.growth_base is not None, loss_scope=loss_scope)
         if self.margin_unit:
             self.claimed = _margin_claimed_value(claim)
@@ -2279,7 +2658,7 @@ class _Check:
 
     def mlabel(self, basis_word: bool = True) -> str:
         if self.growth_base and self.metric != "revenue_growth":
-            kind = "change" if self.margin_unit else "growth"
+            kind = "change" if self.margin_unit or self.absolute else "growth"
             return f"{self.subject() if basis_word else METRIC_LABELS.get(self.growth_base, 'figure')} {kind}"
         base = METRIC_LABELS.get(self.metric, self.metric)
         if self.segment and self.metric in ("segment_revenue", "revenue_growth"):
@@ -2294,6 +2673,8 @@ class _Check:
         if self.margin_unit:
             digits = max(1, decimals_of(self.c.value_text, self.c.value) + 1)
             return f"{v:.{digits}f} {self.margin_unit}"
+        if self.absolute:
+            return fmt_value(v, self.growth_base or self.metric, self.c)
         return fmt_value(v, "revenue_growth" if self.growth_base else self.metric, self.c)
 
     def fmt_observation(self, o: Obs) -> str:
@@ -2368,6 +2749,10 @@ class _Check:
             if (metric == "revenue" and segment is None and f.source == "press_release" and _kept_out_of_revenue(f)
                     and not self._allow_not_revenue_rows):
                 continue  # a comparable, same-store, constant-currency, organic or pro forma row is not revenue
+            if metric == "revenue" and segment is None and cik == self.cik and self.sales_only and not (
+                    (f.concept or "").split(":")[-1] in ("SalesRevenueNet", "SalesRevenueGoodsNet")
+                    or _NET_SALES_ROW_RE.fullmatch((f.locator or "").split("|", 1)[0])):
+                continue  # total revenue is not the net sales the draft names
             if basis == "non-GAAP":
                 if f.basis != "non-GAAP" or f.source != "press_release":
                     continue  # non-GAAP figures come only from press releases
@@ -2387,6 +2772,13 @@ class _Check:
                 self.invalid_numeric_evidence = True
                 continue
             out.append(Obs(float(f.value), (f,)))
+        if basis == "non-GAAP" and out and metric not in ("revenue", "segment_revenue"):
+            # Never a GAAP row of a reconciliation table as the non-GAAP figure (_gaap_row), for every metric but revenue:
+            # an adjusted figure is never confirmed or rejected by GAAP evidence. A rate is read from its label alone.
+            # Revenue has one value either way, so a release's revenue row among its non-GAAP figures is its non-GAAP
+            # revenue (AMD's non-GAAP revenue is its revenue).
+            reported = self.level(cik, metric, rp, None, segment) if any(o.primary.unit == "USD" for o in out) else []
+            out = [o for o in out if not _gaap_row(o.primary, reported if o.primary.unit == "USD" else ())]
         if metric in PER_SHARE_METRICS and len(out) > 1:
             out = self._split_consistent(out)
         return out
@@ -2483,10 +2875,15 @@ class _Check:
         # Noninterest income is a term of a revenue fact's locator: only one filing's own pair is read for it.
         if not pairs and cur and prev and metric != "noninterest_income":
             pairs = self._unrestated_pairs(cik, metric, cal, rp, cur, prev, basis, segment)
-        if not pairs and base is not None and any(p.value > 0 for p in prev) and cur:
+        if not pairs and base is not None and any(self.absolute or p.value > 0 for p in prev) and cur:
             self.unpaired[(rp, comparison)] = base
         out = []
         for c, p in pairs:
+            if self.absolute:  # the change itself, carrying both figures' rounding
+                level = lambda v: fmt_value(v, metric, self.c)  # noqa: E731
+                out.append(Obs(c.value - p.value, c.facts + p.facts, _half_unit(c.primary) + _half_unit(p.primary),
+                               f"from {level(p.value)} to {level(c.value)}"))
+                continue
             if p.value <= 0:
                 continue  # a change from zero or from a loss has no meaningful percent
             ratio = c.value / p.value
@@ -2570,8 +2967,10 @@ class _Check:
                                                or not self._same_margin_filing(facts)
                                                or i.primary.period_start != r.primary.period_start)):
                     continue
-                out.append(Obs(i.value / r.value * 100.0, facts,
-                               self._margin_error(i.primary, r.primary) if strict else 0.0))
+                # The rounding of both inputs bounds the margin, for an operating margin too (strict=False): Illumina's
+                # non-GAAP operating margin of 22.5% is 260 / 1,159 = 22.43% from its rounded figures, 22.38-22.49%
+                # with their rounding, and the release's own rate is computed before that rounding.
+                out.append(Obs(i.value / r.value * 100.0, facts, self._margin_error(i.primary, r.primary)))
         return out
 
     @staticmethod
@@ -2790,9 +3189,18 @@ class _Check:
         return [o for o in obs if within(claimed, o.value, tol + o.err)]
 
     def alternative_matches(self, rp: ResolvedPeriod) -> tuple[Optional[str], list[Obs]]:
-        """A match under another reading of the same wording ('EPS' read as basic rather than diluted)."""
+        """A match under another reading of the same wording ('EPS' read as basic rather than diluted). A change is
+        compared with the other metric's change, never with its level."""
         for metric in self.alternatives:
-            hits = [o for o in self.accepts(self.level(self.cik, metric, rp, self.basis, self.segment)) if self.public(o)]
+            if self.growth_base:
+                base, self.growth_base = self.growth_base, metric
+                try:
+                    obs = self.observe(rp)
+                finally:
+                    self.growth_base = base
+            else:
+                obs = self.level(self.cik, metric, rp, self.basis, self.segment)
+            hits = [o for o in self.accepts(obs) if self.public(o)]
             if hits:
                 return metric, hits
         return None, []
@@ -2869,6 +3277,8 @@ class _Check:
     # -- the rules -------------------------------------------------------------
     def run(self) -> Verdict:
         verdict = self._run()
+        if sibling := self._sibling_basis(verdict):
+            return sibling
         if (verdict.status == "wrong" and verdict.reason != "look_ahead" and self.c.period_type == "quarter"
                 and self.rp is not None and self.rp.fiscal_period == "FY"):
             # a quarterly figure whose period words read as a full year ("in 2025"): never "✗" against the year
@@ -2964,10 +3374,63 @@ class _Check:
         return self.wrong("value_mismatch", actual,
                           f"{self.attribution(actual)}{self.statement(actual, rp, filed_precision=True)}, not {c.value_text}.")
 
+    def _line_names_a_period(self) -> bool:
+        """Whether the draft gives this figure a period: its own sentence (draft_line) has a period phrase or period
+        words, or the draft names a period elsewhere, as a story does once in its opening ("Meta Platforms posted
+        third-quarter 2026 revenue ..." covers "Total costs and expenses jumped to $42.0 billion"). A draft that names
+        no period at all, such as the lone line "Adjusted gross margin of approximately 75.0%", leaves the period only
+        to the context. Without the draft a span can't tell, so it counts as naming one, as before."""
+        if self.line is None:
+            return True
+        return bool(self.draft_period or periods.find_period_phrase(self.line.text)
+                    or _PERIOD_WORDS_RE.search(self.line.text))
+
+    def _sibling_basis(self, verdict: Verdict) -> Optional[Verdict]:
+        """A figure its own words put on one basis ("reported", "GAAP"; or "adjusted", "comparable", "non-GAAP") whose
+        draft line states the same measure on the other basis, and whose evidence fits that other figure: Constellation
+        Brands' "Tax rate: reported ~12%; comparable ~20%", where the release's rate NoCap holds for the quarter is
+        20.2%. The line's bases, or its period, may then differ from the filing's, so the figure is "?", never a value
+        "✗". A figure whose number is the other basis's own (a swapped basis) is diagnosed as before."""
+        if (self.line is None or verdict.status != "wrong" or verdict.reason != "value_mismatch"
+                or verdict.expected_value is None or self.growth_base or self.margin_unit):
+            return None
+        own = _own_wording(self.c)
+        gaap = bool(_GAAP_SIDE_RE.search(_NON_GAAP_SIDE_RE.sub(" ", own)))
+        if gaap == bool(_NON_GAAP_SIDE_RE.search(own)):
+            return None  # its own words name no basis, or both
+        other = _NON_GAAP_SIDE_RE if gaap else _GAAP_SIDE_RE
+        text, start, end = self.line
+        factor = SCALE_FACTOR.get(self.c.scale, 1.0) if self.c.unit in ("USD", "shares") else 1.0
+        expected = verdict.expected_value * factor
+        previous = 0
+        for m in _FIGURE_RE.finditer(text):
+            if not re.search(r"\d", m.group(0)):
+                continue
+            lead, previous = text[previous:m.start()], m.end()
+            if m.start() < end and m.end() > start:
+                continue  # the claim's own number
+            figure = _sibling_figure(m.group(0), self.c)
+            words = other.search(lead if other is _NON_GAAP_SIDE_RE else _NON_GAAP_SIDE_RE.sub(" ", lead))
+            if figure is None or words is None:
+                continue
+            value, half = figure
+            hedged = hedge_of(self.c.model_copy(update={"span_text": text[:m.end()], "value_text": m.group(0).strip()}))
+            band = max(2 * half, 0.01 * abs(value)) if hedged and hedged.kind == "approx" else half
+            if within(expected, value, band):
+                filed = re.sub(rf",\s*not {re.escape(self.c.value_text)}\.$", ".", verdict.explanation)
+                return self.verdict(
+                    "unverifiable", "ambiguous",
+                    f"{filed} The draft's line also gives this measure as “{words.group(0)}” {m.group(0).strip()}, "
+                    f"which that figure fits, so the line's bases or period may differ from the filing's; NoCap "
+                    f"doesn't call {self.c.value_text} wrong.", evidence=verdict.evidence)
+        return None
+
     def _unit_fits(self) -> bool:
         u = self.c.unit
         if self.margin_unit:
             return True  # read from value_text, independently of the proposed unit and scale
+        if self.absolute:  # a change is written in the base metric's own unit
+            return u in ("USD/share", "USD") if self.growth_base in PER_SHARE_METRICS else u == "USD"
         if self.growth_base or self.derived in ("operating_margin", "net_margin"):
             return u == "%"
         if self.metric in USD_METRICS:
@@ -3033,6 +3496,11 @@ class _Check:
         return ResolvedPeriod(latest.fiscal_year, latest.fiscal_period, None) if held else None
 
     def _no_evidence(self, rp: ResolvedPeriod) -> Verdict:
+        if self.sales_only:
+            return self.verdict("unverifiable", "no_evidence",
+                                f"The revenue {self.co_s} filings report is total revenue, which includes more than its "
+                                f"net sales (such as membership fees or other revenue), and NoCap holds no net sales "
+                                f"figure for {self.plabel(rp)}, so it can't check {self.c.value_text} as net sales.")
         if self.invalid_numeric_evidence:
             return self.verdict("unverifiable", "no_evidence",
                                 "The available filing figures could not be compared as finite numbers.")
@@ -3205,10 +3673,12 @@ class _Check:
             return None
         best = _best_obs(hits)
         label = METRIC_LABELS.get(metric or "", "figure")
+        stated = (f"{label} {'grew' if best.value >= 0 else 'fell'} {self.fmt(abs(best.value))} "
+                  f"{_cmp_words(self.comparison)} in {self.plabel(rp)}" if self.growth_base else
+                  f"{label} was {self.fmt(best.value)} for {self.plabel(rp)}")
         return self.verdict("verified", "match",
-                            f"Matches {self.co_s} {form_phrase(best.primary)}: {label} was {self.fmt(best.value)} for "
-                            f"{self.plabel(rp)} (the draft doesn't say basic or diluted).",
-                            evidence=[f for o in hits for f in o.facts])
+                            f"Matches {self.co_s} {form_phrase(best.primary)}: {stated} (the draft doesn't say basic or "
+                            f"diluted).", evidence=[f for o in hits for f in o.facts])
 
     def earnings_release(self, rp: ResolvedPeriod) -> Optional[dict[str, Any]]:
         """The earliest Item 2.02 8-K accepted within EARNINGS_RELEASE_WINDOW_DAYS after the period end, from
@@ -3296,7 +3766,9 @@ class _Check:
                                     evidence=self._matched_facts(best) if self.margin_unit else
                                     [f for o in hits for f in o.facts])
         parts = [f"{self.fmt(_current_obs(obs).value)} {_cmp_words(cmp)}" for cmp, obs in public if obs]
-        if all(obs for _, obs in public):
+        # A dollar change against an unnamed base is never "✗": it may be measured against something else (guidance,
+        # another period), and only the year-over-year and sequential changes are on file.
+        if all(obs for _, obs in public) and not self.absolute:
             actual = _current_obs(public[0][1])
             if len(public) == 1 and (direction := self._wrong_direction(rp, public[0][1], public[0][0])):
                 return direction
@@ -3610,9 +4082,10 @@ class _Check:
         if hint is None:
             return None
         orp, o = hint
-        if not (c.period_text or "").strip():
+        if not (c.period_text or "").strip() or not self._line_names_a_period():
             # The draft gives the figure no period: the story's period is only the context's, so a figure that fits
-            # another period is "?", never a period "✗" against the current one
+            # another period is "?", never a period "✗" against the current one. Extraction may have copied the
+            # context's period into period_text, so the draft decides (_line_names_a_period).
             return self.verdict("unverifiable", "ambiguous",
                                 f"{c.value_text} is {self.co_s} {self.mlabel()} for {self.plabel(orp)}, and the draft "
                                 f"names no period for it; for {self.plabel(rp)} it was "
@@ -3646,7 +4119,10 @@ class _Check:
         return _current_obs(pub)
 
     def _non_gaap_measure_mismatch(self, actual: Obs) -> Optional[Verdict]:
-        """A mismatching adjusted total cannot be rejected using a different non-GAAP row such as TE revenue."""
+        """A mismatching adjusted total cannot be rejected using a different non-GAAP row such as TE revenue, nor using a
+        row whose label names no non-GAAP measure at all: Revvity's "Operating income from continuing operations",
+        filed with its non-GAAP figures, against the draft's "adjusted operating income" ($113 million). A row that says
+        non-GAAP ("Non-GAAP operating income") is the company's non-GAAP figure and still rejects it."""
         if self.basis != "non-GAAP" or self.growth_base or self.derived:
             return None
         fact = actual.primary
@@ -3654,8 +4130,16 @@ class _Check:
             return None
         row = (fact.locator or "").split("|", 1)[0].strip()
         stored, drafted = _non_gaap_measure_qualifiers(row), _claim_measure_qualifiers(self.c)
-        if not stored or not drafted or stored == drafted:
+        if not drafted or stored == drafted:
             return None
+        if not stored:
+            if _ROW_NON_GAAP_RE.search(re.sub(r"[‐‑‒–—―−]", "-", row)):
+                return None
+            return self.verdict(
+                "unverifiable", "ambiguous",
+                f"{self.co_s} {form_phrase(fact)} files “{row}” of {self.fmt(actual.value)} with its non-GAAP figures, "
+                f"but the row names no {' or '.join(drafted)} measure, so it may not be the draft's "
+                f"{self.c.metric_text or self.mlabel(False)}.", evidence=actual.facts)
         return self.verdict(
             "unverifiable", "ambiguous",
             f"{self.co_s} {form_phrase(fact)} reports {row} of {self.fmt(actual.value)}; "

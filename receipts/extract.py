@@ -664,7 +664,10 @@ def split_passages(text: str) -> list[tuple[int, str]]:
     return out
 
 
-_EXCHANGE_RE = re.compile(r"([A-Z][\w&.'’-]*(?:\s+[A-Z][\w&.'’-]*){0,4})\s*\(\s*(?:NASDAQ|Nasdaq|NYSE|NYSE American"
+# The name before an exchange ticker, with a legal form after a comma ("The Goldman Sachs Group, Inc. (NYSE: GS)", not
+# just "Inc.").
+_EXCHANGE_RE = re.compile(r"([A-Z][\w&.'’-]*(?:\s+[A-Z][\w&.'’-]*){0,4}(?:,\s*(?:Inc\.|Corp\.|Co\.|Ltd\.|plc|N\.V\.|L\.P\."
+                          r"|LLC))?)\s*\(\s*(?:NASDAQ|Nasdaq|NYSE|NYSE American"
                           r"|Nasdaq GS|NASDAQ GS|AMEX|Cboe)\s*:\s*[A-Z]{1,5}(?:\.[A-Z])?\s*\)")
 _SUBJECT_RE = re.compile(r"^\W*((?:[A-Z][\w&.'’-]*)(?:\s+[A-Z][\w&.'’-]*){0,3}?)(?:'s|’s)?\s+(?:\([^)]*\)\s+)?"
                          r"(?:today\s+|also\s+)?(?:reported|posted|announced|said|delivered|generated|recorded|earned"
@@ -673,6 +676,12 @@ _POSSESSIVE_RE = re.compile(r"^\W*((?:[A-Z][\w&.-]*)(?:\s+[A-Z][\w&.-]*){0,3})(?
 _NOT_COMPANIES = frozenset({"the", "a", "an", "it", "we", "our", "revenue", "revenues", "net", "gaap", "non-gaap",
                             "total", "in", "for", "during", "this", "that", "first", "second", "third", "fourth",
                             "quarterly", "full", "fiscal", "data", "management", "analysts", "shares", "sales"})
+# A release's lead may name its company without a ticker, in its legal form right before the release verb: "REDMOND,
+# Wash. — October 28, 2026 — Microsoft Corp. today announced". Read only when no other form names a company, and never
+# without the legal form ("Apple today announced"), so a capitalized everyday word never becomes the company.
+_LEGAL_LEAD_RE = re.compile(r"(?<![\w&.'’-])([A-Z][\w&.'’-]*(?:\s+[A-Z][\w&.'’-]*){0,4}?,?\s+(?:Corp\.|Corporation|Inc\."
+                            r"|Incorporated|Co\.|Company|Ltd\.|Limited|plc|PLC|N\.V\.|S\.A\.|AG|SE|L\.P\.|LLC))"
+                            r"\s*,?\s+today\s+(?:announced|reported)\b")
 
 
 def _first_company(passage: str) -> Optional[str]:
@@ -684,20 +693,81 @@ def _first_company(passage: str) -> Optional[str]:
             m = rx.match(sentence)
             if m and m.group(1).split()[0].casefold() not in _NOT_COMPANIES:
                 return m.group(1).strip()
-    return None
+    m = _LEGAL_LEAD_RE.search(passage)
+    return m.group(1).strip() if m else None
+
+
+# A release often opens with a headline that names no period with its year ("Microsoft Announces First Quarter
+# Results"); its lead passage follows. A later passage counts as the lead only when it opens with a dateline (a place in
+# capitals and a written date: "REDMOND, Wash. — October 28, 2026 —") or says "today announced" or "today reported",
+# and its first period phrase follows that marker with no comparison word in between, so a passage that mentions a past
+# period in passing ("In the quarter ended September 30, 2025, the company ...") never sets the period.
+LEAD_PASSAGES = 3
+_MONTH_WORDS = (r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?"
+                r"|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)")
+_DATELINE_RE = re.compile(rf"^\W*[A-Z]{{2,}}[A-Z .'’-]*,[^\n]{{0,40}}?\b{_MONTH_WORDS}\.?\s+\d{{1,2}},\s*(?:19|20)\d{{2}}\b",
+                          re.I)
+_LEAD_VERB_RE = re.compile(r"\btoday\s+(?:announced|reported|released|posted)\b")
+_LEAD_COMPARISON_RE = re.compile(r"\b(?:compared|versus|vs\.?|than|ago|earlier|prior|previous|last)\b", re.I)
+
+
+def _lead_period(passage: str) -> Optional[str]:
+    """The release period a lead passage (above) states, or None when the passage is no lead or names no period."""
+    caps = passage.lstrip()[:1].isupper() and passage.lstrip()[:2].isupper()
+    marker = _DATELINE_RE.match(passage) if caps else None
+    marker = marker or _LEAD_VERB_RE.search(passage)
+    phrase = periods.find_period_phrase(passage[marker.end():]) if marker else None
+    if marker is None or phrase is None:
+        return None
+    between = passage[marker.end():marker.end() + passage[marker.end():].find(phrase)]
+    return None if _LEAD_COMPARISON_RE.search(between) else phrase
+
+
+def _dated(phrase: str) -> bool:
+    """A period phrase that dates itself: an end date ("quarter ended August 30, 2026") or a fiscal year ("fourth quarter
+    of fiscal year 2026"). A bare "Q4 2026" may be a calendar or a fiscal quarter: Costco's fiscal year ends in August."""
+    p = periods.parse(phrase)
+    return p.end is not None or (p.fiscal and p.year is not None)
+
+
+def _names_same_period(bare: str, phrase: str) -> bool:
+    """Whether a dated phrase names the bare phrase's period: the same kind, the same quarter written in both, and the
+    same year (its fiscal year, or the year its end date falls in)."""
+    a, b = periods.parse(bare), periods.parse(phrase)
+    year = b.year if b.year is not None else b.end.year if b.end is not None else None
+    return (a.kind == b.kind and a.year is not None and year == a.year
+            and (a.quarter is None) == (b.quarter is None) and a.quarter == b.quarter)
 
 
 def infer_context(text: str) -> Optional[str]:
     """A cheap, deterministic document-context line from the first passage: company and fiscal period.
 
     'NVIDIA (NASDAQ: NVDA) today reported revenue for the second quarter ended July 26, 2026, ...'
-    gives 'NVIDIA, second quarter ended July 26, 2026'. Returns None when neither is found.
+    gives 'NVIDIA, second quarter ended July 26, 2026'. Among the first LEAD_PASSAGES passages, a later one gives the
+    period (and its company, if the first passage names none) when the first passage's period doesn't date itself
+    (_dated): when the first passage names no period (a headline), the release's lead does (_lead_period); when it
+    names a bare one ("# Costco Q4 2026 Earnings Summary"), the lead's dated period does, or a passage whose first
+    period phrase names the same quarter and year, dated and with no comparison word before it ("fourth quarter of
+    fiscal year 2026"). Returns None when neither is found.
     """
     passages = split_passages(text)
     if not passages:
         return None
     first = passages[0][1]
-    parts = [p for p in (_first_company(first), periods.find_period_phrase(first)) if p]
+    company, period = _first_company(first), periods.find_period_phrase(first)
+    bare = period
+    if period is None or not _dated(period):
+        for _, passage in passages[1:LEAD_PASSAGES]:
+            lead = _lead_period(passage)
+            if lead and (bare is None or _dated(lead)):
+                company, period = _first_company(passage) or company, lead
+                break
+            phrase = periods.find_period_phrase(passage) if bare else None
+            if (phrase and _dated(phrase) and _names_same_period(bare, phrase)
+                    and not _LEAD_COMPARISON_RE.search(passage[:passage.find(phrase)])):
+                company, period = company or _first_company(passage), phrase
+                break
+    parts = [p for p in (company, period) if p]
     return ", ".join(parts) or None
 
 

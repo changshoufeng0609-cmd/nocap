@@ -3,6 +3,7 @@
 python eval/build_spot500.py --data-root /path/to/Meta/data            # v1 (frozen; rebuilds identically)
 python eval/build_spot500.py --data-root /path/to/Meta/data --set v2   # v2: new seed, v1 companies excluded
 python eval/build_spot500.py --data-root /path/to/Meta/data --set v3   # v3: new seed; v1, v2 and fix-tested companies excluded
+python eval/build_spot500.py --data-root /path/to/Meta/data --set full # every eligible company, about 1,000 items
 """
 from __future__ import annotations
 
@@ -51,6 +52,27 @@ V3_FIX_TEST_COMPANIES = frozenset("AKAM AMD AMGN AXP CARR CMCSA CNC DIS ED EXR F
                                   "MRK MSI PFE RF SJM SYY TFC TGT TSLA UDR VLO".split())
 V3_FIX_CODE_COMPANIES = frozenset("CMCSA DIS ED EL FDS MPC SYY".split())
 V3_PROBE_COMPANIES = frozenset("BAX CSGP TGT".split())
+# The full set re-derives both lists over 50a4eac..8d69d3c (eval/spot500_full_exclusions.json,
+# checked by the build). It no longer excludes them: they tag company_in_development. Probable
+# false positives: ED ("Pro Forma Consolidated Revenue"), GPC ("Genuine non-GAAP rows"), O
+# ("Federal Realty") and WMB ("Williams-Sonoma").
+FULL_FIX_TEST_COMPANIES = frozenset("AKAM AMD AMGN AXP CARR CMCSA CNC DAL DIS ED EXR FDS FRT GEHC GPC HPE INTC ITW "
+                                    "IVZ JPM LEN MNST MRK MSI O PFE RF SJM SNA SYY TFC TGT TSLA UDR VLO WMB WMT "
+                                    "WSM".split())
+FULL_FIX_CODE_COMPANIES = frozenset("CMCSA DAL DIS ED EL FDS MPC NVDA SYY".split())
+FULL_PROBE_COMPANIES = frozenset("ADI BAX CSGP TGT".split())
+# The owner names Alliant among the probe companies; no scanned test or fix line names it.
+FULL_TASK_NAMED_COMPANIES = frozenset({"LNT"})
+# The first full freeze (7a68626, merged as 370d943) excluded the development companies. The owner
+# superseded it before any run so that the comprehensive set includes every company.
+FULL_SUPERSEDED = {'commit': '7a68626363949935aecf49ff636137b98f0c8a7a', 'merged_as': '370d943b95566d39845921afd5e86baada4096ec',
+                   'corpus_sha256': '2494d90b887fd183e3a7e59e349c35a383e68fa999d0057cc7f72f5e7dd2bb62',
+                   'manifest_sha256': 'fd6c45e8187476f826002368c834d093f3505086588a2dae2a06c8d1d615ac39',
+                   'note': "the first freeze was superseded before any run, at the owner's request, to include every "
+                           "company"}
+# Full-set scale: total items, mutants per mutator, guidance controls, originals per company,
+# and the item count every source feature should reach where the frame allows.
+FULL_SCALE = {'total': 1000, 'mutants': 60, 'controls': 50, 'per_company': 3, 'feature_target': 20}
 BUILDER_FILES = ('eval/build_spot500.py', 'eval/spot500_sources.py', 'eval/build_corpus.py')
 # A hard quota with its nominal size, as the changes from v1 name it.
 HARD_QUOTAS = (('banks', 3, 'bank', 'banks'), ('REITs or utilities', 2, 'REIT/utility', 'REITs or utilities'),
@@ -80,10 +102,18 @@ class SpotSet:
     previous_sets: tuple = ()
     derivation: tuple = ()
     cap_quotas: bool = False
+    # The full set: every eligible company at FULL_SCALE, without the sentences
+    # these earlier sets used (their companies may stay).
+    full: bool = False
+    exclude_sentences_of: tuple = ()
+    # A full set may keep the original development companies and tag, not exclude, the companies
+    # named in development: (key, companies, description) groups whose union is in_development.
+    exclude_original: bool = True
+    development_groups: tuple = ()
     # The builder file that froze a set is provenance, not something a later
     # builder edit can recompute. Each set keeps the hash of the builder that
-    # froze it, the git blob eval/build_spot500.py at its freezing commit:
-    # v1 050be2e5fe97f9920308e9d63643b7ee8c9771c7, v2 7bdcb11ccb371e897e58ed710dd58ee68a267162.
+    # froze it, the git blob eval/build_spot500.py at its freezing commit: v1 050be2e5fe97f9920308e9d63643b7ee8c9771c7,
+    # v2 7bdcb11ccb371e897e58ed710dd58ee68a267162, v3 02d6e41f7f140c54db2e04fa03a5a0bbf9544576.
     frozen_builder_hashes: tuple = ()
 
     @property
@@ -92,7 +122,12 @@ class SpotSet:
 
     @property
     def excluded(self):
-        return EXCLUDED.union(self.extra_excluded, *(companies for _, companies, _ in self.exclusion_groups))
+        return (EXCLUDED if self.exclude_original else frozenset()).union(
+            self.extra_excluded, *(companies for _, companies, _ in self.exclusion_groups))
+
+    @property
+    def in_development(self):
+        return frozenset().union(*(companies for _, companies, _ in self.development_groups))
 
 
 SETS = {
@@ -120,7 +155,28 @@ SETS = {
                   previous_sets=('v1', 'v2'),
                   derivation=('spot500_v3_exclusions.json',
                               '2e5ecef757b5f553e531b7e11871aa0efafd8c945476e54a1671e89d91af786e'),
-                  cap_quotas=True),
+                  cap_quotas=True,
+                  frozen_builder_hashes=(('eval/build_spot500.py',
+                                          '84cd45a9f1f7031360c309c005f45869b186b840d968bf5cce3c946e729c054b'),)),
+    'full': SpotSet('full', 20261104, '8d69d3c19c3bdfbc3825b48df3e1cb8e7b0edfa0',
+                    'the deployed code that the full set measures; uncommitted builder change and new evaluation files',
+                    'corpus/spot500_full.jsonl', 'spot500_full_manifest.json',
+                    derivation=('spot500_full_exclusions.json',
+                                'ff3886abce011286d41388919966fef2e75c8853b3072751d70143ab93579db8'),
+                    full=True, exclude_sentences_of=('v1', 'v2', 'v3'), exclude_original=False,
+                    development_groups=(
+                        ('original_development_companies', EXCLUDED, 'the original development companies'),
+                        ('spot500_v3_fix_test_companies', V3_FIX_TEST_COMPANIES,
+                         'companies spot500_v3 found named in verifier-fix tests'),
+                        ('spot500_v3_fix_code_companies', V3_FIX_CODE_COMPANIES,
+                         "companies spot500_v3 found named in the fixed verifier's added lines"),
+                        ('verifier_fix_test_companies', FULL_FIX_TEST_COMPANIES,
+                         'companies named in the verifier-fix tests added since spot500_v1'),
+                        ('verifier_fix_code_companies', FULL_FIX_CODE_COMPANIES,
+                         "companies named in the fixed verifier's added lines"),
+                        ('reviewer_probe_companies', FULL_PROBE_COMPANIES, "companies the reviewer's probes used"),
+                        ('owner_named_probe_companies', FULL_TASK_NAMED_COMPANIES,
+                         'probe company the owner names, which no scanned line names'))),
 }
 
 
@@ -575,13 +631,224 @@ def build_items(companies, docs, sentences, spot=None):
     return items, selection
 
 
+def full_pool(sentences, spot):
+    """Frame sentences a full set may use: excluded companies and every earlier set's sentences removed.
+
+    Earlier sentences are matched by source record SHA-256 from each frozen manifest; a frame
+    sentence with identical text is removed too. Read-only.
+    """
+    by_hash = {digest(canonical(s)): s for s in sentences}
+    used, removed = {}, {}
+    for name in spot.exclude_sentences_of:
+        earlier = SETS[name]
+        frozen = json.loads((ROOT / 'eval' / earlier.manifest).read_bytes())
+        if frozen['version'] != earlier.version or frozen['corpus_sha256'] != digest((ROOT / 'eval' / earlier.corpus).read_bytes()):
+            raise ValueError(f'Frozen {earlier.version} files changed')
+        rows = [r for r in frozen['source_records'] if r['kind'] == 'sentence']
+        missing = [r['id'] for r in rows if r['sha256'] not in by_hash]
+        if missing:
+            raise ValueError(f'{earlier.version} sentences missing from the frame: {missing[:3]}')
+        removed[earlier.version] = sorted(r['id'] for r in rows)
+        used.update((r['sha256'], r['id']) for r in rows)
+    texts = {by_hash[h]['text'] for h in used}
+    pool, same_text = [], []
+    for s in sorted(sentences, key=lambda s: s['sentence_id']):
+        if s['ticker'] in spot.excluded or digest(canonical(s)) in used:
+            continue
+        if s['text'] in texts:
+            same_text.append(s['sentence_id'])
+            continue
+        pool.append(s)
+    return pool, {**removed, 'identical_text': same_text}
+
+
+def full_exclusion_sources(spot):
+    """Check the full set's development groups against the frozen derivations and earlier sets (read-only)."""
+    groups = {key: companies for key, companies, _ in spot.development_groups}
+    references = []
+    for name in spot.exclude_sentences_of:
+        earlier = SETS[name]
+        manifest_bytes = (ROOT / 'eval' / earlier.manifest).read_bytes()
+        frozen = json.loads(manifest_bytes)
+        references.append({'version': earlier.version, 'seed': frozen['seed'],
+                           'manifest': f'eval/{earlier.manifest}', 'manifest_sha256': digest(manifest_bytes),
+                           'corpus': f'eval/{earlier.corpus}', 'corpus_sha256': frozen['corpus_sha256']})
+    records = {}
+    for owner, prefix in (('v3', 'spot500_v3_'), ('full', '')):
+        path, expected = SETS[owner].derivation
+        raw = (ROOT / 'eval' / path).read_bytes()
+        if digest(raw) != expected:
+            raise ValueError(f'Frozen exclusion derivation changed: eval/{path}')
+        record = json.loads(raw)
+        for key, field in ((f'{prefix}fix_test_companies' if prefix else 'verifier_fix_test_companies', 'verifier_fix_tests'),
+                           (f'{prefix}fix_code_companies' if prefix else 'verifier_fix_code_companies', 'verifier_fix_code')):
+            if frozenset(record[field]['companies']) != groups[key]:
+                raise ValueError(f'{key} differ from eval/{path}')
+        if owner == 'full' and frozenset(record['reviewer_probes']['companies']) != groups['reviewer_probe_companies']:
+            raise ValueError(f'reviewer_probe_companies differ from eval/{path}')
+        records[owner] = {'file': f'eval/{path}', 'sha256': expected, **({'record': record} if owner == 'full' else {})}
+    return references, records
+
+
+def build_full_items(companies, docs, sentences, spot):
+    """Every eligible company at FULL_SCALE. Pure source-to-items transform, like build_items.
+
+    Order: guidance controls at distinct companies; every candidate of a mutator that has no more
+    candidates than its quota (basis); feature coverage (scarcest feature first), as v1 reserves
+    feature carriers before its mutants; the other mutators (scarce first, with v1's preferences,
+    which favour sentences already chosen); one original per company; and a seeded round-robin
+    fill to the total.
+    """
+    scale, rng = FULL_SCALE, random.Random(spot.seed)
+    pool, removed = full_pool(sentences, spot)
+    historical, forward = defaultdict(list), defaultdict(list)
+    for s in pool:
+        (forward if s['kind'] == 'forward_looking' else historical)[s['ticker']].append(s)
+    eligible = sorted(historical)
+    companies = {t: companies[t] for t in eligible}
+    docs = {k: d for k, d in docs.items() if d['ticker'] in companies}
+    feats = {s['sentence_id']: features(s, companies[s['ticker']], docs[s['doc_id']]) for s in pool if s['ticker'] in companies}
+    candidates = mutation_candidates([s for t in eligible for s in historical[t]], docs, companies, seed=spot.seed)
+    for mutator in MUTATORS:
+        rng.shuffle(candidates[mutator])
+    chosen, per_company, mutants, mutated = {}, Counter(), [], defaultdict(set)
+
+    def room(s):
+        return s['sentence_id'] in chosen or per_company[s['ticker']] < scale['per_company']
+
+    def add(s):
+        if s['sentence_id'] not in chosen:
+            chosen[s['sentence_id']] = s
+            per_company[s['ticker']] += 1
+
+    controls = [s for t in eligible for s in forward.get(t, [])]
+    rng.shuffle(controls)
+    chosen_controls, control_companies = [], set()
+    for s in controls:
+        if s['ticker'] not in control_companies and len(chosen_controls) < scale['controls']:
+            chosen_controls.append(s)
+            control_companies.add(s['ticker'])
+
+    def coverage():
+        counts = Counter()
+        for sid in chosen:
+            counts.update({f: 1 + len(mutated[sid]) for f in feats[sid]})
+        for s in chosen_controls:
+            counts.update(feats[s['sentence_id']])
+        return counts
+
+    frame_counts = Counter(f for s in pool if s['ticker'] in companies for f in feats[s['sentence_id']])
+
+    def cover():
+        for feature in sorted(frame_counts, key=lambda f: (frame_counts[f], f)):
+            while coverage()[feature] < scale['feature_target']:
+                options = [s for t in eligible for s in historical[t] if s['sentence_id'] not in chosen
+                           and feature in feats[s['sentence_id']] and room(s)]
+                if not options:
+                    break
+                add(rng.choice(options))
+
+    shortfalls = {}
+
+    def take_mutants(mutator):
+        taken = set()
+        for pick in range(scale['mutants']):
+            options = [(s, m) for s, m in candidates[mutator] if len(mutated[s['sentence_id']]) < 2
+                       and mutator not in mutated[s['sentence_id']] and room(s)]
+            if not options:
+                shortfalls[mutator] = {'quota': scale['mutants'], 'taken': pick, 'candidates': len(candidates[mutator])}
+                return
+            represented = set(per_company)
+            s, m = min(options, key=lambda pair: (
+                mutator == 'direction' and pick == 0 and not pair[1].detail['metric'].endswith('margin'),
+                pair[0]['ticker'] in taken,
+                pair[0]['sentence_id'] not in chosen and pair[0]['ticker'] in represented,
+                pair[0]['sentence_id'] not in chosen,
+            ))
+            add(s)
+            mutants.append((s, m))
+            mutated[s['sentence_id']].add(mutator)
+            taken.add(s['ticker'])
+
+    # Scarce mutators first, as in v1. One that can only take every candidate (basis) goes
+    # before feature coverage, so the per-company cap never blocks one of its carriers.
+    by_scarcity = sorted(MUTATORS, key=lambda m: (len(candidates[m]), m))
+    take_all = [m for m in by_scarcity if len(candidates[m]) <= scale['mutants']]
+    for mutator in take_all:
+        take_mutants(mutator)
+    cover()
+    for mutator in by_scarcity:
+        if mutator not in take_all:
+            take_mutants(mutator)
+
+    def pick_original(options):
+        rng.shuffle(options)
+        counts = coverage()
+        return min(options, key=lambda s: (-sum(counts[f] < scale['feature_target'] for f in feats[s['sentence_id']]),
+                                           -sum(n['screen'] == 'ok' for n in s['numbers'])))
+
+    for ticker in eligible:
+        if not per_company[ticker]:
+            add(pick_original(list(historical[ticker])))
+    order = list(eligible)
+    rng.shuffle(order)
+    for round_size in range(2, scale['per_company'] + 1):
+        for ticker in order:
+            if len(chosen) + len(mutants) + len(chosen_controls) >= scale['total']:
+                break
+            options = [s for s in historical[ticker] if s['sentence_id'] not in chosen]
+            if per_company[ticker] < round_size and options:
+                add(pick_original(options))
+    counts = coverage()
+    feature_coverage = {}
+    for feature in sorted(frame_counts):
+        carriers = [s for s in pool if s['ticker'] in companies and feature in feats[s['sentence_id']]]
+        entry = {'items': counts[feature], 'frame_sentences': len(carriers),
+                 'frame_companies': len({s['ticker'] for s in carriers})}
+        if counts[feature] < scale['feature_target']:
+            left = [s for s in carriers if s['kind'] != 'forward_looking' and s['sentence_id'] not in chosen]
+            entry['short_because'] = ('every frame sentence carrying it is already used' if not left else
+                                      f"the {scale['per_company']}-per-company cap leaves {len(left)} sentences out")
+        feature_coverage[feature] = entry
+    originals = sorted(chosen.values(), key=lambda s: s['sentence_id'])
+    items = [make_item(s, docs[s['doc_id']], companies[s['ticker']], version=spot.version) for s in originals]
+    items += [make_item(s, docs[s['doc_id']], companies[s['ticker']], mutation=m, version=spot.version)
+              for s, m in sorted(mutants, key=lambda pair: (pair[1].mutator, pair[0]['sentence_id']))]
+    items += [make_item(s, docs[s['doc_id']], companies[s['ticker']], version=spot.version)
+              for s in sorted(chosen_controls, key=lambda s: s['sentence_id'])]
+    # Company history, a tag only: selection above never reads it.
+    for item in items:
+        item['features'] = sorted([*item['features'], 'company_in_development'
+                                   if item['ticker'] in spot.in_development else 'company_fresh'])
+    if len({it['item_hash'] for it in items}) != len(items):
+        raise ValueError('Duplicate item inputs')
+    selection = {
+        'scale': scale, 'eligible_company_count': len(eligible),
+        'in_development_companies': sorted(set(eligible) & spot.in_development),
+        'eligible_by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[t]['sub_industry']] for t in eligible).items())),
+        'selected_companies': eligible, 'removed_sentences': removed,
+        'mutation_candidate_counts': {m: len(candidates[m]) for m in MUTATORS},
+        'mutant_counts': dict(sorted(Counter(m.mutator for _, m in mutants).items())),
+        'guidance_controls': len(chosen_controls), 'originals_per_company': dict(sorted(Counter(per_company.values()).items())),
+        'feature_coverage': feature_coverage,
+        'selected_sentence_ids': sorted([*chosen, *(s['sentence_id'] for s in chosen_controls)])}
+    if shortfalls:
+        selection['mutant_shortfalls'] = shortfalls
+    return items, selection
+
+
 def encode_jsonl(items):
     return b''.join(canonical(item) + b'\n' for item in items)
 
 
 def build(data_root, spot=None):
-    from eval.spot500_sources import load_sources
-    return build_from_sources(*load_sources(data_root, progress=True), spot=spot)
+    from eval import spot500_sources as sources
+    spot = spot or SETS['v1']
+    # A set that keeps the original development companies screens them too; spot500_sources.py
+    # itself is unchanged, so every earlier set's frame and builder hashes stay the same.
+    with patch.object(sources, 'EXCLUDED', sources.EXCLUDED if spot.exclude_original else frozenset()):
+        frame = sources.load_sources(data_root, progress=True)
+    return build_from_sources(*frame, spot=spot)
 
 
 def builder_hashes(spot):
@@ -633,9 +900,119 @@ def exclusion_sources(spot):
     return references, {'file': f'eval/{path}', 'sha256': expected, 'record': derivation}
 
 
+def build_full_from_sources(companies, docs, sentences, provenance, spot):
+    from eval.eval import DEFAULT_EST_COST_PER_ITEM
+    references, derivations = full_exclusion_sources(spot)
+    # The frame is v1's plus the original development companies, screened the same way.
+    without = digest(canonical([{t: c for t, c in companies.items() if t not in EXCLUDED},
+                                {k: d for k, d in docs.items() if d['ticker'] not in EXCLUDED},
+                                [s for s in sentences if s['ticker'] not in EXCLUDED]]))
+    if without != json.loads((ROOT / 'eval' / SETS['v1'].manifest).read_bytes())['source_pool_sha256']:
+        raise ValueError("Without the original companies, the frame differs from spot500_v1's")
+    items, selection = build_full_items(companies, docs, sentences, spot)
+    selected = set(selection['selected_companies'])
+    historical = {s['ticker'] for s in sentences if s['kind'] != 'forward_looking'}
+    absent = {t: 'not in the frame: no stored release and 10-Q pair' if t not in companies
+              else 'no historical sentence passes the frame screening' if t not in historical
+              else 'every historical sentence was used by an earlier set' for t in sorted(spot.in_development - selected)}
+    chosen_sids = set(selection['selected_sentence_ids'])
+    raw = encode_jsonl(items)
+    scale, groups = FULL_SCALE, spot.development_groups
+    removed = selection['removed_sentences']
+    history = {}
+    for tag in ('company_in_development', 'company_fresh'):
+        tagged = [it for it in items if tag in it['features']]
+        history[tag] = {'companies': len({it['ticker'] for it in tagged}), 'items': len(tagged),
+                        'originals': sum(it['mutator'] == 'none' for it in tagged),
+                        'mutants': sum(it['mutator'] in MUTATORS for it in tagged),
+                        'guidance_controls': sum(it['mutator'] == 'forward_looking_control' for it in tagged),
+                        'gold_claims': sum(len(it['gold_claims']) for it in tagged),
+                        'by_mutator': dict(sorted(Counter(it['mutator'] for it in tagged).items()))}
+    counts = {'companies': len(selected), 'items': len(items), 'gold_claims': sum(len(it['gold_claims']) for it in items),
+              'by_company': dict(sorted(Counter(it['ticker'] for it in items).items())),
+              'by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[t]['sub_industry']] for t in selected).items())),
+              'items_by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[it['ticker']]['sub_industry']]
+                                                     for it in items).items())),
+              'by_mutator': dict(sorted(Counter(it['mutator'] for it in items).items())),
+              'by_feature': dict(sorted(Counter(f for it in items for f in it['features']).items())),
+              'by_company_history': history}
+    parts = [f"the {len(companies_)} {description}" for _, companies_, description in groups[1:]]
+    changes = [f"seed {SEED} -> {spot.seed}",
+               f"every company in the frame with an unused historical sentence instead of a 30-company sample, with up "
+               f"to {scale['per_company']} original sentences each, chosen by seed; no company is excluded",
+               f"every item tagged company_in_development (the original {len(EXCLUDED)} plus {', '.join(parts[:-1])} "
+               f"and {parts[-1]}; {len(spot.in_development)} distinct companies) or company_fresh",
+               "sentences used by " + ", ".join(f"{v} ({len(ids)})" for v, ids in removed.items() if v != 'identical_text')
+               + f" removed by source record SHA-256, and {len(removed['identical_text'])} frame sentences with identical "
+               "text; earlier companies stay with their unused sentences",
+               f"{scale['mutants']} mutants per mutator instead of 5, {scale['controls']} guidance controls from different "
+               f"companies instead of 5, at least {scale['feature_target']} items per source feature where the frame "
+               f"allows, and {scale['total']} items in all"]
+    for mutator, short in sorted(selection.get('mutant_shortfalls', {}).items()):
+        changes.append(f"{mutator} mutants lowered from {short['quota']} to {short['taken']}: the frame has "
+                       f"{short['candidates']} {mutator} candidates without the earlier sets' sentences")
+    for feature, entry in selection['feature_coverage'].items():
+        if 'short_because' in entry:
+            changes.append(f"{feature}: {entry['items']} items, below {scale['feature_target']}: {entry['short_because']} "
+                           f"({entry['frame_sentences']} frame sentences at {entry['frame_companies']} companies)")
+    if len(items) != scale['total']:
+        changes.append(f"{len(items)} items instead of {scale['total']}: the frame ran out of unused sentences")
+    manifest = {
+        'version': spot.version, 'seed': spot.seed, 'commit': spot.commit, 'commit_role': spot.commit_role,
+        'procedure': {
+            'selection': f"Python Random({spot.seed}); every company in the frame with an unused historical sentence, "
+                         f"each with at least one and at most "
+                         f"{scale['per_company']} original sentences; in order: {scale['controls']} guidance controls "
+                         f"at distinct companies, every candidate of a mutator with no more candidates than its quota, "
+                         f"feature coverage to {scale['feature_target']} items (scarcest feature first), the other "
+                         f"mutators (scarce first, v1's preferences), one original per company, and a seeded "
+                         f"round-robin fill to {scale['total']} items; source-only mutation feasibility",
+            'quarters': 'latest two stored release/10-Q pairs; no 10-K-only Q4; numeric companyfacts screening',
+            'items': f"{scale['mutants']} per mutator where candidates allow; at most two mutants per original; v1's "
+                     f"gold rules, mutators and feasibility checks",
+            'outputs_used_for_selection': False, 'human_review': False, 'changes_from_spot500_v1': changes},
+        'superseded': FULL_SUPERSEDED,
+        'excluded_tickers': sorted(spot.excluded),
+        'exclusions': {'companies': sorted(spot.excluded),
+                       'note': 'none: every company in the frame with an unused historical sentence is eligible'},
+        'sentence_exclusions': {**removed, 'method': 'source record SHA-256 from each earlier frozen manifest; a frame '
+                                                     'sentence with identical text is removed as well'},
+        'company_history': {
+            'tags': {'company_in_development': 'the original development companies plus every company named in '
+                                               'verifier-fix tests, fix code or probes',
+                     'company_fresh': 'every other company'},
+            'in_development': sorted(spot.in_development), **{key: sorted(c) for key, c, _ in groups},
+            'in_development_absent_from_set': absent,
+            'method': 'the mechanical derivation of v3, re-run over 50a4eac..8d69d3c; selection never reads the tag'},
+        'company_history_derivation': derivations['full'], 'spot500_v3_derivation': derivations['v3'],
+        'reference_sets': references,
+        'company_list': [{'ticker': t, 'name': companies[t]['name'], 'sector': SECTOR_BY_INDUSTRY[companies[t]['sub_industry']],
+                          'sub_industry': companies[t]['sub_industry']} for t in sorted(selected)],
+        'selection': selection, 'counts': counts, 'corpus_sha256': digest(raw),
+        'items': [{'item_id': it['item_id'], 'sha256': digest(canonical(it))} for it in items],
+        'source_records': ([{'kind': 'company', 'id': t, 'sha256': digest(canonical(companies[t]))} for t in sorted(selected)]
+                           + [{'kind': 'document', 'id': k, 'sha256': digest(canonical(d))}
+                              for k, d in sorted(docs.items()) if d['ticker'] in selected]
+                           + [{'kind': 'sentence', 'id': s['sentence_id'], 'sha256': digest(canonical(s))}
+                              for s in sentences if s['sentence_id'] in chosen_sids]),
+        'source_pool_sha256': digest(canonical([companies, docs, sentences])),
+        'frame': {'source_pool_without_original_sha256': without, 'equals': 'spot500_v1 source_pool_sha256',
+                  'original_companies_added': sorted(EXCLUDED & set(companies)),
+                  'original_companies_absent': sorted(EXCLUDED - set(companies))},
+        'sources': {**provenance, 'records': [r for r in provenance['records'] if r['ticker'] in selected],
+                    'screen_counts': {k: v for k, v in provenance['screen_counts'].items() if docs[k]['ticker'] in selected}},
+        'builder_hashes': builder_hashes(spot),
+        'cost_estimate': {'per_item_usd': DEFAULT_EST_COST_PER_ITEM, 'total_usd': round(len(items) * DEFAULT_EST_COST_PER_ITEM, 6),
+                          'source': 'eval/eval.py DEFAULT_EST_COST_PER_ITEM', 'estimate_limit_usd': 5.5,
+                          'live_budget_usd': 6.0}}
+    return raw, json.dumps(manifest, sort_keys=True, indent=2, ensure_ascii=False).encode() + b'\n'
+
+
 def build_from_sources(companies, docs, sentences, provenance, *, spot=None):
     from eval.eval import DEFAULT_EST_COST_PER_ITEM
     spot = spot or SETS['v1']
+    if spot.full:
+        return build_full_from_sources(companies, docs, sentences, provenance, spot)
     reference = reference_set(spot) if spot.extra_excluded_from else None
     references, derivation = exclusion_sources(spot) if spot.exclusion_groups else (None, None)
     items, selection = build_items(companies, docs, sentences, spot)

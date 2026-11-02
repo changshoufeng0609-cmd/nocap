@@ -176,7 +176,7 @@ def _check(text: str, *, context: str, as_of: Any, store: EvidenceStore, stats: 
         raise IncompleteExtraction("Not every figure could be located safely. Your original draft is unchanged.")
     named = verify.named_in_draft(text, store)  # as receipts.check does: the same verdicts and reasons as Check
     extra = {"named": named} if named else {}
-    return [(c, verify.verify(c, store, as_of=as_of, context=context, **extra)) for c in claims]
+    return [(c, verify.verify(c, store, as_of=as_of, context=context, draft=text, **extra)) for c in claims]
 
 
 def _eligible(text: str, results: list[tuple[Claim, Verdict]], as_of: Any) -> dict[str, tuple[Claim, Verdict, tuple[int, int]]]:

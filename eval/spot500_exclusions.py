@@ -1,6 +1,8 @@
 """Derive the companies that later fixes were tested or written on, for a fresh spot500 set.
 
-python eval/spot500_exclusions.py   # writes eval/spot500_v3_exclusions.json; an existing file must match exactly
+python eval/spot500_exclusions.py              # writes eval/spot500_v3_exclusions.json
+python eval/spot500_exclusions.py --set full   # writes eval/spot500_full_exclusions.json
+An existing output must match exactly.
 
 Source-only: the scan reads git history, test and verifier source text, and the
 snapshot's companies table (ticker, name, aliases). It never runs NoCap.
@@ -38,6 +40,13 @@ TEST_DIFF = ("git", "diff", "--name-only", "--diff-filter=A", f"{SINCE}..{UNTIL}
 CODE_DIFF = ("git", "diff", "-U0", "--no-color", f"{SINCE}..{UNTIL}", "--", "receipts/")
 DROPPED = {"tests/test_spot500_sets.py": "the spot500 set tests themselves, not a verifier fix"}
 PROBES = ("BAX", "CSGP", "TGT")
+# One derivation per set: (output, deployed commit, probe companies). The scan
+# always starts at SINCE, so a later range re-reads everything an earlier one did.
+DERIVATIONS = {
+    "v3": (OUTPUT, UNTIL, PROBES),
+    "full": (ROOT / "eval/spot500_full_exclusions.json", "8d69d3c19c3bdfbc3825b48df3e1cb8e7b0edfa0",
+             ("ADI", "BAX", "CSGP", "TGT")),
+}
 TOKEN = re.compile(r"[^\W_]+|&")
 
 
@@ -159,33 +168,36 @@ def added_lines(diff: str):
             number += 1
 
 
-def derive(db: Path) -> dict:
+def derive(db: Path, spot_set: str = "v3") -> dict:
+    _, until, probes = DERIVATIONS[spot_set]
+    test_diff = (*TEST_DIFF[:4], f"{SINCE}..{until}", *TEST_DIFF[5:])
+    code_diff = (*CODE_DIFF[:4], f"{SINCE}..{until}", *CODE_DIFF[5:])
     rows, table = companies_table(db)
-    if not set(PROBES) <= {t for t, _, _ in rows}:
+    if not set(probes) <= {t for t, _, _ in rows}:
         raise ValueError("A probe ticker is missing from the companies table")
     scanner = Scanner(rows)
-    listed = git(*TEST_DIFF).split()
+    listed = git(*test_diff).split()
     files = [path for path in listed if path not in DROPPED]
-    texts = {path: git("git", "show", f"{UNTIL}:{path}") for path in files}
+    texts = {path: git("git", "show", f"{until}:{path}") for path in files}
     tests_named, tests_rejected = scanner.scan(
         [(path, i, line) for path in files for i, line in enumerate(texts[path].splitlines(), 1)])
-    diff = git(*CODE_DIFF)
+    diff = git(*code_diff)
     code_named, code_rejected = scanner.scan(list(added_lines(diff)))
     return {
-        "version": "spot500_v3",
-        "range": {"since": SINCE, "until": UNTIL, "since_role": "the commit recording spot500_v1's one live run",
-                  "until_role": "the deployed code that spot500_v3 measures"},
+        "version": f"spot500_{spot_set}",
+        "range": {"since": SINCE, "until": until, "since_role": "the commit recording spot500_v1's one live run",
+                  "until_role": f"the deployed code that spot500_{spot_set} measures"},
         "companies_table": table,
         "method": __doc__.split("Source-only:")[1].strip(),
         "verifier_fix_tests": {
-            "command": " ".join(TEST_DIFF), "listed": listed, "dropped": DROPPED,
+            "command": " ".join(test_diff), "listed": listed, "dropped": DROPPED,
             "scanned": [{"path": path, "sha256": sha(texts[path].encode())} for path in files],
             "companies": sorted(tests_named), "evidence": tests_named, "rejected": tests_rejected},
         "verifier_fix_code": {
-            "command": " ".join(CODE_DIFF), "scope": "added lines only", "diff_sha256": sha(diff.encode()),
+            "command": " ".join(code_diff), "scope": "added lines only", "diff_sha256": sha(diff.encode()),
             "note": "beyond the requested test scan: the companies the fixed verifier's own added lines name",
             "companies": sorted(code_named), "evidence": code_named, "rejected": code_rejected},
-        "reviewer_probes": {"companies": sorted(PROBES), "source": "used by the owner's reviewer in probes"},
+        "reviewer_probes": {"companies": sorted(probes), "source": "used by the owner's reviewer in probes"},
     }
 
 
@@ -196,9 +208,11 @@ def encode(record: dict) -> bytes:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--companies-db", type=Path, default=ROOT / "data/snapshot/facts.sqlite")
-    parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument("--set", dest="spot_set", choices=sorted(DERIVATIONS), default="v3")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    raw = encode(derive(args.companies_db))
+    args.output = args.output or DERIVATIONS[args.spot_set][0]
+    raw = encode(derive(args.companies_db, args.spot_set))
     if args.output.exists():
         if args.output.read_bytes() != raw:
             raise ValueError(f"Refusing changed frozen output: {args.output}")

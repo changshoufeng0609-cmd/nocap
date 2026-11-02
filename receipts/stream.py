@@ -248,11 +248,12 @@ class CheckStats:
 
 
 def verdict_for(claim: Claim, store: EvidenceStore, as_of: Optional[datetime], context: Optional[str],
-                draft_hash: str = "", named: Optional[list] = None) -> Verdict:
+                draft_hash: str = "", named: Optional[list] = None, draft: Optional[str] = None) -> Verdict:
     """receipts.verify.verify with the receipts.check fallback: one bad claim must not sink the draft. named: the
-    companies the draft names (receipts.verify.named_in_draft), as receipts.check passes them."""
+    companies the draft names (receipts.verify.named_in_draft) and draft: its text, as receipts.check passes them."""
     try:
-        return _verify.verify(claim, store, as_of=as_of, context=context, **({"named": named} if named else {}))
+        return _verify.verify(claim, store, as_of=as_of, context=context, draft=draft,
+                              **({"named": named} if named else {}))
     except Exception as e:
         log.error("verify failed draft=%s claim=%s error=%s", draft_hash[:12], claim.id, type(e).__name__)
         return Verdict(claim_id=claim.id, status="unverifiable", reason="no_evidence", as_of=as_of,
@@ -317,7 +318,7 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
                     extracted_claims.append(claim)
                     yield emit("claim", {"claim": claim.model_dump(mode="json")})
                 for claim in res.claims:
-                    verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash, named)
+                    verdict = verdict_for(claim, store, as_of_dt, ctx, draft_hash, named, text)
                     stats.counts[count_key(verdict)] += 1  # a look-ahead ◷ is not_public, never wrong
                     yield emit("verdict", {"claim_id": claim.id, "verdict": verdict.model_dump(mode="json")})
     except _extract.ExtractionError:

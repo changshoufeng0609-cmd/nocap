@@ -1730,3 +1730,524 @@ def test_a_qualifier_in_the_span_leaves_an_operating_margin_unread(snapshot, spa
 def test_an_operating_margin_with_only_framing_words_keeps_its_check(snapshot, span, value, filed):
     v = verify(amd_margin(span, value), snapshot)
     assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation
+
+
+# --- Round 8. A change in dollars or per share is checked as a change, never against the level ---------------------
+# Full set (Nov 2): Charter's "a decrease of $192 million" (free cash flow, Q1 2026 $1,372M, Q1 2025 $1,564M in one
+# release), Norfolk Southern's "up $0.32" (adjusted diluted EPS $3.62, $3.30 in the Q3 2026 release) and Truist's
+# taxable-equivalent net interest income "up $27 million" (Q3 2026 $3,707M, Q3 2025 $3.68B in its Q3 2026 release) were
+# compared with the level. Truist's "up $32 million" for Q2 2026 has no Q2 2025 taxable-equivalent figure on file.
+CHTR_PR = "0001091667-26-000027"   # Charter Q1 2026 release
+NSC_PR = "0001193125-26-428384"    # Norfolk Southern Q3 2026 release
+TFC_PR = "0000092230-26-000108"    # Truist Q3 2026 release
+CHTR_FCF = ("Free cash flow in the first quarter of 2026 totaled $1.4 billion, a decrease of {} compared to the first "
+            "quarter of 2025.")
+NSC_EPS = "adjusted diluted earnings per share were $3.62, up {}"
+TFC_NII = "Taxable-equivalent net interest income was up {}"
+
+
+def chtr_change(value, words="a decrease of", comparison="YoY", span=CHTR_FCF):
+    text = f"${value} million"
+    return claim(span.replace("a decrease of {}", f"{words} {text}"), text, value, metric="free_cash_flow",
+                 metric_text="Free cash flow", unit="USD", scale="millions", entity="Charter Communications (CHTR)",
+                 period_text="first quarter of 2026", comparison=comparison)
+
+
+def nsc_change(value):
+    return claim(NSC_EPS.format(f"${value:.2f}"), f"${value:.2f}", value, metric="eps_diluted",
+                 metric_text="adjusted diluted earnings per share", entity="Norfolk Southern (NSC)",
+                 period_text="third quarter of fiscal 2026, the quarter ended September 30, 2026", basis="non-GAAP",
+                 comparison="YoY")
+
+
+def tfc_change(value, period_text="third quarter of fiscal 2026"):
+    return claim(TFC_NII.format(f"${value} million"), f"${value} million", value, metric="net_interest_income",
+                 metric_text="Taxable-equivalent net interest income", unit="USD", scale="millions",
+                 entity="Truist Financial", period_text=period_text, comparison="YoY")
+
+
+@pytest.mark.parametrize("c,said,accession", [
+    (chtr_change(192), "free cash flow fell $192 million year over year in Q1 2026", CHTR_PR),
+    (nsc_change(0.32), "non-GAAP diluted EPS grew $0.32 year over year in Q3 2026", NSC_PR),
+    (tfc_change(27), "net interest income grew $27 million year over year in Q3 2026", TFC_PR),
+])
+def test_a_true_dollar_change_verifies_as_the_change(snapshot, c, said, accession):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and said in v.explanation, v.explanation
+    assert len(v.evidence) == 2 and {f.accession for f in v.evidence} == {accession}
+    assert "(from $" in v.explanation  # both levels are shown
+
+
+@pytest.mark.parametrize("c,expected", [
+    (chtr_change(150), -192), (nsc_change(0.40), 0.32), (tfc_change(45), 27),
+    (chtr_change(192, words="an increase of"), -192),  # the right size, the wrong direction
+])
+def test_a_wrong_dollar_change_is_wrong_against_the_change(snapshot, c, expected):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("wrong", "value_mismatch"), v.explanation
+    assert v.expected_value == pytest.approx(expected)
+    assert "1.372 billion for" not in v.explanation and "$3.62 for" not in v.explanation  # never the level
+
+
+def test_a_dollar_change_without_its_base_on_file_is_unread(snapshot):
+    v = verify(tfc_change(32, period_text="second quarter of fiscal 2026"), snapshot)
+    assert unread(v), v.explanation
+    assert "3.667 billion" not in v.explanation
+
+
+def test_a_dollar_change_against_an_unnamed_base_is_never_wrong(snapshot):
+    span = "Free cash flow totaled $1.4 billion, a decrease of {}."
+    assert verify(chtr_change(192, comparison="none", span=span), snapshot).status == "verified"
+    assert unread(verify(chtr_change(150, comparison="none", span=span), snapshot))
+
+
+def test_a_level_the_change_reaches_is_still_a_level(snapshot):
+    for span, value_text, value in [
+        ("Free cash flow in the first quarter of 2026 totaled $1.4 billion, a decrease of $192 million.",
+         "$1.4 billion", 1.4),
+        ("Free cash flow fell $192 million to $1.372 billion in the first quarter of 2026.", "$1.372 billion", 1.372),
+    ]:
+        c = claim(span, value_text, value, metric="free_cash_flow", metric_text="Free cash flow", unit="USD",
+                  scale="billions", entity="Charter Communications (CHTR)", period_text="first quarter of 2026")
+        v = verify(c, snapshot)
+        assert (v.status, v.reason) == ("verified", "match") and "free cash flow was $1.372 billion" in v.explanation
+
+
+def test_an_unqualified_eps_change_may_be_the_basic_change(snapshot):
+    # Amgen Q2 2026: diluted EPS $4.37 (Q2 2025 $2.65), basic $4.40 ($2.66).
+    def eps_change(value):
+        return per_share(f"Amgen's EPS was $4.40, up ${value:.2f} from a year earlier.", value, metric_text="EPS")
+    v = verify(eps_change(1.74), snapshot)
+    assert (v.status, v.reason) == ("verified", "match"), v.explanation
+    assert "basic EPS grew $1.74 year over year" in v.explanation and "doesn't say basic or diluted" in v.explanation
+    v = verify(eps_change(1.90), snapshot)
+    assert (v.status, v.expected_value) == ("wrong", pytest.approx(1.72)), v.explanation
+
+
+def test_a_change_described_as_a_loss_is_unread(snapshot):
+    c = claim("Centene's net loss decreased $50 million from a year earlier.", "$50 million", 50.0,
+              metric="net_income", metric_text="net loss", unit="USD", scale="millions", entity="Centene",
+              period_text="Q3 2026", comparison="YoY")
+    v = verify(c, snapshot)
+    assert unread(v) and "is a change" in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("span,value_text,expected", [
+    ("adjusted diluted earnings per share were $3.62, up $0.32", "$0.32", True),
+    ("Free cash flow totaled $1.4 billion, a decrease of $192 million", "$192 million", True),
+    ("Taxable-equivalent net interest income increased by approximately $36 million", "$36 million", True),
+    ("Revenue rose 5%, or $1.2 billion, from a year ago", "$1.2 billion", True),
+    ("Revenue rose 5% (or $1.2 billion)", "$1.2 billion", True),
+    ("an increase in revenue of $1.2 billion", "$1.2 billion", True),
+    ("Adjusted EPS is $1.49 for the second quarter 2026, $0.24 lower than prior year", "$0.24", True),
+    ("a $192 million decrease in free cash flow", "$192 million", True),
+    ("Revenue rose 5% to $26.5 billion", "$26.5 billion", False),
+    ("Revenue was up from $25.2 billion", "$25.2 billion", False),
+    ("Revenue increased from $25.2 billion to $26.5 billion", "$26.5 billion", False),
+    ("Data Center made up $35 billion of revenue", "$35 billion", False),
+    ("net income of $1.2 billion, or $1.50 per share", "$1.50", False),
+    ("Revenue was $26.5 billion", "$26.5 billion", False),
+    ("Revenue grew 5% to a record $26.5 billion", "$26.5 billion", False),
+])
+def test_the_dollar_change_reading(span, value_text, expected):
+    unit = "USD/share" if value_text in ("$0.32", "$0.24", "$1.50") else "USD"
+    c = claim(span, value_text, float(value_text.strip("$").split()[0]), metric="other", metric_text="figure",
+              unit=unit, scale="units" if unit != "USD" else "millions")
+    assert verifier.absolute_change(c) is expected
+
+
+# --- Round 8. A charge or other item within a reported figure is never checked as the figure ------------------------
+# Martin Marietta Q1 2026: "gross profit, aggregates gross profit and aggregates gross profit per ton included a charge
+# of $22 million, $22 million and $0.49 per ton, respectively" (aggregates gross profit was $288M). The second $22
+# million was extracted with the quote ", $22 million" and compared with aggregates gross profit; its list's head is in
+# the draft, which receipts.check now passes to the verifier.
+MLM_TEXT = ("Quarter ended March 31, 2026, gross profit, aggregates gross profit and aggregates gross profit per ton "
+            "included a charge of $22 million, $22 million and $0.49 per ton, respectively, for the impact of selling "
+            "acquired inventory after markup to fair value as part of acquisition accounting.")
+
+
+def mlm_claims():
+    def at(span, start, value_text, value, metric, metric_text, unit="USD", scale="millions", segment=None):
+        c = claim(span, value_text, value, metric=metric, metric_text=metric_text, unit=unit, scale=scale,
+                  entity="Martin Marietta Materials (MLM)", period_text="Quarter ended March 31, 2026")
+        c = c.model_copy(update={"span_start": start, "span_end": start + len(span), "segment": segment})
+        assert MLM_TEXT[c.span_start:c.span_end] == span
+        return c
+    return [
+        at(MLM_TEXT[30:136], 30, "$22 million", 22.0, "gross_profit", "gross profit"),
+        at(", $22 million", 136, "$22 million", 22.0, "gross_profit", "aggregates gross profit", segment="aggregates"),
+        at(MLM_TEXT[72:167], 72, "$0.49", 0.49, "other", "aggregates gross profit per ton", scale="units",
+           segment="aggregates"),
+    ]
+
+
+def test_a_charge_within_gross_profit_is_unread(snapshot):
+    # The first and third figures were unread already (their wording names no tracked figure); the second is read as
+    # aggregates gross profit unless its list's head, in the draft, makes it a charge.
+    first, second, third = (verify(c, snapshot, draft=MLM_TEXT) for c in mlm_claims())
+    assert all(unread(v) and "288" not in v.explanation for v in (first, second, third))
+    assert "“a charge” makes $22 million an item" in second.explanation, second.explanation
+    assert "doesn't track this kind of figure (gross profit)" in first.explanation
+    assert "“per ton”" in third.explanation
+
+
+def test_check_passes_the_draft_to_the_verifier(snapshot, monkeypatch):
+    claims = mlm_claims()
+    monkeypatch.setattr(extract, "extract_detailed",
+                        lambda text, context=None, **kw: extract.ExtractResult(list(claims), context, []))
+    from receipts.check import check_detailed
+    result = check_detailed(MLM_TEXT, store=snapshot, context="Martin Marietta Materials (MLM), first quarter of "
+                                                              "fiscal 2026")
+    assert [v.status for _, v in result.results] == ["unverifiable"] * 3
+    assert "“a charge” makes $22 million an item" in result.results[1][1].explanation
+
+
+def test_a_span_not_at_its_offsets_reads_no_draft(snapshot):
+    c = mlm_claims()[1]
+    assert verifier.draft_line(c, MLM_TEXT).text == MLM_TEXT
+    assert verifier.draft_line(c, MLM_TEXT.replace("$22 million, $22", "$22 million,  $22")) is None
+    assert verifier.draft_line(c.model_copy(update={"span_start": 0, "span_end": 13}), MLM_TEXT) is None
+
+
+@pytest.mark.parametrize("span,value_text,words", [
+    ("gross profit included a charge of $22 million", "$22 million", "a charge"),
+    ("an unfavorable impact of $0.11 per share", "$0.11", "an unfavorable impact"),
+    ("a $300 million impairment", "$300 million", "impairment"),
+    ("$22 million in restructuring charges", "$22 million", "in restructuring charges"),
+    ("Net income was $1.2 billion, including $0.5 billion from a gain", "$0.5 billion", "including"),
+    ("Adjusted EPS, excluding $0.15 of charges, was $2.50", "$0.15", "excluding"),
+    ("Net income was $1.2 billion, including $0.5 billion from a gain", "$1.2 billion", None),
+    ("Adjusted EPS, excluding $0.15 of charges, was $2.50", "$2.50", None),
+    ("a net loss of $50 million", "$50 million", None),
+    ("operating costs of $5 billion", "$5 billion", None),
+    ("Revenue was $26.5 billion despite currency headwinds", "$26.5 billion", None),
+    ("Revenue of $26.5 billion", "$26.5 billion", None),
+])
+def test_the_item_reading(span, value_text, words):
+    c = claim(span, value_text, float(value_text.strip("$").split()[0]), metric="other", metric_text="figure",
+              unit="USD", scale="millions")
+    assert verifier.item_wording(c) == words
+
+
+# --- Round 8. An adjusted, comparable or reported figure is judged only on its own basis ----------------------------
+# Revvity Q2 2026: "adjusted operating income was $113 million, as compared to $89 million" against release rows labelled
+# "Operating income from continuing operations" (93,696 and 84,651), filed with its non-GAAP figures but naming no
+# adjusted measure. Constellation Brands Q2 FY2027: "Tax rate: reported ~12%; comparable ~20%" against the release's
+# 20.2% (GAAP; comparable 20.4%), which fits the line's comparable ~20%. Estée Lauder Q3 FY2026: "Adjusted gross margin
+# of approximately 75.0%" was checked against the adjusted rows (76.4%; Q3 FY2025 75.0%), and its "✗" was a period
+# diagnosis on a line that names no period. Round 7's GAAP rows filed as non-GAAP (Walmart "Operating income, as
+# reported | 8,708", Federal Realty "Operating income | 180,654") now never confirm an adjusted level either.
+RVTY_TEXT = ("Second quarter 2026 adjusted operating income was $113 million, as compared to $89 million in the same "
+             "period a year ago.")
+STZ_TEXT = "Tax rate: reported ~12%; comparable ~20%"
+STZ_PERIOD = "second quarter of fiscal 2027, the quarter ended August 31, 2026"
+
+
+def rvty(value, span_end=None, period_text="Second quarter 2026"):
+    span = RVTY_TEXT[20:span_end or RVTY_TEXT.index(", as")]
+    return claim(span, f"${value} million", value, metric="operating_income", metric_text="adjusted operating income",
+                 unit="USD", scale="millions", entity="Revvity", period_text=period_text
+                 ).model_copy(update={"span_start": 20, "span_end": 20 + len(span)})
+
+
+@pytest.mark.parametrize("c", [
+    rvty(113), rvty(150),
+    rvty(89, span_end=RVTY_TEXT.index("."), period_text="in the same period a year ago"),
+])
+def test_an_adjusted_figure_is_never_rejected_by_a_row_that_names_no_adjusted_measure(snapshot, c):
+    v = verify(c, snapshot, draft=RVTY_TEXT, context="Revvity (RVTY), second quarter of fiscal 2026, the quarter ended "
+                                                     "July 5, 2026")
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous"), v.explanation
+    assert "names no adjusted measure" in v.explanation
+
+
+def test_a_row_that_says_non_gaap_still_judges_an_adjusted_figure(snapshot):
+    # Flex Q1 FY2027: "Non-GAAP operating income and margin % | 534"
+    def flex(value):
+        return claim(f"Adjusted Operating Income: ${value} million", f"${value} million", value,
+                     metric="operating_income", metric_text="Adjusted Operating Income", unit="USD", scale="millions",
+                     entity="Flex Ltd.", period_text="first quarter of fiscal 2027, the quarter ended June 26, 2026")
+    assert verify(flex(534), snapshot).status == "verified"
+    v = verify(flex(600), snapshot)
+    assert (v.status, v.reason, v.expected_value) == ("wrong", "value_mismatch", pytest.approx(534)), v.explanation
+
+
+@pytest.mark.parametrize("span,value_text,value,entity,period_text", [
+    ("Walmart's adjusted operating income was $8.7 billion.", "$8.7 billion", 8.7, "Walmart", "Q4 FY2026"),
+    ("Federal Realty's adjusted operating income was $180.7 million.", "$180.7 million", 180.7, "Federal Realty",
+     "Q4 2025"),
+])
+def test_an_adjusted_level_is_never_confirmed_by_a_gaap_row_filed_as_non_gaap(snapshot, span, value_text, value,
+                                                                                entity, period_text):
+    c = claim(span, value_text, value, metric="operating_income", metric_text="adjusted operating income", unit="USD",
+              scale=value_text.split()[-1] + "s", entity=entity, period_text=period_text)
+    v = verify(c, snapshot)
+    assert unread(v) and "matches its GAAP operating income" in v.explanation, v.explanation
+
+
+def stz(value_text, value, at):
+    span = STZ_TEXT[:STZ_TEXT.index(";")] if at == 0 else STZ_TEXT[STZ_TEXT.index("comparable"):]
+    return claim(span, value_text, value, metric="tax_rate", metric_text="Tax rate: reported" if at == 0 else
+                 "comparable Tax rate", unit="%", entity="Constellation Brands (STZ)", period_text=STZ_PERIOD
+                 ).model_copy(update={"span_start": STZ_TEXT.index(span), "span_end": STZ_TEXT.index(span) + len(span)})
+
+
+def test_a_reported_figure_whose_filed_rate_fits_the_lines_comparable_one_is_unread(snapshot):
+    v = verify(stz("12%", 12.0, 0), snapshot, draft=STZ_TEXT)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous"), v.explanation
+    assert "20.2%" in v.explanation and "“comparable” 20%" in v.explanation and "not 12%" not in v.explanation
+
+
+@pytest.mark.parametrize("text", [
+    "Tax rate: reported 25.0%; comparable 20.4%",   # the filed 20.2% fits neither figure
+    "Tax rate: reported ~12%; prior year ~20%",     # the other figure names no basis
+])
+def test_a_reported_figure_is_still_wrong_when_no_other_basis_figure_explains_it(snapshot, text):
+    value_text = text.split(": reported ")[1].split(";")[0].lstrip("~")
+    span = text[:text.index(";")]
+    c = claim(span, value_text, float(value_text.rstrip("%")), metric="tax_rate", metric_text="Tax rate: reported",
+              unit="%", entity="Constellation Brands (STZ)", period_text=STZ_PERIOD
+              ).model_copy(update={"span_end": len(span)})
+    v = verify(c, snapshot, draft=text)
+    assert (v.status, v.reason, v.expected_value) == ("wrong", "value_mismatch", pytest.approx(20.2)), v.explanation
+
+
+def el_margin(span):
+    return claim(span, "75.0%", 75.0, metric="gross_margin", metric_text="Adjusted gross margin", unit="%",
+                 entity="Estée Lauder Companies (The) (EL)", period_text="third quarter of fiscal 2026")
+
+
+def test_a_line_that_names_no_period_never_gets_a_period_error(snapshot):
+    text = "Adjusted gross margin of approximately 75.0%"
+    v = verify(el_margin(text), snapshot, draft=text)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous") and "names no period" in v.explanation, v.explanation
+    # Its sentence's own period words make the same figure a period error, as before; so do period words outside the
+    # span, which only the draft shows.
+    for text, span in [("In the third quarter of fiscal 2026, adjusted gross margin was approximately 75.0%", None),
+                       ("In the third quarter of fiscal 2026, adjusted gross margin was approximately 75.0%",
+                        "adjusted gross margin was approximately 75.0%")]:
+        c = el_margin(span or text)
+        c = c.model_copy(update={"span_start": text.index(c.span_text), "span_end": len(text)})
+        v = verify(c, snapshot, draft=text)
+        assert (v.status, v.reason) == ("wrong", "period_mismatch"), v.explanation
+
+
+# --- Round 8. Net sales are never checked against a larger total revenue --------------------------------------------
+# A Costco summary the owner pasted: "Costco's quarterly net sales increased 11.2% year over year to $93.9 billion,
+# compared with $84.4 billion in the same period last year." Costco's total revenue (95,723 for Q4 FY2026, 86,156 a
+# year earlier) is net sales plus membership fees, and NoCap holds only that total. Costco, Walmart, Dollar Tree,
+# Incyte, Snap-on and Viatris print net sales below a larger total revenue (verify.NET_SALES_BELOW_TOTAL_REVENUE).
+COST_TEXT = ("Costco's quarterly net sales increased 11.2% year over year to $93.9 billion, compared with $84.4 billion "
+             "in the same period last year.")
+COST_CONTEXT = "Costco Wholesale, fourth quarter of fiscal year 2026"
+
+
+def cost_sales(value_text, value, *, metric="revenue", metric_text="net sales", span=None, comparison="none"):
+    span = span or COST_TEXT
+    return claim(span, value_text, value, metric=metric, metric_text=metric_text, unit="%" if "%" in value_text else
+                 "USD", scale="units" if "%" in value_text else "billions", entity="Costco", period_text="",
+                 comparison=comparison)
+
+
+@pytest.mark.parametrize("c", [
+    cost_sales("$93.9 billion", 93.9, span=COST_TEXT[:COST_TEXT.index(",")]),
+    cost_sales("$84.4 billion", 84.4, span=COST_TEXT[COST_TEXT.index("compared"):]),
+    cost_sales("11.2%", 11.2, metric="revenue_growth", span=COST_TEXT[:COST_TEXT.index(" to ")], comparison="YoY"),
+    cost_sales("$90.0 billion", 90.0, span="Costco's net sales were $90.0 billion."),  # wrong as well: still "?"
+    cost_sales("$93.9 billion", 93.9, metric_text="sales", span="Costco's sales were $93.9 billion."),
+])
+def test_net_sales_are_never_checked_against_total_revenue(snapshot, c):
+    v = verify(c, snapshot, context=COST_CONTEXT)
+    assert unread(v) and "no net sales figure" in v.explanation, v.explanation
+    assert "95.723" not in v.explanation and "86.156" not in v.explanation
+
+
+@pytest.mark.parametrize("c,filed", [
+    (cost_sales("$95.7 billion", 95.7, metric_text="Total revenue", span="Costco's total revenue was $95.7 billion."),
+     "$95.723 billion"),
+    (claim("Walmart's total revenues were $187.9 billion.", "$187.9 billion", 187.9, metric="revenue",
+           metric_text="total revenues", unit="USD", scale="billions", entity="Walmart", period_text="Q2 FY2027"),
+     "$187.937 billion"),
+])
+def test_total_revenue_of_those_companies_is_still_checked(snapshot, c, filed):
+    v = verify(c, snapshot, context=COST_CONTEXT if c.entity == "Costco" else None)
+    assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation
+
+
+def test_walmart_net_sales_are_unread(snapshot):
+    c = claim("Walmart's net sales were $187.9 billion.", "$187.9 billion", 187.9, metric="revenue",
+              metric_text="net sales", unit="USD", scale="billions", entity="Walmart", period_text="Q2 FY2027")
+    assert unread(verify(c, snapshot))
+
+
+@pytest.mark.parametrize("span,value_text,value,entity,period_text,filed", [
+    ("Apple's net sales were $109.4 billion.", "$109.4 billion", 109.4, "Apple", "Q3 FY2026", "$109.417 billion"),
+    ("Amazon's net sales were $181.5 billion.", "$181.5 billion", 181.5, "Amazon", "Q1 2026", "$181.519 billion"),
+    ("Home Depot's net sales were $47.9 billion.", "$47.9 billion", 47.9, "Home Depot", "Q2 FY2026",
+     "$47.861 billion"),
+])
+def test_net_sales_of_a_company_whose_top_line_is_net_sales_are_checked(snapshot, span, value_text, value, entity,
+                                                                       period_text, filed):
+    c = claim(span, value_text, value, metric="revenue", metric_text="net sales", unit="USD", scale="billions",
+              entity=entity, period_text=period_text)
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation
+    wrong = c.model_copy(update={"value": value + 5, "value_text": f"${value + 5:.1f} billion",
+                                 "span_text": span.replace(value_text, f"${value + 5:.1f} billion")})
+    assert verify(wrong, snapshot).status == "wrong"
+
+
+# --- Round 8. A region, segment or same-store figure is never checked against the company-wide one ------------------
+# Allegion Q3 2026: "Adjusted operating margin in the region decreased 40 basis points to 13.9%": the 13.9% lost the
+# clause's subject because the 40 basis points stand between them, and was compared with the company's 24.71%. MGM Q2
+# 2026: "Same-store revenue (adjusted for dispositions) of $904 million ... compared to $879 million ..., an increase of
+# 3%", quoted as "an increase of 3%", was compared with total revenue growth (1.0%). Axon Q2 2026's "adjusted gross
+# margin increased to 53.4% from 51.1% a year ago" names no segment, and no safe rule tells its figures from Axon's own:
+# it is left as it was (see the round-8 report).
+MGM_TEXT = ("Same-store revenue (adjusted for dispositions) of $904 million in the current quarter compared to $879 "
+            "million in the prior year quarter, an increase of 3%")
+
+
+def alle_margin(span, value):
+    return claim(span, f"{value}%", value, metric="other", metric_text="Adjusted operating margin", unit="%",
+                 entity="Allegion", period_text="third quarter of fiscal 2026, the quarter ended September 30, 2026",
+                 basis="non-GAAP")
+
+
+def test_a_regional_margin_after_its_change_is_unread(snapshot):
+    v = verify(alle_margin("Adjusted operating margin in the region decreased 40 basis points to 13.9%", 13.9), snapshot)
+    assert unread(v) and "“region”" in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("c,filed", [
+    (alle_margin("Adjusted operating margin decreased 40 basis points to 24.7%", 24.7), "24.71%"),
+    (claim("AMD's revenue rose 24%, or 23% FX-neutral, to $10.25 billion", "$10.25 billion", 10.25, metric="revenue",
+           metric_text="revenue", unit="USD", scale="billions", entity="AMD", period_text="Q1 2026"), "$10.253 billion"),
+])
+def test_a_figure_after_its_change_keeps_its_plain_subject(snapshot, c, filed):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation
+
+
+def test_a_change_whose_quote_names_no_base_takes_its_sentences_subject(snapshot):
+    c = claim("an increase of 3%", "3%", 3.0, metric="revenue_growth", metric_text="increase", unit="%",
+              entity="MGM Resorts", period_text="the current quarter", comparison="YoY")
+    c = c.model_copy(update={"span_start": MGM_TEXT.index("an increase"), "span_end": len(MGM_TEXT)})
+    v = verify(c, snapshot, draft=MGM_TEXT, context="MGM Resorts (MGM), second quarter of fiscal 2026, the quarter "
+                                                     "ended June 30, 2026")
+    assert unread(v) and "in its sentence" in v.explanation, v.explanation
+    # A plain subject keeps the check: Target Q2 FY2026 revenue $26,539M, Q2 FY2025 $25,211M (+5.27%).
+    text = "Target revenue was $26.5 billion, an increase of 5.3%."
+    c = claim("an increase of 5.3%", "5.3%", 5.3, metric="revenue_growth", metric_text="increase", unit="%",
+              entity="Target", period_text="Q2 FY2026", comparison="YoY")
+    c = c.model_copy(update={"span_start": text.index("an increase"), "span_end": len(text) - 1})
+    v = verify(c, snapshot, draft=text)
+    assert (v.status, v.reason) == ("verified", "match") and "5.27%" in v.explanation, v.explanation
+
+
+def test_a_fronted_clause_before_a_quote_that_names_its_base_changes_nothing(snapshot):
+    text = "Compared with the prior year, total reported sales increased 7% to $947.1 million."
+    span = text[text.index("total"):-1]
+    c = claim(span, "$947.1 million", 947.1, metric="revenue", metric_text="total reported sales", unit="USD",
+              scale="millions", entity="Mettler-Toledo", period_text="Q1 2026")
+    c = c.model_copy(update={"span_start": text.index("total"), "span_end": len(text) - 1})
+    v = verify(c, snapshot, draft=text)
+    assert (v.status, v.reason) == ("verified", "match") and "$947.127 million" in v.explanation, v.explanation
+
+
+def test_a_reporting_verb_in_the_sentences_subject_is_framing(snapshot):
+    # Dover Q3 2026 (full set, verified before round 8): revenue $2.234 billion, up 7.5% year over year.
+    text = ("For the quarter ended September 30, 2026, Dover generated revenue of $2.2 billion, an increase of 8% (+7% "
+            "organic).")
+    c = claim("an increase of 8%", "8%", 8.0, metric="revenue_growth", metric_text="increase", unit="%", entity="Dover",
+              period_text="quarter ended September 30, 2026")
+    c = c.model_copy(update={"span_start": text.index("an increase"), "span_end": text.index(" (+7%")})
+    v = verify(c, snapshot, draft=text)
+    assert (v.status, v.reason) == ("verified", "match") and "7.5%" in v.explanation, v.explanation
+
+
+def test_a_quote_that_names_its_segment_keeps_its_segment_check(snapshot):
+    # The dev set's AMD Q1 2026 line (Data Center revenue grew 57.2%): the quote names the segment, not "revenue", and
+    # the sentence's earlier subject is another figure's.
+    text = "AMD's revenue was $10.25 billion, and Data Center rose 57% year over year."
+    span = "Data Center rose 57% year over year"
+    c = claim(span, "57%", 57.0, metric="revenue_growth", metric_text="rose 57% year over year", unit="%", entity="AMD",
+              period_text="Q1 2026", comparison="YoY")
+    c = c.model_copy(update={"segment": "Data Center", "span_start": text.index(span),
+                             "span_end": text.index(span) + len(span)})
+    v = verify(c, snapshot, draft=text)
+    assert (v.status, v.reason) == ("verified", "match") and "Data Center revenue grew 57.2%" in v.explanation, \
+        v.explanation
+
+
+# --- Round 8. An operating margin computed from rounded figures carries their rounding -------------------------------
+# Illumina Q2 2026: "GAAP operating margin of 21.1% and non-GAAP operating margin of 22.5%". NoCap computes the non-GAAP
+# margin from the release's non-GAAP operating profit (260, in millions) over revenue (1,159): 22.43%, or 22.38-22.49%
+# with the rounding of both inputs, which the release's own 22.5% (computed before rounding) fits.
+ILMN_TEXT = "GAAP operating margin of 21.1% and non-GAAP operating margin of 22.5%"
+
+
+def ilmn_margin(value, words="non-GAAP operating margin", basis="non-GAAP"):
+    span = f"{words} of {value}%"
+    return claim(span, f"{value}%", value, metric="other", metric_text=words, unit="%", entity="Illumina, Inc.",
+                 period_text="second quarter of fiscal 2026", basis=basis)
+
+
+def test_an_operating_margin_from_rounded_figures_carries_their_rounding(snapshot):
+    v = verify(ilmn_margin(22.5), snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and "22.43%" in v.explanation, v.explanation
+    v = verify(ilmn_margin(21.1, "GAAP operating margin", "GAAP"), snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and "21.14%" in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("value", [22.6, 23.0, 22.3])
+def test_an_operating_margin_beyond_that_rounding_is_still_wrong(snapshot, value):
+    v = verify(ilmn_margin(value), snapshot)
+    assert (v.status, v.reason) == ("wrong", "value_mismatch"), v.explanation
+    assert v.expected_value == pytest.approx(22.43, abs=0.01)
+
+
+# --- Round 8. A sentence whose exchange listing names another company can't say whose figure it gives --------------
+# The full set's planted entity copy: "The Goldman Sachs Group, Inc. (NYSE: Vertex Pharmaceuticals) today reported net
+# revenues of $17.23 billion", with the story's company set to Vertex, was verified against Goldman Sachs ($17.227B).
+GS_TEXT = ("NEW YORK, April 13, 2026 – The Goldman Sachs Group, Inc. (NYSE: {}) today reported net revenues of $17.23 "
+           "billion and")
+
+
+def gs_revenue(listing):
+    text = GS_TEXT.format(listing)
+    span = "reported net revenues of $17.23 billion"
+    c = claim(span, "$17.23 billion", 17.23, metric="revenue", metric_text="net revenues", unit="USD", scale="billions",
+              entity="The Goldman Sachs Group, Inc.", period_text="first quarter of fiscal 2026")
+    return text, c.model_copy(update={"span_start": text.index(span), "span_end": text.index(span) + len(span)})
+
+
+def test_a_listing_that_names_another_company_leaves_the_figure_unread(snapshot):
+    text, c = gs_revenue("Vertex Pharmaceuticals")
+    v = verify(c, snapshot, draft=text, context="Vertex Pharmaceuticals (VRTX), first quarter of fiscal 2026")
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous"), v.explanation
+    assert "“(NYSE: Vertex Pharmaceuticals)” names another company" in v.explanation
+    text, c = gs_revenue("VRTX")  # a ticker names it as well
+    assert verify(c, snapshot, draft=text).status == "unverifiable"
+
+
+@pytest.mark.parametrize("listing", ["GS", "GS) and Vertex Pharmaceuticals (Nasdaq: VRTX"])
+def test_a_listing_of_the_claims_own_company_keeps_the_check(snapshot, listing):
+    text, c = gs_revenue(listing)
+    v = verify(c, snapshot, draft=text)
+    assert (v.status, v.reason) == ("verified", "match") and "$17.227 billion" in v.explanation, v.explanation
+
+
+def test_the_listing_rule_reads_tickers_that_are_words():
+    from receipts.store import Store
+    store = Store(ROOT / "data/snapshot/facts.sqlite", ROOT / "data/snapshot/pr_facts")
+    try:
+        text = "KeyCorp (NYSE: KEY) today reported net income of $500 million."
+        c = claim("net income of $500 million", "$500 million", 500.0, metric="net_income", metric_text="net income",
+                  unit="USD", scale="millions", entity="KeyCorp", period_text="Q1 2026")
+        c = c.model_copy(update={"span_start": text.index("net income"), "span_end": len(text) - 1})
+        assert verifier.listing_conflict(c, store, None, verifier.draft_line(c, text)) is None
+        other = c.model_copy(update={"entity": "Truist Financial"})
+        assert verifier.listing_conflict(other, store, None, verifier.draft_line(other, text)) == "(NYSE: KEY)"
+    finally:
+        store.close()

@@ -172,14 +172,23 @@ def normalize_entity(name: str) -> str:
     'Estée Lauder' -> 'estee lauder'."""
     s = fold(name).lower().replace("’", "'")
     s = re.sub(r"\([^)]*\)", " ", s)
-    s = re.sub(r"'s\b", "", s)
+    # A closing possessive belongs to the sentence; inside a name the s belongs
+    # to the name (Lowe's Companies, Domino's Pizza, McDonald's Corporation).
+    s = re.sub(r"'s(?=\W*$)", "", s)
     s = s.replace("&", " and ").replace(".", "").replace("'", "")
     tokens = re.sub(r"[^0-9a-z]+", " ", s).split()
     while tokens and tokens[0] == "the":
         tokens.pop(0)
     while len(tokens) > 1 and tokens[-1] in _SUFFIXES:
         tokens.pop()
-    return " ".join(tokens)
+    return initials_key(" ".join(tokens))
+
+
+def initials_key(key: str) -> str:
+    """Adjacent single-letter initials share a key: 'd r horton' == 'dr horton'.
+    Whole words are never joined, reordered or prefix-matched.
+    """
+    return re.sub(r"\b[a-z](?:\s+[a-z])+(?!\w)", lambda m: "".join(m[0].split()), key)
 
 
 # --------------------------------------------------------------------------- schema
@@ -417,11 +426,23 @@ COMMON_NAMES: dict[str, tuple[str, ...]] = {
 }
 
 
+# Issuer self-names confirmed in archived earnings releases (2026-11-02).
+# These are exact, bare-name lookups only: notably SBA in a bank's "SBA loans"
+# sentence must never count as SBA Communications. Provenance and sweep:
+# data/eval_runs/codex/names/{before.json,extraction_review.json,sweep.py}.
+RELEASE_SHORT_NAMES: dict[str, tuple[str, ...]] = {
+    "BDX": ("BD",), "COO": ("CooperCompanies",), "FCX": ("Freeport",),
+    "GWW": ("Grainger",), "MPWR": ("MPS",), "MRSH": ("Marsh",),
+    "ODFL": ("Old Dominion",), "ON": ("onsemi",), "SBAC": ("SBA",), "WM": ("WM",),
+}
+RELEASE_NAME_KEYS = frozenset(normalize_entity(n) for names in RELEASE_SHORT_NAMES.values() for n in names)
+
+
 def known_names(ticker: str) -> list[str]:
-    """A ticker's hand-made ALIASES, its constituent SECURITY_ALIASES and COMMON_NAMES, and its lookup-only SHORT_NAMES,
-    as written."""
+    """Curated, constituent and release-attested names, including bare-only aliases, as written."""
     t = (ticker or "").upper()
-    return [*ALIASES.get(t, []), *SECURITY_ALIASES.get(t, ()), *COMMON_NAMES.get(t, ()), *SHORT_NAMES.get(t, ())]
+    return [*ALIASES.get(t, []), *SECURITY_ALIASES.get(t, ()), *COMMON_NAMES.get(t, ()),
+            *SHORT_NAMES.get(t, ()), *RELEASE_SHORT_NAMES.get(t, ())]
 
 
 _SUFFIX_CASE = {"INC": "Inc", "CORP": "Corp", "CO": "Co", "LTD": "Ltd", "PLC": "plc"}
@@ -465,6 +486,10 @@ def company_aliases(ticker: str, *names: str) -> set[str]:
     """Alias keys stored at ingest: the ticker, ALIASES, SECURITY_ALIASES and each name, also without a trailing SEC
     registrant tag."""
     forms = [n for name in names if name for n in dict.fromkeys((name, _SEC_NAME_TAG.sub("", name)))]
+    # SEC inverted names put the surname before separated initials, e.g.
+    # HUNT J B TRANSPORT SERVICES INC. Preserve the complete remaining name.
+    forms += [re.sub(r"^([A-Z][A-Z'-]+)\s+((?:[A-Z]\.?\s+){2,})",
+                     lambda m: m[2] + m[1] + " ", n) for n in forms]
     keys = {normalize_entity(a) for a in [ticker, *known_names(ticker), *forms] if a}
     return {k for k in keys if k}
 
@@ -498,7 +523,8 @@ WORD_NAMES = WORD_TICKERS | frozenset({
     # and tickers that are also something else in capitals: "start-ups", "FICO score", "MSCI index", "RTX 5090",
     # "AES encryption", "APA style", "PTC" (a production tax credit), "TKO", "OXY", "MGM" studios
     "aes", "apa", "fico", "lulu", "mgm", "msci", "otis", "oxy", "ptc", "rtx", "tko", "ups", "wynn", "yum",
-}) | frozenset(normalize_entity(n) for names in SHORT_NAMES.values() for n in names)  # lookup-only, also phrases
+}) | frozenset(normalize_entity(n) for table in (SHORT_NAMES, RELEASE_SHORT_NAMES)
+              for names in table.values() for n in names)  # lookup-only, also phrases
 
 
 def is_word_ticker(ticker: str) -> bool:
@@ -521,7 +547,8 @@ def lookup_keys(ticker: str, name: str, aliases: Iterable[str]) -> set[str]:
     keys = set(aliases)
     if is_word_ticker(ticker):
         bare = normalize_entity(ticker)
-        explicit = (*ALIASES.get((ticker or "").upper(), ()), *SHORT_NAMES.get((ticker or "").upper(), ()))
+        explicit = (*ALIASES.get((ticker or "").upper(), ()), *SHORT_NAMES.get((ticker or "").upper(), ()),
+                    *RELEASE_SHORT_NAMES.get((ticker or "").upper(), ()))
         if bare not in {normalize_entity(a) for a in explicit}:
             keys.discard(bare)
     return keys
@@ -585,7 +612,7 @@ def legal_form(name: str) -> LegalName:
         word = words.pop()
         if word != "and":
             forms.insert(0, _FORM_SPELLING.get(word, word))
-    return tuple(words), tuple(forms)
+    return tuple(initials_key(" ".join(words)).split()), tuple(forms)
 
 
 def _form_kind(forms: tuple[str, ...]) -> str:
@@ -698,7 +725,8 @@ class EntityIndex(NamedTuple):
 
 def build_entity_index(rows: Iterable[tuple]) -> EntityIndex:
     """rows: (cik, ticker, name, aliases), aliases a JSON list of stored keys (or None). ALIASES, SECURITY_ALIASES,
-    COMMON_NAMES and SHORT_NAMES are added here, so a stored database picks up new aliases without a re-ingest."""
+    COMMON_NAMES, SHORT_NAMES and RELEASE_SHORT_NAMES are added here, so a stored database picks up new aliases
+    without a re-ingest."""
     idx = EntityIndex({}, {}, [], {}, {}, {}, {}, {}, {})
     for cik, ticker, name, aliases in rows:
         stored = json.loads(aliases) if isinstance(aliases, str) else list(aliases or ())
@@ -706,12 +734,16 @@ def build_entity_index(rows: Iterable[tuple]) -> EntityIndex:
         c = (cik, ticker)
         sec = legal_form(name or "")
         idx.legal[c] = tuple(dict.fromkeys([sec, *(f for f in map(legal_form, known_names(ticker)) if f[1])]))
-        keys = set(stored or company_aliases(ticker, name)) | {normalize_entity(a) for a in known_names(ticker)}
+        # Re-key stored initials and recompute the SEC name too: snapshots may
+        # predate these normalization rules and have nonempty legacy aliases.
+        keys = {initials_key(a) for a in stored} | company_aliases(ticker, name)
         keys.discard("")
         bare = ticker_only_key(ticker, name, keys)
         tkey = normalize_entity(ticker)
         for k in lookup_keys(ticker, name, keys):
             idx.lookup.setdefault(k, set()).add(c)
+            if k in RELEASE_NAME_KEYS:
+                continue  # strictly bare lookup, including when Ask proposes this company
             single = " " not in k
             if k in WORD_NAMES:  # never in running text; a one-word name counts before a legal suffix
                 if single:
@@ -760,7 +792,7 @@ def find_mentions(s: str, tokens: list[tuple[str, int, int]], index: EntityIndex
             phrase = " ".join(words)
             hits = index.scan.get(phrase)
             if not hits:
-                key = normalize_entity(phrase)
+                key = normalize_entity(s[tokens[i][1]:tokens[i + n - 1][2]])
                 hits = index.scan.get(key)
                 if n > 1 and words[-1] in _LEGAL_SUFFIXES:  # written as a legal name
                     if not hits:

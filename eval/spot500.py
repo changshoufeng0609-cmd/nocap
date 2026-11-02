@@ -7,17 +7,22 @@
 .venv/bin/python eval/spot500.py --set v2 --live --output eval/spot500_runs/v2-live-<date>.json
 .venv/bin/python eval/spot500.py --set v3 --stub oracle --output eval/spot500_runs/v3-oracle-<date>.json
 .venv/bin/python eval/spot500.py --set v3 --live --output eval/spot500_runs/v3-live-<date>.json
+.venv/bin/python eval/spot500.py --set full --stub oracle --output eval/spot500_runs/full-oracle-<date>.json
+.venv/bin/python eval/spot500.py --set full --live --budget 6 --concurrency 4 --output eval/spot500_runs/full-live-<date>.json
 
 Live mode requires MODEL_API_KEY already exported; this runner never reads .env.
 Each output and its .run directory are single use, including interrupted runs.
 v1 is the default set. Later sets write only eval/spot500_runs/<set>-oracle-*.json
 or <set>-live-*.json, and refuse a live run once any <set>-live-* record exists.
+Only the full set has a budget allowance (cap up to $6, estimate up to $5.50); every
+other set refuses a cap of $1 or more. --concurrency runs up to four items at once;
+items that share an extraction request run one after another, so none is sent twice.
 """
 from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -40,9 +45,14 @@ V2_CORPUS = ROOT / "eval/corpus/spot500_v2.jsonl"
 V2_MANIFEST = ROOT / "eval/spot500_v2_manifest.json"
 V3_CORPUS = ROOT / "eval/corpus/spot500_v3.jsonl"
 V3_MANIFEST = ROOT / "eval/spot500_v3_manifest.json"
+FULL_CORPUS = ROOT / "eval/corpus/spot500_full.jsonl"
+FULL_MANIFEST = ROOT / "eval/spot500_full_manifest.json"
 RUNS = ROOT / "eval/spot500_runs"
-SETS = ("v1", "v2", "v3")
+SETS = ("v1", "v2", "v3", "full")
 DEFAULT_BUDGET = 0.95
+# (admission cap limit, harness estimate limit) for a set with an explicit allowance.
+BUDGET_ALLOWANCES = {"full": (6.0, 5.5)}
+MAX_CONCURRENCY = 4
 
 
 def digest(data: bytes) -> str:
@@ -77,6 +87,8 @@ def set_files(spot_set: str = "v1") -> tuple[Path, Path]:
         return V2_CORPUS, V2_MANIFEST
     if spot_set == "v3":
         return V3_CORPUS, V3_MANIFEST
+    if spot_set == "full":
+        return FULL_CORPUS, FULL_MANIFEST
     raise ValueError(f"Unknown spot500 set: {spot_set}")
 
 
@@ -233,15 +245,20 @@ def evidence_hashes(folder: Path) -> dict:
     return {str(path.relative_to(folder)): file_digest(path) for path in paths}
 
 
-def spark_guard(path: Path, backend, allowed_keys: set[str], cap: float):
-    """Reuse existing attempt ledger persistence and context manager with a Meta policy."""
+def spark_guard(path: Path, backend, allowed_keys: set[str], cap: float, *, cap_limit: float | None = None):
+    """Reuse existing attempt ledger persistence and context manager with a Meta policy.
+
+    The cap stays below $1 unless a set's explicit allowance passes cap_limit.
+    """
     from eval.attempt_budget import AttemptBudget
     from receipts import extract as ex
 
     class SparkAttemptBudget(AttemptBudget):
         def __init__(self):
-            if not math.isfinite(cap) or not 0 < cap < 1:
+            if cap_limit is None and (not math.isfinite(cap) or not 0 < cap < 1):
                 raise ValueError("Spot500 admission cap must be below $1.")
+            if cap_limit is not None and (not math.isfinite(cap) or not 0 < cap <= cap_limit):
+                raise ValueError(f"Spot500 admission cap must be at most ${cap_limit:g}.")
             if path.exists():
                 raise FileExistsError("Refusing to overwrite attempt ledger.")
             self.path, self.backend, self.allowed_keys = path, backend, allowed_keys
@@ -318,13 +335,23 @@ def check_set_output(output: Path, spot_set: str, *, stub: bool) -> None:
 
 
 def run(items: list[dict], output: Path, *, stub: bool, evidence_dir: Path, budget: float,
-        spot_set: str = "v1") -> dict:
+        spot_set: str = "v1", concurrency: int = 1) -> dict:
     corpus, manifest = set_files(spot_set)
-    if not math.isfinite(budget) or not 0 < budget < 1:
-        raise ValueError("Budget must be positive and below $1.")
+    allowance = BUDGET_ALLOWANCES.get(spot_set)
     estimate = len(items) * harness.DEFAULT_EST_COST_PER_ITEM
-    if estimate >= 1 or estimate > budget:
-        raise ValueError("Harness per-item estimate exceeds the authorized budget.")
+    if allowance is None:
+        if not math.isfinite(budget) or not 0 < budget < 1:
+            raise ValueError("Budget must be positive and below $1.")
+        if estimate >= 1 or estimate > budget:
+            raise ValueError("Harness per-item estimate exceeds the authorized budget.")
+    else:
+        cap_limit, estimate_limit = allowance
+        if not math.isfinite(budget) or not 0 < budget <= cap_limit:
+            raise ValueError(f"Budget must be positive and at most ${cap_limit:g} for {spot_set}.")
+        if estimate > estimate_limit or estimate > budget:
+            raise ValueError("Harness per-item estimate exceeds the authorized budget.")
+    if type(concurrency) is not int or not 1 <= concurrency <= MAX_CONCURRENCY:
+        raise ValueError(f"Concurrency must be 1 to {MAX_CONCURRENCY}.")
     by_input = {input_key(it["text"], it["context"], harness._as_of(it)): it for it in items}
     if len(by_input) != len(items) or len({it["item_hash"] for it in items}) != len(items):
         raise ValueError("Duplicate input and cutoff cannot be scored separately.")
@@ -348,7 +375,7 @@ def run(items: list[dict], output: Path, *, stub: bool, evidence_dir: Path, budg
                "budget_usd": budget, "evidence_dir": str(evidence_dir), "source_hashes": code_before,
                "evidence_hashes": evidence_before}
     if spot_set != "v1":
-        started["set"] = spot_set
+        started.update(set=spot_set, concurrency=concurrency)
     save(output, started, new=True)
     save(folder / "started.json", started, new=True)
     details = {}
@@ -363,8 +390,14 @@ def run(items: list[dict], output: Path, *, stub: bool, evidence_dir: Path, budg
         from receipts.check import check_detailed
         from receipts.store import Store
         backend = ex.make_backend("meta")
-        keys = {key for it in items for key in ex.request_keys(it["text"], it["context"], backend=backend)}
-        guard = spark_guard(folder / "attempts.json", backend, keys, budget)
+        item_keys = {it["item_hash"]: sorted(set(ex.request_keys(it["text"], it["context"], backend=backend)))
+                     for it in items}
+        keys = {key for found in item_keys.values() for key in found}
+        # An original and its look-ahead mutant share a request: they never run at once, so the
+        # later one reads the extraction cache instead of a refused second dispatch.
+        key_locks = {key: threading.Lock() for key in keys}
+        guard = spark_guard(folder / "attempts.json", backend, keys, budget,
+                            cap_limit=allowance[0] if allowance else None)
         if not harness.install_sdk_hooks():
             raise RuntimeError("SDK usage ledger unavailable; no model call permitted.")
         store = Store(evidence_dir / "facts.sqlite", evidence_dir / "pr_facts")
@@ -375,9 +408,12 @@ def run(items: list[dict], output: Path, *, stub: bool, evidence_dir: Path, budg
         def check(text, *, context, as_of):
             item = by_input[input_key(text, context, as_of)]
             try:
-                result = check_detailed(text, as_of=as_of, context=context, store=store,
-                                        client=client, backend=backend, cache_dir=cache_dir,
-                                        extra_cache_dirs=(), concurrency=1)
+                with ExitStack() as held:
+                    for key in item_keys[item["item_hash"]]:
+                        held.enter_context(key_locks[key])
+                    result = check_detailed(text, as_of=as_of, context=context, store=store,
+                                            client=client, backend=backend, cache_dir=cache_dir,
+                                            extra_cache_dirs=(), concurrency=1)
                 details[item["item_hash"]] = {"calls": result.extraction.calls,
                                               "warnings": result.warnings, "coverage": result.coverage}
                 return result.results
@@ -398,7 +434,7 @@ def run(items: list[dict], output: Path, *, stub: bool, evidence_dir: Path, budg
 
     try:
         with admitted():
-            records, stats = harness.run_items(check, items, retained, concurrency=1, budget=budget,
+            records, stats = harness.run_items(check, items, retained, concurrency=concurrency, budget=budget,
                                               est_per_item=harness.DEFAULT_EST_COST_PER_ITEM, progress=True)
     finally:
         if store is not None:
@@ -438,10 +474,12 @@ def main(argv=None) -> int:
     parser.add_argument("--budget", type=float, default=DEFAULT_BUDGET)
     parser.add_argument("--set", dest="spot_set", choices=SETS, default="v1",
                         help="frozen set to run (default v1); a later set writes eval/spot500_runs/<set>-*.json")
+    parser.add_argument("--concurrency", type=int, choices=range(1, MAX_CONCURRENCY + 1), default=1,
+                        help="items checked at once (default 1)")
     args = parser.parse_args(argv)
     _, items = load_items(args.spot_set)
     result = run(items, args.output, stub=bool(args.stub), evidence_dir=args.evidence_dir, budget=args.budget,
-                 spot_set=args.spot_set)
+                 spot_set=args.spot_set, concurrency=args.concurrency)
     total = result["summary"]["total"]
     print(json.dumps({"output": str(args.output), "total": total, "cost_usd": result["cost_usd"],
                       "estimated_cost_usd": result["estimated_cost_usd"], "inputs_unchanged": result["inputs_unchanged"]}))

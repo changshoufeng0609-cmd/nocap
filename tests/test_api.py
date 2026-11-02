@@ -76,7 +76,7 @@ class FakeExtract:
                                                                  "usage": USAGE, "cost_usd": self.cost})
 
 
-def fake_verify(claim, store, *, as_of=None, context=None):
+def fake_verify(claim, store, *, as_of=None, context=None, **_):  # also named= and draft=, as verify takes
     if claim.value_text == "$3.1 billion":
         return Verdict(claim_id=claim.id, status="wrong", reason="value_mismatch",
                        explanation="Example Corp's 10-Q reports net income of $3.0 billion.", expected_value=3.0,
