@@ -1,0 +1,21 @@
+{
+ "request_sha256": "7ea3976dcd0fe43bb234e4ba2baa74a3e3cdc8868f044dd05c1eeabaf6d5cb0b",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:00Z",
+ "response_id": "resp_6ae86880b2df356fefcb49e7",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1965,
+  "output_tokens": 1514,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1173
+ },
+ "cost_usd": 0.036726,
+ "latency_s": 10.75,
+ "output_text": "{\"draft\": \"Meta Platforms — Q3 2026\\nResults:\\n- Revenue: $64.60 billion, up 26% year-over-year on both a reported and constant currency basis\\n- Total costs and expenses: $51.61 billion, climbed 68% year-over-year\\n- Litigation charge included in costs and expenses: $9.89 billion\\n- Income from operations: $12.99 billion; excluding the charge, $22.88 billion\\n- Diluted EPS: $3.83; excluding the charge, $7.40\\nOperations:\\n- Family daily active people: 3.64 billion on average for September 2026, grew 3% year-over-year\\n- Ad impressions across Family of Apps: rose 10% year-over-year\\n- Average price per ad: jumped 14% year-over-year\\nCash and capital:\\n- Capital expenditures, including principal payments on finance leases: $34.91 billion\\n- Cash, cash equivalents, and marketable securities: $82.45 billion as of September 30, 2026\\n- Cash flow from operating activities: $32.79 billion; free cash flow: negative $2.12 billion\\n- Headcount: 66,775 as of September 30, 2026, slipped 15% year-over-year\\nOutlook:\\n- Fourth quarter 2026 total revenue expected: $73-76 billion\\n- Full year 2026 capital expenditures expected, including principal payments on finance leases: $135-145 billion\\n- Reality Labs losses expected to narrow next year: around $15 billion\"}",
+ "ticker": "META",
+ "stub": false
+}

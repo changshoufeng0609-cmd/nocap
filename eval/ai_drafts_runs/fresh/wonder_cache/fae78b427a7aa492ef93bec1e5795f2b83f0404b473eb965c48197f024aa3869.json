@@ -1,0 +1,21 @@
+{
+ "request_sha256": "fae78b427a7aa492ef93bec1e5795f2b83f0404b473eb965c48197f024aa3869",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:55Z",
+ "response_id": "resp_6ae8683fa2da598b8706476a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3845,
+  "output_tokens": 1590,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1163
+ },
+ "cost_usd": 0.04718,
+ "latency_s": 12.07,
+ "output_text": "{\"draft\": \"# Cisco Q4 FY2026 Earnings Summary\\n\\nCisco closed fiscal 2026 with fourth-quarter revenue of **$17.3 billion**, a result that climbed **18%** year over year, while non-GAAP earnings per share reached **$1.22**.\\n\\n**Revenue and Growth**\\n- Product revenue jumped **24%** year over year, while services revenue was flat.\\n- Revenue rose **18%** in the Americas, **19%** in EMEA and **14%** in APJC.\\n- Networking revenue surged **28%**, and total product orders climbed **35%** year over year.\\n\\n**Profitability**\\n- GAAP operating income grew to **$4.3 billion**, up **38%**, for a GAAP operating margin of **24.7%**.\\n- Non-GAAP operating income advanced to **$6.2 billion**, with a non-GAAP operating margin of **35.9%**.\\n- GAAP earnings per share came in at **$0.97** for the quarter.\\n\\n**Cash Flow and Capital Returns**\\n- Cash flow from operating activities rose to **$5.4 billion**, an increase of **27%** year over year.\\n- The company returned **$3.2 billion** to stockholders through share buybacks and dividends during the quarter.\\n- A quarterly dividend of **$0.42** per common share was declared.\\n\\n**Outlook**\\n- For the first quarter of fiscal 2027, revenue is expected to be **$18.0 billion** to **$18.2 billion**.\\n- For fiscal 2027, revenue is expected to be **$72.2 billion** to **$73.4 billion**.\\n\\n**Bottom Line**\\nThe company exited fiscal 2026 with strong revenue and order momentum, expanding operating income and solid operating cash flow, and guided for further revenue growth in fiscal 2027.\"}",
+ "ticker": "CSCO",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "84ea82e924c90f98c664d090304137ddcaaa1a41aafa070aaaa6926ff76e0268",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:24Z",
+ "response_id": "resp_6ae8685c8887e319783f46ba",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3505,
+  "output_tokens": 1898,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1477
+ },
+ "cost_usd": 0.050566,
+ "latency_s": 16.22,
+ "output_text": "{\"draft\": \"# Edwards Lifesciences Q2 2026 Earnings Summary\\n\\nEdwards Lifesciences delivered stronger sales in the second quarter, with revenue climbing **13.6%** to **$1.74 billion** and adjusted EPS reaching **$0.78**.\\n\\n**Revenue and Growth**\\n- TAVR sales rose to **$1.26 billion**, up **11.3%** from the prior year.\\n- TMTT sales surged to **$195.9 million**, jumping **47.3%** compared with the prior year.\\n- Surgical sales increased to **$284 million**, growing **6.5%** year over year.\\n\\n**Profitability**\\n- EPS came in at **$0.42** for the quarter.\\n- Gross profit margin was **77.5%**, or **77.6%** on an adjusted basis.\\n- Operating profit margin reached **29.5%**, or **30.0%** adjusted.\\n- Selling, general and administrative expenses totaled **$561 million** in the quarter.\\n\\n**Cash Flow and Capital Returns**\\n- Cash and cash equivalents were approximately **$2.9 billion** as of June 30, 2026.\\n- Total debt stood at approximately **$600 million**.\\n- The company had approximately **$1.5 billion** remaining under its share repurchase authorization.\\n\\n**Outlook**\\n- Full-year 2026 constant currency sales growth guidance was raised to **10% to 11%**.\\n- TMTT sales guidance was lifted to **$760 million to $780 million** for the full year.\\n- Adjusted EPS guidance was reaffirmed at **$2.95 to $3.05**.\\n\\n**Bottom Line**\\nThe company paired broad-based segment growth with solid profitability and a strong balance sheet, while raising its sales outlook and maintaining its earnings guidance for 2026.\"}",
+ "ticker": "EW",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "445e508e9bdd130ca4bd1c87efa5da4d72061fba226534f3e514eeb86904f202",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:08Z",
+ "response_id": "resp_6ae8684c87a15327f5bd4145",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2292,
+  "output_tokens": 1243,
+  "cached_tokens": 0,
+  "reasoning_tokens": 847
+ },
+ "cost_usd": 0.034028,
+ "latency_s": 11.18,
+ "output_text": "{\"draft\": \"Quest Diagnostics Raises Full-Year Outlook After Third-Quarter Growth\\n\\nQuest Diagnostics reported third quarter revenues of $3.10 billion, climbing 10.0% from 2025 on strong organic revenue growth. Reported diluted earnings per share reached $2.78, surging 28.7% from 2025, while adjusted diluted EPS grew to $3.00, up 15.4%.\\n\\nThe company raised its outlook for the full year 2026, with revenues now expected to be between $12.065 billion and $12.105 billion. Reported diluted EPS for the full year is now expected to be between $10.21 and $10.31, and adjusted diluted EPS is expected to be between $11.25 and $11.35.\\n\\nQuest also announced expanded offerings and initiatives during the quarter, including a tailored lab test panel with over 50 biomarkers that iPhone and iPad users in the United States can purchase directly through the Apple Health app, available to the public later this year. The company extended its AD-Detect menu and advanced Project Nova to the solutions-build phase, with Epic solutions expected to be deployed in its first lab in the fall of 2027.\\n\\nThe company said it will hold its 2027 Investor Day on March 25, 2027, at the New York Stock Exchange. Quest serves half the physicians and hospitals in the United States and one in three adult Americans each year, with nearly 60,000 employees.\\n\\nFor its adjusted outlook, Quest noted estimated pre-tax charges of $20 million primarily tied to workforce reductions and integration costs, estimated pre-tax amortization expenses of $149 million, and estimated pre-tax net losses of $9 million linked to the contingent consideration accrual. Income tax impacts for those items were primarily calculated using a combined statutory income tax rate of 25.5%.\"}",
+ "ticker": "DGX",
+ "stub": false
+}

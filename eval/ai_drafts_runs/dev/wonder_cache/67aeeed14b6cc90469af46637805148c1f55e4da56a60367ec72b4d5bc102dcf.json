@@ -1,0 +1,21 @@
+{
+ "request_sha256": "67aeeed14b6cc90469af46637805148c1f55e4da56a60367ec72b4d5bc102dcf",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:36Z",
+ "response_id": "resp_6ae865d4c11ca8f6f7374b5d",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2155,
+  "output_tokens": 1677,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1216
+ },
+ "cost_usd": 0.040746,
+ "latency_s": 13.1,
+ "output_text": "{\"draft\": \"Tractor Supply (TSCO) Q2 2026: Sales Growth, Pressured Profitability\\nThe quarter showed modest top-line growth alongside weaker comparable sales, higher costs and lower earnings.\\n\\nNet sales rose 2.3% to $4.54 billion, while comparable store sales slipped 1.5%. Comparable performance reflected a comparable average transaction count decline of 1.7%, partly offset by a comparable average ticket increase of 0.2%.\\n\\nGross profit climbed to $1.68 billion, with the gross margin rate at 37.1% compared with 36.9% in the prior year's second quarter. On an adjusted basis, gross profit reached $1.69 billion, or 37.2% as a percent of net sales. SG&A expenses, including depreciation, amortization and impairment, climbed to $1.22 billion, or 26.8% as a percent of net sales, reflecting impairment and other charges for the Petsense business and acquisition costs for VIP Petcare.\\n\\nOperating income fell to $467.1 million, while adjusted operating income declined to $548.3 million. Net income slipped to $360.7 million, with diluted EPS at $0.69; on an adjusted basis, net income was $423.5 million, or $0.81 per diluted share. The lower effective income tax rate also reflected the timing of certain tax planning initiatives and the one-time charges tied to Petsense and VIP Petcare.\\n\\nCapital returns remained substantial, as the company repurchased approximately 3.9 million shares for $135.3 million and paid quarterly cash dividends totaling $125.6 million, returning a total of $260.9 million of capital to shareholders. Store activity included 28 new Tractor Supply stores opened during the quarter, alongside expansion of Petsense by Tractor Supply.\\n\\nOutlook: The company updated its fiscal guidance to reflect year-to-date performance and expectations for the balance of the year, while withdrawing its long-term financial framework. Attention now turns to whether comparable sales stabilize, adjusted costs moderate, Petsense restructuring benefits emerge, and management delivers an updated long-term framework alongside its year-end earnings announcement.\"}",
+ "ticker": "TSCO",
+ "stub": false
+}

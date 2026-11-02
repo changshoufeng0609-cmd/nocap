@@ -1,0 +1,21 @@
+{
+ "request_sha256": "d7fc73d31d9d46a6bb761fd9ca7d818d0c857ad69b494c0b0408f7944a190d53",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:07Z",
+ "response_id": "resp_6ae8657b7c6cbb1eb7d444bc",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3894,
+  "output_tokens": 1611,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1328
+ },
+ "cost_usd": 0.046382,
+ "latency_s": 14.13,
+ "output_text": "{\"draft\": \"Cummins fourth-quarter profit rises as revenue edges higher\\nCummins Inc. reported fourth-quarter revenue of $8.5 billion, up 1% from a year earlier, while net income attributable to the company climbed to $593 million, or $4.27 per diluted share, from $418 million, or $3.02 per diluted share.\\nEBITDA grew to $1.2 billion, or 13.5% of sales, from $1.0 billion, or 12.1% of sales. Results included electrolyzer-related charges of $218 million, or $1.54 per diluted share, within Accelera.\\nSales in North America slipped 2%, while international revenues rose 5%.\\nFor the full year, the company posted revenue of $33.7 billion, down 1%, and net income of $2.8 billion, or $20.50 per diluted share. Full-year results included electrolyzer charges of $458 million, or $3.28 per diluted share.\\nCummins projected that full-year 2026 revenue will increase 3% to 8%, with EBITDA ranging from 17.0% to 18.0% of sales.\\nThe company also said it returned $1,055 million to shareholders through dividends during 2025.\"}",
+ "ticker": "CMI",
+ "stub": false
+}

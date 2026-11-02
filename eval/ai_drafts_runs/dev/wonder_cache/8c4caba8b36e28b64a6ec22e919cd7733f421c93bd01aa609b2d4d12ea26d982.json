@@ -1,0 +1,21 @@
+{
+ "request_sha256": "8c4caba8b36e28b64a6ec22e919cd7733f421c93bd01aa609b2d4d12ea26d982",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:44Z",
+ "response_id": "resp_6ae865640057c7a868ab4a56",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2447,
+  "output_tokens": 1470,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1058
+ },
+ "cost_usd": 0.037774,
+ "latency_s": 9.49,
+ "output_text": "{\"draft\": \"A. O. Smith third-quarter sales climb as company prepares sale of majority stake in China business\\nA. O. Smith Corporation reported third quarter 2026 sales of $941 million, net earnings of $126 million and diluted earnings per share of $0.93.\\nNorth America segment sales climbed to $761.6 million, up 3%, helped by Leonard Valve acquisition sales, 13% boiler sales growth and pricing actions, partly offset by lower residential water heater volumes. The segment also recorded a $15 million sales contribution from Leonard Valve, and segment earnings reached $179.9 million with a segment margin of 23.6%.\\nRest of World segment sales slipped to $192.8 million, down 7%, amid continued weakness in China's consumer appliance market. China sales fell 17% in local currency, while Rest of World segment earnings came to $10.5 million and segment margin was 5.4%.\\nThe company announced definitive agreements under which CPE will acquire an 81% interest in its China business, while A. O. Smith retains a 19% stake and enters a long-term brand license agreement. The transaction values the China business at approximately $400 million on a cash-free, debt-free basis, with total value expected to exceed $500 million including the net present value of licensing economics, and the structure will enable the company to repatriate approximately $80 million in cash held in China.\\nYear-to-date cash provided by operations was $429.4 million, while free cash flow came to $396.2 million. The company deployed $260.6 million to repurchase shares in the first nine months of 2026.\\nFor full-year 2026, the company updated guidance to exclude the China business for all of 2026, projecting net sales growth, excluding China, of approximately 4% and adjusted EPS, excluding China, of between $3.42 and $3.52.\"}",
+ "ticker": "AOS",
+ "stub": false
+}

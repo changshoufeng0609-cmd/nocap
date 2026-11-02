@@ -1,0 +1,21 @@
+{
+ "request_sha256": "76199a5dccdc76258c143de87604debfee428477c1b51b814c9210beb5d2e422",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:29Z",
+ "response_id": "resp_6ae86825eabfc7f39b914b25",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3926,
+  "output_tokens": 2177,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1648
+ },
+ "cost_usd": 0.059244,
+ "latency_s": 17.62,
+ "output_text": "{\"draft\": \"# American Tower Q3 2026 Earnings Summary\\n\\nAmerican Tower reported third-quarter results shaped by non-cash revenue comparisons and unrealized investment losses, while raising parts of its full-year outlook and continuing share repurchases.\\n\\n**Profitability**\\n- Results were pressured by a decrease in non-cash straight-line revenue, which represented approximately **$(24.0) million** in the current period, compared with approximately **$27.7 million** in the prior-year period.\\n- Unrealized losses on equity investments were approximately **$(71.5) million**, compared with unrealized gains of approximately **$10.9 million** in the prior-year period.\\n\\n**Segment Performance and Outlook**\\n- Citing Data Centers segment outperformance, the company raised the midpoint of its full-year outlook for property revenue by **$55 million**.\\n- The midpoint for net income was lowered by **$30 million**, primarily due to unrealized losses for equity securities.\\n- The midpoint for AFFO attributable to common stockholders per share was raised by **$0.02**, primarily due to capital allocation decisions.\\n- Full-year property revenue midpoint growth rates included **(3.0)%** for U.S. & Canada, **11.0%** for Latin America, **16.2%** for Africa & APAC, **10.4%** for Europe and **16.1%** for Data Centers.\\n\\n**Capital Expenditures and Balance Sheet**\\n- Total capital expenditures climbed to approximately **$407 million**, including **$48 million** for non-discretionary capital improvements and corporate capital expenditures.\\n- The Net Leverage Ratio was **4.9x** net debt to annualized Adjusted EBITDA.\\n- Total liquidity stood at approximately **$10.6 billion**, consisting of approximately **$1.9 billion** in cash and cash equivalents plus approximately **$8.7 billion** available under revolving credit facilities.\\n\\n**Capital Returns**\\n- The company repurchased approximately **1.8 million** shares for an aggregate of approximately **$315 million**.\\n- Approximately **$1.1 billion** remained available under the stock repurchase program before an authorization to purchase up to an additional **$2.0 billion** of outstanding common stock.\\n\\n**Bottom Line**\\nThe company faced notable non-cash and investment-related headwinds, but Data Centers strength supported a higher property revenue outlook, while liquidity remained substantial and capital returns continued.\"}",
+ "ticker": "AMT",
+ "stub": false
+}

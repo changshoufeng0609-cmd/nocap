@@ -1,0 +1,21 @@
+{
+ "request_sha256": "8eea8cdf5afe6ebf67da95af64ccbdcf56c8da4c7969f98957489e127255b1e1",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:03Z",
+ "response_id": "resp_6ae865b3802cea3b2a9846d7",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1850,
+  "output_tokens": 1238,
+  "cached_tokens": 0,
+  "reasoning_tokens": 831
+ },
+ "cost_usd": 0.03216,
+ "latency_s": 7.74,
+ "output_text": "{\"draft\": \"# Everpure Q2 FY2027 Earnings Summary\\n\\nEverpure delivered a strong second quarter of fiscal 2027, with record revenue and operating profit that exceeded the high end of its guidance, alongside sharply higher product sales and continued subscription growth.\\n\\n**Revenue and Growth**\\n- Revenue climbed 38% year-over-year to **$1.2 billion**.\\n- Product revenue jumped 54% to **$687 million**, while subscription services revenue rose 20% to **$499 million**.\\n- Subscription annual recurring revenue grew 20% to **$2.1 billion**.\\n- Remaining performance obligations surged 44% to **$4.1 billion**.\\n\\n**Profitability**\\n- GAAP gross margin was **68.4%**, with non-GAAP gross margin at **69.9%**.\\n- GAAP operating income came in at **$63 million**, while non-GAAP operating income reached **$230 million**.\\n- GAAP operating margin was **5.3%**, compared with a non-GAAP operating margin of **19.4%**.\\n\\n**Cash Flow and Capital Returns**\\n- Operating cash flow was **$(136) million**, and free cash flow was **$(238) million**.\\n- Total cash, cash equivalents, and marketable securities stood at **$1.0 billion**.\\n- The company returned approximately **$69 million** to stockholders through share repurchases of **0.9 million** shares.\\n\\n**Outlook**\\nThe company significantly increased its FY27 revenue and operating profit guidance. Management said demand remains strong across its solutions portfolio despite historic industry price increases in the first half of FY27.\\n\\n**Bottom Line**\\nA sharp rise in product revenue, solid subscription growth, and expanding remaining performance obligations drove a standout quarter, even as cash flow was negative for the period.\"}",
+ "ticker": "P",
+ "stub": false
+}

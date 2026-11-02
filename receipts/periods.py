@@ -14,6 +14,8 @@ Phrasings (case-insensitive):
   calendar phrasing   "third quarter of 2026", "Q3 2026", "3Q26", "Q3'26", "2026": only for
                       companies whose fiscal year is the calendar year; ambiguous otherwise
   relative            "the quarter", "", "second quarter", "full year": filled from the context
+                      A named ordinal / Q1..Q4 without a year in the phrase or context uses the latest
+                      ended occurrence on the fiscal calendar, just like a month-named quarter.
   month-named quarter "June quarter", "the September quarter 2026", "December-quarter results"
                       (Apple's and Microsoft's own phrasing): the company's fiscal quarter that ends in
                       that month. The year comes from the phrase, else the context (its date or year),
@@ -354,6 +356,26 @@ def _by_month(cal: list[CalEntry], p: ParsedPeriod, context: Optional[str],
     return _at(cal, year + offset, fp)
 
 
+def _latest_quarter(cal: list[CalEntry], quarter: int, as_of: Any) -> Optional[ResolvedPeriod]:
+    """An ordinal without a year uses the latest ended occurrence, not the latest reported one.
+
+    Infer the nominal month and fiscal-year offset only from a stable calendar. Known actual
+    end dates take precedence over the nominal month end (including 52/53-week calendars).
+    """
+    fp = f"Q{quarter}"
+    pattern = {(_nominal(e.end).month, e.fiscal_year - _nominal(e.end).year)
+               for e in cal if e.fiscal_period == fp}
+    if len(pattern) != 1:
+        return None
+    month, offset = pattern.pop()
+    anchor = _as_date(as_of) or date.today()
+    year = anchor.year
+    entry = lookup(cal, year + offset, fp)
+    if (entry.end if entry else _last_day(year, month)) > anchor:
+        year -= 1
+    return _at(cal, year + offset, fp)
+
+
 def _resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, context: Optional[str] = None,
                          period_type: Optional[str] = None, comparison: Optional[str] = None,
                          as_of: Any = None) -> Optional[ResolvedPeriod]:
@@ -374,6 +396,15 @@ def _resolve_in_calendar(period_text: Optional[str], cal: list[CalEntry], *, con
     if level and p.shift == "ambiguous":
         return None
     c = parse(context) if context else None
+    if (p.quarter is not None and p.year is None and p.shift is None
+            and (c is None or (c.kind not in ("ytd", "conflict") and c.year is None
+                              and c.end is None and c.month is None))):
+        text = _norm(period_text)
+        named = {_ORD[m['ord']] for m in _ORD_Q_RE.finditer(text)}
+        named.update(int(m['q']) for rx in (_Q_NUM_RE, _NQ_RE) for m in rx.finditer(text))
+        if len(named) != 1:
+            return None
+        return _latest_quarter(cal, p.quarter, as_of)
     if c is None or c.kind in ("ytd", "conflict") or (c.end is None and c.year is None and c.month is None):
         return None
     if c.month is not None:
@@ -426,8 +457,8 @@ def resolve_period(period_text: Optional[str], store: EvidenceStore, cik: int, *
 
     period_type ("quarter" / "annual") breaks the Q4-versus-full-year tie when both end on the same
     date. comparison ("none", "QoQ", "YoY", "sequential") says whether "a year ago" moves the period
-    (a level figure) or describes the comparison base (a percent change). as_of anchors a month-named quarter
-    with no year ("the June quarter") to the latest one that had ended by then.
+    (a level figure) or describes the comparison base (a percent change). as_of anchors a month-named or
+    ordinal quarter with no year ("the June quarter", "first-quarter") to the latest one ended by then.
     """
     return resolve_in_calendar(period_text, calendar(store, cik), context=context, period_type=period_type,
                                comparison=comparison, as_of=as_of)

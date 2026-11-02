@@ -779,7 +779,8 @@ Each set is small, correlated and machine-labelled. Each was run once, and none 
 # Frozen spot500 full: every company, 1,000 items
 
 The full set measures, once, the version deployed on November 2: private `8d69d3c`, public `7a42a29`. After that run
-the verifier code freezes until submission. The owner approved about $5 for the run, with a $6 cap. The README reports
+the plan was to freeze the verifier until submission; the owner later chose to fix what the run found and to
+measure the fixed version once on a new set (full2, below). The owner approved about $5 for the run, with a $6 cap. The README reports
 this set instead of v1–v3. Those three stay in this document, and none of the four results is pooled with another.
 
 **The first freeze was superseded before any run, at the owner's request, to include every company.** That freeze
@@ -1618,3 +1619,33 @@ Results:
     indexed yet.
   - McDonald's: global and U.S. comparable sales, systemwide sales and three loyalty figures are confirmed. Round 9
     confirms its 4% and 3%.
+
+**Loss wording (`d2f3055`, merged `5196d59`).** Loss-phrased figures, such as "diluted loss per share", "a $5.34 billion
+loss" and "net loss attributable to shareholders", are read as the negative filed figures they name, and a sign never
+flips. The same attribution reading also confirms "net income attributable to shareholders" lines. Re-verification
+against the code before it:
+
+| Set | True figures | Planted errors |
+| --- | --- | --- |
+| full | `?`→✓ 4 | none moved |
+| full2 | `?`→✓ 7 | `?`→✗ 3, `?`→◷ 1 |
+
+**Rounds 10a and 10b (merged `e9aaa51`), from the [AI-draft benchmark](ai_drafts.md).**
+- comparison bases whose label follows an intervening figure;
+- written cents;
+- quarters with no year, which anchor to the latest ended one;
+- a draft title's lone quarter;
+- consolidated net income;
+- release-table conflicts;
+- segment subjects;
+- "net sales and revenues" totals;
+- a release's year never confirms its quarter.
+
+Re-verification against `5196d59`:
+
+| Set | True figures | Planted errors |
+| --- | --- | --- |
+| full | `?`→✓ 2 (Keysight, Take-Two) | none moved |
+| full2 | `?`→✓ 4 (Cintas), ✗→`?` 1 (Axon's true 51.9%) | none moved |
+
+No verdict moved away from correct in either step, and no planted error moved to ✓.

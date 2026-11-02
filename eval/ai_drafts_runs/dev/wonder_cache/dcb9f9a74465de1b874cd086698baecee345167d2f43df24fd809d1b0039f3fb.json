@@ -1,0 +1,21 @@
+{
+ "request_sha256": "dcb9f9a74465de1b874cd086698baecee345167d2f43df24fd809d1b0039f3fb",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:53Z",
+ "response_id": "resp_6ae8656d222ec66a856e4444",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3824,
+  "output_tokens": 1648,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1231
+ },
+ "cost_usd": 0.046842,
+ "latency_s": 13.17,
+ "output_text": "{\"draft\": \"# Brown–Forman Q4 FY2026 Earnings Summary\\n\\nBrown–Forman closed the fourth quarter with reported net sales up **2%** to **$912 million**, including **2%** organic growth.\\n\\n**Revenue and Growth**\\n- For the full year, net sales slipped **1%** to **$3.9 billion**, holding flat on an organic basis.\\n- Whiskey net sales climbed **3%**, while Ready-to-Drink net sales jumped **11%**.\\n- U.S. net sales declined **7%**, more than offset by Emerging markets, where net sales surged **14%**.\\n\\n**Profitability**\\n- Fourth-quarter reported operating income fell **53%** to **$96 million**, while diluted earnings per share came in at **$0.12**.\\n- Full-year gross margin expanded **160 basis points** to **60.5%**, helped by acquisitions and divestitures, foreign exchange, and lower costs.\\n\\n**Cash Flow and Capital Returns**\\n- Cash flows from operations grew to **$1.0 billion**, and free cash flow rose to **$893 million**.\\n- The company paid **$427 million** in regular quarterly dividends and returned **$400 million** through its share repurchase program.\\n\\n**Outlook**\\n- For fiscal 2027, the company expects organic operating income to decline in the **3% to 5%** range.\\n- The effective tax rate is expected to be approximately **20% to 22%**, with capital expenditures planned at **$60 to $70 million**.\\n- The company expects a challenging operating environment to persist, with support from its restructuring initiative, U.S. distributor changes, and new product innovation.\\n\\n**Bottom Line**\\nThe company delivered modest quarterly sales growth and stronger cash generation, but profitability remained under pressure as it heads into another challenging year.\"}",
+ "ticker": "BF-B",
+ "stub": false
+}

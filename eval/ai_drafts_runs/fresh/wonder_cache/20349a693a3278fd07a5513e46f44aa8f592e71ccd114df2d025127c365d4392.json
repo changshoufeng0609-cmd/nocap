@@ -1,0 +1,21 @@
+{
+ "request_sha256": "20349a693a3278fd07a5513e46f44aa8f592e71ccd114df2d025127c365d4392",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:41:04Z",
+ "response_id": "resp_6ae868c01722861675584026",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2834,
+  "output_tokens": 1272,
+  "cached_tokens": 0,
+  "reasoning_tokens": 916
+ },
+ "cost_usd": 0.036776,
+ "latency_s": 8.23,
+ "output_text": "{\"draft\": \"Ventas Q3 2026 recap\\nResults:\\n- Attributable net income: $0.13 per share\\n- Normalized FFO: $0.99 per share, up 10% year-over-year\\n- Total company NOI: climbed 18% year-over-year\\n- Total company same-store cash NOI: grew 11% year-over-year\\nSegments:\\n- SHOP same-store cash NOI: jumped 16% year-over-year, led by U.S. growth of 17%\\n- Same-store RevPOR: rose 5%, with average occupancy up 290 basis points year-over-year\\n- Same-store cash NOI margin: expanded 190 basis points year-over-year\\n- U.S. SHOP average occupancy: climbed 320 basis points year-over-year\\nCash and capital:\\n- Senior housing investments closed in the quarter: $1.2 billion\\n- Senior housing investments closed year to date: $5.2 billion\\n- Equity forward sales settled year to date: 47.3 million shares for $3.9 billion in gross proceeds\\n- Unsettled equity forward sales at September 30, 2026: $0.8 billion\\n- Net debt-to-further adjusted EBITDA: 4.4x at quarter end\\n- Liquidity at September 30, 2026: $4.5 billion\\nOutlook:\\n- Disposition and loan repayment proceeds assumption: ~$700 million at a ~7% blended yield\\n- Interest expense assumption: ~$648 million at midpoint\\n- Full-year weighted average diluted share count assumption: 509 million\\n- FAD capital expenditures assumption: ~$400 million at midpoint\"}",
+ "ticker": "VTR",
+ "stub": false
+}

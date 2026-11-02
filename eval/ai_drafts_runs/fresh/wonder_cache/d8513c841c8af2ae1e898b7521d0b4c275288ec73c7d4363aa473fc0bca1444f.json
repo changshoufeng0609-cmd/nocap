@@ -1,0 +1,21 @@
+{
+ "request_sha256": "d8513c841c8af2ae1e898b7521d0b4c275288ec73c7d4363aa473fc0bca1444f",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:00Z",
+ "response_id": "resp_6ae8688082b1b2c06a95461f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3321,
+  "output_tokens": 1403,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1084
+ },
+ "cost_usd": 0.03993,
+ "latency_s": 11.2,
+ "output_text": "{\"draft\": \"Microchip Technology Q1 FY2027 recap\\nResults:\\n- Revenue: $1.485 billion, up 38.0% from a year earlier and climbed 13.2% sequentially\\n- GAAP gross profit: 63.2%\\n- GAAP operating income: $336.8 million, or 22.7% of net sales\\n- GAAP net income attributable to common stockholders: $202.0 million, with EPS of $0.37 per diluted share\\n- Non-GAAP gross profit: 63.8%\\n- Non-GAAP operating income: $521.1 million, or 35.1% of net sales\\n- Non-GAAP net income: $438.6 million, with EPS of $0.76 per diluted share\\nOperations:\\n- Inventory days: 175 days, down from 185 days on March 31\\n- PCIe Gen6 connectivity design wins: 12 programs exiting the June quarter\\nCash and capital:\\n- Returned to common stockholders through dividends: approximately $246.9 million\\n- Quarterly dividend declared for the September quarter: 45.5 cents per share\\n- Net debt reduction during the June quarter: approximately $170 million\\nOutlook:\\n- September quarter net sales: expected to rise 7% to 9% sequentially\\n- September quarter growth at the midpoint: approximately 40.6% from a year earlier\\n- Capital expenditures for all of fiscal 2027: expected to be approximately $100 million\"}",
+ "ticker": "MCHP",
+ "stub": false
+}

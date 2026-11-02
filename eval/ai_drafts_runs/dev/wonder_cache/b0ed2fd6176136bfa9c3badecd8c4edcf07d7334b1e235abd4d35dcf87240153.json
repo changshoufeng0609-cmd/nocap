@@ -1,0 +1,21 @@
+{
+ "request_sha256": "b0ed2fd6176136bfa9c3badecd8c4edcf07d7334b1e235abd4d35dcf87240153",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:59Z",
+ "response_id": "resp_6ae865afb94b274d7ba64838",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1473,
+  "output_tokens": 1439,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1096
+ },
+ "cost_usd": 0.033258,
+ "latency_s": 12.35,
+ "output_text": "{\"draft\": \"Micron Technology — Q4 fiscal 2026 analyst note\\nRecord quarterly and full-year results capped a year shaped by AI-driven demand and strong operational execution.\\nFourth-quarter revenue climbed to $54.23 billion, up from $41.46 billion in the prior quarter and $11.32 billion in the same period last year. GAAP net income reached $37.70 billion, or $32.87 per diluted share, while non-GAAP net income came in at $38.40 billion, or $33.42 per diluted share. Operating cash flow surged to $43.97 billion, compared with $25.39 billion in the prior quarter and $5.73 billion in the same period last year.\\nFor the full year, revenue grew to $133.19 billion from $37.38 billion in the prior year. GAAP net income rose to $84.97 billion, or $74.33 per diluted share, with non-GAAP net income at $86.76 billion, or $75.52 per diluted share.\\nCash generation remained exceptionally strong, with investments in capital expenditures, net of $10.77 billion in the quarter and adjusted free cash flow of $33.20 billion. The company ended the year with cash, marketable investments, and restricted cash of $73.48 billion, and declared a quarterly dividend of $0.15 per share.\\nOutlook: Management said it expects an even stronger fiscal 2027, so investors should watch whether AI-driven demand and operational execution can sustain the momentum behind the record results, alongside the forward-looking guidance discussed by the company.\"}",
+ "ticker": "MU",
+ "stub": false
+}

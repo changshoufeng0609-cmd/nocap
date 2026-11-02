@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e46eb00c8055370679a6eb87773716afc4b56661fb027f340d294cc1708af9a1",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:41:21Z",
+ "response_id": "resp_6ae868d16778dc9a52304338",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2365,
+  "output_tokens": 2616,
+  "cached_tokens": 372,
+  "reasoning_tokens": 2278
+ },
+ "cost_usd": 0.060366,
+ "latency_s": 19.14,
+ "output_text": "{\"draft\": \"Workday, Inc. (WDAY) — Q2 FY2027 Results\\nResults:\\n- Total revenues: $2.649 billion, up 12.8% year-over-year\\n- Subscription revenues: $2.471 billion, climbed 13.9% year-over-year\\n- Operating income: $313 million, or 11.8% of revenues\\n- Non-GAAP operating income: $824 million, or 31.1% of revenues\\n- Diluted net income per share: $2.57\\n- Tax benefit included in diluted net income per share: $1.52 per share\\n- Non-GAAP diluted net income per share: $2.75\\nBacklog and cash:\\n- 12-month subscription revenue backlog: $9.034 billion, rose 14.2%\\n- Total subscription revenue backlog: $27.403 billion, grew 8.0%\\n- Operating cash flows: $520 million\\n- Free cash flows: $460 million\\n- Cash, cash equivalents, and marketable securities: $3.403 billion\\nCapital returns:\\n- Share repurchases: approximately 9.8 million shares for $1.3 billion\\n- Additional share repurchase authorization: up to $4.0 billion\\nOutlook:\\n- Q3 fiscal 2027 subscription revenues guidance: $2.515 billion\\n- Full-year fiscal 2027 subscription revenues guidance: $9.940 billion to $9.950 billion\\n- Full-year fiscal 2027 non-GAAP operating margin guidance: 31.0%\"}",
+ "ticker": "WDAY",
+ "stub": false
+}

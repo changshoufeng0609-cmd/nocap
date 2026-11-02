@@ -109,7 +109,7 @@ Rules and scope:
 4. Time travel: the June-quarter roundup as of July 29, with two Microsoft figures "not public yet".
 5. A real Bank of America SEC slide: SAM 3.1 finds both charts, Spark reads the labels, 5/5 GAAP bars verify.
 6. Meta's whole 10-K in one Spark request (101,135 input tokens); code keeps only exact quotes.
-7. A "same verifier, four backends" card, a real recorded Private check (Glimmer on Modal, 1 ✓ / 1 ✗), a held-out results card and an end card.
+7. A "same verifier, four backends" card, a real recorded Private check (Glimmer on Modal, 1 ✓ / 1 ✗), a results card (since November 2 the comprehensive test: 306/360 planted errors caught, none ✓; the held-out test as a secondary line) and an end card.
 
 The real interface recorded locally at `4bd6f4c` and edited with zooms (no speed changes): cached extraction, disclosed recorded Fix/Slide/Ask/Private runs, judging-window health values shown, local Kokoro `am_fenrir` synthetic narration, original music and 26 English cues. It is not live latency evidence. Owner listening/editorial approval and deployment remain open. <!-- verify-at-release --> The 165-second v1 (deployed October 29–30) is history. See `docs/demo/README.md`.
 

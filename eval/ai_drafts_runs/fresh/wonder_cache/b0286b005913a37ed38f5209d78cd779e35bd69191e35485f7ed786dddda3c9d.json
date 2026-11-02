@@ -1,0 +1,21 @@
+{
+ "request_sha256": "b0286b005913a37ed38f5209d78cd779e35bd69191e35485f7ed786dddda3c9d",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:43Z",
+ "response_id": "resp_6ae86832d2cdda0e01dc49ab",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3324,
+  "output_tokens": 1607,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1283
+ },
+ "cost_usd": 0.044022,
+ "latency_s": 13.92,
+ "output_text": "{\"draft\": \"Baker Hughes Q3 2026: Strong Orders and Record IET Backlog\\nRecord Industrial & Energy Technology backlog and solid adjusted profitability defined a quarter led by order momentum.\\n\\nRevenue reached $8,025 million, climbing 19% sequentially and 14% year-over-year, while GAAP diluted EPS was $0.41 and adjusted diluted EPS was $0.70. Attributable net income came to $411 million, while adjusted net income was $695 million. Adjusted EBITDA totaled $1,415 million, rising 15% sequentially.\\n\\nOrders were $10.8 billion, lifting remaining performance obligations to $46.4 billion, including record IET RPO of $39.4 billion. Oilfield Services & Equipment orders were $4,047 million, with revenue of $3,660 million and Segment EBITDA of $659 million. Industrial & Energy Technology orders hit $5,886 million, revenue was $3,477 million, and Segment EBITDA was $685 million. Chart contributed revenue of $888 million and Segment EBITDA of $156 million following its acquisition during the quarter.\\n\\nCash generation remained healthy, with cash flows from operating activities of $1,005 million and free cash flow of $769 million, supporting the balance of growth investment and capital discipline.\\n\\nOutlook: Broad-based demand across data centers, space, LNG and gas infrastructure, together with ongoing capacity expansions, supports raising the full-year IET order guidance and Horizon 2 IET order outlook to $50 billion plus.\"}",
+ "ticker": "BKR",
+ "stub": false
+}

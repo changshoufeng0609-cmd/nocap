@@ -1,0 +1,21 @@
+{
+ "request_sha256": "a448ee1211c7f47da77b17941cc44e590e802e3da7b15b2c1860ad8a93c6f497",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:24Z",
+ "response_id": "resp_6ae8658c74164ae2481949fd",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3023,
+  "output_tokens": 2223,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1825
+ },
+ "cost_usd": 0.055138,
+ "latency_s": 18.43,
+ "output_text": "{\"draft\": \"# Delta Air Lines Q3 2026 Earnings Summary\\n\\nDelta Air Lines reported a record September quarter, with adjusted operating revenue climbing to **$17.6 billion**, up **16%** from a year earlier, while adjusted earnings reached **$1.72** per share.\\n\\n**Revenue and Growth**\\n- GAAP operating revenue was **$20.2 billion**.\\n- Domestic unit revenue rose **16%** year-over-year, while International unit revenue climbed **12%**.\\n- Premium revenue grew **18%**, and cargo revenue surged **29%**.\\n\\n**Profitability**\\n- GAAP operating income was **$1.5 billion**, with an operating margin of **7.2%**.\\n- Adjusted operating income rose to **$1.7 billion**, with an adjusted operating margin of **9.4%**.\\n- GAAP earnings were **$1.15** per share, as non-fuel unit costs increased **7.3%** year-over-year.\\n\\n**Cash Flow and Capital Returns**\\n- Operating cash flow totaled **$1.7 billion**, while free cash flow in the quarter was **$463 million**.\\n- Adjusted net debt ended the quarter at **$13.4 billion**.\\n- Liquidity stood at **$6.9 billion** at quarter-end.\\n\\n**Outlook**\\n- December-quarter revenue is expected to grow approximately **20%** over last year.\\n- December-quarter earnings are expected to be **$1.15** to **$1.65** per share.\\n- Full-year free cash flow is expected to be approximately **$2.5 billion**.\\n\\n**Bottom Line**\\nThe company paired record quarterly revenue with solid adjusted profitability and cash generation, and guided to continued revenue momentum in the December quarter.\"}",
+ "ticker": "DAL",
+ "stub": false
+}

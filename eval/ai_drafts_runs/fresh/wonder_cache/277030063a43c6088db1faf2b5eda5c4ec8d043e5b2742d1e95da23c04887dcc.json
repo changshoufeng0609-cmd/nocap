@@ -1,0 +1,21 @@
+{
+ "request_sha256": "277030063a43c6088db1faf2b5eda5c4ec8d043e5b2742d1e95da23c04887dcc",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:09Z",
+ "response_id": "resp_6ae8684daaf61d59a41f4cae",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3881,
+  "output_tokens": 1424,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1056
+ },
+ "cost_usd": 0.04259,
+ "latency_s": 14.31,
+ "output_text": "{\"draft\": \"DoorDash reports record third-quarter results and Instacart deal\\n\\nDoorDash, Inc. reported record results for the quarter ended Sept. 30, 2026, as total orders climbed 28% to 993 million. Marketplace gross order value surged 36% to $33.9 billion, while revenue jumped 34% to $4.6 billion.\\n\\nGAAP net income attributable to common stockholders rose 91% to $466 million. Adjusted EBITDA climbed 41% to $1,060 million, equal to 3.1% of Marketplace GOV.\\n\\nExcluding Deliveroo, the company said total orders grew 17%, with Marketplace GOV up 23% and revenue also advancing 23%. It said growth in its U.S. restaurant category was driven by mature cohorts and new consumers, while U.S. grocery and retail Marketplace GOV grew at more than double the pace of the restaurant category.\\n\\nDoorDash said restaurant reservations in existing U.S. geographies expanded over 340% from the prior quarter, with more than 10% coming from consumers who were new to the platform in the quarter. International marketplaces also posted accelerated growth in Marketplace GOV, supported by faster order growth at each of its international brands.\\n\\nThe company generated $994 million in net cash from operating activities and $787 million in free cash flow during the quarter.\\n\\nDoorDash also announced a definitive agreement to acquire Instacart for $65.00 per share, representing an equity value of approximately $17 billion. The transaction is expected to close at the end of 2027 or in the first half of 2028, subject to Instacart stockholder approval, regulatory approvals and other customary closing conditions.\"}",
+ "ticker": "DASH",
+ "stub": false
+}

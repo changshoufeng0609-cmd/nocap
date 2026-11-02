@@ -1,0 +1,21 @@
+{
+ "request_sha256": "f91b3d3550d65fe723e3cbacc20acdf646782e216c7b96c280907e2379d25d97",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:49Z",
+ "response_id": "resp_6ae86875fbc08c8e9e584f6a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2040,
+  "output_tokens": 1348,
+  "cached_tokens": 372,
+  "reasoning_tokens": 948
+ },
+ "cost_usd": 0.033706,
+ "latency_s": 13.31,
+ "output_text": "{\"draft\": \"J.B. Hunt posts higher third-quarter profit as revenue climbs 20%\\nJ.B. Hunt Transport Services, Inc. reported third-quarter 2026 U.S. GAAP net earnings of $172.4 million, or diluted earnings per share of $1.82, compared with $170.8 million, or $1.76 per diluted share, in the third quarter of 2025. Total operating revenue rose to $3.68 billion from $3.05 billion a year earlier, an increase of 20%.\\nRevenue excluding fuel surcharge revenue grew 13% from the year-earlier quarter. Operating income edged up 2% to $247.1 million from $242.7 million in the third quarter of 2025, while the effective income tax rate was 25.5%, versus 24.0% a year earlier.\\nIn Intermodal, volume climbed 8% over the same period in 2025 and segment gross revenue jumped 20%. Revenue per load excluding fuel surcharge revenue rose 2% year over year, and segment operating income advanced 18%.\\nDedicated Contract Services revenue increased 11%, helped by improved productivity. Integrated Capacity Solutions revenue surged 57% from the third quarter of 2025, and the segment swung to operating income of $9.6 million from an operating loss a year earlier.\\nFinal Mile Services revenue slipped 3% from the same period in 2025. Truckload gross revenue climbed 37%, although segment operating income fell to $7.0 million.\\nAt September 30, 2026, J.B. Hunt had approximately $1.12 billion outstanding on various debt instruments, compared with $1.60 billion at September 30, 2025. During the third quarter, the company purchased approximately 704,000 shares of common stock for approximately $174 million.\"}",
+ "ticker": "JBHT",
+ "stub": false
+}

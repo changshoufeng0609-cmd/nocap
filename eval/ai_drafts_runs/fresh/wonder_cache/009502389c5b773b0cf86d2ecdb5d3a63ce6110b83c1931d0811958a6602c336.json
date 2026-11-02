@@ -1,0 +1,21 @@
+{
+ "request_sha256": "009502389c5b773b0cf86d2ecdb5d3a63ce6110b83c1931d0811958a6602c336",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:44Z",
+ "response_id": "resp_6ae86870a14a3b444d9c496c",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3867,
+  "output_tokens": 1545,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1206
+ },
+ "cost_usd": 0.046368,
+ "latency_s": 13.04,
+ "output_text": "{\"draft\": \"Jacobs Solutions lifts full-year outlook as adjusted profit climbs\\n\\nJacobs Solutions reported fiscal third-quarter gross revenue of $4.1 billion, up 34.5% from a year earlier, while adjusted net revenue rose to $2.4 billion, an increase of 8.3%.\\n\\nGAAP net earnings at the company slipped to $137.4 million from $181.2 million in the year-earlier quarter, with the result reflecting a temporarily higher tax rate associated with the PA acquisition transaction. GAAP earnings per share declined to $1.16 from $1.56, while adjusted earnings per share climbed 13.6% to $1.84 and adjusted EBITDA grew 16.7% to $366.8 million.\\n\\nBacklog reached $28.9 billion, up 27.3% year over year. Jacobs posted a quarterly book-to-bill ratio of 1.5x, while its adjusted net revenue book-to-bill ratio was 1.1x.\\n\\nThe company generated $456 million in cash from operations during the quarter. It repurchased $142 million of its shares in the quarter, bringing year-to-date repurchases to $614 million.\\n\\nJacobs raised its fiscal 2026 guidance, forecasting adjusted net revenue growth of 9.5% to 10.0% and an adjusted EBITDA margin of 14.7% to 14.8%. The company now expects adjusted earnings per share of $7.20 to $7.30 and an adjusted free cash flow margin of approximately 8%.\"}",
+ "ticker": "J",
+ "stub": false
+}

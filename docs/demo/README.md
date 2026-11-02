@@ -7,7 +7,7 @@ NoCap interface plus one short take of the Private tab recorded on October 31; n
 It opens on the stakes, shows one disclosure card, then walks through Check, a receipt close-up, Fix with
 receipts, time travel, a real SEC slide (SAM 3.1 regions, 32 readings, five verified GAAP bars), exact quotes
 from Meta's complete 10-K in one Muse Spark request, a "same verifier, four backends" card, a recorded Private
-check on Muse Glimmer, a held-out results card and an end card. The [timed script](video-script.md) lists every
+check on Muse Glimmer, a results card and an end card. The [timed script](video-script.md) lists every
 scene, line and on-screen number with its source; the [recording notes](walkthrough-script.md) explain how the
 footage was captured. Commit hashes in this kit refer to the private development history, which is not in the
 public repository; only the public source `9db6cfc` under [Public player](#public-player) resolves there.
@@ -18,8 +18,8 @@ Changes from v2, following the October 30 review:
 - On the real SEC slide, an edit-layer highlight outlines the two regions SAM 3.1 found, and the narration
   accounts for all 32 readings: 5 GAAP bars verified; 27 non-GAAP, untracked or ambiguous readings left unverifiable.
 - One backends card replaces the benchmark page and the static Private card.
-- The results card shows only held-out results; the closed-book Q&A moved to the backends card, labeled a
-  development benchmark.
+- The results card showed only held-out results (until the November 2 update below); the closed-book Q&A moved to
+  the backends card, labeled a development benchmark.
 - A new Private-check shot: the product replays a recorded live run of Muse Glimmer on our own Modal GPU
   (one figure verified, one planted error caught). It was recorded on October 31 at commit `d6f7ebc`.
 - The disclosure card adds that the green "Live checks are open" notice shows the judging-window setting.
@@ -42,6 +42,24 @@ edited. Durations, captions and audio are identical (the same AAC packets). Deco
 export up to the last keyframe before the card (159.44 s; X cut 43.36 s); from there to the card (0.84 s; X cut
 1.72 s), x264 re-encoded the same pixels at PSNR ≥ 63.7 dB (X cut ≥ 57.9 dB). Rendered with the October 31 card,
 the pipeline reproduces both October 31 MP4s byte for byte. The GIF is unchanged.
+
+**Results-card update, November 2 (owner-approved, walkthrough only).** The results card (2:30.23–2:40.65) and its
+line now lead with the comprehensive test of the November 2 round-8 release: 1,000 frozen test items from 400 S&P 500
+companies, 306/360 planted errors caught and none marked ✓, a ✓ right 736 of 738 times, and 17 of 1,298 true figures
+flagged ✗. The October 29 held-out results (44/48, 1/47, 20/20) stay as one secondary line, under a caveat line (one
+frozen run, machine-made labels, details in the [methods](../../eval/spot500_methods.md)). The new line, "Across 1,000
+test items, NoCap caught 306 of 360 planted errors and never marked one verified.", was synthesized locally with the
+same voice. It runs 8.24 s, against 8.52 s for the old line, and the slot keeps its length. The runtime (171.88 s), the
+26 cues and every shot and cue start are therefore unchanged; caption 25 changed its text and now ends at 2:39.57.
+- **Audio:** the render reused the November 1 loudness measurements and its narration outside 2:30.28–2:40.03. The
+  AAC packets are identical up to 2:30.72. Before encoding, the mix differs only from 2:30.73 to 2:42.63: the new
+  line, then the music duck settling (at most −49 dBFS after the card). From 2:30.72 the encoder chose different
+  packets for the unchanged end-card audio (decoded, they differ about 35 dB below the signal); the last 0.9 s of
+  packets are identical again.
+- **Video:** decoded frames are identical (same packets) up to 2:29.40 and from 2:41.44. x264 re-encoded the same
+  pixels just before the card (2:29.44–2:30.20, PSNR ≥ 57.9 dB) and at the start of the end card (2:40.68–2:41.40,
+  PSNR ≥ 52.8 dB).
+- **Not re-exported:** the X cut and the GIF contain no results card.
 
 ## How it was made
 
@@ -71,7 +89,8 @@ the pipeline reproduces both October 31 MP4s byte for byte. The GIF is unchanged
   labels "Bar Chart · SAM", drawn from the page's logged boxes. The manifest lists every edit-layer element
   with its times under `edit_overlays`. Cards are separate full-frame text graphics. Captions sit in their own band.
 - **Narration:** Kokoro-82M v1.0, voice `am_fenrir` (American English, male), synthesized on the local CPU.
-  Not a person and not a clone. 20 of the 26 lines reuse v2's audio files; 6 were synthesized for v2.1.
+  Not a person and not a clone. 20 of the 26 lines reuse v2's audio files; 5 were synthesized for v2.1 on October 31
+  and 1, the results line, on November 2.
   [Voice choice and permissions](narration-license.md).
 - **Music:** an original ambient bed computed by [`music_bed.py`](music_bed.py) from sine wavetables and seeded
   noise (no samples, loops or downloads), ducked 7 dB under each line. [Music provenance](narration-license.md#music-bed-v21).
@@ -83,13 +102,13 @@ made **zero provider calls and $0 of new provider usage**.
 
 | Artifact | Verified properties |
 |---|---|
-| MP4 | 171.88 s (2:51.9); 1920 × 1080; H.264 High, yuv420p, 25 fps; AAC 48 kHz stereo; `+faststart`; 37,044,660 bytes; SHA-256 `9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897` |
-| Audio | Integrated −14.0 LUFS; true peak −1.5 dBTP; loudness range 3.4 LU. Music bed −25.3 LUFS, ending on its tonic; no stretch of 0.5 s or longer below −50 dB between the fade-in and the fade-out |
-| Captions | 26 English cues, burned in; SRT `ae95c448…`, VTT `cd4a5ccf…` |
+| MP4 | 171.88 s (2:51.9); 1920 × 1080; H.264 High, yuv420p, 25 fps; AAC 48 kHz stereo; `+faststart`; 37,102,660 bytes; SHA-256 `61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0` |
+| Audio | Integrated −14.0 LUFS; true peak −1.5 dBTP; loudness range 3.5 LU. Music bed −25.3 LUFS, ending on its tonic; no stretch of 0.5 s or longer below −50 dB between the fade-in and the fade-out |
+| Captions | 26 English cues, burned in; SRT `168d2610…`, VTT `a464bf20…` |
 | X cut | 56.28 s, same format, 9 cues at 44 px; 13,247,539 bytes; SHA-256 `3b03ca6cb3e7d37936f0710139d1a68f72039be32381b0e48b1725de5dffa714`; −14.0 LUFS, −1.7 dBTP; SRT `d7cf51e5…`, VTT `de468b03…` |
 | GIF | 20.000 s; 960 × 540; 10 fps; 4,766,072 bytes; source 16.56–36.56 s at original speed ([storyboard](gif-storyboard.md)) |
 | Masters | v2 capture (commit `4bd6f4c`): 2560 × 1280, 25 fps, 219.88 s, 1,689 distinct Chrome frames, SHA-256 `67b19ad7…`. Private take (commit `d6f7ebc`): 2560 × 1280, 25 fps, 19.52 s, 177 distinct Chrome frames, SHA-256 `32ea4cff…`. Both local, not committed |
-| Narration | Kokoro-82M v1.0 / `am_fenrir` through kokoro-onnx 0.6.1; 26 segments, 140.5 s of speech, 340 words |
+| Narration | Kokoro-82M v1.0 / `am_fenrir` through kokoro-onnx 0.6.1; 26 segments, 140.2 s of speech, 338 words |
 
 Hashes, per-segment speech and timing, card hashes, the edit timeline, edit overlays, the audio chain and the
 capture log are in the [manifest](assets/manifest.json); check results are in [validation.json](assets/validation.json).
@@ -108,41 +127,50 @@ the backends card, the Private shot (click and result), and the results and end 
 frame and its title and end cards. For the October 31 end-card update both validators ran again; every decoded
 frame and audio packet was compared with the first v2.1 export, and the agent inspected the new end cards and
 their fades in both cuts. The same checks ran for the November 1 coverage-line update, against the October 31 export.
+For the November 2 results-card update the walkthrough's validators ran again; every decoded frame, audio packet and
+pre-encode audio sample was compared with the November 1 export, and the agent inspected the new card, its fades,
+caption 25 and the end card. Local Whisper small and medium, run in a sandbox with no network access, heard the new
+line as written.
 
 The v2 capture's API process started at 16:00:14 (+0800), three minutes before commit `4bd6f4c` landed on
 the development branch. An in-process replay with `4bd6f4c` reproduced both captured Check responses byte for byte, so the
 footage matches the committed verifier.
 
 **Not claimed:** human listening (narration or music) or editorial approval. Deployed playback is covered only
-by the automated start, duration, caption and hash checks in the November 1 release record. A person should
-watch and listen to both MP4s before the submission.
+by the automated start, duration, caption and hash checks in the November 1 release record; the November 2 export
+has not been deployed yet. A person should watch and listen to both MP4s before the submission.
 
 ## Public player
 
 `web/public/demo/` holds byte-identical v2.1 copies of the MP4 and VTT. The page text in
 `web/app/demo/page.tsx` describes v2.1.
 
-Since November 1, Production deployment `dpl_2vPGGu27yA9Lx29ovmucC3BTwCvW` (public source `c99c9a0`) serves it. The anonymous production acceptance confirmed four things on desktop and on 390px mobile:
+The November 2 results-card export is in the repository only. Deployments from November 1 on served the November 1
+export (`9d5bb223…`). Its anonymous production acceptance, on November 1 with Production deployment
+`dpl_2vPGGu27yA9Lx29ovmucC3BTwCvW` (public source `c99c9a0`), confirmed four things on desktop and on 390px mobile:
 - v2.1 plays;
 - it runs 171.88 s;
 - it loads 26 English captions;
 - the browser-downloaded MP4 and VTT match their SHA-256 hashes.
 
-The [release record](../public-release-2026-11-01.json) has the details. <!-- verify-at-release -->
+The [release record](../public-release-2026-11-01.json) has the details. The next release must deploy the new MP4 and
+VTT and check their new hashes. <!-- verify-at-release -->
 
 ## Reproduce
 
 Setup, the sandbox profile and the exact commands are in the [recording checklist](recording-checklist.md).
 The recording harness fails rather than sending a model call when a recorded response is missing; a fresh
 clone includes the scripts and final media, while the raw master and capture logs stay in gitignored
-`data/eval_runs/demo-walkthrough-v2-20261030/`, the Private take in `data/eval_runs/demo-private-take-20261031/`
-and the v2.1 render folder (both cuts, November 1 end card) in `data/eval_runs/demo-walkthrough-v21-endcard-20261101/`.
+`data/eval_runs/demo-walkthrough-v2-20261030/`, the Private take in `data/eval_runs/demo-private-take-20261031/`,
+the v2.1 render folder (both cuts, November 1 end card) in `data/eval_runs/demo-walkthrough-v21-endcard-20261101/`
+and the November 2 walkthrough render (new results card and line) in `data/eval_runs/demo-walkthrough-v21-results-20261102/`.
 
 ## History
 
 | Export | Date | Length | Notes |
 |---|---|---|---|
-| **v2.1 walkthrough** (current) | Oct 31 | 171.88 s | Re-edit of the v2 capture plus a recorded Private-check take: planted-error wording, SAM highlight, backends card, Private replay, held-out-only results card, original music; 56.28 s X cut. End card of both cuts updated Oct 31 with the S&P 500 coverage line, which reads "all 500" since Nov 1 |
+| **v2.1 walkthrough** (current) | Oct 31 | 171.88 s | Re-edit of the v2 capture plus a recorded Private-check take: planted-error wording, SAM highlight, backends card, Private replay, results card, original music; 56.28 s X cut. End card of both cuts updated Oct 31 with the S&P 500 coverage line, which reads "all 500" since Nov 1. Since Nov 2 the walkthrough's results card and line show the comprehensive test |
+| v2.1 walkthrough, November 1 coverage line | Nov 1 | 171.88 s | The walkthrough with the held-out-only results card and the end-card line "Now covering all 500 S&P 500 companies"; 37,044,660 bytes, SHA-256 `9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897`, kept in the private git history at commit `78847a2`; [manifest](assets/historical/2026-11-01-walkthrough-v21-coverage-manifest.json), [validation](assets/historical/2026-11-01-walkthrough-v21-coverage-validation.json). Its X cut is still the current one |
 | v2.1 walkthrough, October 31 end card | Oct 31 | 171.88 s | The same cuts with the end-card line "Now covering 499 S&P 500 companies"; 37,036,160 bytes, SHA-256 `3dd8818760b8ce605757f48cfe3fbde1df5db72fd9a2af7c56dc903b59768cbd`; X cut 13,239,421 bytes, SHA-256 `e5e20d5d312701e11501b706da68694f0e57c2d21ae0d3d032cd94434aeed688`; both kept in the private git history at commit `5d6f7ed`; [manifest](assets/historical/2026-10-31-walkthrough-v21-endcard-manifest.json), [validation](assets/historical/2026-10-31-walkthrough-v21-endcard-validation.json) |
 | v2.1 walkthrough, first export | Oct 31 | 171.88 s | The same cuts before the end-card coverage line; 36,901,732 bytes, SHA-256 `364b7773da0751b605f0707f2f29017c9e6f989e7b9ce2861c41dffad00e5011`; X cut 13,121,872 bytes, SHA-256 `f001ecd0f910d1aa20c617bbe52650918f4d81da1c6ec9723045c66789a5ce0a`; both kept in the private git history at commit `121a6cb`; [manifest](assets/historical/2026-10-31-walkthrough-v21-manifest.json), [validation](assets/historical/2026-10-31-walkthrough-v21-validation.json) |
 | v2 walkthrough | Oct 30 | 168.68 s | Edited recording with zooms; benchmark page and a static Private card; no music; 27 cues; 35,000,399 bytes, SHA-256 `fec139b4bbc12cc0271f3654f0055d7f4eca90db0535b69e8bede79327c00231`, kept in the private git history at commit `1300f84`; [manifest](assets/historical/2026-10-30-walkthrough-v2-manifest.json), [validation](assets/historical/2026-10-30-walkthrough-v2-validation.json) |

@@ -558,7 +558,10 @@ def test_a_store_sales_segment_the_release_reports_keeps_its_own_receipt(snapsho
 
 # --- 6. Net income attributable to the company itself is plain net income -------------------------------------------
 
-@pytest.mark.parametrize("owner", ["Disney", "The Walt Disney Company", "DIS", "the Company", "Disney's"])
+# Its shareholders or stockholders, unqualified, are the same parent line (loss wording, Nov 2): only "common" names the
+# line after preferred dividends. These were "?"; GM's, Aon's and Nucor's true figures in both comprehensive sets read so.
+@pytest.mark.parametrize("owner", ["Disney", "The Walt Disney Company", "DIS", "the Company", "Disney's",
+                                   "Disney shareholders", "shareholders", "the Company's stockholders"])
 def test_net_income_attributable_to_the_company_is_its_net_income(snapshot, owner):
     words = f"net income attributable to {owner}"
     for span, metric_text in ((f"{words[0].upper()}{words[1:]} was $2.64 billion.", words), ("$2.64 billion", words),
@@ -579,17 +582,18 @@ def test_wrong_net_income_attributable_to_the_company_is_wrong_and_the_consolida
 
     v = check("2.50")
     assert (v.status, v.reason, v.expected_value) == ("wrong", "value_mismatch", pytest.approx(2.638))
-    # $2.84 billion is the consolidated figure: as for plain "net income", that is ambiguous, never wrong or right.
-    assert (check("2.84").status, check("2.84").reason) == (check("2.84", "net income").status,
-                                                             check("2.84", "net income").reason)
-    assert check("2.84").status == "unverifiable"
+    # $2.84 billion is the consolidated figure. Attributed to Disney it is never right; plain "net income" is that
+    # consolidated line since round 10a (it was "?" before, as the attributed figure still is).
+    assert (check("2.84").status, check("2.84").reason) == ("unverifiable", "ambiguous")
+    assert (check("2.84", "net income").status, check("2.84", "net income").reason) == ("verified", "match")
 
 
 @pytest.mark.parametrize("words,value,status", [
     ("net income attributable to noncontrolling interests", "0.21", "unverifiable"),
     ("net income attributable to common shareholders", "2.64", "unverifiable"),
     ("net income attributable to Comcast", "2.64", "unverifiable"),
-    ("net income attributable to Disney shareholders", "2.64", "unverifiable"),
+    ("net income attributable to Comcast shareholders", "2.64", "unverifiable"),
+    ("net income attributable to preferred shareholders", "2.64", "unverifiable"),
     ("net income including noncontrolling interests", "2.84", "verified"),
     ("consolidated net income", "2.84", "verified"),
 ])

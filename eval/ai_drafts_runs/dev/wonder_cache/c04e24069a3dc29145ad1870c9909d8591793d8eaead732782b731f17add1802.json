@@ -1,0 +1,21 @@
+{
+ "request_sha256": "c04e24069a3dc29145ad1870c9909d8591793d8eaead732782b731f17add1802",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:36Z",
+ "response_id": "resp_6ae865980cfda667fdb3472a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2131,
+  "output_tokens": 1327,
+  "cached_tokens": 372,
+  "reasoning_tokens": 921
+ },
+ "cost_usd": 0.03365,
+ "latency_s": 9.93,
+ "output_text": "{\"draft\": \"# Fortinet Q3 2026 Earnings Summary\\n\\nFortinet delivered a strong third quarter, with revenue climbing **20%** year over year to **$2.08 billion**.\\n\\n**Revenue and Growth**\\n- Product revenue jumped **37%** year over year to **$765 million**.\\n- Billings advanced **29%** year over year to **$2.34 billion**.\\n\\n**Profitability**\\n- GAAP operating margin came in at **34%**, while non-GAAP operating margin reached **38%**.\\n- GAAP earnings per share were **$0.86**, with non-GAAP earnings per share of **$0.91**.\\n\\n**Cash Flow and Capital Returns**\\n- Operating cash flow totaled **$946 million**, and free cash flow came to **$865 million**.\\n- The share repurchase authorization was increased by **$1.2 billion**, leaving a remaining authorization of **$2 billion**.\\n\\n**Outlook**\\n- For the fourth quarter of 2026, the company expects revenue in the range of **$2.155 billion** to **$2.245 billion** and billings in the range of **$2.775 billion** to **$2.925 billion**.\\n- Diluted non-GAAP net income per share for the fourth quarter is expected in the range of **$0.93** to **$0.95**.\\n- For fiscal year 2026, the company expects revenue in the range of **$8.125 billion** to **$8.215 billion** and billings in the range of **$9.568 billion** to **$9.718 billion**.\\n\\n**Bottom Line**\\nThe company paired sharp product and billings growth with solid margins and cash generation, and raised its 2026 revenue guidance.\"}",
+ "ticker": "FTNT",
+ "stub": false
+}

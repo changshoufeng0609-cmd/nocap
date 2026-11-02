@@ -1,0 +1,21 @@
+{
+ "request_sha256": "41aaa73b2ff187d4cbd6b9848c41a629f620e4867191799e076a6c597d3d5b1e",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:45Z",
+ "response_id": "resp_6ae868ada5b48bd95a754f79",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2913,
+  "output_tokens": 1935,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1406
+ },
+ "cost_usd": 0.050352,
+ "latency_s": 17.88,
+ "output_text": "{\"draft\": \"# The J.M. Smucker Company Q1 FY2027 Earnings Summary\\n\\nThe J.M. Smucker Company opened fiscal 2027 with net sales of **$2.2 billion**, up **5%** from the prior year, aided by higher coffee pricing and tariff refunds received during the quarter.\\n\\n**Revenue and Growth**\\n- Net sales rose by **$106.0 million**, with net price realization adding **4 percentage points** to growth, primarily driven by higher net pricing for coffee.\\n- Volume/mix contributed **1 percentage point**, helped by gains for Uncrustables® sandwiches and coffee, partly offset by declines for sweet baked goods and peanut butter.\\n\\n**Profitability**\\n- Net income per diluted share was **$3.03**, while adjusted earnings per share climbed **71%** to **$3.24**, including an **$0.84** benefit from tariff refunds.\\n- Gross profit jumped by **$504.9 million**, or **106%**, reflecting tariff refunds received during the quarter.\\n\\n**Segment Performance**\\n- One segment posted a **$90.6 million**, or **13%**, increase in net sales, while segment profit surged by **$165.8 million** on tariff refunds and higher net price realization, partly offset by higher marketing spend; volume/mix gains were led by the Dunkin’® and Café Bustelo® brands.\\n- Another segment saw net sales slip by **$16.7 million**, or **7%**, as weaker volume/mix for snack cakes and breakfast weighed on results.\\n\\n**Cash Flow and Capital Returns**\\n- Cash provided by operating activities reached **$425.7 million**, a sharp improvement from cash used in the prior year.\\n- Free cash flow was **$337.3 million**, also swinging higher versus the prior year on the stronger operating cash flow.\\n\\n**Outlook**\\n- For full-year fiscal 2027, the company now expects net sales to decrease **1.0%** to **2.0%** versus the prior year.\\n- Adjusted earnings per share is expected to range from **$10.50** to **$11.00**, with free cash flow of approximately **$1.1 billion**.\\n\\n**Bottom Line**\\nThe quarter combined pricing-led sales growth, a substantial tariff-refund benefit and much stronger cash generation, even as the updated full-year outlook points to softer sales ahead.\"}",
+ "ticker": "SJM",
+ "stub": false
+}

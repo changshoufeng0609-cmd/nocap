@@ -1,0 +1,21 @@
+{
+ "request_sha256": "064de473583c6e0fbb44623062af88009be61cb939b48fdb35d5171e101dfb99",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:49Z",
+ "response_id": "resp_6ae8687580d890fb5c604d8d",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2656,
+  "output_tokens": 1227,
+  "cached_tokens": 0,
+  "reasoning_tokens": 934
+ },
+ "cost_usd": 0.035164,
+ "latency_s": 10.98,
+ "output_text": "{\"draft\": \"Lilly revenue climbs on Mounjaro and Zepbound demand\\nLilly (Eli) said first-quarter revenue rose 45% to $12.73 billion, helped by a 53% increase in volume.\\nRevenue in the U.S. climbed 49% to $8.49 billion, while revenue outside the U.S. grew 38% to $4.24 billion.\\nWorldwide Mounjaro revenue jumped 113% to $3.84 billion, and U.S. Zepbound revenue reached $2.31 billion. Worldwide Verzenio revenue advanced 10% to $1.16 billion.\\nGross margin surged to $10.50 billion and was 82.5% of revenue. Research and development expenses rose to $2.73 billion, while marketing, selling and administrative expenses increased to $2.47 billion.\\nThe company recorded acquired in-process research and development charges of $1.57 billion. Net income was $2.76 billion, with earnings per share of $3.06 on a reported basis and $3.34 on a non-GAAP basis.\\nLilly reaffirmed its revenue guidance of between $58.0 billion and $61.0 billion, while guidance for earnings per share decreased to a range of $20.17 to $21.67 on a reported basis.\"}",
+ "ticker": "LLY",
+ "stub": false
+}

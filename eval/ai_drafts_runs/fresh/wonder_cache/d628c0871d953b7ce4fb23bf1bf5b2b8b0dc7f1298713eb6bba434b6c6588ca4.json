@@ -1,0 +1,21 @@
+{
+ "request_sha256": "d628c0871d953b7ce4fb23bf1bf5b2b8b0dc7f1298713eb6bba434b6c6588ca4",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:13Z",
+ "response_id": "resp_6ae8688dfc0bd75b6c4c42f2",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3229,
+  "output_tokens": 1542,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1049
+ },
+ "cost_usd": 0.042342,
+ "latency_s": 13.06,
+ "output_text": "{\"draft\": \"# Martin Marietta Materials Q2 2026 Earnings Summary\\n\\nMartin Marietta Materials delivered record second-quarter revenues, with growth supported by organic performance and acquisition contributions.\\n\\n**Revenue and Growth**\\n- Revenue climbed **21%**, while Adjusted EBITDA from continuing operations grew **13%**.\\n\\n**Profitability**\\n- Aggregates gross profit slipped **3%** to **$418 million**, inclusive of a **$52 million** non-cash charge associated with fair market value purchase accounting inventory step-up adjustments.\\n\\n**Segment Performance**\\n- Aggregates shipments jumped **17.0%** to a record **61.6 million tons**.\\n- Aggregates ASP declined **2.0%** to **$22.74 per ton**, while organic ASP rose **2.1%**, reflecting acquisition-related mix headwinds.\\n- Other Building Materials revenues increased **12%** to **$303 million**.\\n- Specialties delivered revenues of **$152 million** and gross profit of **$50 million**, both quarterly records.\\n\\n**Cash Flow and Capital Returns**\\n- Cash provided by operating activities for the six months ended June 30, 2026, was **$339 million**, compared with **$605 million** for the prior-year period.\\n- Cash paid for property, plant and equipment additions for the six months was **$314 million**.\\n- The company returned **$302 million** to shareholders through dividend payments and share repurchases during the six months.\\n- The company had **$112 million** of unrestricted cash and cash equivalents on hand as of June 30, 2026.\\n\\n**Outlook**\\n- The company raised full-year 2026 revenue guidance to a range of **$7.2 billion** to **$7.4 billion**.\\n- Full-year Adjusted EBITDA from continuing operations guidance was reaffirmed at **$2.36 billion** to **$2.5 billion**.\\n- An expanded enterprise review identified opportunities expected to generate approximately **$350 million** of annualized cash flow improvements.\\n\\n**Bottom Line**\\nThe company combined record revenue and shipment performance with raised full-year revenue guidance, reaffirmed Adjusted EBITDA guidance, and a focus on cash flow improvements and disciplined capital allocation.\"}",
+ "ticker": "MLM",
+ "stub": false
+}

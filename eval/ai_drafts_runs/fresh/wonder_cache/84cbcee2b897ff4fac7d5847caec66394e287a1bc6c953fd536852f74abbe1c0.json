@@ -1,0 +1,21 @@
+{
+ "request_sha256": "84cbcee2b897ff4fac7d5847caec66394e287a1bc6c953fd536852f74abbe1c0",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:57Z",
+ "response_id": "resp_6ae8684197ed630f771c469d",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3161,
+  "output_tokens": 1184,
+  "cached_tokens": 0,
+  "reasoning_tokens": 693
+ },
+ "cost_usd": 0.036324,
+ "latency_s": 10.19,
+ "output_text": "{\"draft\": \"CVS Health Second-Quarter Profit Rises as Revenue and Adjusted Operating Income Grow\\nCVS Health reported second-quarter GAAP diluted EPS of $2.31, up from $0.80 in the prior year, while adjusted EPS climbed to $2.58 from $1.81. Total revenues rose 7.3% compared with the prior year, with growth across all operating segments.\\nOperating income jumped 97.5%, while adjusted operating income surged 35.4%. The company said the operating income increase reflected higher adjusted operating income and the absence of $833 million in legacy litigation charges recorded in the prior year.\\nIn Health Care Benefits, total revenues grew 3.5%, driven by an increase in the Government business and partly offset by the exit of the individual exchange business in 2026. Adjusted operating income in the segment leaped 85.5%, helped by improved underlying performance in the Government business and the absence of a $471 million premium deficiency reserve recorded in the prior year. The medical benefit ratio slipped to 87.4% from 89.9%, and medical membership was 26.0 million as of June 30, 2026.\\nHealth Services total revenues climbed 11.5%, while adjusted operating income rose 10.0%. Pharmacy claims processed were consistent on a 30-day equivalent basis. In Pharmacy & Consumer Wellness, total revenues increased slightly and adjusted operating income grew 10.2%, while prescriptions filled rose 4.3% on a 30-day equivalent basis.\\nCVS raised its full-year 2026 GAAP diluted EPS, adjusted EPS and cash flow from operations guidance, citing increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments. The company said it was maintaining a cautious view for the remainder of the year amid continued elevated cost trends and the potential for macro headwinds. Prior years' health care costs payable estimates developed favorably by $1.2 billion during the six months ended June 30, 2026, and days claims payable were 41.7 days as of June 30, 2026.\\nAs of June 30, 2026, the company had approximately 9,000 retail pharmacy locations, more than 1,000 walk-in and primary care medical clinics and a pharmacy benefits manager with approximately 87 million plan members.\"}",
+ "ticker": "CVS",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "0f83511162d758c3e043e6ab567c58cecdb00c9b6810789757ddb67d1a03d90f",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:58Z",
+ "response_id": "resp_6ae865718e24183eb58f4a4b",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3438,
+  "output_tokens": 1551,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1229
+ },
+ "cost_usd": 0.044772,
+ "latency_s": 13.64,
+ "output_text": "{\"draft\": \"Cincinnati Financial third-quarter net income falls as investment gains drop\\n\\nCincinnati Financial Corporation reported third-quarter net income of $459 million, or $2.96 per share, compared with $1.122 billion, or $7.11 per share, a year earlier. Non-GAAP operating income was $443 million, or $2.86 per share, compared with $449 million, or $2.85 per share, in the same period last year.\\n\\nThe company said the $663 million decrease in net income included after-tax net decreases of $657 million from net investment gains and $41 million from property casualty underwriting profit, partially offset by an increase of $24 million from investment income.\\n\\nCincinnati's property casualty combined ratio was 90.9%, up from 88.2% a year earlier. Catastrophe losses grew by 7.0 points, while favorable prior accident year reserve development provided a 3.6 percentage-point benefit of $94 million.\\n\\nProperty casualty net written premiums grew 2%, as price increases, premium growth initiatives and a higher level of insured exposures supported growth. Property casualty new business written premiums slipped 12% to $315 million.\\n\\nPretax investment income climbed 10%, or $30 million, while the life insurance subsidiary posted net income of $31 million.\\n\\nBook value per share stood at $105.42 at quarter-end, up $3.07 since year-end, the company said.\"}",
+ "ticker": "CINF",
+ "stub": false
+}

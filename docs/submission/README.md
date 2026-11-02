@@ -13,7 +13,7 @@ Product and team name: **NoCap**. Sole contributor: **SHOU-FENG CHANG (`Robert_C
 ## Status at submission
 
 - **Public:** the [source repository](https://github.com/changshoufeng0609-cmd/nocap), the [product](https://receipts-nocap.vercel.app), the [demo player](https://receipts-nocap.vercel.app/demo) and the [benchmark explorer](https://receipts-nocap.vercel.app/benchmarks). <!-- verify-at-release -->
-- **Live requests** (Check, Fix, Slide, Ask) are open through 2026-11-17 16:00 UTC under a shared $5 daily cap. The three saved examples and the two recorded real-document samples replay at $0 at any time. <!-- verify-at-release -->
+- **Live requests** (Check, Fix, Slide, Ask) are open through 2026-11-17 16:00 UTC under a shared $5 daily cap. The four saved examples and the two recorded real-document samples replay at $0 at any time. <!-- verify-at-release -->
 - **Not live on the public site:** Private check, which needs the operator's own Modal GPU deployment. Its one recorded Modal Glimmer run on a synthetic NVIDIA draft replays at $0, labelled as recorded ([recorded sample](../private-mode.md#recorded-sample)). <!-- verify-at-release -->
 
 ## Owner steps before submitting

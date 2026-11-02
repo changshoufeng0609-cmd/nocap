@@ -142,7 +142,7 @@ def test_quarter_without_year_takes_the_context_year():
     assert resolve("end of the second quarter", context="NVIDIA Q2 FY2027") == NVDA_Q2_FY27
     assert resolve("first quarter", context="NVIDIA, second quarter ended July 26, 2026") == \
         ResolvedPeriod(2027, "Q1", date(2026, 4, 26))
-    assert resolve("second quarter") is None
+    assert resolve("second quarter", as_of="2026-11-02") == NVDA_Q2_FY27
 
 
 def test_full_year_without_year_takes_the_context_fiscal_year():

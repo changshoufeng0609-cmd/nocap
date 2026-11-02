@@ -323,7 +323,7 @@ def fix_events(text: str, *, store: EvidenceStore, as_of: Any = None, context: O
     del max_attempts
     stats = stats if stats is not None else RewriteStats()
     started = time.monotonic()
-    ctx = (extract.infer_context(text) if context is None else context) or ""
+    ctx = (verify.with_draft_company(extract.infer_context(text), text, store) if context is None else context) or ""
     ctx = ctx.strip()
     extraction = extract_client_factory or (lambda: extract.make_client(timeout=timeout_s))
     wonder = wonder_client_factory or (lambda: extract.make_client(timeout=timeout_s, backend=WONDER))

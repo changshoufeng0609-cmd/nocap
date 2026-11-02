@@ -1,0 +1,21 @@
+{
+ "request_sha256": "b4811c1147e7e1ad31e383175d90cbb51ec132e453a86827ad4aecb18dd9a3e8",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:47Z",
+ "response_id": "resp_6ae868aff781a38783b8409b",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2053,
+  "output_tokens": 1989,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1662
+ },
+ "cost_usd": 0.046578,
+ "latency_s": 15.0,
+ "output_text": "{\"draft\": \"Bio-Techne returns to GAAP profit in fourth quarter as sales edge higher\\n\\nBio-Techne Corporation reported fourth-quarter net sales rose 1% to $321.2 million, with organic revenue growth climbing 3% compared with the prior year.\\n\\nGAAP earnings were $0.35 per diluted share, swinging from $(0.11) a year earlier, while adjusted EPS slipped to $0.52 from $0.53. GAAP operating income reached $74.3 million, compared with an operating loss of $23.9 million last year, and GAAP operating margin widened to 23.1% from (7.5)%.\\n\\nAdjusted operating income grew to $103.4 million from $101.3 million in the same quarter last year. In Protein Sciences, net sales increased to $231.2 million, up 2% from $226.5 million, while the segment operating margin eased to 42.0%.\\n\\nDiagnostics and Spatial Biology net sales held steady at $90.1 million as organic revenue jumped 8%, and the segment operating margin improved to 11.2%.\\n\\nFor the full year, the company said net sales remained flat at $1.2 billion. GAAP EPS climbed to $1.16 per diluted share, while adjusted EPS edged up to $1.93.\\n\\nBio-Techne also noted its previously announced agreement to be acquired for $73 per share in cash, representing a total enterprise value of approximately $11.3 billion.\"}",
+ "ticker": "TECH",
+ "stub": false
+}

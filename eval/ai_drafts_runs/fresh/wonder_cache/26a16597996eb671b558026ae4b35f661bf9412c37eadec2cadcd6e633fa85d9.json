@@ -1,0 +1,21 @@
+{
+ "request_sha256": "26a16597996eb671b558026ae4b35f661bf9412c37eadec2cadcd6e633fa85d9",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:47Z",
+ "response_id": "resp_6ae8683669d11d7b3b2e433d",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2423,
+  "output_tokens": 1563,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1199
+ },
+ "cost_usd": 0.039538,
+ "latency_s": 12.68,
+ "output_text": "{\"draft\": \"Chubb Q3 2026: Underwriting and Investment Income Drive Core Earnings\\nCore profitability remained strong in the third quarter, supported by excellent P&C underwriting and record adjusted investment income despite modest premium growth.\\n\\nChubb reported net income of $2.84 billion, or $7.30 per share, alongside core operating income of $2.98 billion, or $7.66 per share. Consolidated net premiums written climbed to $15.1 billion, up 1.9%, as P&C premiums rose 1.9% and Life Insurance premiums grew 1.4%.\\n\\nP&C underwriting income reached $2.1 billion, producing a combined ratio of 84.1%, while the current accident year combined ratio excluding catastrophe losses stood at 82.6%. Adjusted net investment income surged to a record $1.9 billion. Overseas General expanded 6.7%, with Latin America jumping 11.7%, Asia advancing 7.5% and Europe climbing about 7%. North America personal lines rose 5.3%, although North America commercial slipped 2.7%.\\n\\nBook value per share ended the period at $191.43, with tangible book value per share at $126.96. Core operating return on equity was 14.9%, while annualized core operating return on tangible equity reached 21.6%.\\n\\nOutlook: The release gives no formal earnings or premium guidance, so attention turns to premium momentum, underwriting discipline, investment income and capital development. One expected item is the agreed sale involving USI Insurance Services, which is expected to result in a realized gain of $460 million on an investment of $740 million.\"}",
+ "ticker": "CB",
+ "stub": false
+}

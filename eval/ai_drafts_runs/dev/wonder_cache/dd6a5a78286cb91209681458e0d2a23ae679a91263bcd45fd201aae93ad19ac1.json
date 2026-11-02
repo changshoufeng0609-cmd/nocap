@@ -1,0 +1,21 @@
+{
+ "request_sha256": "dd6a5a78286cb91209681458e0d2a23ae679a91263bcd45fd201aae93ad19ac1",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:47Z",
+ "response_id": "resp_6ae865a3ae638e1e1dca40b3",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2870,
+  "output_tokens": 1832,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1526
+ },
+ "cost_usd": 0.046706,
+ "latency_s": 10.83,
+ "output_text": "{\"draft\": \"Intuitive Surgical Q3 2026\\nResults:\\n- Revenue: $3.05 billion, rose 22%\\n- GAAP net income attributable to Intuitive Surgical, Inc.: $523 million, or $1.49 per diluted share\\n- Non-GAAP net income attributable to Intuitive Surgical, Inc.: $1.05 billion, or $3.00 per diluted share\\n- GAAP net income included a pre-tax settlement charge: $450 million\\nSegments and operations:\\n- Da Vinci procedures: grew approximately 14%\\n- Ion procedures: climbed approximately 31%\\n- Da Vinci surgical system placements: 546 systems\\n- Ion endoluminal system placements: 56 systems\\n- Da Vinci surgical system installed base: 12,094 systems\\n- Instruments and accessories revenue: $1.80 billion, increased 18%\\n- Systems revenue: $769 million\\nCash and capital:\\n- Cash, cash equivalents, and investments: $6.80 billion\\n- Share repurchases: 7.8 million shares for $2.94 billion\\nOutlook:\\n- Full-year 2026 worldwide da Vinci procedure growth: approximately 14% to 15%\\n- Full-year 2026 non-GAAP gross profit margin: 68.7% to 69.3% of revenue\\n- Full-year 2026 non-GAAP operating expense growth: 11% to 13%\"}",
+ "ticker": "ISRG",
+ "stub": false
+}

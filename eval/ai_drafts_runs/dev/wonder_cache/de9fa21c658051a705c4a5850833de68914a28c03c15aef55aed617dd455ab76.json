@@ -1,0 +1,21 @@
+{
+ "request_sha256": "de9fa21c658051a705c4a5850833de68914a28c03c15aef55aed617dd455ab76",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:35Z",
+ "response_id": "resp_6ae865d3134cbd035f524a4f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2529,
+  "output_tokens": 1440,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1064
+ },
+ "cost_usd": 0.037502,
+ "latency_s": 10.07,
+ "output_text": "{\"draft\": \"Vertiv Q4 2025: Exceptional orders drive a strong finish\\nVertiv delivered a powerful fourth quarter, with demand for AI infrastructure lifting sales, profitability and backlog sharply.\\n\\nFourth-quarter net sales reached $2,880 million, climbing 23% from fourth quarter 2024, driven by organic sales growth of 19%. Momentum in orders accelerated markedly, as organic orders surged approximately 252% versus last year's fourth quarter and jumped 117% sequentially from third quarter 2025. The book-to-bill ratio was ~2.9x, while backlog expanded to $15.0 billion, up 109% from the same period last year.\\n\\nProfitability improved alongside the volume growth. Operating profit rose to $580 million, up 27%, and adjusted operating profit climbed to $668 million, up 33%. Adjusted operating margin widened to 23.2%, up 170 basis points from fourth quarter 2024, helped by operational leverage on higher volume, productivity and favorable price-cost, partially offset by tariff impact.\\n\\nCash generation was equally strong. Operating cash flow totaled $1,005 million in the quarter and adjusted free cash flow was $910 million. Liquidity remained strong at $2.6 billion, with net leverage of approximately 0.5x at the end of the fourth quarter, leaving the balance sheet well positioned after the quarter's strategic growth acquisitions.\\n\\nOutlook: For full year 2026, Vertiv expects net sales of $13,250 million to $13,750 million, with organic sales growth of 27% to 29% compared to 2025. It also expects adjusted diluted EPS of $5.97 to $6.07, pointing to continued momentum as the year begins.\"}",
+ "ticker": "VRT",
+ "stub": false
+}

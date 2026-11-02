@@ -1,0 +1,21 @@
+{
+ "request_sha256": "86ff71ca50e0f62b53bba165ae4829fdee3e21f88fbe6f4ea09e698b40ed061b",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:04Z",
+ "response_id": "resp_6ae8684896741c2e920a4181",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2137,
+  "output_tokens": 1259,
+  "cached_tokens": 372,
+  "reasoning_tokens": 960
+ },
+ "cost_usd": 0.032314,
+ "latency_s": 9.02,
+ "output_text": "{\"draft\": \"Dollar General Q2 FY2026 Recap\\nResults:\\n- Net sales: $11.3 billion, rose 5.2% from a year earlier\\n- Same-store sales: climbed 3.5%, with customer traffic up 2.0% and average transaction amount up 1.5%\\n- Gross profit as a percentage of net sales: 32.6%\\n- SG&A as a percentage of net sales: 25.8%\\n- Operating profit: $769.2 million, grew 29.2%\\n- Net income: $550.3 million, increased 33.8%\\n- Diluted EPS: $2.48, jumped 33.3%\\nOperations:\\n- Total merchandise inventories: $6.6 billion, slipped 2.7% on an average per-store basis\\n- New stores opened in the United States: 125\\n- Stores remodeled: 665 through Project Renovate and 711 through Project Elevate\\nCash and capital:\\n- Remaining share repurchase authorization: $1.4 billion\\n- Quarterly cash dividend declared: $0.59 per share\\nOutlook:\\n- Fiscal 2026 capital expenditures expected: $1.4 billion to $1.5 billion\\n- New stores planned in the United States: approximately 450\\n- Real estate projects planned: approximately 4,730\"}",
+ "ticker": "DG",
+ "stub": false
+}

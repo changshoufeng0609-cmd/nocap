@@ -1,0 +1,21 @@
+{
+ "request_sha256": "5698def5587fb3fdec83baf9780bb97d7135159200bc91ba1961a6d55fff9d06",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:09Z",
+ "response_id": "resp_6ae8657d5a36eafe480d46b8",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1789,
+  "output_tokens": 1261,
+  "cached_tokens": 372,
+  "reasoning_tokens": 905
+ },
+ "cost_usd": 0.030962,
+ "latency_s": 10.83,
+ "output_text": "{\"draft\": \"CoStar Group reports record third-quarter revenue as profitability surges\\n\\nCoStar Group said revenue for the quarter ended September 30, 2026 climbed to $952 million, up 14% from $834 million in the same quarter a year earlier. Net income reached $74 million, and earnings per diluted share were $0.18 for the third quarter of 2026.\\n\\nAdjusted net income rose to $153 million in the third quarter, up 59% year-over-year, while adjusted EPS advanced to $0.38, up 65% year-over-year. EBITDA came in at $179 million, and adjusted EBITDA grew to $229 million in the third quarter of 2026, doubling from the prior year period.\\n\\nCoStar recorded net new bookings of $37 million for the quarter. The company's websites attracted 121 million average monthly unique visitors in the third quarter of 2026.\\n\\nThe company raised its outlook for the full year of 2026, increasing revenue guidance to a range of $3.75 billion to $3.77 billion, representing revenue growth of approximately 16% year-over-year at the midpoint of the range. CoStar also lifted full-year 2026 adjusted EBITDA guidance to a range of $820 million to $840 million.\\n\\nFor the fourth quarter of 2026, CoStar expects revenue in the range of $976 million to $996 million, representing revenue growth of approximately 10% year-over-year at the midpoint of the range. The company expects fourth-quarter adjusted EBITDA in the range of $275 million to $295 million, representing a margin of 29% at the midpoint of the range.\"}",
+ "ticker": "CSGP",
+ "stub": false
+}

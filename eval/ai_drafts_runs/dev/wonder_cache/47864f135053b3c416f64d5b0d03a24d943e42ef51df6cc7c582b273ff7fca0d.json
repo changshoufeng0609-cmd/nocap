@@ -1,0 +1,21 @@
+{
+ "request_sha256": "47864f135053b3c416f64d5b0d03a24d943e42ef51df6cc7c582b273ff7fca0d",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:15Z",
+ "response_id": "resp_6ae8658176b239ab4f864342",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2198,
+  "output_tokens": 840,
+  "cached_tokens": 0,
+  "reasoning_tokens": 560
+ },
+ "cost_usd": 0.025592,
+ "latency_s": 7.93,
+ "output_text": "{\"draft\": \"Deere & Company — Q3 FY2026\\nResults:\\n- Net income: $1.379 billion in the third quarter\\n- Earnings per share: $5.10, versus $4.75 a year earlier\\n- Prior-year net income: $1.289 billion\\n- Worldwide net sales and revenues: $12.608 billion, up 5 percent\\n- Net sales: $10.999 billion, versus $10.357 billion a year earlier\\n- Nine-month net income: $3.808 billion, or $14.06 per share\\n- Nine-month prior-year net income: $3.962 billion, or $14.57 per share\\n- Nine-month worldwide net sales and revenues: $35.589 billion, up 7 percent\\n- Nine-month net sales: $30.779 billion, versus $28.338 billion last year\\nOther items:\\n- Tariff recoveries: $110 million in the third quarter\\n- Tariff recoveries: $382 million in the first nine months\\n- Tenna LLC acquisition: $439 million, net of cash acquired\\n- Other small-scale acquisitions: $16 million, net of cash acquired\\nOutlook:\\n- Fiscal 2026 net income forecast: $4.75 billion to $5.00 billion\"}",
+ "ticker": "DE",
+ "stub": false
+}

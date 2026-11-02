@@ -1,0 +1,21 @@
+{
+ "request_sha256": "2906a63d04de92c85f0c434533eb484e0a668b9fbc75b90ecb539a058ed90956",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:23Z",
+ "response_id": "resp_6ae86897aaa2421982d8446f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2040,
+  "output_tokens": 1175,
+  "cached_tokens": 372,
+  "reasoning_tokens": 927
+ },
+ "cost_usd": 0.030246,
+ "latency_s": 9.59,
+ "output_text": "{\"draft\": \"Revenue Grows in the Third Quarter as Earnings Ease\\n\\nRollins, Inc. reported third-quarter revenues of $1.1 billion, up 6.2% from a year earlier, with organic revenues rising 4.4%.\\n\\nOperating income slipped 1.0% to $223 million, while operating margin narrowed to 20.5%, down 140 basis points from the prior year. Adjusted operating income came in at $231 million, for an adjusted operating margin of 21.2%.\\n\\nNet income declined 3.4% to $158 million, while adjusted net income was $163 million. Adjusted EBITDA totaled $257 million, with an adjusted EBITDA margin of 23.5%.\\n\\nEarnings per diluted share fell 2.9% to $0.33, while adjusted earnings per diluted share were $0.34.\\n\\nOperating cash flow climbed 26.4% to $242 million, and free cash flow jumped 28.8% to $235 million.\\n\\nDuring the quarter, the company spent $120 million on share repurchases and paid dividends totaling $87 million.\"}",
+ "ticker": "ROL",
+ "stub": false
+}

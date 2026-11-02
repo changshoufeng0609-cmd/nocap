@@ -1,0 +1,21 @@
+{
+ "request_sha256": "49e0807c81956c1e8befe362375ad83ac20c779607d96bebddbec02b44adc1db",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:35Z",
+ "response_id": "resp_6ae8655bca7c9fe0236540f6",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2597,
+  "output_tokens": 1790,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1372
+ },
+ "cost_usd": 0.046188,
+ "latency_s": 16.64,
+ "output_text": "{\"draft\": \"# Akamai Technologies Q2 2026 Earnings Summary\\n\\nAkamai Technologies delivered higher quarterly revenue, as growth in security and cloud infrastructure services helped offset weakness in delivery and softer profitability.\\n\\n**Revenue and Growth**\\n- Revenue climbed to **$1.100 billion**, rising **5%** year-over-year.\\n\\n**Segment Performance**\\n- Security revenue grew to **$604 million**, advancing **10%** year-over-year.\\n- Delivery and other cloud applications revenue slipped to **$396 million**, declining **6%**.\\n- Cloud infrastructure services revenue surged to **$99 million**, jumping **39%**.\\n\\n**Profitability**\\n- GAAP income from operations fell to **$80 million**, while the GAAP operating margin was **7%**.\\n- Non-GAAP income from operations came in at **$271 million**, with a non-GAAP operating margin of **25%**.\\n- GAAP net income per diluted share was **$0.52**, compared with non-GAAP net income per diluted share of **$1.59**.\\n- Adjusted EBITDA totaled **$416 million**.\\n\\n**Cash Flow and Capital Returns**\\n- Cash from operations reached **$326 million**.\\n- Cash, cash equivalents and marketable securities stood at **$4.616 billion**.\\n- The company spent **$410 million** on share repurchases and had **144 million** shares of common stock outstanding.\\n\\n**Contracts and Outlook**\\n- The company has signed numerous customers to multi-year cloud infrastructure services contracts collectively worth over **$2.8 billion** year-to-date.\\n- That total includes a contract with a U.S.-based technology company worth more than **$600 million** over four years.\\n\\n**Bottom Line**\\nThe company posted modest overall revenue growth led by security and cloud infrastructure services, even as delivery revenue and profitability weakened during the quarter.\"}",
+ "ticker": "AKAM",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "f6448d6016481d17e60ae2e9b5c16d2447817f58379aa5e86e1ae83849e900b6",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:31Z",
+ "response_id": "resp_6ae868622f56ef108555404e",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1869,
+  "output_tokens": 1346,
+  "cached_tokens": 372,
+  "reasoning_tokens": 900
+ },
+ "cost_usd": 0.032982,
+ "latency_s": 12.08,
+ "output_text": "{\"draft\": \"Second-Quarter Profit Climbs on Higher Revenue and Airfreight Tonnage\\n\\nExpeditors International reported higher second-quarter results, with revenue and profit advancing as airfreight volumes strengthened. Revenues rose 32% to $3.5 billion, operating income climbed 41% to $350 million, and net earnings attributable to shareholders grew 45% to $266 million. Diluted net earnings attributable to shareholders per share jumped 51% to $2.03.\\n\\nAirfreight tonnage increased 14% from a year earlier, while ocean container volume remained flat. Tonnage also rose 16% compared with the first quarter of 2026, helped by trade lanes including Asia-U.S. and Asia-Europe. Volumes advanced 7% compared with the first quarter of 2026.\\n\\nThe companys results included a $25 million pretax restructuring charge related to its Global Technology team. Expeditors said the restructuring is expected to lower its cost structure by approximately $50 million annually, equating to nearly 10% of total corporate overhead expenses. The charge was partly offset by a $16 million gain on the sale of an underutilized property during the quarter.\\n\\nOperating efficiency improved to 32.2% in the second quarter, inclusive of the restructuring charge. The company said second-quarter headcount remained essentially flat versus the first quarter of 2026, with reductions tied to the restructuring mainly expected to be realized in the third quarter.\\n\\nExpeditors returned $461 million to shareholders through dividends and share repurchases during the second quarter, bringing the total for the first half of 2026 to $748 million. During the three months ended June 30, 2026, the company repurchased 2.3 million shares at an average price of $151.50.\\n\\nFor the six months ended June 30, 2026, Expeditors repurchased 4.3 million shares at an average price of $148.87. The company also plans an Investor Day in New York City in November 2026 for shareholders and analysts.\"}",
+ "ticker": "EXPD",
+ "stub": false
+}

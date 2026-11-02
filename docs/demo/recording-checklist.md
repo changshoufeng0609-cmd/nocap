@@ -1,6 +1,7 @@
 # Recording and evidence checklist
 
-The current export is the **v2.1 walkthrough** (October 31) and its X cut. Its scenes, timings and sources are in the
+The current export is the **v2.1 walkthrough** (October 31; end card updated October 31 and November 1, results
+card November 2) and its X cut. Its scenes, timings and sources are in the
 [video script](video-script.md); how the footage was captured and edited is in the
 [recording notes](walkthrough-script.md). No product code or provider response is modified to make the
 recording appear successful.
@@ -52,14 +53,26 @@ capture folders and refuses an `--out` inside the main one.
 ```bash
 .venv/bin/python docs/demo/capture_walkthrough_v2.py --output data/eval_runs/demo-walkthrough-v2-20261030/take2
 .venv/bin/python docs/demo/capture_walkthrough_v2.py --shot private --output data/eval_runs/demo-private-take-20261031
+# November 1: both cuts (the X cut is still this render)
 OUT=data/eval_runs/demo-walkthrough-v21-endcard-20261101
 .venv/bin/python docs/demo/render_walkthrough_v2.py --out $OUT --cut main --private-take data/eval_runs/demo-private-take-20261031
 .venv/bin/python docs/demo/validate_walkthrough_v2.py $OUT --cut main
 .venv/bin/python docs/demo/render_walkthrough_v2.py --out $OUT --cut x
 .venv/bin/python docs/demo/validate_walkthrough_v2.py $OUT --cut x
 .venv/bin/python docs/demo/export_walkthrough_v2.py --source $OUT
+# November 2: the walkthrough's results card and line; render/ starts with the November 1 render's v2.1 voice files
+OUT=data/eval_runs/demo-walkthrough-v21-results-20261102
+mkdir -p $OUT/render && cp data/eval_runs/demo-walkthrough-v21-endcard-20261101/render/voice-*.wav $OUT/render/
+.venv/bin/python docs/demo/render_walkthrough_v2.py --out $OUT --cut main --private-take data/eval_runs/demo-private-take-20261031 \
+  --keep-audio-from docs/demo/assets/manifest.json
+.venv/bin/python docs/demo/validate_walkthrough_v2.py $OUT --cut main
+.venv/bin/python docs/demo/export_walkthrough_v2.py --source $OUT
 .venv/bin/python docs/demo/validate_media_v2.py
 ```
+
+`--keep-audio-from` reuses the previous export's loudness measurements and keeps its narration outside the lines
+whose text changed (it needs the previous Kokoro file of each changed line), so the rest of the audio is unchanged.
+The export keeps the current X cut when the source folder has only the main cut.
 
 `capture_walkthrough_v2.py --quick` is a short selector rehearsal without video. `render_walkthrough_v2.py
 --plan-only` prints the edit plan, and `--cards-only` writes the text cards as PNG files for review. The main cut
@@ -80,6 +93,7 @@ Kokoro files for unchanged lines (`--voice-cache`, default `<capture>/render`) a
 | Real SEC slide | 32 readings: 5 verified, 0 wrong, 27 unverifiable; 2 SAM and 2 Spark regions; original run 21 s, $0.0302, 3 model calls | Recorded October 30 live run, replayed by the real API |
 | Whole-filing quotes | Meta 10-K, 516,028 characters, 101,135 input tokens, 4 exact quotes; original run 6.1 s, $0.13, 1 model call | Recorded October 30 live run, replayed by the real API |
 | Backends card (v2.1, a text card) | Spark Open 27/27 gold claims on Fireworks and Baseten; 200 closed-book answers, 0 wrong numbers passed, 0–34% accepted | [Open-weights record](../open-weights.md), [closed-book Q&A](../../eval/qa_results.md) |
+| Results card (November 2, a text card) | 1,000 frozen items from 400 S&P 500 companies: 306/360 planted errors caught, 0 marked ✓, 54 returned ?; a ✓ right 736 of 738 times; 17/1,298 true figures ✗, 736 verified, 533 ?; held-out line 44/48, 1/47, 20/20 | [README Results](../../README.md#results), [comprehensive test](../../eval/spot500_methods.md#results-of-the-one-live-run-november-2-2026-after-round-8), [held-out results](../../eval/heldout_results.md) |
 | Private check (v2.1 take) | "Recorded Private check · Muse Glimmer · 2 claims": $96.2 billion verified (10-Q $96.221 billion); GAAP diluted EPS $2.22 wrong (non-GAAP; GAAP $2.46); original run 26 s, 1 model call; $0 this replay | Live Modal Glimmer run of 2026-10-30 18:17 UTC in `data/snapshot/recordings/private/`, replayed by the real API; [Private mode](../private-mode.md) |
 
 All drafts and documents are repository examples or public SEC filings. No unpublished participant text,

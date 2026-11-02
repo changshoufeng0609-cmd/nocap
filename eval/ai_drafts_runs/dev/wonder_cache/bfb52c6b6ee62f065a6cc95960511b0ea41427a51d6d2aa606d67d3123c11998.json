@@ -1,0 +1,21 @@
+{
+ "request_sha256": "bfb52c6b6ee62f065a6cc95960511b0ea41427a51d6d2aa606d67d3123c11998",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:54Z",
+ "response_id": "resp_6ae8656ddb2c86f20d6a4227",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2957,
+  "output_tokens": 1336,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1027
+ },
+ "cost_usd": 0.038548,
+ "latency_s": 9.66,
+ "output_text": "{\"draft\": \"Biogen Q3 2026 recap\\nResults:\\n- Revenue: $2.8 billion, climbed 11% from a year earlier\\n- GAAP diluted EPS: $(0.14)\\n- Non-GAAP diluted EPS: $2.62\\n- Acquired IPR&D, upfront and milestone expense: $284 million in GAAP and Non-GAAP results\\n- Effective tax rates: (128.5)% GAAP and 20.0% Non-GAAP\\nPortfolio:\\n- Growth Portfolio revenue: $1.26 billion, surged 49% year-over-year\\n- Growth Portfolio share of Core Pharmaceutical revenue: 63%\\nCash and capital:\\n- Net cash flow from operations: approximately $641 million\\n- Capital expenditures: approximately $40 million; free cash flow: approximately $600 million\\n- Cash and cash equivalents: approximately $1.3 billion; total debt: approximately $7.7 billion; net debt: approximately $6.4 billion\\n- Weighted average diluted shares: approximately 148 million for GAAP diluted EPS and approximately 149 million for Non-GAAP diluted EPS\\nOutlook:\\n- Full year 2026 Non-GAAP diluted EPS guidance: $12.20 to $13.00\\n- Guidance raised at the lower end from $12.00\\n- Combined Non-GAAP R&D expense and Non-GAAP SG&A expense expected for full year 2026: approximately $4.95 billion\"}",
+ "ticker": "BIIB",
+ "stub": false
+}

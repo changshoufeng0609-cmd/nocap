@@ -1,0 +1,21 @@
+{
+ "request_sha256": "342d5763be65a2de6991df2e9348c9d63158a8700b2723df65138ffddf6a64ad",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:27Z",
+ "response_id": "resp_6ae8685e8569783cf5954ea8",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1444,
+  "output_tokens": 1840,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1483
+ },
+ "cost_usd": 0.042576,
+ "latency_s": 17.72,
+ "output_text": "{\"draft\": \"Expand Energy Third Quarter Results: Steady Production and Cash Generation\\nThe quarter combined solid adjusted profitability with strong operating cash flow and continued shareholder returns.\\n\\nExpand Energy reported net income of $519 million, or $2.24 per fully diluted share, while adjusted net income came to $338 million, or $1.46 per diluted share. Adjusted EBITDAX reached $1,229 million, and net cash provided by operating activities totaled $1,177 million, helped by operational performance and liquids revenue.\\n\\nProduction averaged 7.54 Bcfe/d, with natural gas representing 92% of the total. Output included 6.9 Bcf/d of natural gas, 17 MBbls/d of oil and 87 MBbls/d of natural gas liquids, while the company operated an average of 11 rigs during the quarter. The Twin Eagle acquisition was completed in September, adding to the operating footprint heading into year-end.\\n\\nThe balance sheet showed total debt of $4.6 billion at quarter-end and a leverage ratio of 0.8x. Expand Energy repurchased $305 million of common stock in the quarter, bringing year-to-date repurchases to approximately $900 million, or 4% of shares outstanding, and plans a quarterly base dividend of $0.575 per share.\\n\\nOutlook: For the full year, Expand Energy expects to run 11 – 12 rigs, with capital investment guidance updated to approximately $3 billion and average daily production expected at approximately 7.45 – 7.55 Bcfe/d. The company also expects $80 million of marketing EBITDA during the fourth quarter, reflecting the impact of the Twin Eagle acquisition.\"}",
+ "ticker": "EXE",
+ "stub": false
+}

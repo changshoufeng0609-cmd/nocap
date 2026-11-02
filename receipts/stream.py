@@ -307,11 +307,12 @@ def check_events(text: str, *, draft_hash: str, as_of: Optional[str], context: O
 
     stats.passages = len(_extract.split_passages(text))
     yield emit("meta", {"draft_hash": draft_hash, "cached": False, "passages": stats.passages, "as_of": as_of})
-    ctx = _extract.infer_context(text) if context is None else (context.strip() or None)
+    named = _verify.named_in_draft(text, store)  # from the whole draft up front, exactly as receipts.check does
+    ctx = (_verify.with_draft_company(_extract.infer_context(text), text, store, named) if context is None
+           else (context.strip() or None))
     admission_rejected = False
     retry_after: Optional[float] = None  # the longest wait Meta asked for on a failed passage
     extracted_claims: list[Claim] = []
-    named = _verify.named_in_draft(text, store)  # from the whole draft up front, exactly as receipts.check does
     try:
         results = _extract.iter_extract(text, ctx if ctx is not None else "",
                                         usage_callback=account, before_model_call=before_model_call, **extract_kwargs)

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "7848b49915ff8abee3add04262ad85fc8eb98c6d2209798ce042e229852e303e",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:23Z",
+ "response_id": "resp_6ae865c6fc212f6e52a34d43",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2932,
+  "output_tokens": 1658,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1348
+ },
+ "cost_usd": 0.043474,
+ "latency_s": 14.33,
+ "output_text": "{\"draft\": \"Rockwell Automation — Strong Organic Growth Lifts Earnings\\nA double-digit organic sales advance, expanding profitability and solid cash generation marked a strong third quarter.\\nRevenue climbed to $2,313 million, up 8% year over year, as organic sales grew 10%. Profitability improved alongside that growth, with Net income attributable to Rockwell Automation reaching $408 million, or $3.65 per share. Adjusted EPS came in at $3.49, up 22% year over year, while Enterprise operating margin expanded to 22.3%.\\nSegment performance was led by Intelligent Devices, where sales rose to $1.1 billion, an increase of 12%. Software & Control delivered the fastest growth, with sales of $751 million, up 19%, and segment operating margin reaching 34.8%. Lifecycle Services was softer, with sales slipping to $482 million, a decrease of (12)% year over year.\\nCash generation strengthened during the quarter, with cash provided by operating activities of $724 million and free cash flow of $654 million. Capital returns continued through share repurchases costing $145 million in the quarter.\\nOutlook: For fiscal 2026, the company updated its reported sales growth and organic sales growth ranges to 7.5% - 9.5%. It also updated diluted EPS guidance to $12.72 - $13.02 and Adjusted EPS guidance to $13.00 - $13.30.\"}",
+ "ticker": "ROK",
+ "stub": false
+}

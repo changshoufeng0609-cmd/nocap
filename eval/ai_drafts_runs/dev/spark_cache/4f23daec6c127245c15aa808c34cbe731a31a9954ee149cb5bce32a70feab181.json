@@ -1,0 +1,1 @@
+{"request_sha256": "4f23daec6c127245c15aa808c34cbe731a31a9954ee149cb5bce32a70feab181", "model": "muse-spark-1.3", "effort": "minimal", "created_utc": "2026-11-02T10:30:07+00:00", "response_id": "resp_6ae8662f6b6d0a06acff44fd", "usage": {"input_tokens": 2197, "output_tokens": 71, "cached_tokens": 2161, "reasoning_tokens": 57}, "output_text": "{\"claims\": []}", "latency_s": 1.07}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "f286e9924f6d55a989a1e34cb0357464acc4624dd5c2778ce6ad7d769349709c",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:59Z",
+ "response_id": "resp_6ae86573dfa1ead6568a4c43",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1730,
+  "output_tokens": 1800,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1474
+ },
+ "cost_usd": 0.041506,
+ "latency_s": 14.83,
+ "output_text": "{\"draft\": \"Casey's profit climbs in first quarter on fuel and inside strength\\n\\nCasey's General Stores, Inc. reported stronger first-quarter earnings, with diluted earnings per share of $7.37, up 27.7% from the same period a year ago. Net income rose to $273.7 million, up 27.1%, while EBITDA climbed to $485.1 million, up 17.1%.\\n\\nInside the stores, same-store sales grew 3.2% from a year earlier, and the company posted an inside margin of 42.2%. Total inside gross profit increased 6.3% to $749.8 million.\\n\\nFuel results also improved. The company reported a fuel margin of 47.8 cents per gallon, and total fuel gross profit jumped 19.6% to $446.9 million. Total fuel gallons sold rose 2.5% from the prior year.\\n\\nOperating expenses increased 8.0% during the quarter. At the end of the period, the company had approximately $1.4 billion in available liquidity, including approximately $524 million in cash and cash equivalents on hand.\\n\\nThe company repurchased approximately $45.6 million of shares during the quarter. Its board approved a quarterly dividend of $0.65 per share.\\n\\nFor fiscal 2027, the company said its previously disclosed outlook remains unchanged. It expects EBITDA to increase 8% to 10% and plans to open at least 120 stores during the year.\"}",
+ "ticker": "CASY",
+ "stub": false
+}

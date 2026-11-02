@@ -2,7 +2,7 @@
   "schema_version": 4,
   "product_brand": "NoCap",
   "version": "v2.1 walkthrough",
-  "source_render": "data/eval_runs/demo-walkthrough-v21-endcard-20261101",
+  "source_render": "data/eval_runs/demo-walkthrough-v21-results-20261102",
   "capture_take": "data/eval_runs/demo-walkthrough-v2-20261030/take2",
   "release_state": "Repository export prepared; not deployed, published or submitted",
   "published": false,
@@ -66,6 +66,33 @@
       }
     }
   ],
+  "results_card_update": {
+    "date": "2026-11-02",
+    "change": "The walkthrough's results card (\"results\") and its line (c25) now show the comprehensive test of the November 2 round-8 release: \"1,000 frozen test items from 400 S&P 500 companies\"; 306/360 planted errors caught (none marked \u2713; the other 54 came back ?); 736/738 times a \u2713 was right; 17/1,298 true figures flagged \u2717; the October 29 held-out results (44/48, 1/47, 20/20) as one secondary line; caveat: one frozen run of the November 2 release, machine-made labels, details in eval/spot500_methods.md. The new line, \"Across 1,000 test items, NoCap caught 306 of 360 planted errors and never marked one verified.\" (8.236 s), replaced \"On held-out tests, NoCap caught 44 of 48 planted errors, with one false alarm in 47 clean sentences.\" (8.524 s).",
+    "reason": "The comprehensive test of the November 2 round-8 release is the current headline accuracy result (README.md Results; eval/spot500_methods.md, \"Results of the one live run (November 2, 2026, after round 8)\"). The card had shown only the October 29 held-out test, which stays as one secondary line.",
+    "approval": "Owner-approved (November 2), for the walkthrough; the X cut has no results card and is not re-exported",
+    "narration": "c25 synthesized on 2026-11-02 with the same local Kokoro-82M files (SHA-256 unchanged), voice am_fenrir, speed 1.0; local Whisper small and medium both transcribed it as written. Over its span it measures -13.3 LUFS in the export (the old line -13.5; its neighbors -13.6 and -13.5).",
+    "unchanged": "Footage, every shot boundary, the other 25 lines and their times, the other four cards, the music bed and the runtime (171.88 s): the results slot keeps its October 31 length, so the end card and its line stay put. The audio was rendered with --keep-audio-from: the November 1 loudness measurements, and the November 1 narration outside 150.280-160.029 s. Before this change the pipeline reproduced the November 1 MP4 byte for byte here; after it, the old line still gives the same plan and the same AAC packets.",
+    "previous_video_sha256": {
+      "receipts-demo.mp4": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897"
+    },
+    "comparison_with_previous": {
+      "receipts-demo.mp4": {
+        "results_card_s": [
+          150.23,
+          160.654
+        ],
+        "changed_by_design": "frames 3756-4016 (150.24-160.64 s): the results card, its fades and caption 25",
+        "decoded_frames_identical": "0-3735 (0.00-149.40 s) and 4036-4296 (161.44-171.84 s), with the same H.264 packets",
+        "reencoded_same_pixels": "3736-3755 (149.44-150.20 s), the keyframe group before the card: PSNR >= 57.9 dB, under 0.21% of samples off by more than 2 levels; 4017-4035 (160.68-161.40 s) of the end card: PSNR >= 52.8 dB, under 1.5% of samples off by more than 2 levels",
+        "audio": "AAC packets identical up to 150.72 s (7,065 of 8,058) and for the last 42 (0.9 s). Before encoding, the mix is bit-identical outside 150.729-162.631 s: the new line, then the music duck settling after it (at most 0.0035, -49 dBFS, after the card). From 150.72 s the encoder chose different packets for the unchanged end-card audio (difference 35 dB below the signal); integrated -14.0 LUFS, true peak -1.5 dBTP",
+        "captions": "cue 25 only: new text and end 159.566 s instead of 159.854 s; 26 cues"
+      },
+      "plan": "shots identical; cue c25 lasts 8.236 s instead of 8.524 s",
+      "nocap-x.mp4": "not re-exported: the X cut has no results card",
+      "receipts-demo.gif": "unchanged: its 20 seconds (16.56-36.56 s) decode identically"
+    }
+  },
   "format": "v2.1 re-edit of the v2 capture plus one recorded Private take: recorded browser footage with camera moves and cuts, text cards, edit-layer labels and highlight, burned-in captions, local synthetic narration and an original music bed",
   "product_pixels": "Cropped and scaled from the recorded browser masters (the v2 capture, and the Private take for the \"private\" shot); edit-layer overlays are listed under edit_overlays; cards are separate full-frame text graphics",
   "duration_s": 171.88,
@@ -91,31 +118,31 @@
     ],
     "format": {
       "duration": "171.880000",
-      "size": "37044660"
+      "size": "37102660"
     }
   },
   "asset_sha256": {
-    "receipts-demo.mp4": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
+    "receipts-demo.mp4": "61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0",
     "receipts-demo.gif": "c61698a43e3d655f021bca96367a78397af5dba24f9798717e18dafabd9a45c6",
-    "receipts-demo.en.srt": "ae95c448fbc2e9fa0bcdc1fdc0db03b5e4de81f119bfd6e5606657e6438010e4",
-    "receipts-demo.en.vtt": "cd4a5ccf352e37d84dcccbc1d6e75508e81d55cb373d5a3f37778372b6814dca",
+    "receipts-demo.en.srt": "168d2610fb999ebd63b976efe24be9fa555e9ada04fa74831fc1c13f5c0095cc",
+    "receipts-demo.en.vtt": "a464bf206c195f787af919f1af65281fa9b0f70e6ce17166b45202a5a6e0e707",
     "nocap-x.mp4": "3b03ca6cb3e7d37936f0710139d1a68f72039be32381b0e48b1725de5dffa714",
     "nocap-x.en.srt": "d7cf51e51b6afddfa23ac7bb6197cb5c7fcf3742622deb499136a270fa6dc915",
     "nocap-x.en.vtt": "de468b033da22c370172a370ff80aa0099c44205522fb5e00edf52025a1bf51f"
   },
   "public_copies": {
-    "receipts-demo.mp4": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
-    "receipts-demo.en.vtt": "cd4a5ccf352e37d84dcccbc1d6e75508e81d55cb373d5a3f37778372b6814dca"
+    "receipts-demo.mp4": "61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0",
+    "receipts-demo.en.vtt": "a464bf206c195f787af919f1af65281fa9b0f70e6ce17166b45202a5a6e0e707"
   },
   "script_sha256": {
-    "narration_v2.py": "a5238932625a6e82702c0b6733b560f807d911101462ae0e2875309cca6abfed",
+    "narration_v2.py": "1dcce6ee51aba98f1ae27b66262080654a09d35d646cbaf64e205db0c23132e2",
     "music_bed.py": "ea93eadb9542a6ea0f4f6bbb1d05c1899a6f7a2ff8b6c24898f62ba21834d5f3",
     "screencast_recorder.py": "f5074834b577abd5cbc47571e00480c302cc2d22e130f00cc60a1ca281d5eeb8",
     "capture_walkthrough_v2.py": "2e13382461e8ffd9911fc47659946008ce09c4d01d966a4390f2154df469a20a",
-    "render_walkthrough_v2.py": "88f3566d4dd292a215ce587d61aad57abca74fe643f76ff400c44f6863b143db",
+    "render_walkthrough_v2.py": "d69db317b2c3761328bbdd08e6a1baeb392feb843b95e668fb19ef1c261a1f72",
     "render_demo.py": "a758ce2555ff4ccd02948569b81dec53909cd55843380af515318eb860cff2f6",
     "validate_walkthrough_v2.py": "197c2b8ef5e19d998972587e406d406b33ab732fb87fe02abec4622937255ab3",
-    "export_walkthrough_v2.py": "5230d4befe3b057bd59c063b336c95f8e6574e54e1f37480a28a035a989cc098",
+    "export_walkthrough_v2.py": "616a53ec220f3e8d3fe10b4217981571d87e60148d8a0a1046a1d3514a79bbda",
     "validate_media_v2.py": "b71a6626469de2facad714722ba4802eb96593d4479735fb5aa7f0ed74c71eae",
     "select_voice_v2.py": "f4853820d3c7e6c2ad019c92d9bb1ba186cf6882fe93fa1115c629905cb27d0c",
     "whisper_transcribe.py": "48eb8df6bbc40661be17910dd7e2ec4d2a9fff95f7683a8491b8e932a94116a8"
@@ -385,11 +412,11 @@
     {
       "cue": "c25",
       "start_s": 150.73,
-      "seconds": 8.524,
-      "caption": "On held-out tests, NoCap caught 44 of 48 planted errors, with one false alarm in 47 clean sentences.",
-      "spoken_text": "On held-out tests, No Cap caught forty-four of forty-eight planted errors, with one false alarm in forty-seven clean sentences.",
-      "audio_origin": "synthesized for v2.1",
-      "speech_sha256": "2fea7ef6cb26c2891f635820c3b1117073d81aa0214db939dc7a28b73b9ba53c"
+      "seconds": 8.236,
+      "caption": "Across 1,000 test items, NoCap caught 306 of 360 planted errors and never marked one verified.",
+      "spoken_text": "Across one thousand test items, No Cap caught three hundred six of three hundred sixty planted errors, and never marked one verified.",
+      "audio_origin": "synthesized on 2026-11-02 for the comprehensive-test results line",
+      "speech_sha256": "0f53ae0ac353225da074874005a8e9766d0f82788ed2237fa565aba76de8a986"
     },
     {
       "cue": "c26",
@@ -420,18 +447,18 @@
       "loudnorm_output": {
         "input_i": "-22.44",
         "input_tp": "-0.31",
-        "input_lra": "5.00",
+        "input_lra": "4.80",
         "input_thresh": "-32.79",
-        "output_i": "-16.95",
+        "output_i": "-16.94",
         "output_tp": "-1.50",
-        "output_lra": "3.80",
+        "output_lra": "3.90",
         "output_thresh": "-27.13",
         "normalization_type": "dynamic",
-        "target_offset": "2.95"
+        "target_offset": "2.94"
       },
       "measured_after_normalization": {
         "integrated_lufs": -13.9,
-        "loudness_range_lu": 3.9,
+        "loudness_range_lu": 4.1,
         "true_peak_dbtp": -1.5
       }
     },
@@ -474,9 +501,10 @@
       },
       "target_lufs_in_mix": -26.0,
       "gain_db": -1.8,
+      "raw_level_lufs": -24.2,
       "measured_in_mix": {
         "integrated_lufs": -26.0,
-        "loudness_range_lu": 3.3,
+        "loudness_range_lu": 3.4,
         "true_peak_dbtp": -11.3
       },
       "undocked_level_lufs": -19.6,
@@ -488,7 +516,7 @@
       "limiter": {
         "ceiling_dbfs": -2.5,
         "sample_peak_before_dbfs": -0.33,
-        "seconds_of_samples_over_ceiling_before": 0.8031
+        "seconds_of_samples_over_ceiling_before": 0.7867
       },
       "loudnorm_first_pass": {
         "input_i": "-14.64",
@@ -505,16 +533,59 @@
       "loudnorm_output": {
         "input_i": "-14.59",
         "input_tp": "-2.50",
-        "input_lra": "3.40",
-        "input_thresh": "-24.89",
+        "input_lra": "3.60",
+        "input_thresh": "-24.88",
         "output_i": "-13.94",
         "output_tp": "-1.86",
-        "output_lra": "3.30",
-        "output_thresh": "-24.25",
+        "output_lra": "3.50",
+        "output_thresh": "-24.24",
         "normalization_type": "linear",
         "target_offset": "-0.06"
       },
       "gain_applied_db": 0.7
+    },
+    "measurements_reused": {
+      "from_video_sha256": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
+      "what": "the narration and final-mix loudnorm measuring passes and the music-bed level of the previous export, so unchanged material gets exactly the gains it had",
+      "narration_splice": {
+        "replaced_cues": [
+          "c25"
+        ],
+        "new_narration_from_s": 150.28,
+        "new_narration_to_s": 160.029,
+        "outside": "the previous export's narration, normalized with the same parameters",
+        "unspliced_tracks_differ_from_to_s": [
+          148.81,
+          169.477
+        ]
+      },
+      "fresh_measurement_now": {
+        "narration_loudnorm_first_pass": {
+          "input_i": "-22.44",
+          "input_tp": "-0.31",
+          "input_lra": "4.80",
+          "input_thresh": "-32.79",
+          "output_i": "-17.06",
+          "output_tp": "-1.50",
+          "output_lra": "3.90",
+          "output_thresh": "-27.31",
+          "normalization_type": "dynamic",
+          "target_offset": "3.06"
+        },
+        "music_bed_raw_level_lufs": -24.2,
+        "mix_loudnorm_first_pass": {
+          "input_i": "-14.64",
+          "input_tp": "-2.20",
+          "input_lra": "3.70",
+          "input_thresh": "-24.98",
+          "output_i": "-14.01",
+          "output_tp": "-1.56",
+          "output_lra": "3.60",
+          "output_thresh": "-24.30",
+          "normalization_type": "dynamic",
+          "target_offset": "0.01"
+        }
+      }
     }
   },
   "captions": [
@@ -665,8 +736,8 @@
     {
       "cue": "c25",
       "start": 150.68,
-      "end": 159.854,
-      "caption": "On held-out tests, NoCap caught 44 of 48 planted errors, with one false alarm in 47 clean sentences."
+      "end": 159.566,
+      "caption": "Across 1,000 test items, NoCap caught 306 of 360 planted errors and never marked one verified."
     },
     {
       "cue": "c26",
@@ -1573,7 +1644,7 @@
     "stakes": "4ec5ecbb1c31556521718e52416fda119590a227b1ef46a08a52caa03573c53e",
     "title": "d763e6bb334dd91443667179a7a3002862ccff8b5e138aeba222456dc602dfaf",
     "backends": "736cacc63fc772d9d7c3a973a746594f242391193d1368f44e78d59550749d7d",
-    "results": "7540fdb5f6e06fd559d1652d37b37e104600512a0809b6dc7a11b8f7ab3ef35e",
+    "results": "f8fb415af181065a33693620c1aa247b5be2612356b1e38ee1fcf0cce63e569a",
     "end": "8c813a13671fcac854f12174fbc39145dd148ec3d7c900fa807ae4bce6abadad"
   },
   "master_sha256": "67b19ad74c6ac11c4b7b0f95a28aee459ca69de075c2048b1a61e13c9b877836",
@@ -1582,8 +1653,8 @@
     "version": "v2.1",
     "cut": "main",
     "video": "nocap-walkthrough-v2.1.mp4",
-    "video_sha256": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
-    "video_bytes": 37044660,
+    "video_sha256": "61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0",
+    "video_bytes": 37102660,
     "duration_s": 171.88,
     "resolution": [
       1920,
@@ -1595,7 +1666,7 @@
     "full_decode": "passed",
     "loudness": {
       "integrated_lufs": -14.0,
-      "loudness_range_lu": 3.4,
+      "loudness_range_lu": 3.5,
       "true_peak_dbfs": -1.5
     },
     "music": {
@@ -1610,12 +1681,12 @@
       "runs_between_fade_in_and_fade_out": 0
     },
     "caption_count": 26,
-    "caption_words": 340,
-    "speech_s": 140.5,
-    "words_per_minute_of_runtime": 118.7,
+    "caption_words": 338,
+    "speech_s": 140.21,
+    "words_per_minute_of_runtime": 118.0,
     "caption_timing": "SRT and VTT match the manifest; ordered, non-overlapping, within the runtime",
-    "srt_sha256": "ae95c448fbc2e9fa0bcdc1fdc0db03b5e4de81f119bfd6e5606657e6438010e4",
-    "vtt_sha256": "cd4a5ccf352e37d84dcccbc1d6e75508e81d55cb373d5a3f37778372b6814dca",
+    "srt_sha256": "168d2610fb999ebd63b976efe24be9fa555e9ada04fa74831fc1c13f5c0095cc",
+    "vtt_sha256": "a464bf206c195f787af919f1af65281fa9b0f70e6ce17166b45202a5a6e0e707",
     "master_sha256": "67b19ad74c6ac11c4b7b0f95a28aee459ca69de075c2048b1a61e13c9b877836",
     "private_take": true,
     "api_posts": {
@@ -2266,6 +2337,13 @@
       "video_sha256": "e5e20d5d312701e11501b706da68694f0e57c2d21ae0d3d032cd94434aeed688",
       "duration_s": 56.28,
       "commit": "5d6f7ed"
+    },
+    "v21_coverage_172s": {
+      "manifest": "historical/2026-11-01-walkthrough-v21-coverage-manifest.json",
+      "validation": "historical/2026-11-01-walkthrough-v21-coverage-validation.json",
+      "video_sha256": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
+      "duration_s": 171.88,
+      "commit": "78847a2"
     }
   },
   "new_provider_calls": 0,

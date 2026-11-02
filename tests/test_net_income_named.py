@@ -55,9 +55,13 @@ def test_named_line_mismatch_corrects_to_that_line_even_when_served_value_matche
 
 
 @pytest.mark.parametrize("description,value,make_fact,label", NAMES)
-def test_unqualified_alternative_keeps_both_receipts_without_verifying(description, value, make_fact, label):
+def test_unqualified_alternative_keeps_both_receipts(description, value, make_fact, label):
+    # Round 10a: the consolidated line is what plain "net income" names on the income statement, so it verifies (it was
+    # "?" before); net income available to common stockholders stays "?": preferred dividends make it another measure.
     v = verify(proposal("net income", value), store([own_income(), make_fact()]))
-    assert (v.status, v.reason, v.expected_value) == ("unverifiable", "ambiguous", None), v.explanation
+    consolidated = make_fact().metric == "net_income_including_nci"
+    assert (v.status, v.reason, v.expected_value) == (("verified", "match", None) if consolidated else
+                                                       ("unverifiable", "ambiguous", None)), v.explanation
     assert "$2.977 billion" in v.explanation and f"${value} billion" in v.explanation
     assert {f.metric for f in v.evidence} == {"net_income", make_fact().metric}
 
@@ -139,9 +143,13 @@ def test_another_numbers_line_name_does_not_change_this_number(other, span):
 
 @pytest.mark.parametrize("description,value,make_fact,label", [NAMES[0], NAMES[3]])
 def test_model_invented_line_name_cannot_qualify_unqualified_source_words(description, value, make_fact, label):
+    # The source says plain "net income", so the model's line name changes nothing: it reads as unqualified net income,
+    # which the consolidated line verifies since round 10a, and the available-to-common line leaves "?"
     c = proposal(description, value, span=f"Occidental's net income was ${value} billion.")
     v = verify(c, store([own_income(), make_fact()]))
-    assert (v.status, v.reason) == ("unverifiable", "ambiguous"), v.explanation
+    plain = verify(proposal("net income", value), store([own_income(), make_fact()]))
+    assert (v.status, v.reason) == (plain.status, plain.reason), v.explanation
+    assert v.status == ("verified" if make_fact().metric == "net_income_including_nci" else "unverifiable")
     assert v.expected_value is None
 
 
@@ -152,9 +160,12 @@ def test_model_invented_line_name_cannot_qualify_unqualified_source_words(descri
     "Net income was ${value} billion; {description} was also ${value} billion.",
 ])
 def test_unrecoverable_source_wording_cannot_borrow_model_line_name(description, value, make_fact, label, span):
+    # Read as unqualified net income whatever line the model names: ✓ on the consolidated line since round 10a, "?" on
+    # the available-to-common one
     c = proposal(description, value, span=span.format(value=value, description=description))
     v = verify(c, store([own_income(), make_fact()]))
-    assert v.status == "unverifiable", v.explanation
+    assert v.status == ("verified" if make_fact().metric == "net_income_including_nci" else "unverifiable"), \
+        v.explanation
     assert v.expected_value is None
 
 

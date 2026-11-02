@@ -1,0 +1,21 @@
+{
+ "request_sha256": "dcf278cc1a104aba84419518ebce9ac14563e899f55d07f983624fbe102ee640",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:41:08Z",
+ "response_id": "resp_6ae868c46811fbea3bac4fb0",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1405,
+  "output_tokens": 1889,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1410
+ },
+ "cost_usd": 0.041986,
+ "latency_s": 13.59,
+ "output_text": "{\"draft\": \"# Vulcan Materials Company Q3 2026 Earnings Summary\\n\\nVulcan Materials Company reported third-quarter results marked by stronger aggregates pricing, resilient non-aggregates margins, lower overhead costs, and continued shareholder returns.\\n\\n**Aggregates Performance**\\n- Segment gross profit came to **$593 million**, or **$9.46 per ton**, while cash gross profit reached **$750 million**, or **$11.95 per ton**.\\n- Shipments slipped **3%** from the prior year.\\n- Freight-adjusted selling prices climbed **5%** on a mix-adjusted basis, with the reported increase at **$0.82 per ton**.\\n- Freight-adjusted unit cash cost of sales rose **7%**, or **$0.72 per ton**, from the prior year.\\n\\n**Non-Aggregates Performance**\\n- Non-aggregates segment gross profit was **$72 million**, and cash gross profit was **$88 million**.\\n- Asphalt gross profit margin stayed strong at **17%**, despite lower shipments and higher liquid asphalt costs.\\n- Concrete gross profit margin expanded to **9%**.\\n\\n**Costs and Profitability**\\n- SAG expense fell to **$137 million**, down **6%** from the prior year.\\n- SAG expense represented **6.3%** of total revenues in the quarter.\\n\\n**Cash Flow and Capital Returns**\\n- Capital expenditures for maintenance and growth projects totaled **$174 million**.\\n- The company returned **$417 million** to shareholders, including **$350 million** of common stock repurchases and **$67 million** of dividends.\\n- The ratio of total debt to trailing-twelve months Adjusted EBITDA was **2.0 times**.\\n- Return on average invested capital on a trailing-twelve months basis was **15.9%**.\\n\\n**Outlook**\\n- The company expects to deliver approximately **$2.4 billion** in Adjusted EBITDA for the full year and targets another year of earnings growth in the following year.\\n\\n**Bottom Line**\\nThe quarter combined firmer pricing and disciplined costs with solid segment margins, shareholder returns, and a maintained full-year earnings outlook.\"}",
+ "ticker": "VMC",
+ "stub": false
+}

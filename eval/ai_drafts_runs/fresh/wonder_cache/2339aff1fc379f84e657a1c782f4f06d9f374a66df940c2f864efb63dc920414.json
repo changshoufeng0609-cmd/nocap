@@ -1,0 +1,21 @@
+{
+ "request_sha256": "2339aff1fc379f84e657a1c782f4f06d9f374a66df940c2f864efb63dc920414",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:03Z",
+ "response_id": "resp_6ae868839e3d5e5e225243bd",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2165,
+  "output_tokens": 1759,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1325
+ },
+ "cost_usd": 0.042426,
+ "latency_s": 13.62,
+ "output_text": "{\"draft\": \"# Moody's Corporation Q3 2026 Earnings Summary\\n\\nMoody's Corporation reported steady third-quarter results, with modest headline revenue growth, stronger underlying growth, and higher earnings per share.\\n\\n**Revenue and Growth**\\n- Revenue rose **1%** to **$2.0 billion**, and climbed **3%** on an organic constant currency basis.\\n- Annualized recurring revenue grew **8%** to **$3.7 billion**.\\n\\n**Profitability**\\n- Operating margin was **44.8%**, while adjusted operating margin was **52.6%**.\\n- Diluted EPS jumped **18%**, and adjusted diluted EPS grew **6%** from the prior-year period.\\n\\n**Segment Performance**\\n- MIS delivered **$1.1 billion** in revenue, slipping **1%** year-over-year against a record prior-year comparison, primarily reflecting lower Leveraged Finance issuance.\\n- Investment Grade revenue surged **18%** year-over-year, supported by strong large corporate financing activity.\\n- MA adjusted operating margin was **35.3%**, while MIS adjusted operating margin was **64.4%**.\\n\\n**Cash Flow and Capital Returns**\\n- Year-to-date operating cash flow climbed **21%** to **$2,471 million**, and free cash flow rose **22%** to **$2,200 million**.\\n- The company returned approximately **$3.1 billion** to shareholders year-to-date, including **$2.6 billion** of shares repurchased.\\n\\n**Outlook**\\n- The company reaffirmed guidance for full-year 2026, including a diluted EPS range of **$16.00 to $16.50** and an adjusted diluted EPS range of **$16.50 to $17.00**.\\n\\n**Bottom Line**\\nThe company delivered resilient profitability and cash generation in the quarter, supported by recurring revenue strength and disciplined shareholder returns, while maintaining its full-year earnings outlook.\"}",
+ "ticker": "MCO",
+ "stub": false
+}

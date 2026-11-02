@@ -1,0 +1,21 @@
+{
+ "request_sha256": "a6357ba5dbf9a523dba369a32b258036fa3bf1ea353b9e5362283ad8b0971ffc",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:29Z",
+ "response_id": "resp_6ae86824514bcc3cab354ead",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1859,
+  "output_tokens": 1910,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1481
+ },
+ "cost_usd": 0.045636,
+ "latency_s": 16.89,
+ "output_text": "{\"draft\": \"AEP Q3 2026: Earnings Beat Prior Year, Investment Plan Expanded\\nThird-quarter profitability climbed on both a GAAP and operating basis, while demand commitments underpinned a larger long-term capital programme.\\n\\nAmerican Electric Power reported third-quarter 2026 GAAP earnings of $1,187 million, or $2.18 per share, up from $972 million, or $1.82 per share, in third-quarter 2025. Operating earnings rose to $1,216 million, or $2.23 per share, compared with $963 million, or $1.80 per share, a year earlier, extending the strong year-to-date performance cited by the company.\\n\\nThe centrepiece alongside the results was an expanded $100 billion five-year capital plan through 2031, intended to strengthen reliability, modernise the grid and support growing customer demand. The plan is expected to lift rate base to $162 billion by 2031, supported by a 13% plus rate base compound annual growth rate. Within the programme, approximately $37 billion is planned for transmission assets and $36 billion for generation resources, the latter backed by long-term customer contracts.\\n\\nDemand visibility also increased during the quarter. With 15 gigawatts of new load commitments signed in the third quarter, incremental contracted load is expected to grow to 84 GW by 2031. Large load contracts in integrated states are now expected to generate up to $21 billion in fixed cost offsets for existing residential customers over the life of the contracts.\\n\\nOutlook: AEP expects full-year 2026 operating earnings to be at or above the high end of its guidance range of $6.25 to $6.55 per share. The company introduced operating earnings guidance of $6.75 to $7.05 per share for 2027 and $7.40 to $7.70 per share for 2028, and introduced an expected annual operating earnings per share growth rate of 9% to 11% from 2027 through 2031.\"}",
+ "ticker": "AEP",
+ "stub": false
+}

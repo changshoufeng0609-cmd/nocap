@@ -1,0 +1,21 @@
+{
+ "request_sha256": "d280c5a4d381ecd017a12b6ea74ecd533344ba546150d59203517fe9c6cf47f6",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:55Z",
+ "response_id": "resp_6ae868b73f9e929dbb2e47bc",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2904,
+  "output_tokens": 1287,
+  "cached_tokens": 372,
+  "reasoning_tokens": 798
+ },
+ "cost_usd": 0.035942,
+ "latency_s": 9.53,
+ "output_text": "{\"draft\": \"# UnitedHealth Group Q3 2025 Earnings Summary\\nUnitedHealth Group reported third-quarter 2025 results and raised its full-year 2025 earnings outlook, reflecting continued execution on its performance agenda and a refocus on its mission and culture.\\n\\n**Revenue and Growth**\\n- Consolidated revenues climbed to **$113.2 billion**, up **12%** year-over-year.\\n\\n**Profitability**\\n- GAAP earnings were **$2.59** per share, while adjusted earnings reached **$2.92** per share.\\n- Earnings from operations totaled **$4.3 billion**, with a net margin of **2.1%**.\\n- The medical care ratio came in at **89.9%**, in line with expectations outlined in the second quarter 2025.\\n- The operating cost ratio was **13.5%**, reflecting investments to support future growth.\\n\\n**Segment Performance**\\n- UnitedHealthcare revenues grew **16%** year-over-year to **$87.1 billion**, driven by growth in Medicare & Retirement and Community & State.\\n- UnitedHealthcare served **50.1 million** consumers domestically, up **795,000** year-over-year.\\n- Optum revenues rose **8%** year-over-year to **$69.2 billion**, driven by growth in Optum Rx.\\n- Medicare & Retirement revenues surged to **$43.4 billion**, up **24%** year-over-year, while Community & State revenues climbed **18%** to **$23.8 billion**.\\n\\n**Cash Flow and Balance Sheet**\\n- Cash flows from operations were **$5.9 billion**, or **2.3x** net income.\\n- The debt-to-capital ratio at September 30, 2025 was **44.1%**, unchanged from the second quarter 2025.\\n\\n**Outlook**\\n- The company raised its full-year 2025 outlook to net earnings of at least **$14.90** per share and adjusted net earnings of at least **$16.25** per share.\\n\\n**Bottom Line**\\nThe quarter showed solid revenue growth across the company's businesses and an increased full-year earnings outlook, even as elevated medical cost trends continued to pressure profitability.\"}",
+ "ticker": "UNH",
+ "stub": false
+}

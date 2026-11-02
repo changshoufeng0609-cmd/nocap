@@ -95,8 +95,8 @@ Same verifier, four backends: Spark Open found all 27 gold claims, and Glimmer r
 Private check runs on Glimmer: one real run on our own Modal GPU, one figure verified, one planted error caught.
 
 25
-00:02:30,680 --> 00:02:39,854
-On held-out tests, NoCap caught 44 of 48 planted errors, with one false alarm in 47 clean sentences.
+00:02:30,680 --> 00:02:39,566
+Across 1,000 test items, NoCap caught 306 of 360 planted errors and never marked one verified.
 
 26
 00:02:40,754 --> 00:02:50,076

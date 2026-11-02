@@ -1,0 +1,21 @@
+{
+ "request_sha256": "b15d97fe2fcde8f29fac76eb0331a581ecc604b760094d843deb2888495269d7",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:23Z",
+ "response_id": "resp_6ae865c6204392d07ee844ce",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2666,
+  "output_tokens": 1796,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1365
+ },
+ "cost_usd": 0.04517,
+ "latency_s": 11.48,
+ "output_text": "{\"draft\": \"Sherwin-Williams Posts Higher Third-Quarter Sales, Slightly Lower Profit\\nThe Sherwin-Williams Company said consolidated net sales climbed 7.9% to $6.86 billion in the third quarter ended September 30, 2026, while net income slipped 1.5% to $821.0 million, or 12.0% of net sales.\\nDiluted net income per share rose 0.9% to $3.38 per share, compared with $3.35 per share in the third quarter of 2025. On an adjusted basis, diluted net income per share grew 1.1% to $3.63 per share, compared with $3.59 per share a year earlier.\\nEarnings before interest, taxes, depreciation and amortization increased 3.4% to $1.39 billion, or 20.3% of net sales. Sherwin-Williams said the increase in consolidated net sales primarily reflected higher net sales in all reportable segments, inclusive of the October 2025 acquisition of Suvinil, and selling price increases.\\nNet sales from stores in the Paint Stores Group open more than twelve calendar months advanced 3.9% in the quarter.\\nThe company returned $749.0 million to shareholders in the quarter through dividends and share repurchases. During the first nine months of 2026, it generated $2.59 billion in net operating cash and returned $2.98 billion to shareholders in the form of dividends and repurchases of 7.1 million shares of its common stock.\\nFor the fourth quarter, Sherwin-Williams expects consolidated net sales to increase by a mid-single digit percentage from a year earlier, and it maintained full-year sales guidance calling for an increase of a mid to high-single digit percentage. The company revised full-year diluted net income per share guidance to a range of $10.92 to $11.22 per share and narrowed adjusted diluted net income per share guidance to $11.85 to $12.15 per share.\"}",
+ "ticker": "SHW",
+ "stub": false
+}

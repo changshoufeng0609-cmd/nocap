@@ -1,0 +1,21 @@
+{
+ "request_sha256": "0ea7e2c83816cc53d4318161eef2776c6f20670fa573b56a4c50c51038f5c0db",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:55Z",
+ "response_id": "resp_6ae8683f9aefb970c2814402",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1996,
+  "output_tokens": 1737,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1412
+ },
+ "cost_usd": 0.042724,
+ "latency_s": 15.8,
+ "output_text": "{\"draft\": \"Capital One Q2 2026: Profit Rebounds, Revenue Growth Continues\\nCapital One delivered net income of $3.0 billion, or $4.73 per diluted common share, while adjusted net income came to $5.81 per diluted common share.\\nTotal net revenue rose 4 percent to $15.9 billion, helped by a net interest margin of 8.01 percent that expanded 14 basis points. Total non-interest expense climbed 7 percent to $9.0 billion, reflecting an 11 percent jump in marketing and a 6 percent increase in operating expenses, leaving pre-provision earnings up 1 percent at $6.8 billion.\\nCredit costs eased, with the provision for credit losses down $1.1 billion to $3.0 billion. That result included net charge-offs of $3.6 billion and a $662 million loan reserve release, suggesting a more benign credit backdrop during the quarter.\\nOn the balance sheet, period-end loans held for investment grew $9.4 billion, or 2 percent, to $457.2 billion, with Credit Card period-end loans reaching $275.4 billion and loan growth also recorded across consumer and commercial banking. The common equity Tier 1 capital ratio stood at 13.7%, while period-end total deposits were $484.3 billion.\\nOutlook: The release gives no formal guidance, so the focus remains on the Discover integration, the sustainability of revenue and margin momentum, expense discipline, credit-loss trends and capital strength.\"}",
+ "ticker": "COF",
+ "stub": false
+}

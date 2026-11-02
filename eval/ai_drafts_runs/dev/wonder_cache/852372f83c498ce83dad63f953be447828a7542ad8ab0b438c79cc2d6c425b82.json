@@ -1,0 +1,21 @@
+{
+ "request_sha256": "852372f83c498ce83dad63f953be447828a7542ad8ab0b438c79cc2d6c425b82",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:40Z",
+ "response_id": "resp_6ae8655f6e8c0566f56443c8",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2071,
+  "output_tokens": 1226,
+  "cached_tokens": 0,
+  "reasoning_tokens": 746
+ },
+ "cost_usd": 0.032804,
+ "latency_s": 10.01,
+ "output_text": "{\"draft\": \"Applied Materials Q3 FY2026: Record Results on AI Demand\\nRecord revenue and earnings underscore strong momentum as AI adoption lifts demand for the company's materials engineering solutions.\\n\\nApplied Materials delivered record revenue of $9.12 billion in the third quarter ended July 26, 2026, up 25 percent year over year. Profitability also reached new highs, with GAAP gross margin of 50.3 percent and non-GAAP gross margin of 50.4 percent. GAAP operating income came in at a record $3.08 billion, or 33.7 percent of revenue, while non-GAAP operating income climbed to a record $3.10 billion, or 34.0 percent of revenue.\\n\\nEarnings per share showed similar strength. GAAP EPS was $3.17, up 43 percent year over year, and record non-GAAP EPS was $3.50, up 41 percent year over year. Management highlighted the company's 13th consecutive quarter of year-over-year gross margin expansion, pointing to the value created by enabling better chips, systems and fab returns.\\n\\nCash generation was also a record, with cash from operations of $3.04 billion. Applied Materials distributed $860 million to shareholders during the quarter, comprising $440 million in share repurchases and $420 million in dividends. Elsewhere, EPIC Center R&D partnerships expanded to 11 engagements with leading chipmakers, universities and innovation partners, and the company expanded its manufacturing and R&D operations in Singapore, where the new US$500 million Tampines Campus more than doubles its advanced cleanroom capacity in the country.\\n\\nOutlook: For the fourth quarter of fiscal 2026, the company said its outlook covers total revenue and non-GAAP diluted EPS, and management is further raising its Semiconductor Systems revenue expectations for calendar 2026, confident it will grow faster than the market this year, while expecting another strong growth year for Applied Materials in 2027 based on increased demand visibility from customers. The non-GAAP diluted EPS outlook excludes known charges related to completed acquisitions of $0.01 per share, includes the normalized tax benefit of share-based compensation of $0.01 per share and includes a net income tax benefit related to intra-entity intangible asset transfers of $0.05 per share.\"}",
+ "ticker": "AMAT",
+ "stub": false
+}

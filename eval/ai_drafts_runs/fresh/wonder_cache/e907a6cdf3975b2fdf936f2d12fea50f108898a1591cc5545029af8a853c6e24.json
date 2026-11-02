@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e907a6cdf3975b2fdf936f2d12fea50f108898a1591cc5545029af8a853c6e24",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:24Z",
+ "response_id": "resp_6ae86820889402935a2b4d05",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3143,
+  "output_tokens": 1252,
+  "cached_tokens": 372,
+  "reasoning_tokens": 921
+ },
+ "cost_usd": 0.036198,
+ "latency_s": 12.0,
+ "output_text": "{\"draft\": \"American International Group (AIG) — Q2 2026\\nResults:\\n- Net income attributable to common shareholders: $948 million, or $1.78 per diluted share\\n- Adjusted after-tax income: $1.1 billion, or $2.00 per diluted share, up 10% year-over-year\\n- ROE: 9.4%; Core Operating ROE: 11.1%\\n- Total net investment income: $1.1 billion, compared with $1.5 billion a year earlier\\n- Net investment income on an APTI basis: $908 million, compared with $955 million a year earlier\\nGeneral Insurance:\\n- Net premiums written: $7.5 billion, climbed 9% year-over-year on a reported and constant dollar basis\\n- Net premiums written excluding North America Property: up 11%\\n- Underwriting income: $686 million, rose 10% year-over-year\\n- Combined ratio: 89.0%; Accident year combined ratio, as adjusted: 88.1%\\n- Catastrophe-related charges: $210 million, representing 3.4 loss ratio points\\n- Favorable prior year development: $145 million\\nCash and capital:\\n- Capital returned to shareholders: $904 million, including $641 million of share repurchases and $263 million of dividends\\n- Remaining interest in Corebridge sold for aggregate proceeds of approximately $710 million\\n- Total debt to total capital ratio: 18.1%\\n- Quarterly cash dividend declared: $0.50 per share\"}",
+ "ticker": "AIG",
+ "stub": false
+}

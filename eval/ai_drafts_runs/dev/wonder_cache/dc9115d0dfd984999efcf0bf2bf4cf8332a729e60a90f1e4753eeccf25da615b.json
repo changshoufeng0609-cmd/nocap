@@ -1,0 +1,21 @@
+{
+ "request_sha256": "dc9115d0dfd984999efcf0bf2bf4cf8332a729e60a90f1e4753eeccf25da615b",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:44Z",
+ "response_id": "resp_6ae86564beba8568e45d45ef",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3344,
+  "output_tokens": 1278,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1029
+ },
+ "cost_usd": 0.038936,
+ "latency_s": 8.51,
+ "output_text": "{\"draft\": \"Air Products Q3 FY2026\\nResults:\\n- Sales: $3.2 billion, up 5% from a year earlier\\n- GAAP operating loss: $2.1 billion\\n- GAAP loss per share: $6.47\\n- Project exit charges: $2.9 billion pre-tax\\n- Adjusted operating income: $810 million, up 9%\\n- Adjusted operating margin: 25.6%\\n- Adjusted EPS: $3.47, up 12%\\nSegments:\\n- Americas sales: $1.3 billion, up 5%\\n- Americas operating income: $395 million\\n- Asia sales: $886 million, up 9%\\n- Asia operating income: $256 million\\n- Europe sales: $816 million, up 6%\\n- Europe operating income: $231 million\\nOutlook:\\n- Full-year fiscal 2026 adjusted EPS guidance raised to $13.39 to $13.49\\n- Fiscal 2026 fourth quarter adjusted EPS guidance: $3.55 to $3.65\\n- Fiscal 2026 capital expenditures expected at approximately $3.5 billion\"}",
+ "ticker": "APD",
+ "stub": false
+}

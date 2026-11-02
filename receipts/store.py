@@ -482,6 +482,18 @@ def display_name(ticker: str, sec_name: str) -> str:
     return " ".join(_title_word(w, i == 0) for i, w in enumerate(name.split()))
 
 
+# An SEC name inverted around one initial and a given name, "PRICE T ROWE GROUP INC" (T. Rowe Price Group, Inc.), which
+# the two-initial rule below can't reorder. Read so only when a company word follows the given name: the surname, one
+# initial and one name word are then the whole personal name, as in no other reading of such a title (round 10a).
+_GIVEN_NAME_INVERSION_RE = re.compile(r"^([A-Z][A-Z'-]+)\s+([A-Z]\.?\s+[A-Z][A-Z'-]+)\s+(?=(?:GROUP|INC|CORP|CO|COMPANY|"
+                                      r"COMPANIES|HOLDINGS?|LTD|PLC|LLC)\b)")
+
+
+def _uninverted_given_name(name: str) -> str:
+    """'PRICE T ROWE GROUP INC' -> 'T ROWE PRICE GROUP INC'; any other name unchanged (_GIVEN_NAME_INVERSION_RE)."""
+    return _GIVEN_NAME_INVERSION_RE.sub(lambda m: f"{m[2]} {m[1]} ", name)
+
+
 def company_aliases(ticker: str, *names: str) -> set[str]:
     """Alias keys stored at ingest: the ticker, ALIASES, SECURITY_ALIASES and each name, also without a trailing SEC
     registrant tag."""
@@ -490,6 +502,7 @@ def company_aliases(ticker: str, *names: str) -> set[str]:
     # HUNT J B TRANSPORT SERVICES INC. Preserve the complete remaining name.
     forms += [re.sub(r"^([A-Z][A-Z'-]+)\s+((?:[A-Z]\.?\s+){2,})",
                      lambda m: m[2] + m[1] + " ", n) for n in forms]
+    forms += [_uninverted_given_name(n) for n in forms]
     keys = {normalize_entity(a) for a in [ticker, *known_names(ticker), *forms] if a}
     return {k for k in keys if k}
 

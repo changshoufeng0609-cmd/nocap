@@ -9,7 +9,12 @@ eval/qa_results.md or docs/open-weights.md.
 v2.1 changes from v2: c02 says the errors were planted; c17 and c18 describe all 32 slide readings; c23 is the
 four-backends card that replaces the benchmark-page and Private-card lines; c24 narrates the Private-check shot
 (the recorded Modal Glimmer run, replayed) and is used only when that capture is passed to the renderer; c25 is
-the held-out results line; c26 is v2's end-card line, unchanged.
+the results line; c26 is v2's end-card line, unchanged.
+
+November 2 (owner-approved): c25 now quotes the comprehensive test of the November 2 round-8 release (README.md's
+Results table; eval/spot500_methods.md, "Results of the one live run (November 2, 2026, after round 8)"). It must fit
+the October 31 line's slot (render_walkthrough_v2.RESULTS_LINE_S). The October 31 line was "On held-out tests, NoCap
+caught 44 of 48 planted errors, with one false alarm in 47 clean sentences."
 """
 from __future__ import annotations
 
@@ -99,15 +104,19 @@ CUES = [
     ('c24', 'private-shot',
      'Private check runs on Glimmer: one real run on our own Modal GPU, one figure verified, one planted error caught.',
      'Private check runs on Glimmer: one real run on our own Modal G P U, one figure verified, one planted error caught.'),
+    # Card and README: 306/360 planted errors caught (✗ or ◷), 0/360 marked ✓, 54 returned ?. "Verified" is how the product
+    # names ✓; the web fonts have no ✓ glyph for the burned-in caption.
     ('c25', 'results-card',
-     'On held-out tests, NoCap caught 44 of 48 planted errors, with one false alarm in 47 clean sentences.',
-     'On held-out tests, No Cap caught forty-four of forty-eight planted errors, with one false alarm in forty-seven clean sentences.'),
+     'Across 1,000 test items, NoCap caught 306 of 360 planted errors and never marked one verified.',
+     'Across one thousand test items, No Cap caught three hundred six of three hundred sixty planted errors, and never marked one verified.'),
     ('c26', 'end-card',
      'NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17.',
      'No Cap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November seventeenth.'),
 ]
 
 OPTIONAL = {'c24'}            # cues that exist only when their footage exists
+# Lines whose current text was synthesized after the October 31 export; the manifest records this as the line's origin.
+LATER_LINES = {'c25': 'synthesized on 2026-11-02 for the comprehensive-test results line'}
 X_CUES = ['c01', 'c02', 'c03', 'c06', 'c07', 'c10', 'c11', 'c17', 'c26']   # the 45-60 s X cut
 
 

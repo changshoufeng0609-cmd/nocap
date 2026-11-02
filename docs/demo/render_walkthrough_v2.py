@@ -12,6 +12,7 @@ music_bed.py. Nothing leaves the machine; the capture folder is only read.
 
   --cut main   the walkthrough (about 2:40; a recorded Private-check shot is added with --private-take)
   --cut x      a 45-60 s cut for X that opens on a red ✗
+  --keep-audio-from MANIFEST   when a line's text changes, keep the rest of a previous export's audio as it was
 """
 from __future__ import annotations
 
@@ -30,7 +31,7 @@ import soundfile as sf
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import music_bed  # noqa: E402
-from narration_v2 import CUES, OPTIONAL, SPEED, VERSION, VOICE, X_CUES  # noqa: E402
+from narration_v2 import CUES, LATER_LINES, OPTIONAL, SPEED, VERSION, VOICE, X_CUES  # noqa: E402
 from render_demo import local_narrator  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -50,6 +51,9 @@ BED_LUFS = -26.0                                # music bed level in the mix (in
 LIMIT_DBFS = -2.5                               # sample-peak ceiling before the final linear loudness pass
 DIM = 0.45                                      # spotlight: darkening outside the SAM regions
 SAM_LABEL = 'SAM 3.1 · two bar-chart regions'
+# Length of the October 31 results line (c25, held-out results) after trimming: 204,578 samples at 24 kHz, 8.524 s. The
+# results slot is sized by it, so replacing the line moves nothing after the card.
+RESULTS_LINE_S = 204578 / 24000
 
 
 # --------------------------------------------------------------------------- fonts (the product's own web fonts)
@@ -103,6 +107,24 @@ class Canvas:
 
     def width(self, text, kind='sans', size=32, weight=400, opsz=None):
         return self.draw.textlength(text, font=self.f(kind, size, weight, opsz)) / self.ss
+
+    def marked(self, xy, text, kind='sans', size=32, weight=400, fill=CREAM):
+        """Left-aligned text on a baseline. The web fonts have no ✓ or ✗ glyph, so those are drawn as vector marks in the
+        product's verdict colors."""
+        x, y = xy
+        for part in re.split('([✓✗])', text):
+            if part in ('✓', '✗'):
+                m = size * .82
+                center = (x + m * .55, y - size * .34)
+                if part == '✓':
+                    self.check(center, m, GREEN, max(3, round(size / 9)))
+                else:
+                    self.cross(center, m * 1.15, RED, max(3, round(size / 9)))
+                x += m * 1.1
+            elif part:
+                self.text((x, y), part, kind, size, weight, fill, 'ls')
+                x += self.width(part, kind, size, weight)
+        return x
 
     def wrap(self, text, width, kind='sans', size=32, weight=400):
         lines, line = [], ''
@@ -236,29 +258,40 @@ def card_backends():
     return c.result()
 
 
+# The results card quotes README.md's Results table. Since November 2 (owner-approved) it shows the comprehensive test of
+# the November 2 round-8 release (eval/spot500_methods.md, "Results of the one live run (November 2, 2026, after
+# round 8)"), with the October 29 held-out test as one secondary line. Until then it showed only the held-out test
+# (44/48 caught, 1/47 false alarm, 20/20 in trap drafts; frozen source 61e1055).
+RESULTS_TITLE = '1,000 frozen test items from 400 S&P 500 companies'
+RESULTS_ROWS = [('306/360', GREEN, 'planted errors caught', 'none marked ✓; the other 54 came back ?'),
+                ('736/738', GREEN, 'times a ✓ was right', '99.7%; the other 2 landed on figures labeled guidance'),
+                ('17/1,298', CREAM, 'true figures flagged ✗', '1.3%; 736 verified and 533 left ? instead of guessed')]
+RESULTS_EARLIER = ('Earlier held-out test, run once on Oct 29:',
+                   '44/48 planted errors caught, 1/47 false alarm, 20/20 in trap drafts')
+RESULTS_NOTES = ['One frozen run of the November 2 release, not rerun. Labels are machine-made, with no human review yet.',
+                 'Details: eval/spot500_methods.md']
+
+
 def card_results():
     c = Canvas()
-    c.text((180, 132), 'RESULTS · README.md', 'sans', 24, 600, GREEN, 'ls', spacing=3)
-    c.text((180, 214), 'Measured on held-out tests', 'serif', 64, 500, CREAM, 'ls', 60)
-    rows = [('44/48', GREEN, 'planted errors caught', 'real earnings-release sentences; the 4 misses came back ?, never ✓'),
-            ('1/47', CREAM, 'false alarm on unmodified sentences', 'same set; 22 of 110 true figures left ? instead of guessed'),
-            ('20/20', GREEN, 'planted errors caught in trap drafts', 'seven earnings stories written by Muse Wonder; 0 of 52 true figures flagged')]
-    for i, (big, color, main, sub) in enumerate(rows):
-        y = 340 + i * 148
-        c.rect((180, y - 62, W - 180, y + 70), radius=18, fill=PANEL, outline=LINE, width=2)
-        c.text((230, y + 34), big, 'serif', 96, 600, color, 'ls', 72)
-        c.text((640, y - 6), main, 'sans', 38, 500, CREAM, 'ls')
-        if sub.endswith(' ✓'):                      # the web fonts have no ✓ glyph, so draw the mark as a vector
-            sub = sub[:-2]
-            c.check((640 + c.width(sub + ' ', 'sans', 28, 400) + 11, y + 32), 24, GREEN, 3)
-        c.text((640, y + 42), sub, 'sans', 28, 400, MUTED, 'ls')
-        tag_w = c.width('HELD-OUT', 'sans', 20, 600) + 3 * 7 + 40
-        c.rect((W - 220 - tag_w, y - 44, W - 220, y - 8), radius=18, fill=(14, 60, 40), outline=GREEN, width=2)
-        c.text((W - 220 - tag_w / 2, y - 19), 'HELD-OUT', 'sans', 20, 600, GREEN, 'ms', spacing=3)
-    notes = ('Frozen source 61e1055, run once on Oct 29 and not rerun after later fixes. Small, correlated sets; '
-             'labels are machine-assisted, with no independent human review yet.')
-    for j, line in enumerate(c.wrap(notes, W - 360, 'sans', 24)):
-        c.text((180, 806 + j * 34), line, 'sans', 24, 400, MUTED, 'ls')
+    c.text((180, 134), 'RESULTS · README.md', 'sans', 24, 600, GREEN, 'ls', spacing=3)
+    assert c.width(RESULTS_TITLE, 'serif', 58, 500, 60) <= W - 360, RESULTS_TITLE
+    c.text((180, 212), RESULTS_TITLE, 'serif', 58, 500, CREAM, 'ls', 60)
+    for i, (big, color, main, sub) in enumerate(RESULTS_ROWS):
+        y = 326 + i * 140
+        c.rect((180, y - 60, W - 180, y + 64), radius=18, fill=PANEL, outline=LINE, width=2)
+        assert c.width(big, 'serif', 86, 600, 72) <= 650 - 222 - 30, big
+        c.text((222, y + 30), big, 'serif', 86, 600, color, 'ls', 72)
+        c.marked((650, y - 6), main, 'sans', 38, 500, CREAM)
+        assert c.marked((650, y + 40), sub, 'sans', 28, 400, MUTED) <= W - 180 - 40, sub
+    label, numbers = RESULTS_EARLIER
+    x = 180 + c.width(label + ' ', 'sans', 26, 400)
+    assert x + c.width(numbers, 'sans', 26, 500) <= W - 180, numbers
+    c.text((180, 740), label, 'sans', 26, 400, MUTED, 'ls')
+    c.text((x, 740), numbers, 'sans', 26, 500, CREAM, 'ls')
+    for j, line in enumerate(RESULTS_NOTES):
+        assert c.width(line, 'sans', 24) <= W - 360, line
+        c.text((180, 800 + j * 34), line, 'sans', 24, 400, MUTED, 'ls')
     return c.result()
 
 
@@ -349,7 +382,7 @@ def synthesize(work, cache, cue_ids):
             continue
         key = hashlib.sha256(f'{VOICE}|{SPEED}|{spoken}'.encode()).hexdigest()[:12]
         found = sorted(work.glob(f'voice-*-{key}.wav')) + (sorted(cache.glob(f'voice-*-{key}.wav')) if cache and cache.exists() else [])
-        origin = 'reused from the v2 render' if found and found[0].parent != work else 'synthesized for v2.1'
+        origin = 'reused from the v2 render' if found and found[0].parent != work else LATER_LINES.get(cue_id, 'synthesized for v2.1')
         if found:
             path = found[0]
         else:
@@ -598,9 +631,11 @@ def build_main(marks, actions, speech, private=None):
         footage('private', src, s, t, [(0, form, 0), (P['private-result']['t'] - src - .3, result, .9)],
                 limit=P['private-end']['t'], master=private['master'],
                 label='Private check · Muse Glimmer on our own Modal GPU', fade=.35, corner='top-right')
-    # 10. Results card (held-out only).
+    # 10. Results card. Its slot keeps the length it had with the October 31 line (RESULTS_LINE_S of speech 0.5 s in, then a
+    #     1.4 s hold), so the end card, its line and the runtime stay where they were; the current line must fit that slot.
     s = t - .4
-    t = say('c25', t + .1) + 1.4
+    assert say('c25', t + .1) <= t + .1 + RESULTS_LINE_S + .4, 'the results line no longer fits the results slot'
+    t = t + .1 + RESULTS_LINE_S + 1.4
     card('results', s, t, fade=.4)
     # 11. Close.
     s = t - .4
@@ -786,37 +821,78 @@ def loudnorm_json(text):
     return json.loads(text[text.rfind('{'):text.rfind('}') + 1])
 
 
-def two_pass(target, samples, rate, tp=-1.5):
-    first = loudnorm_json(ffmpeg_pcm(['-af', f'loudnorm=I={target}:TP={tp}:LRA=11:print_format=json', '-f', 'null', '-'], samples, rate).stderr.decode())
+def two_pass(target, samples, rate, tp=-1.5, measured=None):
+    """loudnorm's measuring pass and the second-pass filter built from it; `measured` reuses an earlier measuring pass."""
+    first = measured or loudnorm_json(ffmpeg_pcm(['-af', f'loudnorm=I={target}:TP={tp}:LRA=11:print_format=json', '-f', 'null', '-'],
+                                                 samples, rate).stderr.decode())
     second = (f"loudnorm=I={target}:TP={tp}:LRA=11:measured_I={first['input_i']}:measured_TP={first['input_tp']}:"
               f"measured_LRA={first['input_lra']}:measured_thresh={first['input_thresh']}:offset={first['target_offset']}:linear=true:print_format=json")
     return first, second
 
 
-def build_audio(said, speech, order, duration, work, out_name):
-    rate = 24000
+def voice_track(said, order, duration, samples_of, rate=24000):
     voice = np.zeros(int(duration * rate) + rate, dtype=np.float32)
     for cue in order:
-        samples = speech[cue]['samples']
+        samples = samples_of(cue)
         offset = int(round(said[cue] * rate))
         voice[offset:offset + len(samples)] += samples
-    voice = voice[:int(round(duration * rate))]
+    return voice[:int(round(duration * rate))]
+
+
+def normalize_narration(voice, second, n, rate=24000):
+    run = ffmpeg_pcm(['-af', second + ',aresample=48000,pan=stereo|c0=c0|c1=c0', '-f', 'f32le', '-ar', '48000', '-ac', '2', '-'], voice, rate)
+    narration = np.frombuffer(run.stdout, dtype='<f4').reshape(-1, 2)[:n]
+    return np.pad(narration, ((0, n - len(narration)), (0, 0))), loudnorm_json(run.stderr.decode())
+
+
+def build_audio(said, speech, order, duration, work, out_name, keep=None):
+    """Narration, ducked music, limiter and final loudness pass; returns the AAC file and the audio record.
+
+    `keep` (from --keep-audio-from) holds a previous export's audio record and the previous speech of the lines this
+    render replaces. Every loudness pass then reuses that export's measurements instead of measuring again, and the
+    narration outside the replaced lines is the previous export's own (the old and new narration tracks are normalized
+    with the same parameters; the new one is used only from the middle of the pause before the first replaced line to
+    the middle of the pause after the last). Unchanged material therefore gets exactly the gains it had before."""
+    rate = 24000
+    n = int(round(duration * music_bed.SR))
+    voice = voice_track(said, order, duration, lambda cue: speech[cue]['samples'], rate)
     # Narration: the v2 chain (two-pass loudnorm to -14 LUFS, -1.5 dBTP), upsampled to 48 kHz stereo. Speech peaks sit
     # about 22 dB above its loudness, so a linear gain to -14 LUFS would break the -1.5 dBTP ceiling and loudnorm uses
     # its dynamic mode instead, as it did for v2. The manifest records the mode; the final mix pass below must be linear.
-    first, second = two_pass(-14, voice, rate)
-    run = ffmpeg_pcm(['-af', second + ',aresample=48000,pan=stereo|c0=c0|c1=c0', '-f', 'f32le', '-ar', '48000', '-ac', '2', '-'], voice, rate)
-    narration_pass = loudnorm_json(run.stderr.decode())
-    n = int(round(duration * music_bed.SR))
-    narration = np.frombuffer(run.stdout, dtype='<f4').reshape(-1, 2)[:n]
-    narration = np.pad(narration, ((0, n - len(narration)), (0, 0)))
+    first, second = two_pass(-14, voice, rate, measured=keep and keep['audio']['narration']['loudnorm_first_pass'])
+    narration, narration_pass = normalize_narration(voice, second, n, rate)
+    splice = None
+    if keep and keep['speech']:
+        # loudnorm's dynamic mode looks about 3 s ahead, so the new line would also nudge the gain at the end of the line
+        # before it. Keep the previous narration everywhere except the replaced lines, cutting inside silent pauses.
+        previous = voice_track(said, order, duration, lambda cue: keep['speech'].get(cue, speech[cue]['samples']), rate)
+        before, _ = normalize_narration(previous, second, n, rate)
+        replaced = [cue for cue in order if cue in keep['speech']]
+        i0, i1 = order.index(replaced[0]), order.index(replaced[-1])
+        assert i0 > 0 and i1 + 1 < len(order), replaced
+        end_of = lambda cue: said[cue] + max(speech[cue]['seconds'], len(keep['speech'].get(cue, ())) / rate)  # noqa: E731
+        cut_a = (end_of(order[i0 - 1]) + said[replaced[0]]) / 2
+        cut_b = (end_of(replaced[-1]) + said[order[i1 + 1]]) / 2
+        ia, ib = int(round(cut_a * music_bed.SR)), int(round(cut_b * music_bed.SR))
+        guard = music_bed.SR // 10                    # both tracks must be digital silence 0.1 s either side of each cut
+        for i in (ia, ib):
+            assert not narration[i - guard:i + guard].any() and not before[i - guard:i + guard].any(), f'cut at {i / music_bed.SR:.3f} s is not silent'
+        differ = np.flatnonzero((before != narration).any(axis=1))
+        narration = np.concatenate([before[:ia], narration[ia:ib], before[ib:]])
+        splice = {'replaced_cues': replaced, 'new_narration_from_s': round(ia / music_bed.SR, 3), 'new_narration_to_s': round(ib / music_bed.SR, 3),
+                  'outside': "the previous export's narration, normalized with the same parameters",
+                  'unspliced_tracks_differ_from_to_s': [round(float(differ[0]) / music_bed.SR, 3), round(float(differ[-1]) / music_bed.SR, 3)]}
     narration_level = loudness(narration, music_bed.SR)
     # Music: an original bed, ducked under each narration line, set to BED_LUFS by measurement.
     bed, bed_info = music_bed.synthesize(duration)
     spans = [(said[c], said[c] + speech[c]['seconds']) for c in order]
     duck = music_bed.duck_gains(spans, duration)
     ducked = bed * duck[:, None]
-    raw_level = loudness(ducked, music_bed.SR)['integrated_lufs']
+    if keep:
+        # The previous export measured the ducked bed at one decimal (ebur128's summary) and recorded the gain to two.
+        raw_level = keep['audio']['music'].get('raw_level_lufs', round(BED_LUFS - keep['audio']['music']['gain_db'], 1))
+    else:
+        raw_level = loudness(ducked, music_bed.SR)['integrated_lufs']
     gain_db = BED_LUFS - raw_level
     bed_mix = ducked * np.float32(10 ** (gain_db / 20))
     bed_level = loudness(bed_mix, music_bed.SR)
@@ -833,7 +909,7 @@ def build_audio(said, speech, order, duration, work, out_name):
     assert abs(len(limited) - n) <= 2, (len(limited), n)
     mix = np.pad(limited[:n], ((0, max(0, n - len(limited))), (0, 0)))
     # Final mix: two-pass loudnorm (linear) to -14 LUFS, then AAC; the video encode copies this stream.
-    first_mix, second_mix = two_pass(-14, mix, music_bed.SR)
+    first_mix, second_mix = two_pass(-14, mix, music_bed.SR, measured=keep and keep['audio']['mix']['loudnorm_first_pass'])
     m4a = work / f'{out_name}.m4a'
     run = ffmpeg_pcm(['-af', second_mix + ',aresample=48000', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-y', str(m4a)], mix, music_bed.SR)
     final = loudnorm_json(run.stderr.decode())
@@ -846,7 +922,7 @@ def build_audio(said, speech, order, duration, work, out_name):
                       'loudnorm_output': narration_pass, 'measured_after_normalization': narration_level},
         'music': {**bed_info, 'license': 'Original work made for this project (see narration-license.md)',
                   'duck': {**music_bed.DUCK, 'spans': len(spans)},
-                  'target_lufs_in_mix': BED_LUFS, 'gain_db': round(gain_db, 2),
+                  'target_lufs_in_mix': BED_LUFS, 'gain_db': round(gain_db, 2), 'raw_level_lufs': raw_level,
                   'measured_in_mix': bed_level, 'undocked_level_lufs': open_level,
                   'level_in_export_lufs': round(bed_level['integrated_lufs'] + applied, 2),
                   'pcm_sha256': hashlib.sha256(np.ascontiguousarray(bed, dtype='<f4').tobytes()).hexdigest()},
@@ -856,6 +932,16 @@ def build_audio(said, speech, order, duration, work, out_name):
                             'seconds_of_samples_over_ceiling_before': round(over_s, 4)},
                 'loudnorm_first_pass': first_mix, 'loudnorm_output': final, 'gain_applied_db': round(applied, 2)},
     }
+    if keep:
+        # For the record only: what a fresh measuring pass reports for the new tracks.
+        audio['measurements_reused'] = {
+            'from_video_sha256': keep['video_sha256'],
+            'what': ('the narration and final-mix loudnorm measuring passes and the music-bed level of the previous export, so '
+                     'unchanged material gets exactly the gains it had'),
+            'narration_splice': splice,
+            'fresh_measurement_now': {'narration_loudnorm_first_pass': two_pass(-14, voice, rate)[0],
+                                      'music_bed_raw_level_lufs': loudness(ducked, music_bed.SR)['integrated_lufs'],
+                                      'mix_loudnorm_first_pass': two_pass(-14, mix, music_bed.SR)[0]}}
     return m4a, audio
 
 
@@ -872,6 +958,37 @@ def load_private(path):
     return {'path': path, 'capture': capture, 'marks': marks, 'master': path / 'master.mp4'}
 
 
+def load_keep(path, cut, said, speech, order, duration, voice_dirs):
+    """The previous export's audio record and the previous speech of every line whose text changed (see build_audio)."""
+    previous = json.loads(Path(path).read_text())
+    if 'asset_sha256' in previous:               # docs/demo/assets/manifest.json, as written by export_walkthrough_v2.py
+        record = previous['x_cut'] if cut == 'x' else previous
+        segments, video_sha = record['narration_segments'], (previous['asset_sha256']['nocap-x.mp4' if cut == 'x' else 'receipts-demo.mp4'])
+        old_duration = record['duration_s']
+    else:                                        # a render folder's <cut>/manifest.json
+        record, segments, video_sha, old_duration = previous, previous['narration']['segments'], previous['video_sha256'], previous['duration_s']
+    assert old_duration == duration, ('the runtime changed, so the previous measurements do not apply', old_duration, duration)
+    by_cue = {segment['cue']: segment for segment in segments}
+    assert list(by_cue) == order, ('the lines or their order changed', list(by_cue), order)
+    files = {}
+    for folder in voice_dirs:
+        for wav in sorted(Path(folder).glob('voice-*.wav')) if folder and Path(folder).exists() else []:
+            files.setdefault(hashlib.sha256(wav.read_bytes()).hexdigest(), wav)
+    replaced = {}
+    for cue in order:
+        old = by_cue[cue]
+        assert round(said[cue], 3) == old['start_s'], (cue, 'moved', round(said[cue], 3), old['start_s'])
+        if speech[cue]['sha256'] == old['speech_sha256']:
+            continue
+        assert old['speech_sha256'] in files, f'{cue}: the previous Kokoro file ({old["speech_sha256"][:12]}) is not in {voice_dirs}'
+        samples, rate = sf.read(files[old['speech_sha256']], dtype='float32')
+        loud = np.flatnonzero(np.abs(samples) > 0.01)              # the same trim as synthesize()
+        samples = samples[max(0, loud[0] - 240):min(len(samples), loud[-1] + 960)]
+        assert round(len(samples) / rate, 3) == old['seconds'], (cue, len(samples) / rate, old['seconds'])
+        replaced[cue] = samples
+    return {'audio': record['audio'], 'speech': replaced, 'video_sha256': video_sha}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--source', type=Path, default=ROOT / 'data/eval_runs/demo-walkthrough-v2-20261030/take2',
@@ -883,6 +1000,10 @@ def main():
     parser.add_argument('--private-take', type=Path, help='optional capture folder with a recorded Private-check replay')
     parser.add_argument('--plan-only', action='store_true', help='Print the timeline without rendering video')
     parser.add_argument('--cards-only', action='store_true', help='Write the text cards as PNG files for review')
+    parser.add_argument('--keep-audio-from', type=Path,
+                        help=('a previous export\'s manifest.json (e.g. docs/demo/assets/manifest.json): reuse its loudness measurements '
+                              'and keep its narration outside the lines whose text changed (their previous Kokoro files must be in '
+                              'render/ or the voice cache)'))
     args = parser.parse_args()
     out, source = args.out.resolve(), args.source.resolve()
     if out == source or source in out.parents:
@@ -937,7 +1058,9 @@ def main():
             print(f"{said[cue]:7.2f} +{speech[cue]['seconds']:5.2f}  {cue}  {speech[cue]['caption'][:90]}")
         return
     name = OUTPUT[args.cut]
-    m4a, audio = build_audio(said, speech, order, duration, work, name)
+    keep = load_keep(args.keep_audio_from, args.cut, said, speech, order, duration,
+                     [work, args.voice_cache or args.source / 'render']) if args.keep_audio_from else None
+    m4a, audio = build_audio(said, speech, order, duration, work, name, keep)
     caption_size = 44 if args.cut == 'x' else 34
     bands = {item['cue']: caption_band(item['caption'], caption_size) for item in captions}
     blank = caption_band('', caption_size)

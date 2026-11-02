@@ -80,8 +80,8 @@ parks it first and holds the Ask filing view longer. Take 1 is not used.
   no frozen frames, no reordering inside a shot. The cold open reuses footage recorded right after Check.
 - **Cards.** Stakes, title and disclosure, backends, results and end cards (title and end cards in the X cut)
   are drawn in the product's own fonts (Geist, Geist Mono and Newsreader from the web build) on a dark
-  background, so they never look like product UI. The web fonts have no ✓ glyph, so the one on the results
-  card is drawn as a vector mark. Their PNGs are hashed in the manifest.
+  background, so they never look like product UI. The web fonts have no ✓ or ✗ glyph, so the marks on the
+  results card are drawn as vectors in the product's verdict colors. Their PNGs are hashed in the manifest.
 - **Scene labels.** A small label naming the Meta model's role appears for four seconds at the start of six
   scenes. On the Check and Private shots it sits top-right, clear of the Check button and of the draft field
   that fills on the replay click; on the wide slide shot it sits bottom-right so the NoCap header stays visible.

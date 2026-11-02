@@ -5,10 +5,11 @@
 | `nvda_q2_fy2027.txt` | `nvda-ai-story` | QoQ/YoY swap, GAAP vs non-GAAP EPS, guidance stays `?` |
 | `meta_q3_2026.txt` | `meta-ai-story` | wrong quarter, millions for billions, a transposed EPS |
 | `roundup_q2_2026.txt` | `q2-roundup-look-ahead` | another company's EPS, and look-ahead under its own `as_of` |
+| `reddit_q3_2026.txt` | `reddit-wonder-recap` | a Muse Wonder recap from Reddit's own release sentences: filed facts and release statements confirm it, one planted EPS is caught |
 | `draft_6claims.txt` | (CLI only) | the Day 2 six-claim smoke test |
 
 `examples.json` holds each demo draft's title, description, `as_of` and context for `GET /api/examples`.
-`scripts/build_snapshot.py` records all three through the real pipeline into `data/snapshot/api_cache/`, so the
+`scripts/build_snapshot.py` records all four through the real pipeline into `data/snapshot/api_cache/`, so the
 demo replays them with `cached: true` and never waits on the model. Every figure in the drafts is a real value from
 `data/facts.sqlite` and `data/pr_facts`; the planted errors are real figures from the wrong period, basis, scale or
 company. Verdicts below were confirmed with the CLI on 2026-10-27; claim ids are the CLI's (document order), which
@@ -209,3 +210,31 @@ python -m receipts check examples/trap_amd_q1_2026.txt \
 | c12 | plus or minus $300 million | ? `forward_looking` | ? | guidance range |
 
 Summary at `as_of`: `7 ✓ · 2 ✗ · 1 ◷ · 2 ? · 0 ≈`. Without `as_of`: `8 ✓ · 2 ✗ · 2 ?`.
+
+## `reddit_q3_2026.txt`: Reddit Q3 2026 recap by Muse Wonder
+
+Muse Wonder wrote this bullet recap for the AI-draft benchmark's dev batch (draft `RDDT-2026Q3` in
+[`eval/ai_drafts_runs/dev`](../eval/ai_drafts_runs/dev/), [method](../eval/ai_drafts.md)). It worked only from Reddit's
+own Q3 2026 earnings-release sentences (8-K accession 0001713445-26-000114). One figure was changed afterwards:
+diluted EPS $1.40 became $1.04. Because the writer used the release's sentences, its release-statement ✓ are expected;
+the filed-fact ✓ and the catch are not circular. Recorded on 2026-11-02 (one Muse Spark call, $0.0139).
+
+```
+python -m receipts check examples/reddit_q3_2026.txt --context "Reddit, third quarter of 2026"
+```
+
+| Claims | Draft says | Verdict | Why |
+|---|---|---|---|
+| c1, c2 | revenue $895 million, up 53% | ✓ `match` | 10-Q: $894.957M, up 53.0% year over year |
+| c3–c6 | ad revenue $847 million (+54%), other revenue $48 million (+35%) | ✓ `release_statement` | the 8-K release's own sentence |
+| c7 | gross margin 91.5% | ✓ `match` | 8-K press release: 91.50% |
+| c8 | net income $283 million | ✓ `match` | 10-Q: $283.264M |
+| c9 | 32% of revenue | ✓ `release_statement` | "Net income of $283 million, 32% of revenue" |
+| c10 | diluted EPS $1.04 | ✗ `value_mismatch` | planted; the 10-Q says $1.40 |
+| c11 | adjusted EBITDA $402 million | ✓ `release_statement` | the release's own sentence |
+| c12–c15 | DAUq 130.3 million (+12%), WAUq 515.2 million (+16%) | ✓ `release_statement` | the release's own sentences |
+| c16, c17 | operating cash flow $364 million, up 96% | ✓ `match` | 10-Q: $363.797M, up 96.5% year over year |
+| c18, c19 | cash and marketable securities $3.03 billion; share repurchases $100 million | ? `no_evidence` | figure kinds NoCap does not track yet |
+| c20–c23 | fourth-quarter revenue and adjusted EBITDA guidance | ? `forward_looking` | guidance |
+
+Summary: `16 ✓ · 1 ✗ · 6 ? · 0 ≈`.

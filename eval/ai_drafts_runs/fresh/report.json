@@ -1,0 +1,1822 @@
+{
+ "batch": "fresh",
+ "version": "ai_drafts_v1",
+ "generated_utc": "2026-11-02T10:49:13Z",
+ "inputs": {
+  "plan_sha256": "c054477a89248071221f1dd7b9d5a29142ccbf86bd4c78cbc742ea52b54c68f3",
+  "drafts_sha256": "9cd2e9e4cb8905b27b2942f88877c5682e72c09829377e155f9a8cdc2ef5a4b1",
+  "checks_sha256": "21d59544f2fbae06688bbaf62c7888051028d24af0769a4bd77cb462d96b84a5"
+ },
+ "stub": false,
+ "check_code": {
+  "receipts_sha256": "8d971b3bc07d032866bee0f733414be50f4beded20d078e2d9af1f716d486e81",
+  "git_head": "98b8de94135625dfedd6763e141491ee3050f3ab",
+  "receipts_dirty": false
+ },
+ "drafts": {
+  "planned": 50,
+  "written": 50,
+  "checked": 50,
+  "statuses": {
+   "ok": 50
+  }
+ },
+ "styles": {
+  "news_story": 12,
+  "analyst_note": 13,
+  "bullet_recap": 12,
+  "chatgpt_markdown": 13
+ },
+ "totals": {
+  "verified": 388,
+  "verified_filed_fact": 216,
+  "verified_filed_fact_10q_10k": 147,
+  "claims": 1203,
+  "unverifiable": 808,
+  "verified_release_statement": 172,
+  "verified_filed_fact_8k_table": 69,
+  "wrong": 7
+ },
+ "by_style": {
+  "analyst_note": {
+   "verified": 96,
+   "verified_release_statement": 32,
+   "claims": 317,
+   "verified_filed_fact": 64,
+   "verified_filed_fact_10q_10k": 36,
+   "unverifiable": 217,
+   "verified_filed_fact_8k_table": 28,
+   "wrong": 4
+  },
+  "bullet_recap": {
+   "verified": 144,
+   "verified_release_statement": 78,
+   "claims": 292,
+   "verified_filed_fact": 66,
+   "verified_filed_fact_10q_10k": 54,
+   "unverifiable": 148,
+   "verified_filed_fact_8k_table": 12
+  },
+  "chatgpt_markdown": {
+   "unverifiable": 181,
+   "claims": 305,
+   "verified": 121,
+   "verified_release_statement": 52,
+   "verified_filed_fact": 69,
+   "verified_filed_fact_10q_10k": 44,
+   "verified_filed_fact_8k_table": 25,
+   "wrong": 3
+  },
+  "news_story": {
+   "verified": 27,
+   "verified_filed_fact": 17,
+   "verified_filed_fact_10q_10k": 13,
+   "claims": 289,
+   "unverifiable": 262,
+   "verified_release_statement": 10,
+   "verified_filed_fact_8k_table": 4
+  }
+ },
+ "provenance": {
+  "source_match": 1194,
+  "not_in_source": 5,
+  "rounded": 2
+ },
+ "provenance_by_style": {
+  "analyst_note": {
+   "source_match": 318,
+   "rounded": 1
+  },
+  "bullet_recap": {
+   "source_match": 288
+  },
+  "chatgpt_markdown": {
+   "source_match": 301,
+   "not_in_source": 5,
+   "rounded": 1
+  },
+  "news_story": {
+   "source_match": 287
+  }
+ },
+ "wrong": {
+  "writer_error_caught": [],
+  "possible_false_alarm": [
+   {
+    "ticker": "CAT",
+    "style": "analyst_note",
+    "draft_line": "Caterpillar Q2 2026: First Quarter Above $20 Billion in Sales",
+    "value_text": "$20 Billion",
+    "metric": "revenue",
+    "metric_text": "Sales",
+    "reason": "value_mismatch",
+    "explanation": "Caterpillar's 10-Q reports that revenue was $17.415 billion for Q1 2026 (quarter ended Mar 31, 2026), which is not more than $20 Billion.",
+    "figure": "$20 Billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s3"
+    ],
+    "source_lines": [
+     "[s3] “This is the first time in company history that we have generated over $20 billion in sales and revenues in a single quarter,” said Caterpillar Chairman and CEO Joe Creed."
+    ],
+    "expected_value": 17.415
+   },
+   {
+    "ticker": "COF",
+    "style": "analyst_note",
+    "draft_line": "Total non-interest expense climbed 7 percent to $9.0 billion, reflecting an 11 percent jump in marketing and a 6 percent increase in operating expenses, leaving pre-provision earnings up 1 percent at $6.8 billion.",
+    "value_text": "6 percent",
+    "metric": "other",
+    "metric_text": "operating expenses increase",
+    "reason": "value_mismatch",
+    "explanation": "Capital One's operating expenses growth for Q2 2026 (quarter ended Jun 30, 2026) was 29.4% year over year and 6.8% quarter over quarter, not 6 percent.",
+    "figure": "6 percent",
+    "provenance": "source_match",
+    "source_refs": [
+     "s14"
+    ],
+    "source_lines": [
+     "[s14] 6 percent increase in operating expenses."
+    ],
+    "expected_value": 29.35202403
+   },
+   {
+    "ticker": "FAST",
+    "style": "analyst_note",
+    "draft_line": "Net income jumped 19.7% to $401.6, with diluted net income per share advancing to $0.35 from $0.29.",
+    "value_text": "$401.6",
+    "metric": "net_income",
+    "metric_text": "Net income",
+    "reason": "scale_mismatch",
+    "explanation": "Fastenal Co's 10-Q reports that net income was $401.6 million for Q3 2026 (quarter ended Sep 30, 2026), so $401.6 is off by a factor of a million.",
+    "figure": "$401.6",
+    "provenance": "source_match",
+    "source_refs": [
+     "s42"
+    ],
+    "source_lines": [
+     "[s42] Net income was $401.6 in the third quarter of 2026, an increase of 19.7% compared to the third quarter of 2025."
+    ],
+    "expected_value": 401600000.0
+   },
+   {
+    "ticker": "FAST",
+    "style": "analyst_note",
+    "draft_line": "Cash generation remained solid, with net cash provided by operating activities growing to $421.6 and representing 105.0% of net income.",
+    "value_text": "$421.6",
+    "metric": "operating_cash_flow",
+    "metric_text": "net cash provided by operating activities",
+    "reason": "scale_mismatch",
+    "explanation": "Fastenal's 10-Q reports that operating cash flow was $421.6 million for Q3 2026 (quarter ended Sep 30, 2026), so $421.6 is off by a factor of a million.",
+    "figure": "$421.6",
+    "provenance": "source_match",
+    "source_refs": [
+     "s44"
+    ],
+    "source_lines": [
+     "[s44] Net cash provided by operating activities was $421.6 in the third quarter of 2026, an increase of 9.0% from the third quarter of 2025."
+    ],
+    "expected_value": 421600000.0
+   },
+   {
+    "ticker": "SJM",
+    "style": "chatgpt_markdown",
+    "draft_line": "- One segment posted a **$90.6 million**, or **13%**, increase in net sales, while segment profit surged by **$165.8 million** on tariff refunds and higher net price realization, partly offset by higher marketing spend; volume/mix gains were led by the Dunkin…",
+    "value_text": "13%",
+    "metric": "revenue_growth",
+    "metric_text": "increase in net sales",
+    "reason": "value_mismatch",
+    "explanation": "J.M. Smucker's revenue growth for Q1 FY2027 (quarter ended Jul 31, 2026) was 5.0% year over year and -2.2% quarter over quarter, not 13%.",
+    "figure": "13%",
+    "provenance": "source_match",
+    "source_refs": [
+     "s31"
+    ],
+    "source_lines": [
+     "[s31] Net sales increased $90.6 million, or 13 percent."
+    ],
+    "expected_value": 5.015851985
+   },
+   {
+    "ticker": "SJM",
+    "style": "chatgpt_markdown",
+    "draft_line": "- Another segment saw net sales slip by **$16.7 million**, or **7%**, as weaker volume/mix for snack cakes and breakfast weighed on results.",
+    "value_text": "7%",
+    "metric": "revenue_growth",
+    "metric_text": "net sales slip",
+    "reason": "value_mismatch",
+    "explanation": "J.M. Smucker's revenue growth for Q1 FY2027 (quarter ended Jul 31, 2026) was 5.0% year over year and -2.2% quarter over quarter, not 7%.",
+    "figure": "7%",
+    "provenance": "source_match",
+    "source_refs": [
+     "s42"
+    ],
+    "source_lines": [
+     "[s42] Net sales decreased $16.7 million, or 7 percent."
+    ],
+    "expected_value": 5.015851985
+   },
+   {
+    "ticker": "VMC",
+    "style": "chatgpt_markdown",
+    "draft_line": "- Concrete gross profit margin expanded to **9%**.",
+    "value_text": "9%",
+    "metric": "gross_margin",
+    "metric_text": "Concrete gross profit margin",
+    "reason": "value_mismatch",
+    "explanation": "Vulcan Materials Co's 10-Q reports that Concrete gross margin was 30.5% for Q3 2026 (quarter ended Sep 30, 2026), not 9%.",
+    "figure": "9%",
+    "provenance": "source_match",
+    "source_refs": [
+     "s12"
+    ],
+    "source_lines": [
+     "[s12] Concrete gross profit margin expanded to 9 percent."
+    ],
+    "expected_value": 30.4678202
+   }
+  ],
+  "no_matching_figure": []
+ },
+ "unverifiable": {
+  "count": 808,
+  "buckets": [
+   {
+    "bucket": "guidance",
+    "label": "Guidance",
+    "count": 196,
+    "share": 0.2426,
+    "drafts": 37,
+    "top_words": [
+     [
+      "revenue",
+      6
+     ],
+     [
+      "earnings per share",
+      6
+     ],
+     [
+      "Full-year property revenue midpoint growth rates",
+      5
+     ],
+     [
+      "operating earnings guidance",
+      4
+     ],
+     [
+      "adjusted EPS guidance",
+      4
+     ],
+     [
+      "Reported diluted EPS",
+      4
+     ],
+     [
+      "adjusted earnings per share",
+      4
+     ],
+     [
+      "Comparable store sales",
+      4
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      81
+     ],
+     [
+      "eps_diluted",
+      52
+     ],
+     [
+      "revenue_growth",
+      24
+     ],
+     [
+      "revenue",
+      23
+     ],
+     [
+      "segment_revenue",
+      5
+     ],
+     [
+      "operating_income",
+      3
+     ],
+     [
+      "operating_cash_flow",
+      2
+     ],
+     [
+      "capital_returned",
+      2
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ABNB",
+      "style": "news_story",
+      "draft_line": "For the third quarter, the company expects revenue of $4.69 billion to $4.77 billion, representing year-over-year growth of 15% to 17%.",
+      "value_text": "$4.69 billion",
+      "metric": "revenue",
+      "metric_text": "revenue",
+      "reason": "forward_looking",
+      "explanation": "This is guidance about a future period, so no filing can confirm it yet."
+     },
+     {
+      "ticker": "AEP",
+      "style": "analyst_note",
+      "draft_line": "The centrepiece alongside the results was an expanded $100 billion five-year capital plan through 2031, intended to strengthen reliability, modernise the grid and support growing customer demand.",
+      "value_text": "$100 billion",
+      "metric": "other",
+      "metric_text": "five-year capital plan",
+      "reason": "forward_looking",
+      "explanation": "This is guidance about a future period, so no filing can confirm it yet."
+     },
+     {
+      "ticker": "AMT",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Citing Data Centers segment outperformance, the company raised the midpoint of its full-year outlook for property revenue by **$55 million**.",
+      "value_text": "$55 million",
+      "metric": "other",
+      "metric_text": "midpoint of its full-year outlook for property revenue",
+      "reason": "forward_looking",
+      "explanation": "This is guidance about a future period, so no filing can confirm it yet."
+     }
+    ]
+   },
+   {
+    "bucket": "no_company",
+    "label": "No company attached",
+    "count": 9,
+    "share": 0.0111,
+    "drafts": 1,
+    "top_words": [
+     [
+      "Adjusted EPS",
+      2
+     ],
+     [
+      "Revenue",
+      1
+     ],
+     [
+      "rising",
+      1
+     ],
+     [
+      "Financial Services revenue grew",
+      1
+     ],
+     [
+      "Operating margin",
+      1
+     ],
+     [
+      "Adjusted Operating Margin",
+      1
+     ],
+     [
+      "GAAP EPS",
+      1
+     ],
+     [
+      "free cash flow",
+      1
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      3
+     ],
+     [
+      "revenue_growth",
+      2
+     ],
+     [
+      "eps_diluted",
+      2
+     ],
+     [
+      "revenue",
+      1
+     ],
+     [
+      "free_cash_flow",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "CTSH",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Revenue climbed to **$5.7 billion**, rising **4.6%** year-over-year, or **4.8%** in constant currency.",
+      "value_text": "$5.7 billion",
+      "metric": "revenue",
+      "metric_text": "Revenue",
+      "reason": "ambiguous",
+      "explanation": "The draft doesn't say which company this figure belongs to."
+     }
+    ]
+   },
+   {
+    "bucket": "company_not_matched",
+    "label": "Company name not matched",
+    "count": 0,
+    "share": 0.0,
+    "drafts": 0,
+    "top_words": [],
+    "top_metrics": [],
+    "examples": []
+   },
+   {
+    "bucket": "evidence_ends",
+    "label": "Evidence ends before the quarter",
+    "count": 2,
+    "share": 0.0025,
+    "drafts": 1,
+    "top_words": [
+     [
+      "Q1 FY2027",
+      2
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue",
+      1
+     ],
+     [
+      "revenue_growth",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "SJM",
+      "style": "chatgpt_markdown",
+      "draft_line": "Smucker Company opened fiscal 2027 with net sales of **$2.2 billion**, up **5%** from the prior year, aided by higher coffee pricing and tariff refunds received during the quarter.",
+      "value_text": "$2.2 billion",
+      "metric": "revenue",
+      "metric_text": "net sales",
+      "reason": "no_evidence",
+      "explanation": "NoCap's evidence for The J.M. Smucker Company ends with Q1 FY2027, so it can't check fiscal 2027 yet."
+     }
+    ]
+   },
+   {
+    "bucket": "constant_currency_or_organic",
+    "label": "Constant currency or organic (company-defined measure)",
+    "count": 10,
+    "share": 0.0124,
+    "drafts": 7,
+    "top_words": [
+     [
+      "organic",
+      6
+     ],
+     [
+      "constant-currency",
+      3
+     ],
+     [
+      "Organic",
+      1
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      10
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ABNB",
+      "style": "news_story",
+      "draft_line": "Airbnb said second-quarter revenue advanced 17% year-over-year to $3.6 billion, with growth of 13% on an ex-FX basis, as demand lifted bookings across its regions.",
+      "value_text": "13%",
+      "metric": "revenue_growth",
+      "metric_text": "revenue growth on an ex-FX basis",
+      "reason": "no_evidence",
+      "explanation": "13% is a constant-currency (FX-neutral) figure; filings report results at actual exchange rates, so NoCap can't check it."
+     },
+     {
+      "ticker": "CTSH",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Revenue climbed to **$5.7 billion**, rising **4.6%** year-over-year, or **4.8%** in constant currency.",
+      "value_text": "4.8%",
+      "metric": "revenue_growth",
+      "metric_text": "rising in constant currency",
+      "reason": "no_evidence",
+      "explanation": "4.8% is a constant-currency (FX-neutral) figure; filings report results at actual exchange rates, so NoCap can't check it."
+     },
+     {
+      "ticker": "HUBB",
+      "style": "bullet_recap",
+      "draft_line": "- Organic sales grew 11%; M&A contributed 13%",
+      "value_text": "11%",
+      "metric": "revenue_growth",
+      "metric_text": "Organic sales grew",
+      "reason": "no_evidence",
+      "explanation": "The wording “Organic” describes a company-defined measure that filings don't report under that name, so NoCap can't check 11%."
+     }
+    ]
+   },
+   {
+    "bucket": "non_gaap_no_release_fact",
+    "label": "Non-GAAP with no release fact",
+    "count": 14,
+    "share": 0.0173,
+    "drafts": 9,
+    "top_words": [
+     [
+      "operating income growth",
+      3
+     ],
+     [
+      "free cash flow",
+      2
+     ],
+     [
+      "operating margin",
+      2
+     ],
+     [
+      "diluted EPS",
+      2
+     ],
+     [
+      "net income",
+      2
+     ],
+     [
+      "free cash flow growth",
+      1
+     ],
+     [
+      "operating income",
+      1
+     ],
+     [
+      "gross margin",
+      1
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      6
+     ],
+     [
+      "free_cash_flow",
+      2
+     ],
+     [
+      "eps_diluted",
+      2
+     ],
+     [
+      "net_income",
+      2
+     ],
+     [
+      "operating_income",
+      1
+     ],
+     [
+      "gross_margin",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ABNB",
+      "style": "news_story",
+      "draft_line": "Free cash flow was $1.3 billion, up 30%, with a 35% margin, while trailing twelve month free cash flow reached $4.8 billion at a 37% margin.",
+      "value_text": "$1.3 billion",
+      "metric": "free_cash_flow",
+      "metric_text": "Free cash flow",
+      "reason": "no_evidence",
+      "explanation": "No press-release fact for Airbnb's non-GAAP free cash flow for Q2 2026 (quarter ended Jun 30, 2026) (non-GAAP figures come only from earnings releases)."
+     },
+     {
+      "ticker": "CSCO",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Non-GAAP operating income advanced to **$6.2 billion**, with a non-GAAP operating margin of **35.9%**.",
+      "value_text": "$6.2 billion",
+      "metric": "operating_income",
+      "metric_text": "Non-GAAP operating income",
+      "reason": "no_evidence",
+      "explanation": "No press-release fact for Cisco's non-GAAP operating income for Q4 FY2026 (quarter ended Jul 25, 2026) (non-GAAP figures come only from earnings releases)."
+     },
+     {
+      "ticker": "CVS",
+      "style": "news_story",
+      "draft_line": "CVS Health reported second-quarter GAAP diluted EPS of $2.31, up from $0.80 in the prior year, while adjusted EPS climbed to $2.58 from $1.81.",
+      "value_text": "$2.58",
+      "metric": "eps_diluted",
+      "metric_text": "adjusted EPS",
+      "reason": "no_evidence",
+      "explanation": "No press-release fact for CVS Health's non-GAAP diluted EPS for Q2 2026 (quarter ended Jun 30, 2026) (non-GAAP figures come only from earnings releases)."
+     }
+    ]
+   },
+   {
+    "bucket": "qualifier_wording",
+    "label": "Qualifier wording",
+    "count": 68,
+    "share": 0.0842,
+    "drafts": 32,
+    "top_words": [
+     [
+      "U.S.",
+      6
+     ],
+     [
+      "cash",
+      4
+     ],
+     [
+      "reaching",
+      4
+     ],
+     [
+      "operating",
+      3
+     ],
+     [
+      "comparable",
+      3
+     ],
+     [
+      "excluding special items",
+      3
+     ],
+     [
+      "core",
+      2
+     ],
+     [
+      "per share",
+      2
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      16
+     ],
+     [
+      "other",
+      14
+     ],
+     [
+      "eps_diluted",
+      12
+     ],
+     [
+      "operating_income",
+      6
+     ],
+     [
+      "net_income",
+      5
+     ],
+     [
+      "segment_revenue",
+      4
+     ],
+     [
+      "revenue",
+      3
+     ],
+     [
+      "dividend_per_share",
+      2
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ABNB",
+      "style": "news_story",
+      "draft_line": "Free cash flow was $1.3 billion, up 30%, with a 35% margin, while trailing twelve month free cash flow reached $4.8 billion at a 37% margin.",
+      "value_text": "$4.8 billion",
+      "metric": "free_cash_flow",
+      "metric_text": "trailing twelve month free cash flow",
+      "reason": "no_evidence",
+      "explanation": "The wording “twelve month” qualifies this figure (trailing twelve month free cash flow) in a way NoCap can't match to a filing fact, so there is nothing to check it against."
+     },
+     {
+      "ticker": "AEP",
+      "style": "analyst_note",
+      "draft_line": "Operating earnings rose to $1,216 million, or $2.23 per share, compared with $963 million, or $1.80 per share, a year earlier, extending the strong year-to-date performance cited by the company.",
+      "value_text": "$2.23",
+      "metric": "eps_diluted",
+      "metric_text": "operating earnings per share",
+      "reason": "no_evidence",
+      "explanation": "The wording “operating” qualifies this figure (operating earnings per share) in a way NoCap can't match to a filing fact, so there is nothing to check it against."
+     },
+     {
+      "ticker": "AIG",
+      "style": "bullet_recap",
+      "draft_line": "- Adjusted after-tax income: $1.1 billion, or $2.00 per diluted share, up 10% year-over-year",
+      "value_text": "$2.00",
+      "metric": "eps_diluted",
+      "metric_text": "Adjusted after-tax income per diluted share",
+      "reason": "no_evidence",
+      "explanation": "The wording “after-tax income” qualifies this figure (Adjusted after-tax income per diluted share) in a way NoCap can't match to a filing fact, so there is nothing to check it against."
+     }
+    ]
+   },
+   {
+    "bucket": "untracked_kind",
+    "label": "Untracked kind of figure",
+    "count": 353,
+    "share": 0.4369,
+    "drafts": 50,
+    "top_words": [
+     [
+      "shares repurchased",
+      4
+     ],
+     [
+      "returned to shareholders",
+      4
+     ],
+     [
+      "dividends",
+      4
+     ],
+     [
+      "Share repurchases",
+      4
+     ],
+     [
+      "share repurchases",
+      3
+     ],
+     [
+      "Adjusted EBITDA",
+      3
+     ],
+     [
+      "Segment EBITDA",
+      3
+     ],
+     [
+      "Book value per share",
+      3
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      290
+     ],
+     [
+      "capital_returned",
+      22
+     ],
+     [
+      "eps_diluted",
+      12
+     ],
+     [
+      "repurchase_authorization_remaining",
+      7
+     ],
+     [
+      "dividend_per_share",
+      5
+     ],
+     [
+      "gross_margin",
+      4
+     ],
+     [
+      "operating_cash_flow",
+      3
+     ],
+     [
+      "operating_income",
+      3
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ABNB",
+      "style": "news_story",
+      "draft_line": "The company reported gross booking value of $27.2 billion, up 16%, while nights and seats booked climbed 10% to 148.3 million.",
+      "value_text": "$27.2 billion",
+      "metric": "other",
+      "metric_text": "gross booking value",
+      "reason": "no_evidence",
+      "explanation": "NoCap doesn't track this kind of figure (gross booking value) yet, so there is no filing fact to check."
+     },
+     {
+      "ticker": "AEP",
+      "style": "analyst_note",
+      "draft_line": "American Electric Power reported third-quarter 2026 GAAP earnings of $1,187 million, or $2.18 per share, up from $972 million, or $1.82 per share, in third-quarter 2025.",
+      "value_text": "$972 million",
+      "metric": "net_income",
+      "metric_text": "GAAP earnings",
+      "reason": "no_evidence",
+      "explanation": "NoCap doesn't track this kind of figure (GAAP earnings) yet, so there is no filing fact to check."
+     },
+     {
+      "ticker": "AIG",
+      "style": "bullet_recap",
+      "draft_line": "- Adjusted after-tax income: $1.1 billion, or $2.00 per diluted share, up 10% year-over-year",
+      "value_text": "$1.1 billion",
+      "metric": "other",
+      "metric_text": "Adjusted after-tax income",
+      "reason": "no_evidence",
+      "explanation": "NoCap doesn't track this kind of figure (Adjusted after-tax income) yet, so there is no filing fact to check."
+     }
+    ]
+   },
+   {
+    "bucket": "period",
+    "label": "Period ambiguous or unresolved",
+    "count": 104,
+    "share": 0.1287,
+    "drafts": 19,
+    "top_words": [
+     [
+      "net sales",
+      4
+     ],
+     [
+      "adjusted EPS",
+      3
+     ],
+     [
+      "free cash flow",
+      3
+     ],
+     [
+      "revenues",
+      3
+     ],
+     [
+      "net income",
+      3
+     ],
+     [
+      "per diluted share",
+      3
+     ],
+     [
+      "net operating income",
+      2
+     ],
+     [
+      "adjusted net income",
+      2
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      22
+     ],
+     [
+      "revenue_growth",
+      18
+     ],
+     [
+      "eps_diluted",
+      17
+     ],
+     [
+      "net_income",
+      11
+     ],
+     [
+      "revenue",
+      10
+     ],
+     [
+      "segment_revenue",
+      7
+     ],
+     [
+      "operating_cash_flow",
+      6
+     ],
+     [
+      "operating_income",
+      6
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "AWK",
+      "style": "analyst_note",
+      "draft_line": "Over the first nine months, segment net income jumped to $946 million from $872 million.",
+      "value_text": "$946 million",
+      "metric": "net_income",
+      "metric_text": "segment net income",
+      "reason": "ambiguous",
+      "explanation": "Couldn't tell which American Water Works Company, Inc. fiscal period \"Over the first nine months\" refers to."
+     },
+     {
+      "ticker": "CVS",
+      "style": "news_story",
+      "draft_line": "CVS Health reported second-quarter GAAP diluted EPS of $2.31, up from $0.80 in the prior year, while adjusted EPS climbed to $2.58 from $1.81.",
+      "value_text": "$0.80",
+      "metric": "eps_diluted",
+      "metric_text": "GAAP diluted EPS",
+      "reason": "ambiguous",
+      "explanation": "Couldn't tell which CVS Health fiscal period \"in the prior year\" refers to."
+     },
+     {
+      "ticker": "DASH",
+      "style": "news_story",
+      "draft_line": "Excluding Deliveroo, the company said total orders grew 17%, with Marketplace GOV up 23% and revenue also advancing 23%.",
+      "value_text": "23%",
+      "metric": "revenue_growth",
+      "metric_text": "revenue",
+      "reason": "ambiguous",
+      "explanation": "Couldn't tell which DoorDash, Inc. fiscal period \"no period\" refers to."
+     }
+    ]
+   },
+   {
+    "bucket": "other",
+    "label": "Other",
+    "count": 52,
+    "share": 0.0644,
+    "drafts": 20,
+    "top_words": [
+     [
+      "net income",
+      2
+     ],
+     [
+      "Revenue",
+      2
+     ],
+     [
+      "segment operating income",
+      2
+     ],
+     [
+      "total debt",
+      2
+     ],
+     [
+      "operating income",
+      2
+     ],
+     [
+      "Net premiums written excluding North America Property growth",
+      1
+     ],
+     [
+      "Capital returned to shareholders",
+      1
+     ],
+     [
+      "Domestic online revenue",
+      1
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      22
+     ],
+     [
+      "segment_revenue",
+      10
+     ],
+     [
+      "other",
+      6
+     ],
+     [
+      "operating_income",
+      5
+     ],
+     [
+      "net_income",
+      4
+     ],
+     [
+      "capital_returned",
+      1
+     ],
+     [
+      "operating_cash_flow",
+      1
+     ],
+     [
+      "repurchase_authorization_remaining",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "AIG",
+      "style": "bullet_recap",
+      "draft_line": "- Net premiums written excluding North America Property: up 11%",
+      "value_text": "11%",
+      "metric": "revenue_growth",
+      "metric_text": "Net premiums written excluding North America Property growth",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for American International Group's General Insurance excluding North America Property revenue growth for Q2 2026 (quarter ended Jun 30, 2026)."
+     },
+     {
+      "ticker": "AWK",
+      "style": "analyst_note",
+      "draft_line": "The Regulated Businesses drove profitability, with net income climbing to $407 million in the third quarter from $383 million a year earlier.",
+      "value_text": "$407 million",
+      "metric": "net_income",
+      "metric_text": "net income",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for American Water Works Company, Inc.'s Regulated Businesses net income for Q3 2026 (quarter ended Sep 30, 2026)."
+     },
+     {
+      "ticker": "BBY",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Domestic online revenue grew **5.1%** on a comparable basis to **$3.00 billion**.",
+      "value_text": "$3.00 billion",
+      "metric": "segment_revenue",
+      "metric_text": "Domestic online revenue",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for Best BUY Co Inc's Domestic online revenue for Q2 FY2027 (quarter ended Aug 1, 2026)."
+     }
+    ],
+    "top_templates": [
+     [
+      "This claim is net income available to common stockholders, which can differ after preferred dividends; NoCap doesn't resolve that basis here, so it cannot compa",
+      3
+     ],
+     [
+      "No filing fact for American Water Works Company, <Company>'s Regulated Businesses net income for <period> (…).",
+      2
+     ],
+     [
+      "NoCap checks operating income in dollars, and this figure is written in percent.",
+      2
+     ],
+     [
+      "NoCap checks revenue growth in percent, and this figure is written in other.",
+      2
+     ],
+     [
+      "No filing fact for <Company>'s General Insurance excluding North America Property revenue growth for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s capital returned to shareholders for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Domestic online revenue for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Financial Products revenue for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Enterprise operating cash flow for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Latin America revenue growth for <period> (…).",
+      1
+     ]
+    ]
+   }
+  ]
+ },
+ "coverage": {
+  "figures_in_source": 1196,
+  "verified_any": 387,
+  "verified_filed_fact": 215,
+  "rate_any": 0.3236,
+  "rate_filed_fact": 0.1798,
+  "wrong_on_source_figures": 7,
+  "outcomes": {
+   "✓ filed fact": 215,
+   "not extracted": 8,
+   "?": 794,
+   "✓ release statement": 172,
+   "✗": 7
+  },
+  "by_style": {
+   "analyst_note": {
+    "✓ release statement": 32,
+    "✓ filed fact": 64,
+    "?": 217,
+    "not extracted": 2,
+    "✗": 4,
+    "rate_any": 0.3009
+   },
+   "bullet_recap": {
+    "✓ release statement": 78,
+    "✓ filed fact": 66,
+    "?": 142,
+    "not extracted": 2,
+    "rate_any": 0.5
+   },
+   "chatgpt_markdown": {
+    "?": 177,
+    "✓ release statement": 52,
+    "✓ filed fact": 68,
+    "not extracted": 2,
+    "✗": 3,
+    "rate_any": 0.3974
+   },
+   "news_story": {
+    "✓ filed fact": 17,
+    "not extracted": 2,
+    "?": 258,
+    "✓ release statement": 10,
+    "rate_any": 0.0941
+   }
+  }
+ },
+ "costs": {
+  "write": {
+   "stage": "write",
+   "cap_usd": 3.4,
+   "ledger_total_usd": 2.293622,
+   "this_run_usd": 2.293622,
+   "attempts_this_run": 51,
+   "stub": false
+  },
+  "check": {
+   "stage": "check",
+   "cap_usd": 4.0,
+   "ledger_total_usd": 1.217068,
+   "this_run_usd": 1.217068,
+   "attempts_this_run": 216,
+   "stub": false
+  }
+ },
+ "per_draft": [
+  {
+   "draft_id": "ABNB-2026Q2",
+   "ticker": "ABNB",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 32,
+   "not_in_source": 0,
+   "claims": 31,
+   "verified": 8,
+   "wrong": 0,
+   "unverifiable": 23,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AEP-2026Q3",
+   "ticker": "AEP",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 3,
+   "wrong": 0,
+   "unverifiable": 21,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AIG-2026Q2",
+   "ticker": "AIG",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 27,
+   "not_in_source": 0,
+   "claims": 27,
+   "verified": 13,
+   "wrong": 0,
+   "unverifiable": 14,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AMT-2026Q3",
+   "ticker": "AMT",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 1,
+   "wrong": 0,
+   "unverifiable": 21,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AWK-2026Q3",
+   "ticker": "AWK",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "BBY-2027Q2",
+   "ticker": "BBY",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 11,
+   "wrong": 0,
+   "unverifiable": 14,
+   "approximate": 0
+  },
+  {
+   "draft_id": "BKR-2026Q3",
+   "ticker": "BKR",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 12,
+   "wrong": 0,
+   "unverifiable": 11,
+   "approximate": 0
+  },
+  {
+   "draft_id": "BNY-2026Q3",
+   "ticker": "BNY",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 16,
+   "wrong": 0,
+   "unverifiable": 6,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CAT-2026Q2",
+   "ticker": "CAT",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 26,
+   "not_in_source": 0,
+   "claims": 26,
+   "verified": 13,
+   "wrong": 1,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CB-2026Q3",
+   "ticker": "CB",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 6,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "COF-2026Q2",
+   "ticker": "COF",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 13,
+   "wrong": 1,
+   "unverifiable": 9,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CSCO-2026Q4",
+   "ticker": "CSCO",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 11,
+   "wrong": 0,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CTSH-2026Q3",
+   "ticker": "CTSH",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 2,
+   "claims": 22,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 22,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CVS-2026Q2",
+   "ticker": "CVS",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 3,
+   "wrong": 0,
+   "unverifiable": 20,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DASH-2026Q3",
+   "ticker": "DASH",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 20,
+   "not_in_source": 0,
+   "claims": 20,
+   "verified": 4,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DG-2026Q2",
+   "ticker": "DG",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 15,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DGX-2026Q3",
+   "ticker": "DGX",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 18,
+   "not_in_source": 0,
+   "claims": 21,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 21,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DIS-2026Q1",
+   "ticker": "DIS",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 26,
+   "not_in_source": 0,
+   "claims": 26,
+   "verified": 8,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "EG-2026Q3",
+   "ticker": "EG",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 23,
+   "approximate": 0
+  },
+  {
+   "draft_id": "EW-2026Q2",
+   "ticker": "EW",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 3,
+   "claims": 24,
+   "verified": 10,
+   "wrong": 0,
+   "unverifiable": 14,
+   "approximate": 0
+  },
+  {
+   "draft_id": "EXE-2026Q3",
+   "ticker": "EXE",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "EXPD-2026Q2",
+   "ticker": "EXPD",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 22,
+   "approximate": 0
+  },
+  {
+   "draft_id": "FAST-2026Q3",
+   "ticker": "FAST",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 7,
+   "wrong": 2,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "HUBB-2026Q3",
+   "ticker": "HUBB",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 7,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "IBKR-2026Q2",
+   "ticker": "IBKR",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 27,
+   "verified": 17,
+   "wrong": 0,
+   "unverifiable": 10,
+   "approximate": 0
+  },
+  {
+   "draft_id": "J-2026Q3",
+   "ticker": "J",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 26,
+   "not_in_source": 0,
+   "claims": 26,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 26,
+   "approximate": 0
+  },
+  {
+   "draft_id": "JBHT-2026Q3",
+   "ticker": "JBHT",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 28,
+   "not_in_source": 0,
+   "claims": 27,
+   "verified": 12,
+   "wrong": 0,
+   "unverifiable": 15,
+   "approximate": 0
+  },
+  {
+   "draft_id": "LITE-2026Q4",
+   "ticker": "LITE",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 13,
+   "wrong": 0,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "LLY-2025Q1",
+   "ticker": "LLY",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "MAS-2026Q3",
+   "ticker": "MAS",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "MCHP-2027Q1",
+   "ticker": "MCHP",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 12,
+   "wrong": 0,
+   "unverifiable": 11,
+   "approximate": 0
+  },
+  {
+   "draft_id": "MCO-2026Q3",
+   "ticker": "MCO",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 11,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "META-2026Q3",
+   "ticker": "META",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 11,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "MLM-2026Q2",
+   "ticker": "MLM",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 11,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "NXPI-2026Q3",
+   "ticker": "NXPI",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 16,
+   "wrong": 0,
+   "unverifiable": 8,
+   "approximate": 0
+  },
+  {
+   "draft_id": "PKG-2026Q2",
+   "ticker": "PKG",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 19,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 5,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "PM-2026Q3",
+   "ticker": "PM",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 12,
+   "wrong": 0,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ROL-2026Q3",
+   "ticker": "ROL",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 23,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ROST-2026Q2",
+   "ticker": "ROST",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 8,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "SBUX-2026Q3",
+   "ticker": "SBUX",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 14,
+   "wrong": 0,
+   "unverifiable": 11,
+   "approximate": 0
+  },
+  {
+   "draft_id": "SCHW-2026Q2",
+   "ticker": "SCHW",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 26,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 15,
+   "wrong": 0,
+   "unverifiable": 10,
+   "approximate": 0
+  },
+  {
+   "draft_id": "SJM-2027Q1",
+   "ticker": "SJM",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 7,
+   "wrong": 2,
+   "unverifiable": 14,
+   "approximate": 0
+  },
+  {
+   "draft_id": "TECH-2026Q4",
+   "ticker": "TECH",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 25,
+   "approximate": 0
+  },
+  {
+   "draft_id": "TYL-2026Q3",
+   "ticker": "TYL",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 21,
+   "wrong": 0,
+   "unverifiable": 3,
+   "approximate": 0
+  },
+  {
+   "draft_id": "UNH-2025Q3",
+   "ticker": "UNH",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 13,
+   "wrong": 0,
+   "unverifiable": 10,
+   "approximate": 0
+  },
+  {
+   "draft_id": "VICI-2026Q3",
+   "ticker": "VICI",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 7,
+   "wrong": 0,
+   "unverifiable": 17,
+   "approximate": 0
+  },
+  {
+   "draft_id": "VLTO-2026Q3",
+   "ticker": "VLTO",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "VMC-2026Q3",
+   "ticker": "VMC",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 10,
+   "wrong": 1,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "VTR-2026Q3",
+   "ticker": "VTR",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 3,
+   "wrong": 0,
+   "unverifiable": 20,
+   "approximate": 0
+  },
+  {
+   "draft_id": "WDAY-2027Q2",
+   "ticker": "WDAY",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 15,
+   "wrong": 0,
+   "unverifiable": 10,
+   "approximate": 0
+  }
+ ],
+ "notes": [
+  "The drafts are written from the same release sentences the release-statement matcher reads, so a release-statement ✓ is partly circular; a filed-fact ✓ (10-Q/10-K XBRL, or the release's own table) is not.",
+  "Provenance compares values only: a source_match figure may still carry the wrong measure, period or basis, so each possible false alarm needs a human read before any fix."
+ ]
+}

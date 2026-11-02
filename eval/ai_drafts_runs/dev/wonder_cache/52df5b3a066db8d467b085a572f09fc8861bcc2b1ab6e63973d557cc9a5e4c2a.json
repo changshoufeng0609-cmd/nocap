@@ -1,0 +1,21 @@
+{
+ "request_sha256": "52df5b3a066db8d467b085a572f09fc8861bcc2b1ab6e63973d557cc9a5e4c2a",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:01Z",
+ "response_id": "resp_6ae865b15d5c353b059645af",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1703,
+  "output_tokens": 1965,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1615
+ },
+ "cost_usd": 0.044698,
+ "latency_s": 12.98,
+ "output_text": "{\"draft\": \"Nike Fiscal First-Quarter Earnings Note\\nRevenue contracted in the quarter while profitability held up better, with margin expansion and controlled overhead partly cushioning weaker sales.\\n\\nFirst-quarter revenues were $11.2 billion, down 4 percent on a reported basis and down 5 percent on a currency-neutral basis. NIKE Brand wholesale revenues were $6.8 billion, down 1 percent on a reported and currency-neutral basis, while NIKE Direct revenues were $4.1 billion, down 8 percent on a reported basis, hurt by a 13 percent decrease in NIKE Brand Digital. Converse revenues were $263 million, down 28 percent on a reported and currency-neutral basis, with declines across all territories.\\n\\nGross margin expanded 60 basis points to 42.8 percent, helped by lower warehousing and logistics costs. Net income was $0.7 billion, and diluted earnings per share was $0.48. Selling and administrative expense decreased to $3.9 billion, reflecting lower operating overhead even as demand creation investment climbed.\\n\\nCash and equivalents and short-term investments were $8.4 billion at quarter end. In the first quarter, the company returned approximately $610 million to shareholders through dividends.\\n\\nOutlook: Revenues are expected to decline high-single digits in fiscal 2027. The effective tax rate for fiscal 2027 is expected to be in the mid-20 percent range, and adjusted diluted earnings per share is expected to be in the range of $1.15 to $1.35. NIKE expects Pace to deliver approximately $2.5 billion in cumulative savings through fiscal 2031.\"}",
+ "ticker": "NKE",
+ "stub": false
+}

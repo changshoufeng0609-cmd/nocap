@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e557ace9d5fa0fb92e4ed8ca5fd84f50acff83b8092ae43cb2144163921ea874",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:46Z",
+ "response_id": "resp_6ae865de391770d64d9f41ce",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2198,
+  "output_tokens": 1310,
+  "cached_tokens": 372,
+  "reasoning_tokens": 777
+ },
+ "cost_usd": 0.033578,
+ "latency_s": 10.21,
+ "output_text": "{\"draft\": \"Weyerhaeuser Q3 2026: Sales Rise, Profitability Softens Sequentially\\nNet sales climbed year over year, although net earnings slipped from last year and eased sharply from the prior quarter.\\n\\nWeyerhaeuser reported third-quarter net sales of $1.9 billion, up from $1.7 billion in the same period last year. Net earnings came in at $61 million, or $0.08 per diluted share, compared with $80 million, or 11 cents per diluted share, a year earlier and $162 million in second quarter 2026. There were no special items in the quarter, while net earnings before special items was $40 million last year and $91 million in the second quarter. Adjusted EBITDA rose to $248 million, a 14 percent increase from $217 million last year, though it declined from $310 million in the second quarter.\\n\\nOperational commentary was mixed across the portfolio. In the West, fee harvest volumes and forestry and road costs were comparable to the second quarter, while earnings and Adjusted EBITDA fell sequentially due to the timing and mix of Real Estate sales. For lumber, delivered sales realizations were slightly higher than the second quarter average, while oriented strand board sales realizations slipped 2 percent versus the second quarter average.\\n\\nBeyond the core operations, the company monetized approximately 340,000 forest carbon credits year-to-date through the third quarter and said it is on pace for its highest annual sales volume since the program's inception. Weyerhaeuser also signed a geothermal energy exploration agreement covering approximately 145,000 acres in Oregon and Washington. In October, it entered into an agreement to divest approximately 81,000 acres of non-core timberlands in Arkansas for $146 million.\\n\\nOutlook: Weyerhaeuser anticipates fourth quarter earnings before special items and Adjusted EBITDA will be comparable to the third quarter for one part of the business, while another outlook calls for earnings before special items approximately $35 million lower than the third quarter and Adjusted EBITDA approximately $45 million lower, reflecting the timing and mix of Real Estate sales. A further segment is expected to post moderately lower fourth quarter earnings before special items and Adjusted EBITDA than the third quarter, excluding changes in average sales realizations for lumber and oriented strand board. For Strategic Land Solutions, the company continues to expect full year 2026 Adjusted EBITDA of approximately $450 million, a $25 million increase from the initial outlook, with basis as a percentage of sales of 15 to 20 percent for the full year.\"}",
+ "ticker": "WY",
+ "stub": false
+}

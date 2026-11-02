@@ -57,10 +57,11 @@ def check_detailed(text: str, *, as_of: Any = None, context: Optional[str] = Non
     store = store if store is not None else default_store()  # fail before spending on the model API
     if "extra_cache_dirs" not in extract_kwargs and hasattr(store, "db_path"):
         extract_kwargs["extra_cache_dirs"] = [store.db_path.parent / "spark_cache"]
-    ctx = _extract.infer_context(text) if context is None else (context.strip() or None)
+    named = _verify.named_in_draft(text, store)  # the only companies a wrong figure may be attributed to
+    ctx = (_verify.with_draft_company(_extract.infer_context(text), text, store, named) if context is None
+           else (context.strip() or None))
     extraction = _extract.extract_detailed(text, ctx if ctx is not None else "", **extract_kwargs)
     results: list[tuple[Claim, Verdict]] = []
-    named = _verify.named_in_draft(text, store)  # the only companies a wrong figure may be attributed to
     for claim in extraction.claims:
         try:
             verdict = _verify.verify(claim, store, as_of=as_of_dt, context=ctx, draft=text,

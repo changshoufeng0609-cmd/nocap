@@ -1,0 +1,21 @@
+{
+ "request_sha256": "0538f3d35ac4ae1c3a57fecf1e7ccd945b897b11eaf3c8775c14d4fe97ac0725",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:40Z",
+ "response_id": "resp_6ae8659cc06cd30b8a0b4022",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 4067,
+  "output_tokens": 1598,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1168
+ },
+ "cost_usd": 0.046814,
+ "latency_s": 13.01,
+ "output_text": "{\"draft\": \"Gilead Sciences Q3 2026: HIV and Oncology Strength Drive Product Sales Growth\\nStrong HIV and oncology sales lifted third-quarter product sales, while higher product sales supported a modest rise in non-GAAP earnings per share.\\n\\nTotal product sales climbed 13% to $8.3 billion in the third quarter of 2026, and product sales excluding Veklury rose 16% to $8.2 billion. Diluted EPS slipped to $1.94 from $2.43 a year earlier, reflecting net losses from equity securities, higher operating expenses and higher income tax expense, partly offset by higher product sales. Non-GAAP diluted EPS was $2.55, while product gross margin reached 81.0%, helped by the expiration of a royalty-related obligation.\\n\\nHIV product sales grew to $6.2 billion, led by Biktarvy at $4.1 billion and a 49% jump in Descovy sales, driven by higher demand in HIV prevention, higher average realized price and favorable inventory dynamics. Trodelvy sales surged to $506 million on higher demand, partly offsetting weakness elsewhere. Veklury sales fell to $86 million amid lower COVID-19-related hospitalizations, and Cell Therapy product sales declined to $355 million as competitive headwinds persisted.\\n\\nCash generation remained strong, with $5.0 billion of operating cash flow generated during the quarter. The company paid dividends of $1.0 billion and repurchased $370 million of common stock in the quarter, ending the period with $6.4 billion of cash, cash equivalents and marketable debt securities.\\n\\nOutlook: Management raised full-year base business revenue guidance again, bringing the total increase to $1.6 billion since the start of 2026. Full-year GAAP and non-GAAP diluted loss per share guidance includes an impact of approximately $9.88 from acquired IPR&D charges of $12.4 billion related to transactions announced this year, net of the Lakefront collaboration and related taxes.\"}",
+ "ticker": "GILD",
+ "stub": false
+}

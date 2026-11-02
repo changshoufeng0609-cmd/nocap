@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AccuracyPanel } from "@/components/accuracy-panel";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatDay } from "@/lib/format";
+import accuracy from "./accuracy.json";
 import data from "./results.json";
 
 export const metadata: Metadata = {
@@ -80,6 +82,8 @@ export default function BenchmarksPage() {
           <Link className="underline underline-offset-4" href="/">Open the workspace</Link>
         </div>
       </header>
+
+      <AccuracyPanel data={accuracy} />
 
       <section aria-labelledby="answer-results" className="space-y-4">
         <div className="max-w-4xl space-y-2">

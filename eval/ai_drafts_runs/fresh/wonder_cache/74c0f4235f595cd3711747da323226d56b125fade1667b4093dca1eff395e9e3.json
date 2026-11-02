@@ -1,0 +1,21 @@
+{
+ "request_sha256": "74c0f4235f595cd3711747da323226d56b125fade1667b4093dca1eff395e9e3",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:49Z",
+ "response_id": "resp_6ae86875f75f661211be411f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2935,
+  "output_tokens": 1377,
+  "cached_tokens": 372,
+  "reasoning_tokens": 958
+ },
+ "cost_usd": 0.037866,
+ "latency_s": 11.09,
+ "output_text": "{\"draft\": \"Lumentum Q4 Fiscal 2026: Revenue Crosses $1 Billion\\nAdjusted profitability expanded sharply as revenue climbed, even as a one-time non-cash debt charge drove a large GAAP loss.\\n\\nRevenue reached $1.01 billion in the fiscal fourth quarter, up from $808.4 million in the third quarter and $480.7 million in the fourth quarter of fiscal year 2025. Management cited broad-based traction, with OCS solutions and the cloud module business, including advancing 1.6T adoption, beginning to layer in as growth drivers.\\n\\nGAAP gross margin was 47.4%, while non-GAAP gross margin was 50.4%. GAAP operating margin came in at 27.8%, compared with non-GAAP operating margin of 36.6%. The GAAP net loss was $7.2 billion, or $84.65 per diluted share, driven by a one-time, non-cash loss on debt extinguishment of $7.8 billion tied to the equitization of certain convertible notes. On a non-GAAP basis, net income rose to $326.3 million, or $3.23 per diluted share, from $225.7 million, or $2.37 per diluted share, in the third quarter.\\n\\nLumentum held $2.7 billion in total cash, cash equivalents, and short-term investments at quarter end. That balance declined by $433.9 million from the end of the third quarter, while increasing by $1.9 billion from the end of fiscal year 2025.\\n\\nOutlook: For the first quarter of fiscal year 2027, Lumentum expects net revenue of $1.225 billion to $1.275 billion, with a guidance midpoint of $1.25 billion, non-GAAP operating margin of 39.5% to 40.5%, and non-GAAP diluted net income per share of $4.05 to $4.35.\"}",
+ "ticker": "LITE",
+ "stub": false
+}

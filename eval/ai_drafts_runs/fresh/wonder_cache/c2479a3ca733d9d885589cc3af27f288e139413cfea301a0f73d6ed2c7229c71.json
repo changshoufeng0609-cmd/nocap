@@ -1,0 +1,21 @@
+{
+ "request_sha256": "c2479a3ca733d9d885589cc3af27f288e139413cfea301a0f73d6ed2c7229c71",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:46Z",
+ "response_id": "resp_6ae868357c320bba424044fd",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3386,
+  "output_tokens": 1314,
+  "cached_tokens": 0,
+  "reasoning_tokens": 965
+ },
+ "cost_usd": 0.039824,
+ "latency_s": 12.89,
+ "output_text": "{\"draft\": \"Caterpillar Q2 2026: First Quarter Above $20 Billion in Sales\\nCaterpillar delivered record quarterly sales as growth across its main equipment segments lifted revenue and profitability sharply.\\n\\nSales and revenues rose to $20.5 billion, up 24% from $16.6 billion a year earlier. Operating profit climbed to $4.295 billion, up 50%, with operating profit margin expanding to 20.9% from 17.3% and adjusted operating profit margin reaching 21.9%. Profit per share increased to $7.77 from $4.62, while adjusted profit per share came in at $8.17.\\n\\nPower & Energy sales grew to $8.238 billion, up 17%, and segment profit rose to $2.027 billion. Construction Industries was the fastest-growing major segment, with sales surging to $8.346 billion, up 35%, and segment profit advancing to $1.947 billion. Resource Industries sales climbed to $4.648 billion, up 20%, while segment profit increased to $693 million.\\n\\nFinancial Products revenues rose to $1.145 billion. Enterprise operating cash flow was $4.4 billion, and the company ended the quarter with $6.7 billion of enterprise cash. Capital returns included $1.5 billion deployed for repurchases of Caterpillar common stock and $0.7 billion for dividends.\\n\\nOutlook: With no quantified guidance provided in the release, investors will watch for updates on sales volume and price realization, manufacturing costs, tariff recoveries, restructuring tied to divestitures, and credit conditions at Cat Financial.\"}",
+ "ticker": "CAT",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "33da84e686529b1d60d745f00fd14386704f6f566bce187939f0a3f15ff6a0f1",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:08Z",
+ "response_id": "resp_6ae865b8eeace2936c0c4dd8",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2148,
+  "output_tokens": 1671,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1363
+ },
+ "cost_usd": 0.040598,
+ "latency_s": 12.87,
+ "output_text": "{\"draft\": \"O'Reilly Second-Quarter Profit and Sales Rise\\nO'Reilly Automotive reported higher second-quarter results, with sales rising 8% to $4.89 billion from $4.53 billion a year earlier as comparable store sales increased 6.0%.\\nGross profit grew to $2.52 billion, or 51.4% of sales, while operating income climbed to $986 million, or 20.2% of sales. Selling, general and administrative expenses rose to $1.53 billion.\\nNet income increased 7% to $715 million. Diluted earnings per common share jumped 10% to $0.86, compared with $0.78 a year earlier.\\nFor the first six months of 2026, O'Reilly said sales advanced to $9.45 billion and net income reached $1.32 billion. Diluted earnings per common share for the period rose to $1.58.\\nThe company said it repurchased 16.7 million shares during the second quarter at an average price of $90.40 per share, for a total investment of $1.51 billion.\\nO'Reilly raised its full-year 2026 comparable store sales guidance to a range of 4% to 6%. The company said it had opened 110 net new stores year to date across North America and was on track for 225 to 235 net new store openings in 2026.\"}",
+ "ticker": "ORLY",
+ "stub": false
+}

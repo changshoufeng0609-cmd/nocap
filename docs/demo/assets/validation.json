@@ -22,7 +22,7 @@
     ],
     "format": {
       "duration": "171.880000",
-      "size": "37044660"
+      "size": "37102660"
     }
   },
   "gif_probe": {
@@ -45,10 +45,10 @@
   "full_video_decode": "passed",
   "full_gif_decode": "passed",
   "asset_sha256": {
-    "receipts-demo.mp4": "9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897",
+    "receipts-demo.mp4": "61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0",
     "receipts-demo.gif": "c61698a43e3d655f021bca96367a78397af5dba24f9798717e18dafabd9a45c6",
-    "receipts-demo.en.srt": "ae95c448fbc2e9fa0bcdc1fdc0db03b5e4de81f119bfd6e5606657e6438010e4",
-    "receipts-demo.en.vtt": "cd4a5ccf352e37d84dcccbc1d6e75508e81d55cb373d5a3f37778372b6814dca",
+    "receipts-demo.en.srt": "168d2610fb999ebd63b976efe24be9fa555e9ada04fa74831fc1c13f5c0095cc",
+    "receipts-demo.en.vtt": "a464bf206c195f787af919f1af65281fa9b0f70e6ce17166b45202a5a6e0e707",
     "nocap-x.mp4": "3b03ca6cb3e7d37936f0710139d1a68f72039be32381b0e48b1725de5dffa714",
     "nocap-x.en.srt": "d7cf51e51b6afddfa23ac7bb6197cb5c7fcf3742622deb499136a270fa6dc915",
     "nocap-x.en.vtt": "de468b033da22c370172a370ff80aa0099c44205522fb5e00edf52025a1bf51f"
@@ -153,6 +153,7 @@
     "screenshot_179s",
     "v1_165s",
     "v21_172s",
+    "v21_coverage_172s",
     "v21_endcard_172s",
     "v21_endcard_x_56s",
     "v21_x_56s",

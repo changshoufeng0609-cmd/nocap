@@ -1,0 +1,21 @@
+{
+ "request_sha256": "9d818264a44b9c4ae2880640620100e9db38d6bd47e84d93f73f535a8dbd80b8",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:15Z",
+ "response_id": "resp_6ae865bf0ec481a5a1474c3c",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2936,
+  "output_tokens": 1873,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1408
+ },
+ "cost_usd": 0.04779,
+ "latency_s": 14.54,
+ "output_text": "{\"draft\": \"# Procter & Gamble Q1 FY2027 Earnings Summary\\n\\nProcter & Gamble opened fiscal 2027 with net sales climbing to **$23.3 billion**, up **4%** from a year earlier. Diluted net earnings per share reached **$1.97** and core earnings per share came in at **$2.00**, with each measure rising **1%**.\\n\\n**Revenue and Growth**\\n- Net sales grew **4%** as higher sales were partly offset by increased operating costs.\\n- Currency-neutral core EPS was unchanged versus the prior year.\\n\\n**Profitability**\\n- Reported gross margin declined **160 basis points** versus the prior year.\\n- Core gross margin slipped **150 basis points** during the quarter.\\n- Reported SG&A as a percentage of sales fell **90 basis points** year over year.\\n- Reported operating margin decreased **70 basis points** versus the prior year.\\n\\n**Cash Flow and Capital Returns**\\n- Operating cash flow totaled **$5.8 billion**, while net earnings were **$4.8 billion**.\\n- Free cash flow productivity stood at **93%**.\\n- The company returned **$3.9 billion** to shareowners, including **$2.6 billion** in dividend payments and **$1.3 billion** in share repurchases.\\n\\n**Outlook**\\n- Fiscal 2027 all-in sales growth is now expected in the range of **2% to 4%** versus the prior year.\\n- Core EPS is projected at **$6.89 to $7.11** per share, with a midpoint estimate of **$7.00**.\\n- The company now expects a commodity cost headwind of approximately **$1.4 billion** after tax.\\n- For fiscal 2027, the company expects to pay over **$10 billion** in dividends and repurchase approximately **$5 billion** of common shares.\\n\\n**Bottom Line**\\nThe quarter featured solid sales growth and modest earnings gains, even as margins came under pressure from higher costs. Cash generation remained strong, supporting continued dividends and share repurchases.\"}",
+ "ticker": "PG",
+ "stub": false
+}

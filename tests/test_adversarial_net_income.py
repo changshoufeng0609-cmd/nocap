@@ -23,11 +23,13 @@ def derived_income(total=1_338_000_000, nci=1_026_000_000):
     (2_996_000_000, 19_000_000, "$2.996 billion", 2.996),
     (869_000_000, 142_000_000, "$0.869 billion", .869),
 ])
-def test_consolidated_income_in_derived_locator_is_an_ambiguous_reading(total, nci, text, value):
+def test_consolidated_income_in_derived_locator_verifies_plain_net_income(total, nci, text, value):
+    # Round 10a: unqualified net income that matches the filed consolidated figure is ✓ (it was "?" before): that is
+    # the line the income statement calls net income. The receipt keeps the filing whose locator shows both.
     verdict = verify(claim(text, value, metric="net_income"), FakeStore([derived_income(total, nci)]))
-    assert (verdict.status, verdict.reason) == ("unverifiable", "ambiguous"), verdict.explanation
+    assert (verdict.status, verdict.reason) == ("verified", "match"), verdict.explanation
     assert "including noncontrolling interests" in verdict.explanation
-    assert "subtracting" in verdict.explanation
+    assert "attributable to the company" in verdict.explanation
     assert verdict.expected_value is None
     assert verdict.evidence[0].value == total - nci
 
@@ -66,11 +68,11 @@ def test_later_consolidated_income_does_not_leak_through_as_of():
     assert "including noncontrolling interests" not in verdict.explanation
 
 
-def test_separately_stored_same_filing_income_concepts_are_ambiguous_too():
+def test_separately_stored_same_filing_income_concepts_verify_plain_net_income_too():
     own = derived_income().model_copy(update={"source": "xbrl", "derived_from": [], "locator": None})
     total = own.model_copy(update={"concept": "us-gaap:ProfitLoss", "value": 1_338_000_000})
     verdict = verify(claim("$1.34 billion", 1.34, metric="net_income"), FakeStore([own, total]))
-    assert (verdict.status, verdict.reason) == ("unverifiable", "ambiguous"), verdict.explanation
+    assert (verdict.status, verdict.reason) == ("verified", "match"), verdict.explanation  # "?" before round 10a
     assert set(f.value for f in verdict.evidence) == {312_000_000, 1_338_000_000}
 
 
@@ -90,7 +92,7 @@ def test_two_nci_components_preserved_in_the_locator_are_supported():
         "NetIncomeLossAttributableToRedeemableNoncontrollingInterest + "
         "NetIncomeLossAttributableToNonredeemableNoncontrollingInterest")})
     verdict = verify(claim("$1.34 billion", 1.34, metric="net_income"), FakeStore([f]))
-    assert (verdict.status, verdict.reason) == ("unverifiable", "ambiguous"), verdict.explanation
+    assert (verdict.status, verdict.reason) == ("verified", "match"), verdict.explanation  # "?" before round 10a
 
 
 @pytest.mark.parametrize("word", ["attributable", "available", "applicable"])

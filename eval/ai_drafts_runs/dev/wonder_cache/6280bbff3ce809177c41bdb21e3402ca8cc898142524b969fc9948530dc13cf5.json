@@ -1,0 +1,21 @@
+{
+ "request_sha256": "6280bbff3ce809177c41bdb21e3402ca8cc898142524b969fc9948530dc13cf5",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:41Z",
+ "response_id": "resp_6ae865d9fa979c0f9e6e4a6a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2628,
+  "output_tokens": 1381,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1058
+ },
+ "cost_usd": 0.036718,
+ "latency_s": 8.3,
+ "output_text": "{\"draft\": \"Williams Companies — Q2 2026\\nResults:\\n- GAAP net income: $827 million, or $0.68 per diluted share, up 51% vs. 2Q 2025\\n- Adjusted net income: $614 million, or $0.50 per diluted share, up 8% vs. 2Q 2025\\n- Adjusted EBITDA: $1.921 billion, climbed $113 million or 6% vs. 2Q 2025\\n- Service revenues rose $111 million in the quarter\\n- Net gain from sale of Brazos Permian II equity-method investment: $126 million\\nCash and capital:\\n- Cash flow from operations: $1.376 billion\\n- Available funds from operations: $1.450 billion, grew $133 million or 10% vs. 2Q 2025\\n- Dividend coverage ratio: 2.26x on an AFFO basis\\n- Power Innovation Joint Venture with Blackstone added $5.34 billion of low-cost capital\\nOutlook and expansion:\\n- 2026 Adjusted EBITDA guidance: $8.3 billion to $8.5 billion, with the midpoint raised by $200 million to $8.4 billion\\n- 2026 growth capex expected to be $7.3 billion to $7.9 billion\\n- Momentum Midstream acquisition valued at up to $5.5 billion\\n- Socrates phase one completed, with phase two on track for 4Q 2026 completion\"}",
+ "ticker": "WMB",
+ "stub": false
+}

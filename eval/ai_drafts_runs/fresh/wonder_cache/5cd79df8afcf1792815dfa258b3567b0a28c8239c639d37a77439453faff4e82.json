@@ -1,0 +1,21 @@
+{
+ "request_sha256": "5cd79df8afcf1792815dfa258b3567b0a28c8239c639d37a77439453faff4e82",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:41:02Z",
+ "response_id": "resp_6ae868be0c9d74c472b94e59",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2017,
+  "output_tokens": 1825,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1523
+ },
+ "cost_usd": 0.043154,
+ "latency_s": 13.56,
+ "output_text": "{\"draft\": \"Veralto earnings rise in third quarter as company raises full-year outlook\\n\\nVeralto reported third-quarter sales that climbed 7.5% to $1,509 million, with non-GAAP core sales growth of 5.1%.\\n\\nOperating profit margin was 19.7%, while non-GAAP adjusted operating profit margin reached 25.6%. Net earnings were $253 million, or $1.03 per diluted common share, and non-GAAP adjusted net earnings were $290 million, or $1.18 per diluted common share.\\n\\nThe company generated operating cash flow of $323 million and non-GAAP free cash flow of $304 million during the quarter.\\n\\nYear to date, the company deployed $1.1 billion on four strategic acquisitions and repurchased $550 million of shares, representing 2.4% of outstanding shares. Its Cost Optimization Program is now expected to deliver full-year 2026 savings of $10 million to $15 million.\\n\\nFor the fourth quarter, the company expects non-GAAP core sales growth of 5.5% to 6.5% year over year and an adjusted operating profit margin of approximately 24.5%.\\n\\nThe company raised its full-year 2026 adjusted earnings per share guidance to $4.49 to $4.52, representing growth of 15% to 16% over the prior year.\"}",
+ "ticker": "VLTO",
+ "stub": false
+}

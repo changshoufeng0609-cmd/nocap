@@ -1,0 +1,21 @@
+{
+ "request_sha256": "03fffaeb3307fd9c9604bc7d033dae034dc5bf092d2ed7373a536660f50f4875",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:33Z",
+ "response_id": "resp_6ae865d152d30e1611f849ce",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3156,
+  "output_tokens": 1327,
+  "cached_tokens": 372,
+  "reasoning_tokens": 947
+ },
+ "cost_usd": 0.03775,
+ "latency_s": 9.96,
+ "output_text": "{\"draft\": \"Universal Health Services: Steady Volume, Stronger Pricing Drives First-Quarter Growth\\nRevenue and earnings climbed in the quarter as pricing gains across both hospital segments more than offset muted acute-care volumes.\\n\\nNet revenues rose 9.6% to $4.495 billion, compared with $4.100 billion a year earlier. Reported net income attributable to UHS increased to $348.7 million, or $5.65 per diluted share, from $316.7 million, or $4.80 per diluted share. On an adjusted basis, net income was $346.5 million, or $5.62 per diluted share, while Adjusted EBITDA net of NCI grew to $648.3 million from $598.2 million.\\n\\nAcute care performance was driven mainly by reimbursement and mix rather than admissions. On a same-facility basis, adjusted patient days edged up 0.8%, net revenue per adjusted admission climbed 6.3%, and net revenues advanced 8.2%. Behavioral health delivered a similar pricing-led profile, with adjusted admissions up 1.2%, net revenue per adjusted admission up 6.2%, and same-facility net revenues up 7.3%.\\n\\nCash generation improved, with net cash provided by operating activities reaching $402 million versus $360 million in the prior-year period. Capital returns remained active as the company repurchased 675,000 shares for approximately $127.3 million, leaving approximately $1.298 billion available under its repurchase authorization at quarter-end.\\n\\nOutlook: The release provides no formal guidance, so the focus remains on same-facility volume trends, revenue per adjusted admission, Medicaid supplemental payment programs, and the potential effects of changing government program rules on reimbursement and uncompensated care.\"}",
+ "ticker": "UHS",
+ "stub": false
+}

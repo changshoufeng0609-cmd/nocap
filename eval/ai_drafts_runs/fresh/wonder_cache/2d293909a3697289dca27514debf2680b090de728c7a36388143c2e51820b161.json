@@ -1,0 +1,21 @@
+{
+ "request_sha256": "2d293909a3697289dca27514debf2680b090de728c7a36388143c2e51820b161",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:19Z",
+ "response_id": "resp_6ae86893b4901db2deb74cc3",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 4140,
+  "output_tokens": 2058,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1582
+ },
+ "cost_usd": 0.056306,
+ "latency_s": 16.44,
+ "output_text": "{\"draft\": \"# Philip Morris International Q3 2026 Earnings Summary\\n\\nPhilip Morris International delivered higher revenue and operating income in the third quarter, with adjusted earnings reaching a new quarterly high despite a decline in reported earnings per share.\\n\\n**Revenue and Growth**\\n- Revenue climbed **5.5%** to **$11.4 billion**, or **7.1%** on an organic basis.\\n- Gross profit rose **6.7%**, helped by combustible pricing, scale and smoke-free mix benefits.\\n\\n**Profitability**\\n- Operating income jumped **14.1%**.\\n- Reported diluted EPS slipped **4.9%** to **$2.12**, mainly due to the non-cash fair value adjustment for equity security investments.\\n- Adjusted diluted EPS grew **5.4%** to **$2.36**, and by **5.8%** excluding currency.\\n\\n**Product Performance**\\n- Total shipments edged up **0.6%**, while smoke-free product shipments rose **2.7%**.\\n- IQOS heated tobacco unit shipment volumes grew **1.5%** to **41.5 billion** units.\\n- VEEV quarterly shipments surged **61.6%**.\\n- In the U.S., total ZYN shipments increased **4.2%** to **3.2 billion** pouches.\\n\\n**Cash Flow and Capital Returns**\\n- The regular quarterly dividend was increased **8.8%** to **$1.60** per share.\\n- Full-year operating cash flow is expected to be around **$13.5 billion** at prevailing exchange rates.\\n\\n**Outlook**\\n- Reported diluted EPS is forecast in a range of **$7.11** to **$7.26** for the full year.\\n- Net revenue growth is expected at **5%** to **7%** on an organic basis, with a greater likelihood to be in the middle or upper-half of the range.\\n\\n**Bottom Line**\\nThe quarter showed resilient underlying growth led by smoke-free products, stronger operating performance and a higher dividend, even as reported EPS was weighed down by a non-cash adjustment.\"}",
+ "ticker": "PM",
+ "stub": false
+}

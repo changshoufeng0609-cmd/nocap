@@ -1,0 +1,21 @@
+{
+ "request_sha256": "d334c908c939e199e260e002af5bb931e8860d5e39598c647d31ddd663d334c7",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:33Z",
+ "response_id": "resp_6ae86829c0348d43a16e47ee",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2687,
+  "output_tokens": 1245,
+  "cached_tokens": 0,
+  "reasoning_tokens": 831
+ },
+ "cost_usd": 0.035648,
+ "latency_s": 12.28,
+ "output_text": "{\"draft\": \"American Water Works Q3 2026: Adjusted EPS Advances as Guidance Narrows\\nAdjusted earnings climbed in the third quarter, supported by regulated rate recovery despite weather headwinds and higher costs to fund investment.\\n\\nThird-quarter adjusted (non-GAAP) earnings rose to $2.00 per share from $1.89 per share a year earlier, while GAAP earnings were steady at $1.94 per share. For the year-to-date period, adjusted earnings increased to $4.63 per share from $4.40 per share. Operating revenues grew by $60 million in the quarter and $212 million over the nine-month period, helped by new rates recovering capital and acquisition investments, though unfavorable weather weighed on the quarterly comparison.\\n\\nThe Regulated Businesses drove profitability, with net income climbing to $407 million in the third quarter from $383 million a year earlier. Over the first nine months, segment net income jumped to $946 million from $872 million. Regulatory execution remained a central support, with $284 million of additional annualized revenues authorized since the start of the year, while pending rate cases and infrastructure surcharges seek a further $360 million on an annualized basis.\\n\\nCapital deployment stayed elevated as the company invested $2.8 billion in infrastructure improvements and growth during the first nine months, including $437 million for regulated acquisitions. The full-year investment plan of $3.7 billion remains on track. Shareholders will receive a quarterly cash dividend of $0.8950 per share, underlining continued capital returns alongside the heavy spending program.\\n\\nOutlook: Management narrowed 2026 adjusted EPS guidance to $6.07 to $6.12 and initiated standalone 2027 adjusted EPS guidance of $6.53 to $6.63, reflecting growth of 8% at the midpoint versus the 2026 range. Long-term targets were affirmed, including EPS growth of 7-9%, providing a clear framework for regulated investment and earnings progression.\"}",
+ "ticker": "AWK",
+ "stub": false
+}

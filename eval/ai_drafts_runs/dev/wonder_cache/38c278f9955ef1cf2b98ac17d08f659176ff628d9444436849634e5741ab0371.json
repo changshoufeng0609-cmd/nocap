@@ -1,0 +1,21 @@
+{
+ "request_sha256": "38c278f9955ef1cf2b98ac17d08f659176ff628d9444436849634e5741ab0371",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:31Z",
+ "response_id": "resp_6ae8655749aab091dba44a97",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2715,
+  "output_tokens": 1542,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1044
+ },
+ "cost_usd": 0.0417,
+ "latency_s": 12.8,
+ "output_text": "{\"draft\": \"# Allstate Q2 2026 Earnings Summary\\n\\nAllstate reported second-quarter 2026 results marked by higher revenues, stronger underwriting performance and higher profit. Total revenues rose to **$18.6 billion**, net income reached **$3.2 billion**, and adjusted net income was **$2.3 billion**, or **$8.99 per diluted share**.\\n\\n**Revenue and Growth**\\n- Total revenues climbed **11.8%** from the prior year quarter.\\n- Property-Liability earned premiums grew **4.0%** to **$14.9 billion**, helped by policy growth and higher homeowners insurance average premiums.\\n- Policies in force increased **2.6%**, led by growth in auto and homeowners insurance.\\n\\n**Profitability**\\n- The Property-Liability recorded combined ratio improved to **86.6**, an improvement of **4.5 points** versus the prior year quarter.\\n- Underwriting income jumped to **$2.0 billion**, as lower catastrophe losses and more favorable prior year reserve releases helped results.\\n- Catastrophe losses slipped to **$1.4 billion**, down **12.8%** from the prior year.\\n- Adjusted net income return on equity was **44.2%** over the last 12 months.\\n\\n**Segment Performance**\\n- The recorded auto insurance combined ratio was **83.3**, while auto insurance policies in force grew **2.8%**.\\n- Homeowners insurance delivered an underwriting profit of **$226 million**, with a recorded combined ratio of **94.6**.\\n- Protection Services revenues rose **7.8%** to **$935 million**, driven primarily by continued Protection Plans growth.\\n\\n**Investments and Capital Returns**\\n- Net investment income climbed to **$1.0 billion**, supported by contributions from both market-based and performance-based investments.\\n- The investment portfolio stood at **$87.8 billion**.\\n- The company returned capital through **$1.0 billion** in share repurchases and **$280 million** in dividends during the quarter.\\n\\n**Bottom Line**\\nStrong underwriting, growing policies in force and higher investment income drove a solid quarter, with profitability improving across the core insurance operations and capital continuing to flow back to shareholders.\"}",
+ "ticker": "ALL",
+ "stub": false
+}

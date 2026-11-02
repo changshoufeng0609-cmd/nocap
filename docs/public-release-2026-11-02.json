@@ -1,0 +1,110 @@
+{
+  "record": "NoCap public releases on 2026-11-02 (Taipei)",
+  "origin": "https://receipts-nocap.vercel.app",
+  "current_deployment": "dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5",
+  "current_public_source": "898cb9af4a76de8d451fd6476e2671714d9f1841",
+  "rollback_deployment": "dpl_H39vsq9VaVdogc9ZBqXPtRK4xrBr",
+  "deployments": [
+    {
+      "deployment": "dpl_EAfhreQrZdaWr3HJg4q3jHuuVVsR",
+      "created_utc": "2026-11-01T16:41:57Z",
+      "public_source": "1de7b7b0edb4a79e2cca78d92a3c572ac5aaebc8",
+      "private_source": "f22e56c",
+      "change": "wording fixes from the first spot check (rounds 4-5)",
+      "anonymous_acceptance": {
+        "status": "passed",
+        "checks": 49,
+        "provider_calls": 0,
+        "new_spend_usd": 0,
+        "started_utc": "2026-11-01T16:44:04Z"
+      }
+    },
+    {
+      "deployment": "dpl_HhDVAiVh9cWB4LqaVw6yTLhKaXMh",
+      "created_utc": "2026-11-01T18:02:06Z",
+      "public_source": "0d800091b69bda2cb344fc03a9e85399217e679f",
+      "private_source": "84b8fd4",
+      "change": "round-6 comparison-base fixes",
+      "anonymous_acceptance": {
+        "status": "passed",
+        "checks": 49,
+        "provider_calls": 0,
+        "new_spend_usd": 0,
+        "started_utc": "2026-11-01T18:03:17Z"
+      }
+    },
+    {
+      "deployment": "dpl_48sU1dZPDN1ST9JcTvFAGuL6o4Zn",
+      "created_utc": "2026-11-02T01:16:23Z",
+      "public_source": "7a42a29f0606bbda53251bbba429db5dfb455cad",
+      "private_source": "8d69d3c",
+      "change": "round-7 non-GAAP margin fixes",
+      "anonymous_acceptance": {
+        "status": "passed",
+        "checks": 49,
+        "provider_calls": 0,
+        "new_spend_usd": 0,
+        "started_utc": "2026-11-02T01:18:13Z"
+      }
+    },
+    {
+      "deployment": "dpl_H39vsq9VaVdogc9ZBqXPtRK4xrBr",
+      "created_utc": "2026-11-02T05:42:16Z",
+      "public_source": "8abbd6651f598b86ddf6824170497626659e0a16",
+      "private_source": "8c2fd78",
+      "change": "round-8 fixes and release-name resolution",
+      "anonymous_acceptance": {
+        "status": "passed",
+        "checks": 49,
+        "provider_calls": 0,
+        "new_spend_usd": 0,
+        "started_utc": "2026-11-02T05:45:11Z"
+      }
+    },
+    {
+      "deployment": "dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5",
+      "created_utc": "2026-11-02T09:00:13Z",
+      "public_source": "898cb9af4a76de8d451fd6476e2671714d9f1841",
+      "private_source": "1bc620f",
+      "change": "release statements, round 9 and the second comprehensive test",
+      "anonymous_acceptance": {
+        "status": "passed",
+        "checks": 49,
+        "provider_calls": 0,
+        "new_spend_usd": 0,
+        "started_utc": "2026-11-02T09:01:57Z"
+      }
+    }
+  ],
+  "deploy_procedure": "Each release: export with secret and PII scan, release-identity commit whose tree equals the private commit's export except docs/release-provenance.json, SSH push to GitHub main (repo private until submission), Production deployment from that commit, then anonymous desktop and 390px mobile acceptance at $0.",
+  "evidence": {
+    "snapshot_fingerprint": "1381a6507b55e7322c8b369e",
+    "release_text_manifest_sha256": "a2f14fe2b603749e37f099cde1f067845e2773eaa6cc04c0176da3f022227e40",
+    "release_text": {
+      "companies": 451,
+      "releases": 1844,
+      "units": 133208
+    }
+  },
+  "one_shot_tests_run_on_these_releases": [
+    {
+      "set": "full",
+      "measured_private_source": "8d69d3c",
+      "deployment": "dpl_48sU1dZPDN1ST9JcTvFAGuL6o4Zn",
+      "record": "eval/spot500_runs/full-live-20261102.json",
+      "cost_usd": 3.69412935
+    },
+    {
+      "set": "full2",
+      "measured_private_source": "8c2fd78",
+      "deployment": "dpl_H39vsq9VaVdogc9ZBqXPtRK4xrBr",
+      "record": "eval/spot500_runs/full2-live-20261102.json",
+      "cost_usd": 3.79727435
+    }
+  ],
+  "tests_at_current_private_source": {
+    "python": 3893,
+    "python_fresh_clone": 3881,
+    "frontend_checks": 234
+  }
+}

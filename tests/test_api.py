@@ -436,7 +436,10 @@ def test_repo_examples_are_demo_ready():
     assert len(examples) >= 3 and len({e["id"] for e in examples}) == len(examples)
     for e in examples:
         assert set(e) == {"id", "title", "description", "text", "as_of", "context"}
-        assert 120 <= len(e["text"].split()) <= 250 and len(e["text"]) <= api.MAX_CHARS
+        # Prose stories run 120-250 words; Muse Wonder's Reddit bullet recap packs 23 figures into 115 (Nov 2), so the
+        # floor is 100 words with at least 8 numbers (Meta's story has 9): a demo draft is substantial, not a one-liner.
+        assert 100 <= len(e["text"].split()) <= 250 and len(e["text"]) <= api.MAX_CHARS
+        assert len(re.findall(r"\d[\d,.]*", e["text"])) >= 8  # numbers, not digits
         assert e["title"] and e["description"] and e["context"]
     assert any(e["as_of"] for e in examples)  # the look-ahead demo has its own as_of
 

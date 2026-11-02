@@ -1,0 +1,21 @@
+{
+ "request_sha256": "aeb41ab2bf605d3f2b1c408409a4cdcff584296de004cbe9bdd11925813a014f",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:39Z",
+ "response_id": "resp_6ae8682f4530b95cc3cd451f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2319,
+  "output_tokens": 1420,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1179
+ },
+ "cost_usd": 0.037676,
+ "latency_s": 9.88,
+ "output_text": "{\"draft\": \"BNY Mellon Q3 2026\\nResults:\\n- Total revenue: $5.7 billion, up 12%\\n- Diluted EPS: $2.34, climbed 24%\\n- Fee revenue: rose 12%; Net interest income: grew 15%\\n- Noninterest expense: $3.5 billion, up 8%\\n- Pre-tax operating margin: 38.5%\\n- Provision for credit losses: $1 million; Effective tax rate: 22.8%\\nOperating metrics:\\n- AUC/A: increased 10%\\n- AUM: rose 2%\\n- Assets under custody and/or administration: $63.4 trillion\\n- Assets under management: $2.2 trillion\\n- Average deposits: $311 billion, up 4% year-over-year\\nCash and capital:\\n- Capital returned to common shareholders: $1.4 billion\\n- Dividends: $436 million\\n- Share repurchases: $937 million\\n- CET1 ratio: 10.9%\\n- Tier 1 leverage ratio: 5.7%\"}",
+ "ticker": "BNY",
+ "stub": false
+}

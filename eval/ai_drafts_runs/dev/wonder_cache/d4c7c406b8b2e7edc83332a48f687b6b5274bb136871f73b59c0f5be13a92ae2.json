@@ -1,0 +1,21 @@
+{
+ "request_sha256": "d4c7c406b8b2e7edc83332a48f687b6b5274bb136871f73b59c0f5be13a92ae2",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:35Z",
+ "response_id": "resp_6ae8655b7721ce9ac9ea449c",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1405,
+  "output_tokens": 1962,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1574
+ },
+ "cost_usd": 0.04486,
+ "latency_s": 17.01,
+ "output_text": "{\"draft\": \"Accenture Q4 fiscal 2026: higher profit and a stable margin\\nGAAP net income climbed to $2.03 billion in the fourth quarter, with gross margin edging up to 32.0%.\\n\\nProfitability was broadly steady in the quarter. Gross margin of 32.0% compared with 31.9% in the fourth quarter of fiscal 2025, while selling, general and administrative expenses rose to $3.12 billion, or 16.7% of revenues, from $2.95 billion a year earlier. The GAAP effective tax rate slipped to 27.3%, compared with 30.1% in the prior-year quarter, as GAAP net income grew from $1.45 billion. Adjusted net income was $1.94 billion for the fourth quarter of fiscal 2025.\\n\\nFor the full year, GAAP net income increased to $8.52 billion, compared with $7.83 billion in fiscal 2025. Adjusted net income rose to $8.77 billion, compared with $8.32 billion, while fiscal selling, general and administrative expenses were $12.06 billion, or 16.3% of revenues.\\n\\nCash and capital returns remained solid. Days services outstanding were 50 days at August 31, 2026, compared with 47 days a year earlier, and the total cash balance grew to $12.8 billion from $11.5 billion. In fiscal 2026, the company returned $11.5 billion to shareholders, including $7.5 billion in share repurchases and $4.0 billion in cash dividends.\\n\\nOutlook: The release gives no guidance, so the focus ahead will be on whether margins, profitability, cash generation and shareholder returns can sustain the levels reported for the quarter and full year.\"}",
+ "ticker": "ACN",
+ "stub": false
+}

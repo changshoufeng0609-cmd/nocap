@@ -1,0 +1,21 @@
+{
+ "request_sha256": "f0c3f2852b3b15f7a17c6af14cd1e8ab57b654090a99f25d365503f40850e6e5",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:47Z",
+ "response_id": "resp_6ae865df04622ccfcd22498a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3171,
+  "output_tokens": 1627,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1306
+ },
+ "cost_usd": 0.04381,
+ "latency_s": 11.81,
+ "output_text": "{\"draft\": \"West Pharmaceutical Services Q3 2026\\nResults:\\n- Net sales: $874.5 million, up 8.7% from a year earlier; organic growth was 11.9%\\n- Diluted EPS: $3.02, climbed 57.3%\\n- Adjusted-diluted EPS: $2.66, rose 35.7%\\nSegments:\\n- High-Value Product Components net sales: $466.7 million, jumped 19.7%; organic growth was 20.3%\\n- High-Value Product Delivery Devices net sales: $99.1 million, flat; organic growth excluding foreign currency translation effects and the SmartDose® 3.5mL divestiture impact was 26.4%\\n- Standard Products net sales: $163.0 million, grew 2.9%\\n- West Vantage accounted for 17% of total company net sales\\nCash and capital:\\n- Stock repurchases: $231 million in the quarter, bringing the year-to-date total to $685 million\\n- Year-to-date operating cash flow: $403 million; capital expenditures were $125 million\\n- Fourth-quarter dividend declared: $0.26 per share, up 18% over the prior quarter\\nOutlook:\\n- Full-year 2026 net sales guidance: $3.41 billion to $3.42 billion\\n- Full-year 2026 adjusted-diluted EPS guidance: $9.38 to $9.48\"}",
+ "ticker": "WST",
+ "stub": false
+}

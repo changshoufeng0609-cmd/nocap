@@ -1,0 +1,21 @@
+{
+ "request_sha256": "385f94c4e6f241268eb654e86112a52854e6261bedd64b9b1ee70a2a82920463",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:23Z",
+ "response_id": "resp_6ae865c792c9ae5002ed4efe",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3903,
+  "output_tokens": 1080,
+  "cached_tokens": 372,
+  "reasoning_tokens": 758
+ },
+ "cost_usd": 0.035798,
+ "latency_s": 7.27,
+ "output_text": "{\"draft\": \"T-Mobile Posts Higher Profit and Revenue in Third Quarter on Postpaid Growth\\nT-Mobile US reported higher third-quarter results, with service revenues climbing 6% year-over-year to $19.4 billion and postpaid service revenues rising 9% to $16.3 billion.\\nNet income for the company jumped 27% to $3.5 billion, while diluted earnings per share surged 34% to $3.22 per share. Core Adjusted EBITDA, a non-GAAP measure, advanced 11% to $9.6 billion.\\nT-Mobile added 274 thousand postpaid accounts on a net basis, bringing total postpaid accounts to 35.0 million, up 3% year-over-year. Postpaid average revenue per account grew 4% to $155.73.\\nCash generation was mixed, as net cash provided by operating activities slipped to $7.3 billion. Cash purchases of property and equipment, including capitalized interest, eased to $2.3 billion, while Adjusted Free Cash Flow, a non-GAAP measure, rose to $5.1 billion.\\nThe company returned $3.5 billion to stockholders in the quarter through common stock repurchases and cash dividends.\\nFor the full year, T-Mobile expects postpaid net account additions of approximately 1.0 million. The company also expects Core Adjusted EBITDA of between $37.35 billion and $37.45 billion and Adjusted Free Cash Flow of between $18.7 billion and $18.8 billion.\"}",
+ "ticker": "TMUS",
+ "stub": false
+}

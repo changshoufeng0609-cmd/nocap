@@ -1,0 +1,21 @@
+{
+ "request_sha256": "7c5b5ac64cc0abda9785dc1e32ed7e94379fa21123fa0025c78492e4468a9cf4",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:27Z",
+ "response_id": "resp_6ae8689b58b6ac7bd3f844e1",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1765,
+  "output_tokens": 1704,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1272
+ },
+ "cost_usd": 0.039726,
+ "latency_s": 13.1,
+ "output_text": "{\"draft\": \"# Ross Stores Q2 FY2026 Earnings Summary\\n\\nRoss Stores delivered a strong second quarter, with sales climbing **13%** to **$6.3 billion**, helped by robust customer traffic.\\n\\n**Revenue and Growth**\\n- Comparable store sales jumped **10%** for the quarter.\\n- For the first six months of fiscal 2026, sales grew **17%** to **$12.3 billion**.\\n- Comparable store sales for the six-month period advanced **13%**.\\n\\n**Profitability**\\n- Operating profits reached **$1.1 billion**, including approximately **$253 million** from IEEPA tariff refunds.\\n- Operating margin expanded **610 basis points**, including **405 basis points** from the tariff refunds.\\n- Net income rose to **$851 million**, while earnings per share climbed to **$2.66**.\\n- The results included an approximate **$0.60** per share benefit from the tariff refunds.\\n\\n**Store Expansion and Capital Returns**\\n- The company opened **47** new stores during the quarter.\\n- A total of **1.4 million** shares were repurchased for an aggregate price of **$319 million**.\\n- The company remains on track to buy back a total of **$1.275 billion** in common stock during fiscal 2026.\\n\\n**Outlook**\\n- Comparable store sales are expected to increase **6%** to **7%** in the third quarter and **4%** to **5%** in the fourth quarter.\\n- The new store opening plan for 2026 was increased to **115** locations.\\n- Fiscal year 2026 earnings per share are now projected to be in the range of **$8.61** to **$8.77**.\\n\\n**Bottom Line**\\nThe company posted broad-based sales and profit strength in the quarter, supported by tariff refunds, and raised its outlook for the second half and full fiscal year.\"}",
+ "ticker": "ROST",
+ "stub": false
+}

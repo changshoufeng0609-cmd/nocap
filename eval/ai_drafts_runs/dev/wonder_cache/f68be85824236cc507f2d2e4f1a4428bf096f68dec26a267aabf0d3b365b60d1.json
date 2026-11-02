@@ -1,0 +1,21 @@
+{
+ "request_sha256": "f68be85824236cc507f2d2e4f1a4428bf096f68dec26a267aabf0d3b365b60d1",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:11Z",
+ "response_id": "resp_6ae865bbc92607e7c6eb4921",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2755,
+  "output_tokens": 1652,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1078
+ },
+ "cost_usd": 0.042646,
+ "latency_s": 12.13,
+ "output_text": "{\"draft\": \"# PepsiCo Q3 2026 Earnings Summary\\n\\nPepsiCo reported third-quarter 2026 results marked by revenue growth, stronger reported profitability and modest core earnings growth.\\n\\n**Revenue and Growth**\\n- Net revenue rose **5.6%** in the third quarter, while organic revenue increased **3.1%**.\\n- Quarterly growth included a **1.7-percentage-point** net benefit from acquisitions and divestitures and a **0.7-percentage-point** benefit from foreign exchange translation.\\n- Organic growth reflected effective net pricing and a contribution from organic volume growth.\\n- Year to date, net revenue climbed **6.7%** and organic revenue grew **2.7%**, with foreign exchange translation and acquisitions and divestitures each contributing **2.0 percentage points**.\\n\\n**Profitability**\\n- Third-quarter operating profit jumped **19%**, and operating margin expanded **195 basis points**.\\n- Core operating profit rose **3%**, while core operating margin slipped **35 basis points**.\\n- Core performance reflected productivity savings, effective net pricing and a **4-percentage-point** favorable impact from tariff refunds, partly offset by operating cost increases and higher advertising and marketing expenses.\\n- Earnings per share surged **17%**, core EPS increased **2%**, and core constant currency EPS advanced **1.5%**.\\n\\n**Segment Performance**\\n- In North America, convenient foods net revenue trends improved sequentially, reflecting savory snacks volume growth and volume market share improvement, offset by lower effective net pricing.\\n- The beverages business delivered **5 percent** net revenue growth in the quarter, primarily reflecting benefits from acquisitions made in 2025.\\n- Year to date, beverages net revenue grew **7 percent**, with organic revenue growth increasing **1 percent**.\\n\\n**Year-to-Date Performance**\\n- Year-to-date operating profit climbed **45%**, and operating margin expanded **440 basis points**.\\n- Core operating profit increased **5%**, while core operating margin contracted **25 basis points**.\\n- Earnings per share rose **47%** year to date, core EPS grew **5%**, and core constant currency EPS increased **2%**.\\n\\n**Outlook**\\n- The company updated its fiscal 2026 financial guidance.\\n- The outlook for capital returns is comprised of dividends of **$7.9 billion** and share repurchases of **$1.0 billion**.\\n\\n**Bottom Line**\\nThe quarter combined solid reported revenue and profit growth with more modest core gains, supported by pricing, productivity savings and contributions from acquisitions, while core margins remained under pressure from higher costs and marketing investment.\"}",
+ "ticker": "PEP",
+ "stub": false
+}

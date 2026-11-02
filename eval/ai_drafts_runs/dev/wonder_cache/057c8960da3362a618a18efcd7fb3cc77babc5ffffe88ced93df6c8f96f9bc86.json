@@ -1,0 +1,21 @@
+{
+ "request_sha256": "057c8960da3362a618a18efcd7fb3cc77babc5ffffe88ced93df6c8f96f9bc86",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:48Z",
+ "response_id": "resp_6ae865a4fc37a1d36eac4453",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1970,
+  "output_tokens": 1143,
+  "cached_tokens": 372,
+  "reasoning_tokens": 816
+ },
+ "cost_usd": 0.029326,
+ "latency_s": 7.4,
+ "output_text": "{\"draft\": \"Lowe's Q2 FY2026 Recap\\nResults:\\n- Net earnings: $2.4 billion\\n- Diluted EPS: $4.27, matching $4.27 a year earlier\\n- Adjusted diluted EPS: $4.40, up 1.6% from a year earlier\\n- Pre-tax acquisition-related expenses: $96 million\\n- IEEPA tariff refund benefit included in EPS: $0.11\\n- Total sales: $26.0 billion, compared with $24.0 billion a year earlier\\nSales and operations:\\n- Comparable sales: rose 0.2%\\n- Online sales: climbed 15.7%\\n- Stores operated: 1,761\\n- Retail selling space: 196.0 million square feet\\nCash and capital:\\n- Dividends paid: $673 million\\nOutlook:\\n- Fiscal 2026 total sales: $92.0 billion\\n- Fiscal 2026 comparable sales: expected to be flat versus the prior year\\n- Fiscal 2026 operating margin: 11.2%\\n- Fiscal 2026 adjusted operating margin: 11.6%\\n- Fiscal 2026 net interest expense: approximately $1.6 billion\\n- Fiscal 2026 effective income tax rate: approximately 24.5%\\n- Fiscal 2026 diluted EPS: approximately $11.75\\n- Fiscal 2026 adjusted diluted EPS: approximately $12.25\\n- Fiscal 2026 capital expenditures: up to $2.5 billion\"}",
+ "ticker": "LOW",
+ "stub": false
+}

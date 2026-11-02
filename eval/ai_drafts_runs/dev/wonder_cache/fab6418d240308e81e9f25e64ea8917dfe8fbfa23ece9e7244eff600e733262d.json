@@ -1,0 +1,21 @@
+{
+ "request_sha256": "fab6418d240308e81e9f25e64ea8917dfe8fbfa23ece9e7244eff600e733262d",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:06Z",
+ "response_id": "resp_6ae8657aedf02a35e61e4d32",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1169,
+  "output_tokens": 1079,
+  "cached_tokens": 372,
+  "reasoning_tokens": 812
+ },
+ "cost_usd": 0.024842,
+ "latency_s": 6.85,
+ "output_text": "{\"draft\": \"CSX Corporation Q3 2026\\nResults:\\n- Revenue: $4.02 billion, up 12% year-over-year\\n- Operating income: $1.57 billion, up 44%\\n- Net earnings: $1.05 billion\\n- Diluted EPS: $0.57, up 54%\\n- Operating margin: 39.1%, expanded 880 bps\\nVolumes:\\n- Total volume: 1.69 million units, up 5%\\n- Intermodal volume: increasing by 7%\\nPrior-year comparison:\\n- Third quarter 2025 operating income: $1.09 billion\\n- Third quarter 2025 net earnings: $694 million\\n- Third quarter 2025 diluted EPS: $0.37\\n- Third quarter 2025 adjusted operating income: $1.25 billion\\n- Third quarter 2025 adjusted net earnings: $818 million\\n- Third quarter 2025 adjusted EPS: $0.44\\n- Non-cash goodwill impairment in last year's results: $164 million\\n- Operating income versus adjusted results: increased 25%\\n- Net earnings versus adjusted results: increased 29%\\n- EPS versus adjusted results: increased 30%\"}",
+ "ticker": "CSX",
+ "stub": false
+}

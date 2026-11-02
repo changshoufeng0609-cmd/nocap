@@ -1,0 +1,21 @@
+{
+ "request_sha256": "6b7e85f43088835b108f64bc4c06d05fe7814de9313f36fcec47d564861c1f07",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:19Z",
+ "response_id": "resp_6ae868570149600c4336413b",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3496,
+  "output_tokens": 2160,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1759
+ },
+ "cost_usd": 0.05577,
+ "latency_s": 16.93,
+ "output_text": "{\"draft\": \"Disney Q1 Fiscal 2026: Top-Line Growth, Softer Segment Profit\\nRevenue growth outpaced profitability in the quarter, as stronger Experiences and Entertainment sales were offset by higher costs.\\n\\nRevenue rose 5% to $26.0 billion, while income before income taxes came in at $3.7 billion. Total segment operating income declined 9% to $4.6 billion. Diluted earnings per share were $1.34, and adjusted EPS was $1.63.\\n\\nEntertainment revenue climbed 7%, but operating income fell to $1.1 billion, leaving an Entertainment segment operating margin of 9.5%. SVOD revenue grew 11%, with SVOD operating income reaching $450 million and SVOD operating margin at 8.4%. Sports generated segment operating income of $191 million, including an adverse impact of approximately $110 million from the temporary suspension of YouTube TV carriage.\\n\\nExperiences delivered record quarterly revenue of $10.0 billion and segment operating income of $3.3 billion. Domestic Parks & Experiences operating income rose 8%, while attendance at domestic parks was up 1%. Cash provided by operations dropped to $0.7 billion, and capital expenditures increased to $3.0 billion.\\n\\nOutlook: For Q2 fiscal 2026, the company expects Entertainment segment operating income comparable to Q2 fiscal 2025 and SVOD operating income of approximately $500 million, while Sports segment operating income is expected to decline by $100 million on comparable revenue. For fiscal 2026, it guided to double-digit Entertainment segment operating income growth, a SVOD operating margin of 10%, low-single-digit Sports segment operating income growth, high-single-digit Experiences segment operating income growth, and double-digit adjusted EPS growth. It also expects $19 billion in cash provided by operations and remains on track to repurchase $7 billion of stock.\"}",
+ "ticker": "DIS",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e7b97b1eb418c2bc725bee28ed4e9db54ddcb7b20d3880550da209ade0fa6f79",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:38Z",
+ "response_id": "resp_6ae8686a5f38a6d068694a33",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2131,
+  "output_tokens": 1276,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1006
+ },
+ "cost_usd": 0.03263,
+ "latency_s": 11.23,
+ "output_text": "{\"draft\": \"Interactive Brokers Q2 2026\\nResults:\\n- GAAP net revenues: $1.90 billion\\n- Adjusted net revenues: $1.88 billion, against $1.48 billion a year earlier\\n- GAAP diluted EPS: $0.69, with adjusted diluted EPS also $0.69\\n- Year-ago diluted EPS: $0.51, both reported and adjusted\\n- Income before income taxes: $1.46 billion reported and $1.44 billion adjusted, against $1.10 billion a year earlier\\n- Pretax profit margin: 77% reported and adjusted, versus 75% a year earlier\\nRevenue drivers:\\n- Commission revenue: rose 30% to $673 million\\n- Net interest income: climbed 23% to $1.06 billion\\n- Other fees and services: jumped 40% to $87 million\\n- Other income: surged 88% to $79 million\\nCustomers:\\n- Customer accounts: grew 34% to 5.19 million\\n- Total DARTs: climbed 36% to 4.82 million\\nCash and capital:\\n- Total equity: $22.3 billion\\n- Quarterly cash dividend: $0.0875 per share\"}",
+ "ticker": "IBKR",
+ "stub": false
+}

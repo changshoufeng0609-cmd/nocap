@@ -1,0 +1,21 @@
+{
+ "request_sha256": "2793a7f7a2e45f326da3aa3a3da7bea39f6cfb484f7b922f323a05ed1e444c9f",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:35Z",
+ "response_id": "resp_6ae868a358d6cda376b94dc5",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3022,
+  "output_tokens": 1775,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1468
+ },
+ "cost_usd": 0.047588,
+ "latency_s": 12.2,
+ "output_text": "{\"draft\": \"Charles Schwab Corporation — Q2 2026\\nResults:\\n- Net income: $2.8 billion, or $1.54 per share\\n- Adjusted net income: $2.9 billion, or $1.62 per share, excluding $170 million of pre-tax transaction-related costs\\n- Net revenues: record $7.1 billion, rose 21% year-over-year\\n- Asset management and administration fees: $1.8 billion, grew 16% year-over-year\\n- Trading revenue: $1.2 billion, jumped 28% year-over-year\\n- Net interest margin: widened quarter-over-quarter to 3.00%\\n- GAAP expenses: climbed 12% year-over-year; adjusted total expenses rose 11% versus 2Q25\\nClients and activity:\\n- Total client assets: $13.08 trillion, increased 22% year-over-year\\n- Core net new assets: $119.8 billion, surged 49% versus 2Q25\\n- New brokerage account openings: 1.4 million; total client accounts reached 48.0 million\\n- Daily average trading volume: record 11.9 million, climbed 57% versus 2Q25\\nCash and capital:\\n- Common stock repurchases: 11.2 million shares for $1.0 billion during the quarter\\n- Preliminary consolidated Tier 1 Leverage: 8.7%\"}",
+ "ticker": "SCHW",
+ "stub": false
+}

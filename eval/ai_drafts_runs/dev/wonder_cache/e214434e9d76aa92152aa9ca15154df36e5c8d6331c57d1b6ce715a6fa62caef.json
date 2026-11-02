@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e214434e9d76aa92152aa9ca15154df36e5c8d6331c57d1b6ce715a6fa62caef",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:46Z",
+ "response_id": "resp_6ae865a272d8647058754ff3",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3500,
+  "output_tokens": 2516,
+  "cached_tokens": 0,
+  "reasoning_tokens": 2288
+ },
+ "cost_usd": 0.06432,
+ "latency_s": 21.03,
+ "output_text": "{\"draft\": \"Fidelity National Information Services Q2 2026\\nResults:\\n- Revenue: $3.4 billion, rose 29% on a GAAP basis\\n- GAAP diluted EPS: $0.45\\n- Adjusted EPS: $1.48, climbed 8.8%\\n- Adjusted EBITDA: $1.4 billion, grew 35%\\nSegments:\\n- One segment revenue: $2.5 billion, surged 44%\\n- Another segment revenue: $810 million, increased 3.5% on a GAAP basis\\n- Remaining segment revenue: $84 million, slipped 26%\\nCash and capital:\\n- Net cash provided by operating activities: $493 million; free cash flow: $525 million\\n- Capital returned to shareholders: $270 million\\nOutlook:\\n- Full-year Adjusted revenue growth: 29 - 30%\\n- Full-year Adjusted EPS growth: 7.0 - 8.5%\\n- Full-year Free Cash Flow: $2,150 - $2,250 million\"}",
+ "ticker": "FIS",
+ "stub": false
+}

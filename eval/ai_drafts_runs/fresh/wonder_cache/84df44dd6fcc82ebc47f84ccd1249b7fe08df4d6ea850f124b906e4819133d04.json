@@ -1,0 +1,21 @@
+{
+ "request_sha256": "84df44dd6fcc82ebc47f84ccd1249b7fe08df4d6ea850f124b906e4819133d04",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:02Z",
+ "response_id": "resp_6ae868469e411ec03c974098",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 4198,
+  "output_tokens": 1961,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1510
+ },
+ "cost_usd": 0.054598,
+ "latency_s": 16.55,
+ "output_text": "{\"draft\": \"# Cognizant Q3 2026 Earnings Summary\\n\\nCognizant delivered revenue growth and stronger adjusted profitability in the third quarter, supported by solid performance in Financial Services and continued cash generation.\\n\\n**Revenue and Growth**\\n- Revenue climbed to **$5.7 billion**, rising **4.6%** year-over-year, or **4.8%** in constant currency.\\n- Financial Services revenue grew **12%** year-over-year.\\n\\n**Profitability**\\n- Operating margin came in at **15.4%**, while Adjusted Operating Margin expanded to **16.3%**, up **30 basis points** year-over-year.\\n- GAAP EPS surged to **$1.39**, up **148%** year-over-year.\\n- Adjusted EPS advanced to **$1.49**, increasing **7.2%** year-over-year.\\n\\n**Bookings and Operations**\\n- Trailing 12-month bookings reached **$28.7 billion**, climbing **4%** year-over-year.\\n- Third quarter bookings slipped **7%** year-over-year.\\n\\n**Cash Flow and Capital Returns**\\n- The company generated **$1.6 billion** of free cash flow year-to-date.\\n- Share repurchases totaled **$258 million** during the third quarter.\\n- A quarterly cash dividend of **$0.33** per share was declared in October.\\n\\n**Outlook**\\n- Fourth quarter revenue is expected to be **$5.49 billion** to **$5.57 billion**.\\n- Full-year revenue is expected to be **$22.05 billion** to **$22.14 billion**.\\n- Full-year Adjusted Operating Margin is now expected to be approximately **16.1%**.\\n- Full-year Adjusted Diluted EPS guidance was revised to **$5.72** to **$5.79**.\\n\\n**Bottom Line**\\nThe quarter combined steady revenue growth, adjusted margin expansion and higher adjusted earnings, while the updated outlook points to continued growth and profitability improvement for the full year.\"}",
+ "ticker": "CTSH",
+ "stub": false
+}

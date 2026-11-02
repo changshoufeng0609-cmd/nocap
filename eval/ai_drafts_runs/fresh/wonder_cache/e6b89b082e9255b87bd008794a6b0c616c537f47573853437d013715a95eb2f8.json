@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e6b89b082e9255b87bd008794a6b0c616c537f47573853437d013715a95eb2f8",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:38:34Z",
+ "response_id": "resp_6ae8682ab14a86b7ec36487f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2370,
+  "output_tokens": 1302,
+  "cached_tokens": 0,
+  "reasoning_tokens": 914
+ },
+ "cost_usd": 0.03552,
+ "latency_s": 10.04,
+ "output_text": "{\"draft\": \"# Best Buy Q2 FY2027 Earnings Summary\\n\\nBest Buy delivered stronger second-quarter results, highlighted by comparable sales growth of **4.1%**, as diluted EPS jumped **70%** to **$1.48**.\\n\\n**Revenue and Growth**\\n- Domestic revenue climbed **4.3%** to **$9.07 billion**, driven by comparable sales growth of **4.5%**.\\n- Domestic online revenue grew **5.1%** on a comparable basis to **$3.00 billion**.\\n- International revenue slipped **4.2%** to **$709 million**, reflecting a comparable sales decline of **1.8%** and foreign exchange pressure.\\n\\n**Profitability**\\n- Adjusted diluted EPS rose **15%** to **$1.47**.\\n- The domestic gross profit rate expanded to **24.0%**, up from **23.4%** last year.\\n- Domestic adjusted SG&A was **$1.78 billion**.\\n\\n**Cash Flow and Capital Returns**\\n- The company returned **$239 million** to shareholders in the quarter.\\n- That total included dividends of **$203 million** and share repurchases of **$36 million**.\\n\\n**Outlook**\\n- The company raised its FY27 revenue guidance to **$42.3 billion** to **$42.8 billion**.\\n- Comparable sales are now expected to rise **1.9%** to **3.0%** for FY27.\\n- Adjusted diluted EPS guidance was lifted to **$6.70** to **$6.90**.\\n\\n**Bottom Line**\\nThe company combined solid domestic growth and improved profitability with increased full-year guidance, signaling confidence heading into the second half.\"}",
+ "ticker": "BBY",
+ "stub": false
+}

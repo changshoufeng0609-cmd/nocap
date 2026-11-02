@@ -1,0 +1,21 @@
+{
+ "request_sha256": "e9e8257098bb00c9d87d25d419602792ec7cbf50587af7bce43eedc5d1a70bd5",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:25Z",
+ "response_id": "resp_6ae865c91eb64cf82ab6430a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2861,
+  "output_tokens": 1245,
+  "cached_tokens": 372,
+  "reasoning_tokens": 989
+ },
+ "cost_usd": 0.03493,
+ "latency_s": 9.8,
+ "output_text": "{\"draft\": \"Synchrony Financial Q3 2026\\nResults:\\n- Net earnings: $892 million, slipped 17%\\n- Diluted earnings per share: $2.68, versus $2.86 a year earlier\\n- Interest and fees on loans: $5.6 billion, rose 1%\\n- Net interest income: $4.8 billion, climbed 2%\\n- Retailer share arrangements: $1.1 billion, grew 7%\\n- Provision for credit losses: $1.3 billion, increased 10%\\n- Other expense: $1.4 billion, rose 10%\\n- Net interest margin: 15.50%\\n- Return on equity: 21.0%\\nSegments:\\n- Purchase volume: $49.7 billion, jumped 8%\\n- Loan receivables: $103.3 billion, grew 3%\\n- Average active accounts: 68.3 million, flat\\n- Diversified & Value purchase volume: surged 13%\\nCash and capital:\\n- Deposits: $83.0 billion, rose 4%\\n- Capital returned to shareholders: $1.2 billion\"}",
+ "ticker": "SYF",
+ "stub": false
+}

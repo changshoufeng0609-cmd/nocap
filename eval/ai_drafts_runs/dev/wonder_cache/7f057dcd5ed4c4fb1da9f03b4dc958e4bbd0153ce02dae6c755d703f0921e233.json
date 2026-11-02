@@ -1,0 +1,21 @@
+{
+ "request_sha256": "7f057dcd5ed4c4fb1da9f03b4dc958e4bbd0153ce02dae6c755d703f0921e233",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:49Z",
+ "response_id": "resp_6ae865e07439c013a7fc4139",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2920,
+  "output_tokens": 1526,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1132
+ },
+ "cost_usd": 0.040786,
+ "latency_s": 9.34,
+ "output_text": "{\"draft\": \"Wynn Resorts Q2 2026 recap\\nResults:\\n- Revenue: $1.86 billion, rose from $1.74 billion a year earlier\\n- Net income attributable to Wynn Resorts, Limited: $140.1 million, climbed from $66.2 million a year earlier\\n- Diluted net income per share: $1.32, grew from $0.64 a year earlier\\n- Adjusted net income attributable to Wynn Resorts, Limited: $127.5 million, or $1.24 per diluted share\\n- Adjusted Property EBITDAR: $568.3 million, up from $552.4 million a year earlier\\nSegments:\\n- Wynn Palace revenue: $653.4 million, jumped from $539.6 million a year earlier; Adjusted Property EBITDAR: $201.5 million, rose from $157.2 million\\n- Wynn Macau revenue: $351.1 million; Adjusted Property EBITDAR: $95.5 million\\n- Las Vegas Operations revenue: $643.2 million; Adjusted Property EBITDAR: $215.2 million\\n- Encore Boston Harbor revenue: $209.3 million; Adjusted Property EBITDAR: $56.1 million\\nCash and capital:\\n- Cash and cash equivalents as of June 30, 2026: $1.57 billion\\n- Total current and long-term debt outstanding at June 30, 2026: $10.72 billion\\n- Share repurchases during the quarter: $75.0 million in aggregate cost\\n- Declared cash dividend: $0.25 per share\\nOutlook:\\n- Cash contributed to Wynn Al Marjan Island joint venture during the quarter: $48.1 million, bringing life-to-date contributions to $1.06 billion\\n- Wynn Al Marjan Island opening: currently expected in September 2027\"}",
+ "ticker": "WYNN",
+ "stub": false
+}

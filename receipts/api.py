@@ -59,6 +59,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from receipts import extract as _extract
 from receipts import stream as _stream
+from receipts import verify as _verify
 from receipts import recordings as _recordings
 from receipts.stream import Event
 from receipts.spend import BudgetUnavailable, DailyCount, LocalLedger, PostgresLedger, Reservation
@@ -735,7 +736,8 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
         except Exception as e:
             log.error("check %s store unavailable error=%s", tag, type(e).__name__)
             return error_response("The evidence database isn't available on this server.", False)
-        ctx = _extract.infer_context(text) if context is None else context
+        ctx = (_verify.with_draft_company(_extract.infer_context(text), text, store) if context is None
+               else context)
         spark_dirs = [d for d in (settings.spark_cache_dir, *settings.spark_read_dirs) if d is not None]
         try:
             calls = (_extract.passages_to_call(text, ctx or "", cache_dirs=spark_dirs) if settings.use_caches
@@ -823,7 +825,8 @@ def create_app(settings: Optional[Settings] = None, *, store: Any = None,
                                   "rate_limited")
         # The original and revised draft can both need extraction. Wonder has a separate, larger allowance;
         # cached extraction saves actual spend, but never bypasses a fix request's admission guard.
-        ctx = _extract.infer_context(text) if context is None else context
+        ctx = (_verify.with_draft_company(_extract.infer_context(text), text, evidence_store) if context is None
+               else context)
         wonder_bound = max(0.15, _extract.cost_usd(
             {"input_tokens": MAX_REQUEST_BYTES + 1024, "cached_tokens": 0,
              "output_tokens": MAX_OUTPUT_TOKENS, "reasoning_tokens": 0}, WONDER.prices))

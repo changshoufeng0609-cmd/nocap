@@ -1,0 +1,21 @@
+{
+ "request_sha256": "4e7b538347b265af37372591647ff4af74cf0b68f384e0d7a9c6dd0effdd1919",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:36Z",
+ "response_id": "resp_6ae868680916a1a881464f2a",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2866,
+  "output_tokens": 1571,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1302
+ },
+ "cost_usd": 0.04147,
+ "latency_s": 11.83,
+ "output_text": "{\"draft\": \"Hubbell Incorporated — Q3 2026\\nResults:\\n- Diluted EPS: $4.94; adjusted diluted EPS: $5.91\\n- Adjusted diluted EPS rose 14%; net sales climbed 25%\\n- Organic sales grew 11%; M&A contributed 13%\\n- Operating margin: 21.8%; adjusted operating margin: 25.5%\\nSegments:\\n- Utility Solutions net sales: $1,028 million, up 9%\\n- Utility Solutions organic net sales increased approximately 5%\\n- Electrical Solutions net sales: $845 million, surged 51%\\n- Electrical Solutions organic net sales jumped 22%; acquisitions added 29%\\n- Utility Solutions segment operating income: $241 million\\nCash and capital:\\n- Net cash provided by operating activities: $323 million\\n- Free cash flow: $280 million\\nOutlook:\\n- Full-year 2026 total sales growth anticipated at 18-19%\\n- FY 2026 diluted EPS expected: $17.30-$17.50\\n- FY 2026 adjusted diluted EPS raised to: $20.40-$20.60\\n- Full-year 2026 free cash flow conversion expected at approximately 90%\"}",
+ "ticker": "HUBB",
+ "stub": false
+}

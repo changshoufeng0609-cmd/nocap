@@ -1,0 +1,21 @@
+{
+ "request_sha256": "ef08e52c4006d760037aca696b47ddcc2fc4fde34f4b8a6544fa388ac9e62625",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:15Z",
+ "response_id": "resp_6ae865bf39eebc36b3a9406e",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1675,
+  "output_tokens": 1811,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1567
+ },
+ "cost_usd": 0.041506,
+ "latency_s": 12.14,
+ "output_text": "{\"draft\": \"Reddit — Q3 2026 Recap\\nResults:\\n- Revenue: $895 million, grew 53% year-over-year\\n- Ad revenue: $847 million, rose 54% year-over-year\\n- Other revenue: $48 million, climbed 35% year-over-year\\n- Gross margin: 91.5%\\n- Net income: $283 million, 32% of revenue\\n- Diluted EPS: $1.40\\n- Adjusted EBITDA: $402 million\\nEngagement:\\n- Daily Active Uniques: 130.3 million, increased 12% year-over-year\\n- Weekly Active Uniques: 515.2 million, jumped 16% year-over-year\\nCash and capital:\\n- Operating cash flow: $364 million, surged 96% year-over-year\\n- Cash, cash equivalents, and marketable securities: $3.03 billion\\n- Share repurchases: $100 million\\nOutlook:\\n- Fourth-quarter revenue guidance: $1,000 million to $1,030 million\\n- Fourth-quarter Adjusted EBITDA guidance: $480 million to $510 million\"}",
+ "ticker": "RDDT",
+ "stub": false
+}

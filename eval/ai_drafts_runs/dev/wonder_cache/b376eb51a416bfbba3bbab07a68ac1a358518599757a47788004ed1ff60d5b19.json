@@ -1,0 +1,21 @@
+{
+ "request_sha256": "b376eb51a416bfbba3bbab07a68ac1a358518599757a47788004ed1ff60d5b19",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:56Z",
+ "response_id": "resp_6ae865ab93c218b8717c42ed",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1652,
+  "output_tokens": 2244,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1973
+ },
+ "cost_usd": 0.050074,
+ "latency_s": 16.42,
+ "output_text": "{\"draft\": \"Loews Corporation — Q2 2026\\nResults:\\n- Net income: $444 million, or $2.16 per share, up from $391 million, or $1.87 per share a year earlier\\n- Book value per share: $93.52 as of June 30, 2026, versus $90.71 as of December 31, 2025\\nSegments:\\n- CNA net income attributable to Loews Corporation: climbed to $294 million from $274 million\\n- CNA core income: slipped to $324 million from $335 million\\n- CNA Property and Casualty premiums: net earned premiums grew 3%, net written premiums grew 4%\\n- CNA Property and Casualty combined ratio: 96.5%, versus 94.1%\\n- Boardwalk net income: rose to $100 million from $88 million\\n- Loews Hotels net income: jumped to $48 million from $28 million\\n- Loews Hotels adjusted EBITDA: increased to $137 million from $109 million\\nCash and capital:\\n- Parent company cash and investments: $4.4 billion\\n- Parent company debt: $1.8 billion\\n- Share repurchases: 1.4 million shares for $146 million\"}",
+ "ticker": "L",
+ "stub": false
+}

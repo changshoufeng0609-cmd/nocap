@@ -1,0 +1,21 @@
+{
+ "request_sha256": "0291573a52cdcf600dec35efa3e0bf46ef6cb7d80fff2727bff10d6242864182",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:21Z",
+ "response_id": "resp_6ae865885b55f7eb203b4c10",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3589,
+  "output_tokens": 1483,
+  "cached_tokens": 372,
+  "reasoning_tokens": 954
+ },
+ "cost_usd": 0.042602,
+ "latency_s": 11.51,
+ "output_text": "{\"draft\": \"# Healthpeak Properties Q4 2025 Earnings Summary\\n\\nHealthpeak Properties reported fourth-quarter net income of **$0.16 per share**, Nareit FFO of **$0.47 per share** and AFFO of **$0.40 per share**, while Total Merger-Combined Same-Store Cash (Adjusted) NOI climbed **+3.9%**.\\n\\n**Profitability**\\n- For the full year, diluted Nareit FFO reached **$1.81 per share** and FFO as Adjusted rose to **$1.84 per share**.\\n- Full-year Total Merger-Combined Same-Store Cash (Adjusted) NOI grew **+4.0%**.\\n\\n**Segment Performance and Leasing**\\n- Fourth-quarter new and renewal lease executions totaled **2.1 million square feet**.\\n- Outpatient Medical renewals delivered **+4.4%** cash releasing spreads.\\n- Lab new lease executions totaled **261,000 square feet**, while renewal cash releasing spreads slipped **-1.7%**.\\n- Life Plan Merger-Combined Same-Store Cash (Adjusted) NOI surged **+16.7%** year over year.\\n\\n**Transactions and Balance Sheet**\\n- The company acquired a campus in South San Francisco for **$600 million** and bought the remaining joint venture interest in a senior housing portfolio for **$314 million**.\\n- Outpatient medical sales closed during the quarter totaled **$325 million**.\\n- Net Debt to Adjusted EBITDAre stood at **5.2x** at quarter end.\\n- The declared dividend amounts to an annualized **$1.22 per share**.\\n\\n**Outlook**\\n- The company is progressing with a capital recycling plan that includes **$1 billion** of asset sales, recapitalizations and loan repayments in 2026.\\n- For full-year 2026, guidance calls for diluted earnings per common share of **$0.34 – $0.38** and diluted Nareit FFO per share of **$1.70 – $1.74**.\\n- Total Merger-Combined Same-Store Cash (Adjusted) NOI growth is expected at **(1%) – 1%**.\\n\\n**Bottom Line**\\nThe quarter combined steady FFO and same-store NOI growth with active leasing, major senior housing and life science transactions, and a clear 2026 recycling and guidance framework.\"}",
+ "ticker": "DOC",
+ "stub": false
+}

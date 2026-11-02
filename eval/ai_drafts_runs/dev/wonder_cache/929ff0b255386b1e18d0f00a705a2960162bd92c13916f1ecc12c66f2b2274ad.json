@@ -1,0 +1,21 @@
+{
+ "request_sha256": "929ff0b255386b1e18d0f00a705a2960162bd92c13916f1ecc12c66f2b2274ad",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:39Z",
+ "response_id": "resp_6ae865d75e23cbc1e1594be5",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3607,
+  "output_tokens": 2225,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1806
+ },
+ "cost_usd": 0.057514,
+ "latency_s": 16.45,
+ "output_text": "{\"draft\": \"Revenue rises in third quarter as client assets decline\\nT. Rowe Price Group, Inc. reported third-quarter diluted earnings per common share of $2.79, with adjusted diluted earnings per common share of $2.86, as net revenues reached $2.0 billion. Net revenues rose 5.9% from the third quarter of 2025 and climbed 5.1% from the second quarter of 2026.\\nAssets under management slipped $30.7 billion during the quarter to $1.9 trillion, as the company recorded net client outflows of $28.3 billion. Its investment advisory annualized effective fee rate, excluding performance-based fees, eased to 37.8 basis points, down from 39.1 basis points a year earlier and 38.1 basis points in the prior quarter.\\nOperating expenses fell to $1,235.1 million, declining 1.2% from a year earlier and 9.6% from the prior quarter. Adjusted operating expenses were $1,200.1 million, up 5.8% from a year earlier but down 0.3% from the prior quarter.\\nCompensation, benefits, and related costs totaled $664.7 million in the quarter. Distribution and servicing costs came to $111.0 million, while technology, occupancy, and facility costs were $205.1 million. The company also recorded a restructuring charge of $4.0 million.\\nAdministrative, distribution, servicing, and other fees slipped during the quarter, reflecting lower recordkeeping fees and transfer agent services compared with a year earlier. Lower investment gains also weighed on results, as losses on fixed income holdings amid rising interest rates more than offset higher dividends on cash equivalents and other fixed income holdings.\\nFor the full year 2026, the company estimates its effective income tax rate, on both a U.S. GAAP and adjusted basis, will be in the range of 23.5% to 25.5%.\"}",
+ "ticker": "TROW",
+ "stub": false
+}

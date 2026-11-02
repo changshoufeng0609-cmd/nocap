@@ -1,0 +1,21 @@
+{
+ "request_sha256": "7d3cb39d141cc0c21867527de9cb0f0ad3646c2384260d687aa2840199d4aab6",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:26:44Z",
+ "response_id": "resp_6ae8656458b56f22071545b1",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1696,
+  "output_tokens": 1662,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1296
+ },
+ "cost_usd": 0.040024,
+ "latency_s": 13.0,
+ "output_text": "{\"draft\": \"Ametek Q4 2025: Record Sales and Earnings Close the Year\\nRecord fourth-quarter sales and adjusted earnings capped a strong year, with both operating segments contributing double-digit sales growth.\\n\\nFourth-quarter sales climbed to a record $2.0 billion, up 13% from a year earlier, while adjusted earnings reached a record $2.01 per diluted share. On a GAAP basis, earnings were $1.73 per diluted share. GAAP operating income was $505.5 million, and adjusted operating income rose to $523.0 million, up 12% versus the prior-year quarter.\\n\\nElectronic Instruments Group sales increased to a record $1.37 billion, up 13%, with adjusted operating income of $413.7 million. Electromechanical Group sales grew to $628.9 million, up 15%, as operating income jumped to $142.5 million and operating margins reached 22.7%, supporting broad-based profitability across the portfolio.\\n\\nCash generation was a standout, with operating cash flow hitting a record $584.3 million and free cash flow reaching a record $527.3 million, representing free cash flow to net income conversion of 132%. For the full year, sales totaled $7.4 billion, providing a solid base heading into the new year.\\n\\nOutlook: For 2026, sales are expected to be up mid to high single digits compared with 2025, with adjusted earnings per diluted share guided to a range of $7.87 to $8.07. For the first quarter of 2026, sales are expected to climb approximately 10% year over year, with adjusted earnings anticipated at $1.85 to $1.90 per share.\"}",
+ "ticker": "AME",
+ "stub": false
+}

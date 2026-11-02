@@ -1,0 +1,21 @@
+{
+ "request_sha256": "6229ac7f4064c7a6b9ad38fc41f0c687652845fc7ebcd5d3bb6105ad59ec34ec",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:38Z",
+ "response_id": "resp_6ae8686a89b7398b3f4a47ff",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3028,
+  "output_tokens": 2077,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1677
+ },
+ "cost_usd": 0.052238,
+ "latency_s": 18.75,
+ "output_text": "{\"draft\": \"Fastenal Q3 2026: Broad Sales Strength With Operating Leverage\\nFastenal posted a strong third quarter as share gains with larger customers, pricing actions and broad-based demand across core end markets lifted sales and profits.\\n\\nDaily sales rose 15.5% year-over-year, while net sales climbed $330.0, also 15.5%, compared with the prior-year quarter. Product pricing added approximately 240 basis points to net sales growth, and direct materials outpaced indirect materials amid greater fastener contribution and continued strength with manufacturing customers. Contract customers continued to outperform, and the company signed 7,484 weighted FASTBin and FASTVend devices during the quarter.\\n\\nProfitability reflected a mix of gross-margin pressure and expense leverage. Gross profit slipped to 44.8% of net sales from 45.3%, as a shift toward larger customers and price/cost weighed on results. SG&A expenses improved to 23.3% of net sales from 24.6%, lifting operating income to 21.5% of net sales from 20.7%. Net income jumped 19.7% to $401.6, with diluted net income per share advancing to $0.35 from $0.29.\\n\\nCash generation remained solid, with net cash provided by operating activities growing to $421.6 and representing 105.0% of net income. Fastenal returned $328.4 to shareholders, or 81.8% of net income, comprising dividends of $298.2 and share repurchases of $30.2.\\n\\nOutlook: Fastenal lowered its goal for weighted FASTBin and FASTVend device signings to between 27,000 and 29,000 MEUs and continues to expect investment in property and equipment, net of proceeds from sales, of between $310.0 and $330.0, alongside elevated IT spending.\"}",
+ "ticker": "FAST",
+ "stub": false
+}

@@ -1,0 +1,21 @@
+{
+ "request_sha256": "3c63b4f1c585b2aafc7b05b47fe880ab246de22897896033fc8fba7625c50483",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:48Z",
+ "response_id": "resp_6ae868b0cf67f22621144152",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2234,
+  "output_tokens": 1957,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1680
+ },
+ "cost_usd": 0.048076,
+ "latency_s": 13.52,
+ "output_text": "{\"draft\": \"Tyler Technologies Q3 2026\\nResults:\\n- Total revenues: $647.6 million, up 8.7% from a year earlier\\n- Recurring revenues: $568.8 million, climbed 11.0%\\n- SaaS revenues: $242.2 million, jumped 21.2%\\n- Transaction revenues: $220.4 million, rose 9.5%\\n- GAAP operating income: $117.0 million, grew 19.5%\\n- Non-GAAP operating income: $182.1 million, rose 14.8%\\n- GAAP net income: $95.1 million, or $2.33 per diluted share\\n- Non-GAAP net income: $143.4 million, or $3.52 per diluted share\\n- Adjusted EBITDA: $192.7 million, increased 13.4%\\nCash and capital:\\n- Cash flows from operations: $282.5 million, up 10.7%\\n- Free cash flow: $277.0 million\\n- Share repurchases: approximately $379 million during the quarter\\n- CODY Systems acquisition: approximately $27.7 million in cash\\nHighlights:\\n- AI-containing deals sold across the client base to date: approximately 300\"}",
+ "ticker": "TYL",
+ "stub": false
+}

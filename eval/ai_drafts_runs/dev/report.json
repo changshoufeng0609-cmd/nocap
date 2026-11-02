@@ -1,0 +1,1944 @@
+{
+ "batch": "dev",
+ "version": "ai_drafts_v1",
+ "generated_utc": "2026-11-02T10:33:37Z",
+ "inputs": {
+  "plan_sha256": "534334ccadc64fa25900a09487d3300adc44700c3bbd8e4bae7516b9d2ac8746",
+  "drafts_sha256": "638c989fc6a5b2f71372df6d163df5ac8fb85dde58cb8d96926637f55d436156",
+  "checks_sha256": "8577f096f3d6944dbe2986201e87ef266aabc5b7ef14b706bcc1f74e7c342362"
+ },
+ "stub": false,
+ "check_code": {
+  "receipts_sha256": "8d971b3bc07d032866bee0f733414be50f4beded20d078e2d9af1f716d486e81",
+  "git_head": "d71daffc1da363571adccd5269ae3632c54d2338",
+  "receipts_dirty": false
+ },
+ "drafts": {
+  "planned": 50,
+  "written": 50,
+  "checked": 50,
+  "statuses": {
+   "ok": 50
+  }
+ },
+ "styles": {
+  "analyst_note": 13,
+  "chatgpt_markdown": 12,
+  "news_story": 12,
+  "bullet_recap": 13
+ },
+ "totals": {
+  "wrong": 13,
+  "claims": 1175,
+  "unverifiable": 749,
+  "verified": 413,
+  "verified_filed_fact": 279,
+  "verified_filed_fact_10q_10k": 188,
+  "verified_filed_fact_8k_table": 91,
+  "verified_release_statement": 134
+ },
+ "by_style": {
+  "analyst_note": {
+   "wrong": 7,
+   "claims": 299,
+   "unverifiable": 173,
+   "verified": 119,
+   "verified_filed_fact": 79,
+   "verified_filed_fact_10q_10k": 50,
+   "verified_filed_fact_8k_table": 29,
+   "verified_release_statement": 40
+  },
+  "bullet_recap": {
+   "verified": 135,
+   "verified_filed_fact": 85,
+   "verified_filed_fact_10q_10k": 62,
+   "claims": 306,
+   "verified_release_statement": 50,
+   "unverifiable": 167,
+   "verified_filed_fact_8k_table": 23,
+   "wrong": 4
+  },
+  "chatgpt_markdown": {
+   "verified": 110,
+   "verified_filed_fact": 80,
+   "verified_filed_fact_10q_10k": 49,
+   "claims": 284,
+   "unverifiable": 173,
+   "verified_release_statement": 30,
+   "verified_filed_fact_8k_table": 31,
+   "wrong": 1
+  },
+  "news_story": {
+   "verified": 49,
+   "verified_filed_fact": 35,
+   "verified_filed_fact_10q_10k": 27,
+   "claims": 286,
+   "verified_filed_fact_8k_table": 8,
+   "verified_release_statement": 14,
+   "unverifiable": 236,
+   "wrong": 1
+  }
+ },
+ "provenance": {
+  "source_match": 1159,
+  "not_in_source": 13,
+  "rounded": 2
+ },
+ "provenance_by_style": {
+  "analyst_note": {
+   "source_match": 292,
+   "not_in_source": 1
+  },
+  "bullet_recap": {
+   "source_match": 300,
+   "not_in_source": 5
+  },
+  "chatgpt_markdown": {
+   "source_match": 280,
+   "not_in_source": 7,
+   "rounded": 2
+  },
+  "news_story": {
+   "source_match": 287
+  }
+ },
+ "wrong": {
+  "writer_error_caught": [],
+  "possible_false_alarm": [
+   {
+    "ticker": "ACN",
+    "style": "analyst_note",
+    "draft_line": "GAAP net income climbed to $2.03 billion in the fourth quarter, with gross margin edging up to 32.0%.",
+    "value_text": "$2.03 billion",
+    "metric": "net_income",
+    "metric_text": "net income",
+    "reason": "value_mismatch",
+    "explanation": "Accenture's 10-K reports that GAAP net income was $1.991 billion for Q4 FY2026 (quarter ended Aug 31, 2026), not $2.03 billion.",
+    "figure": "$2.03 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s8"
+    ],
+    "source_lines": [
+     "[s8] GAAP net income for the quarter was $2.03 billion, compared with $1.45 billion for the fourth quarter of fiscal 2025."
+    ],
+    "expected_value": 1.991267
+   },
+   {
+    "ticker": "ACN",
+    "style": "analyst_note",
+    "draft_line": "The GAAP effective tax rate slipped to 27.3%, compared with 30.1% in the prior-year quarter, as GAAP net income grew from $1.45 billion.",
+    "value_text": "$1.45 billion",
+    "metric": "net_income",
+    "metric_text": "GAAP net income",
+    "reason": "value_mismatch",
+    "explanation": "Accenture plc's 10-K reports that GAAP net income was $1.684 billion for Q4 FY2024 (quarter ended Aug 31, 2024), the comparison period the sentence implies, not $1.45 billion.",
+    "figure": "$1.45 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s8"
+    ],
+    "source_lines": [
+     "[s8] GAAP net income for the quarter was $2.03 billion, compared with $1.45 billion for the fourth quarter of fiscal 2025."
+    ],
+    "expected_value": 1.684301
+   },
+   {
+    "ticker": "ACN",
+    "style": "analyst_note",
+    "draft_line": "For the full year, GAAP net income increased to $8.52 billion, compared with $7.83 billion in fiscal 2025.",
+    "value_text": "$8.52 billion",
+    "metric": "net_income",
+    "metric_text": "GAAP net income",
+    "reason": "value_mismatch",
+    "explanation": "Accenture plc's 10-K reports that GAAP net income was $8.367 billion for fiscal 2026 (year ended Aug 31, 2026), not $8.52 billion.",
+    "figure": "$8.52 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s16"
+    ],
+    "source_lines": [
+     "[s16] GAAP net income for fiscal 2026 was $8.52 billion, compared with $7.83 billion in fiscal 2025."
+    ],
+    "expected_value": 8.367056
+   },
+   {
+    "ticker": "ACN",
+    "style": "analyst_note",
+    "draft_line": "For the full year, GAAP net income increased to $8.52 billion, compared with $7.83 billion in fiscal 2025.",
+    "value_text": "$7.83 billion",
+    "metric": "net_income",
+    "metric_text": "GAAP net income",
+    "reason": "value_mismatch",
+    "explanation": "Accenture plc's 10-K reports that GAAP net income was $7.678 billion for fiscal 2025 (year ended Aug 31, 2025), not $7.83 billion.",
+    "figure": "$7.83 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s16"
+    ],
+    "source_lines": [
+     "[s16] GAAP net income for fiscal 2026 was $8.52 billion, compared with $7.83 billion in fiscal 2025."
+    ],
+    "expected_value": 7.678433
+   },
+   {
+    "ticker": "AME",
+    "style": "analyst_note",
+    "draft_line": "Electromechanical Group sales grew to $628.9 million, up 15%, as operating income jumped to $142.5 million and operating margins reached 22.7%, supporting broad-based profitability across the portfolio.",
+    "value_text": "22.7%",
+    "metric": "other",
+    "metric_text": "operating margins",
+    "reason": "value_mismatch",
+    "explanation": "Ametek Inc's 10-K (derived) reports that operating margin was 25.29% for Q4 2025 (quarter ended Dec 31, 2025), not 22.7%.",
+    "figure": "22.7%",
+    "provenance": "source_match",
+    "source_refs": [
+     "s20"
+    ],
+    "source_lines": [
+     "[s20] EMG’s fourth quarter operating income increased 28% to $142.5 million, and operating income margins were 22.7% in the quarter, up 240 basis points versus the prior year’s results."
+    ],
+    "expected_value": 25.29372793
+   },
+   {
+    "ticker": "BF-B",
+    "style": "chatgpt_markdown",
+    "draft_line": "- Cash flows from operations grew to **$1.0 billion**, and free cash flow rose to **$893 million**.",
+    "value_text": "$1.0 billion",
+    "metric": "operating_cash_flow",
+    "metric_text": "Cash flows from operations",
+    "reason": "value_mismatch",
+    "explanation": "Brown Forman Corp's 10-K (derived) reports that operating cash flow was $291 million for Q4 FY2026 (quarter ended Apr 30, 2026), not $1.0 billion.",
+    "figure": "$1.0 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s6",
+     "s10",
+     "s33"
+    ],
+    "source_lines": [
+     "[s6] Reported operating income decreased 10% to $1.0 billion (-2% on an organic basis) and diluted earnings per share decreased 17% to $1.53.",
+     "[s10] Cash flows from operations grew by $402 million to $1.0 billion and free cash flow2 increased by $462 million to $893 million."
+    ],
+    "expected_value": 0.291
+   },
+   {
+    "ticker": "COP",
+    "style": "news_story",
+    "draft_line": "ConocoPhillips reported second-quarter 2026 earnings of $3.9 billion, or $3.23 per share, compared with $2.0 billion, or $1.56 per share in the same period a year earlier.",
+    "value_text": "$1.56 per share",
+    "metric": "other",
+    "metric_text": "earnings per share",
+    "reason": "period_mismatch",
+    "explanation": "$1.56 per share is ConocoPhillips' diluted EPS for Q2 2025 (quarter ended Jun 30, 2025); for Q2 2026 (quarter ended Jun 30, 2026) it was $3.23.",
+    "figure": "$1.56",
+    "provenance": "source_match",
+    "source_refs": [
+     "s6"
+    ],
+    "source_lines": [
+     "[s6] HOUSTON—Aug. 6, 2026—ConocoPhillips (NYSE: COP) today reported second-quarter 2026 earnings of $3.9 billion, or $3.23 per share, compared with second-quarter 2025 earnings of $2.0 billion, or $1.56 per share."
+    ],
+    "expected_value": 3.23
+   },
+   {
+    "ticker": "DE",
+    "style": "bullet_recap",
+    "draft_line": "- Net sales: $10.999 billion, versus $10.357 billion a year earlier",
+    "value_text": "$10.999 billion",
+    "metric": "revenue",
+    "metric_text": "Net sales",
+    "reason": "value_mismatch",
+    "explanation": "Deere & Company's 10-Q reports that revenue was $12.608 billion for Q3 FY2026 (quarter ended Aug 2, 2026), not $10.999 billion.",
+    "figure": "$10.999 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s5"
+    ],
+    "source_lines": [
+     "[s5] Net sales were $10.999 billion for the quarter and $30.779 billion for nine months, compared with $10.357 billion and $28.338 billion last year, respectively."
+    ],
+    "expected_value": 12.608
+   },
+   {
+    "ticker": "DE",
+    "style": "bullet_recap",
+    "draft_line": "- Net sales: $10.999 billion, versus $10.357 billion a year earlier",
+    "value_text": "$10.357 billion",
+    "metric": "revenue",
+    "metric_text": "Net sales",
+    "reason": "value_mismatch",
+    "explanation": "Deere & Company's 10-Q reports that revenue was $12.018 billion for Q3 FY2025 (quarter ended Jul 27, 2025), not $10.357 billion.",
+    "figure": "$10.357 billion",
+    "provenance": "source_match",
+    "source_refs": [
+     "s5"
+    ],
+    "source_lines": [
+     "[s5] Net sales were $10.999 billion for the quarter and $30.779 billion for nine months, compared with $10.357 billion and $28.338 billion last year, respectively."
+    ],
+    "expected_value": 12.018
+   },
+   {
+    "ticker": "GILD",
+    "style": "analyst_note",
+    "draft_line": "Trodelvy sales surged to $506 million on higher demand, partly offsetting weakness elsewhere.",
+    "value_text": "$506 million",
+    "metric": "segment_revenue",
+    "metric_text": "Trodelvy sales",
+    "reason": "value_mismatch",
+    "explanation": "Gilead Sciences, Inc.'s 8-K press release reports that Trodelvy revenue was $336 million for Q3 2026 (quarter ended Sep 30, 2026), not $506 million.",
+    "figure": "$506 million",
+    "provenance": "source_match",
+    "source_refs": [
+     "s23"
+    ],
+    "source_lines": [
+     "[s23] Trodelvy® (sacituzumab govitecan-hziy) sales increased 42% to $506 million in the third quarter 2026 compared to the same period in 2025, primarily driven by higher demand."
+    ],
+    "expected_value": 336.0
+   },
+   {
+    "ticker": "L",
+    "style": "bullet_recap",
+    "draft_line": "- Net income: $444 million, or $2.16 per share, up from $391 million, or $1.87 per share a year earlier",
+    "value_text": "$391 million",
+    "metric": "net_income",
+    "metric_text": "Net income",
+    "reason": "period_mismatch",
+    "explanation": "$391 million is Loews Corporation's net income for Q2 2025 (quarter ended Jun 30, 2025); for Q2 2026 (quarter ended Jun 30, 2026) it was $444 million.",
+    "figure": "$391 million",
+    "provenance": "source_match",
+    "source_refs": [
+     "s5"
+    ],
+    "source_lines": [
+     "[s5] Loews Corporation reported net income of $444 million, or $2.16 per share, in the second quarter of 2026, compared to $391 million, or $1.87 per share, in the second quarter of 2025."
+    ],
+    "expected_value": 444.0
+   },
+   {
+    "ticker": "SYF",
+    "style": "bullet_recap",
+    "draft_line": "- Diluted earnings per share: $2.68, versus $2.86 a year earlier",
+    "value_text": "$2.86",
+    "metric": "eps_diluted",
+    "metric_text": "Diluted earnings per share",
+    "reason": "period_mismatch",
+    "explanation": "$2.86 is Synchrony Financial's diluted EPS for Q3 2025 (quarter ended Sep 30, 2025); for Q3 2026 (quarter ended Sep 30, 2026) it was $2.68.",
+    "figure": "$2.86",
+    "provenance": "source_match",
+    "source_refs": [
+     "s2"
+    ],
+    "source_lines": [
+     "[s2] STAMFORD, Conn - Synchrony Financial (NYSE: SYF) today announced third quarter 2026 net earnings of $892 million, or $2.68 per diluted share, compared to $1.1 billion, or $2.86 per diluted share in the third quarter 2025."
+    ],
+    "expected_value": 2.68
+   },
+   {
+    "ticker": "WY",
+    "style": "analyst_note",
+    "draft_line": "Net earnings came in at $61 million, or $0.08 per diluted share, compared with $80 million, or 11 cents per diluted share, a year earlier and $162 million in second quarter 2026.",
+    "value_text": "11 cents",
+    "metric": "eps_diluted",
+    "metric_text": "per diluted share",
+    "reason": "value_mismatch",
+    "explanation": "Weyerhaeuser's 10-Q reports that diluted EPS was $0.11 for Q3 2025 (quarter ended Sep 30, 2025), not 11 cents.",
+    "figure": "11",
+    "provenance": "source_match",
+    "source_refs": [
+     "s6"
+    ],
+    "source_lines": [
+     "[s6] This compares with net earnings of $80 million, or 11 cents per diluted share, on net sales of $1.7 billion for the same period last year and net earnings of $162 million for second quarter 2026."
+    ],
+    "expected_value": 0.11
+   }
+  ],
+  "no_matching_figure": []
+ },
+ "unverifiable": {
+  "count": 749,
+  "buckets": [
+   {
+    "bucket": "guidance",
+    "label": "Guidance",
+    "count": 171,
+    "share": 0.2283,
+    "drafts": 35,
+    "top_words": [
+     [
+      "revenue",
+      6
+     ],
+     [
+      "billings",
+      4
+     ],
+     [
+      "organic sales growth",
+      4
+     ],
+     [
+      "effective tax rate",
+      3
+     ],
+     [
+      "revenue growth",
+      3
+     ],
+     [
+      "adjusted earnings per diluted share",
+      2
+     ],
+     [
+      "adjusted earnings",
+      2
+     ],
+     [
+      "adjusted EPS, excluding China",
+      2
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      74
+     ],
+     [
+      "eps_diluted",
+      42
+     ],
+     [
+      "revenue_growth",
+      21
+     ],
+     [
+      "revenue",
+      18
+     ],
+     [
+      "tax_rate",
+      6
+     ],
+     [
+      "free_cash_flow",
+      5
+     ],
+     [
+      "net_income",
+      2
+     ],
+     [
+      "gross_margin",
+      2
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "AMAT",
+      "style": "analyst_note",
+      "draft_line": "The non-GAAP diluted EPS outlook excludes known charges related to completed acquisitions of $0.01 per share, includes the normalized tax benefit of share-based compensation of $0.01 per share and includes a net income tax benefit related to intra-entity inta…",
+      "value_text": "$0.01",
+      "metric": "other",
+      "metric_text": "known charges related to completed acquisitions",
+      "reason": "forward_looking",
+      "explanation": "This is guidance about a future period, so no filing can confirm it yet."
+     },
+     {
+      "ticker": "AME",
+      "style": "analyst_note",
+      "draft_line": "Outlook: For 2026, sales are expected to be up mid to high single digits compared with 2025, with adjusted earnings per diluted share guided to a range of $7.87 to $8.07.",
+      "value_text": "$7.87",
+      "metric": "eps_diluted",
+      "metric_text": "adjusted earnings per diluted share",
+      "reason": "forward_looking",
+      "explanation": "This is guidance about a future period, so no filing can confirm it yet."
+     },
+     {
+      "ticker": "AOS",
+      "style": "news_story",
+      "draft_line": "The transaction values the China business at approximately $400 million on a cash-free, debt-free basis, with total value expected to exceed $500 million including the net present value of licensing economics, and the structure will enable the company to repa…",
+      "value_text": "$500 million",
+      "metric": "other",
+      "metric_text": "total value including the net present value of licensing economics",
+      "reason": "forward_looking",
+      "explanation": "This is guidance about a future period, so no filing can confirm it yet."
+     }
+    ]
+   },
+   {
+    "bucket": "no_company",
+    "label": "No company attached",
+    "count": 0,
+    "share": 0.0,
+    "drafts": 0,
+    "top_words": [],
+    "top_metrics": [],
+    "examples": []
+   },
+   {
+    "bucket": "company_not_matched",
+    "label": "Company name not matched",
+    "count": 11,
+    "share": 0.0147,
+    "drafts": 1,
+    "top_words": [
+     [
+      "T. Rowe Price Group, Inc.",
+      11
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      4
+     ],
+     [
+      "eps_diluted",
+      2
+     ],
+     [
+      "revenue_growth",
+      2
+     ],
+     [
+      "operating_expenses",
+      2
+     ],
+     [
+      "revenue",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "TROW",
+      "style": "news_story",
+      "draft_line": "reported third-quarter diluted earnings per common share of $2.79, with adjusted diluted earnings per common share of $2.86, as net revenues reached $2.0 billion.",
+      "value_text": "$2.79",
+      "metric": "eps_diluted",
+      "metric_text": "diluted earnings per common share",
+      "reason": "ambiguous",
+      "explanation": "\"T. Rowe Price Group, Inc.\" contains the name of T. Rowe Price, which NoCap covers, but isn't a name NoCap matches to it (it may be a unit, a subsidiary or another company), so NoCap doesn't check it against T. Rowe Price's filings."
+     }
+    ]
+   },
+   {
+    "bucket": "evidence_ends",
+    "label": "Evidence ends before the quarter",
+    "count": 13,
+    "share": 0.0174,
+    "drafts": 2,
+    "top_words": [
+     [
+      "Q2 2026",
+      10
+     ],
+     [
+      "Q1 FY2027",
+      3
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      5
+     ],
+     [
+      "revenue",
+      3
+     ],
+     [
+      "eps_diluted",
+      3
+     ],
+     [
+      "net_income",
+      2
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "CMI",
+      "style": "news_story",
+      "draft_line": "reported fourth-quarter revenue of $8.5 billion, up 1% from a year earlier, while net income attributable to the company climbed to $593 million, or $4.27 per diluted share, from $418 million, or $3.02 per diluted share.",
+      "value_text": "$8.5 billion",
+      "metric": "revenue",
+      "metric_text": "fourth-quarter revenue",
+      "reason": "no_evidence",
+      "explanation": "NoCap's evidence for Cummins Inc. ends with Q2 2026, so it can't check Q4 2026 yet; $8.5 billion matches its revenue for Q4 2025 (quarter ended Dec 31, 2025)."
+     },
+     {
+      "ticker": "PG",
+      "style": "chatgpt_markdown",
+      "draft_line": "Procter & Gamble opened fiscal 2027 with net sales climbing to **$23.3 billion**, up **4%** from a year earlier.",
+      "value_text": "$23.3 billion",
+      "metric": "revenue",
+      "metric_text": "net sales",
+      "reason": "no_evidence",
+      "explanation": "NoCap's evidence for Procter & Gamble ends with Q1 FY2027, so it can't check fiscal 2027 yet."
+     }
+    ]
+   },
+   {
+    "bucket": "constant_currency_or_organic",
+    "label": "Constant currency or organic (company-defined measure)",
+    "count": 19,
+    "share": 0.0254,
+    "drafts": 7,
+    "top_words": [
+     [
+      "organic",
+      14
+     ],
+     [
+      "constant-currency",
+      5
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      15
+     ],
+     [
+      "other",
+      3
+     ],
+     [
+      "eps_diluted",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ILMN",
+      "style": "analyst_note",
+      "draft_line": "Revenue excluding tariff refunds was $1.17 billion, up 4.7% after also excluding the impacts of currency, acquisitions, and the Greater China region, a measure described as ROW organic revenue growth.",
+      "value_text": "4.7%",
+      "metric": "revenue_growth",
+      "metric_text": "ROW organic revenue growth",
+      "reason": "no_evidence",
+      "explanation": "The wording “organic” describes a company-defined measure that filings don't report under that name, so NoCap can't check 4.7%."
+     },
+     {
+      "ticker": "NKE",
+      "style": "analyst_note",
+      "draft_line": "First-quarter revenues were $11.2 billion, down 4 percent on a reported basis and down 5 percent on a currency-neutral basis.",
+      "value_text": "5 percent",
+      "metric": "revenue_growth",
+      "metric_text": "revenues",
+      "reason": "no_evidence",
+      "explanation": "5 percent is a constant-currency (FX-neutral) figure; filings report results at actual exchange rates, so NoCap can't check it."
+     },
+     {
+      "ticker": "PEP",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Net revenue rose **5.6%** in the third quarter, while organic revenue increased **3.1%**.",
+      "value_text": "3.1%",
+      "metric": "revenue_growth",
+      "metric_text": "organic revenue increased",
+      "reason": "no_evidence",
+      "explanation": "The wording “organic” describes a company-defined measure that filings don't report under that name, so NoCap can't check 3.1%."
+     }
+    ]
+   },
+   {
+    "bucket": "non_gaap_no_release_fact",
+    "label": "Non-GAAP with no release fact",
+    "count": 27,
+    "share": 0.036,
+    "drafts": 14,
+    "top_words": [
+     [
+      "net income",
+      5
+     ],
+     [
+      "free cash flow",
+      5
+     ],
+     [
+      "operating income growth",
+      4
+     ],
+     [
+      "operating income",
+      4
+     ],
+     [
+      "diluted EPS",
+      4
+     ],
+     [
+      "operating margin",
+      2
+     ],
+     [
+      "U.S. revenue growth",
+      1
+     ],
+     [
+      "U.S. revenue",
+      1
+     ]
+    ],
+    "top_metrics": [
+     [
+      "operating_income",
+      7
+     ],
+     [
+      "other",
+      6
+     ],
+     [
+      "net_income",
+      5
+     ],
+     [
+      "free_cash_flow",
+      5
+     ],
+     [
+      "eps_diluted",
+      2
+     ],
+     [
+      "revenue_growth",
+      1
+     ],
+     [
+      "segment_revenue",
+      1
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ACN",
+      "style": "analyst_note",
+      "draft_line": "Adjusted net income rose to $8.77 billion, compared with $8.32 billion, while fiscal selling, general and administrative expenses were $12.06 billion, or 16.3% of revenues.",
+      "value_text": "$8.77 billion",
+      "metric": "net_income",
+      "metric_text": "Adjusted net income",
+      "reason": "no_evidence",
+      "explanation": "No press-release fact for Accenture plc's non-GAAP net income for fiscal 2026 (year ended Aug 31, 2026) (non-GAAP figures come only from earnings releases)."
+     },
+     {
+      "ticker": "AFL",
+      "style": "chatgpt_markdown",
+      "draft_line": "- In Japan, total adjusted revenues in dollar terms dropped **12.6%** to **$2.2 billion**, and pretax adjusted earnings slipped **6.2%** to **$741 million**.",
+      "value_text": "6.2%",
+      "metric": "operating_income",
+      "metric_text": "pretax adjusted earnings",
+      "reason": "no_evidence",
+      "explanation": "No press-release fact for Aflac Inc's non-GAAP operating income growth for Q2 2026 (quarter ended Jun 30, 2026) (non-GAAP figures come only from earnings releases)."
+     },
+     {
+      "ticker": "AME",
+      "style": "analyst_note",
+      "draft_line": "Electronic Instruments Group sales increased to a record $1.37 billion, up 13%, with adjusted operating income of $413.7 million.",
+      "value_text": "$413.7 million",
+      "metric": "operating_income",
+      "metric_text": "adjusted operating income",
+      "reason": "no_evidence",
+      "explanation": "No press-release fact for Ametek Inc's non-GAAP Electronic Instruments Group operating income for Q4 2025 (quarter ended Dec 31, 2025) (non-GAAP figures come only from earnings releases)."
+     }
+    ]
+   },
+   {
+    "bucket": "qualifier_wording",
+    "label": "Qualifier wording",
+    "count": 60,
+    "share": 0.0801,
+    "drafts": 27,
+    "top_words": [
+     [
+      "core",
+      5
+     ],
+     [
+      "taxes",
+      4
+     ],
+     [
+      "U.S.",
+      3
+     ],
+     [
+      "reaching",
+      3
+     ],
+     [
+      "results",
+      3
+     ],
+     [
+      "operating",
+      3
+     ],
+     [
+      "dollar terms",
+      2
+     ],
+     [
+      "fuel",
+      2
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      15
+     ],
+     [
+      "other",
+      14
+     ],
+     [
+      "eps_diluted",
+      8
+     ],
+     [
+      "revenue",
+      5
+     ],
+     [
+      "net_income",
+      4
+     ],
+     [
+      "segment_revenue",
+      3
+     ],
+     [
+      "operating_cash_flow",
+      2
+     ],
+     [
+      "free_cash_flow",
+      2
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "AFL",
+      "style": "chatgpt_markdown",
+      "draft_line": "- The weaker yen/dollar exchange rate had a negative **$0.05** impact on adjusted earnings per share.",
+      "value_text": "$0.05",
+      "metric": "other",
+      "metric_text": "impact on adjusted earnings per share",
+      "reason": "no_evidence",
+      "explanation": "The wording “impact” qualifies this figure (impact on adjusted earnings per share) in a way NoCap can't match to a filing fact, so there is nothing to check it against."
+     },
+     {
+      "ticker": "AME",
+      "style": "analyst_note",
+      "draft_line": "Cash generation was a standout, with operating cash flow hitting a record $584.3 million and free cash flow reaching a record $527.3 million, representing free cash flow to net income conversion of 132%.",
+      "value_text": "$584.3 million",
+      "metric": "operating_cash_flow",
+      "metric_text": "operating cash flow",
+      "reason": "no_evidence",
+      "explanation": "The wording “hitting” qualifies this figure (operating cash flow) in a way NoCap can't match to a filing fact, so there is nothing to check it against."
+     },
+     {
+      "ticker": "AOS",
+      "style": "news_story",
+      "draft_line": "The segment also recorded a $15 million sales contribution from Leonard Valve, and segment earnings reached $179.9 million with a segment margin of 23.6%.",
+      "value_text": "$15 million",
+      "metric": "segment_revenue",
+      "metric_text": "sales contribution from Leonard Valve",
+      "reason": "no_evidence",
+      "explanation": "The wording “contribution Leonard Valve” qualifies this figure (sales contribution from Leonard Valve) in a way NoCap can't match to a filing fact, so there is nothing to check it against."
+     }
+    ]
+   },
+   {
+    "bucket": "untracked_kind",
+    "label": "Untracked kind of figure",
+    "count": 312,
+    "share": 0.4166,
+    "drafts": 48,
+    "top_words": [
+     [
+      "Adjusted EBITDA",
+      5
+     ],
+     [
+      "share repurchases",
+      4
+     ],
+     [
+      "Share repurchases",
+      4
+     ],
+     [
+      "selling, general and administrative expenses",
+      3
+     ],
+     [
+      "returned to shareholders",
+      3
+     ],
+     [
+      "dividends",
+      3
+     ],
+     [
+      "EBITDA",
+      3
+     ],
+     [
+      "adjusted earnings",
+      3
+     ]
+    ],
+    "top_metrics": [
+     [
+      "other",
+      244
+     ],
+     [
+      "capital_returned",
+      26
+     ],
+     [
+      "operating_cash_flow",
+      7
+     ],
+     [
+      "eps_diluted",
+      7
+     ],
+     [
+      "dividend_per_share",
+      5
+     ],
+     [
+      "operating_income",
+      4
+     ],
+     [
+      "tax_rate",
+      3
+     ],
+     [
+      "gross_margin",
+      3
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ACN",
+      "style": "analyst_note",
+      "draft_line": "Gross margin of 32.0% compared with 31.9% in the fourth quarter of fiscal 2025, while selling, general and administrative expenses rose to $3.12 billion, or 16.7% of revenues, from $2.95 billion a year earlier.",
+      "value_text": "$3.12 billion",
+      "metric": "other",
+      "metric_text": "selling, general and administrative expenses",
+      "reason": "no_evidence",
+      "explanation": "NoCap doesn't track this kind of figure (selling, general and administrative expenses) yet, so there is no filing fact to check."
+     },
+     {
+      "ticker": "AFL",
+      "style": "chatgpt_markdown",
+      "draft_line": "- The average yen/dollar exchange rate was **159.45**, or **9.3%** weaker than a year earlier, creating a headwind for translated results.",
+      "value_text": "159.45",
+      "metric": "other",
+      "metric_text": "average yen/dollar exchange rate",
+      "reason": "no_evidence",
+      "explanation": "NoCap doesn't track this kind of figure (average yen/dollar exchange rate) yet, so there is no filing fact to check."
+     },
+     {
+      "ticker": "AKAM",
+      "style": "chatgpt_markdown",
+      "draft_line": "- Adjusted EBITDA totaled **$416 million**.",
+      "value_text": "$416 million",
+      "metric": "other",
+      "metric_text": "Adjusted EBITDA",
+      "reason": "no_evidence",
+      "explanation": "NoCap doesn't track this kind of figure (Adjusted EBITDA) yet, so there is no filing fact to check."
+     }
+    ]
+   },
+   {
+    "bucket": "period",
+    "label": "Period ambiguous or unresolved",
+    "count": 80,
+    "share": 0.1068,
+    "drafts": 15,
+    "top_words": [
+     [
+      "net income",
+      6
+     ],
+     [
+      "per diluted share",
+      6
+     ],
+     [
+      "Net income",
+      4
+     ],
+     [
+      "diluted earnings per share",
+      3
+     ],
+     [
+      "net cash provided by operating activities",
+      3
+     ],
+     [
+      "free cash flow",
+      2
+     ],
+     [
+      "net income per share",
+      2
+     ],
+     [
+      "Non-GAAP operating income",
+      2
+     ]
+    ],
+    "top_metrics": [
+     [
+      "net_income",
+      16
+     ],
+     [
+      "eps_diluted",
+      15
+     ],
+     [
+      "other",
+      14
+     ],
+     [
+      "revenue_growth",
+      11
+     ],
+     [
+      "revenue",
+      8
+     ],
+     [
+      "operating_income",
+      4
+     ],
+     [
+      "segment_revenue",
+      4
+     ],
+     [
+      "operating_cash_flow",
+      4
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "AOS",
+      "style": "news_story",
+      "draft_line": "Year-to-date cash provided by operations was $429.4 million, while free cash flow came to $396.2 million.",
+      "value_text": "$396.2 million",
+      "metric": "free_cash_flow",
+      "metric_text": "free cash flow",
+      "reason": "ambiguous",
+      "explanation": "Couldn't tell which A. O. Smith Corporation fiscal period \"Year-to-date\" refers to."
+     },
+     {
+      "ticker": "CASY",
+      "style": "news_story",
+      "draft_line": "reported stronger first-quarter earnings, with diluted earnings per share of $7.37, up 27.7% from the same period a year ago.",
+      "value_text": "$7.37",
+      "metric": "eps_diluted",
+      "metric_text": "diluted earnings per share",
+      "reason": "ambiguous",
+      "explanation": "Couldn't tell which Casey's General Stores, Inc. fiscal period \"first-quarter\" refers to."
+     },
+     {
+      "ticker": "CINF",
+      "style": "news_story",
+      "draft_line": "Cincinnati Financial Corporation reported third-quarter net income of $459 million, or $2.96 per share, compared with $1.122 billion, or $7.11 per share, a year earlier.",
+      "value_text": "$459 million",
+      "metric": "net_income",
+      "metric_text": "net income",
+      "reason": "ambiguous",
+      "explanation": "Couldn't tell which Cincinnati Financial Corporation fiscal period \"third-quarter\" refers to."
+     }
+    ]
+   },
+   {
+    "bucket": "other",
+    "label": "Other",
+    "count": 56,
+    "share": 0.0748,
+    "drafts": 22,
+    "top_words": [
+     [
+      "per diluted share",
+      2
+     ],
+     [
+      "Capital returned to shareholders",
+      2
+     ],
+     [
+      "Loews Hotels net income",
+      2
+     ],
+     [
+      "gross margin",
+      1
+     ],
+     [
+      "net income",
+      1
+     ],
+     [
+      "Electronic Instruments Group sales",
+      1
+     ],
+     [
+      "Electronic Instruments Group sales growth",
+      1
+     ],
+     [
+      "Electromechanical Group sales",
+      1
+     ]
+    ],
+    "top_metrics": [
+     [
+      "revenue_growth",
+      22
+     ],
+     [
+      "segment_revenue",
+      15
+     ],
+     [
+      "net_income",
+      6
+     ],
+     [
+      "operating_income",
+      3
+     ],
+     [
+      "other",
+      3
+     ],
+     [
+      "gross_margin",
+      2
+     ],
+     [
+      "eps_diluted",
+      2
+     ],
+     [
+      "capital_returned",
+      2
+     ]
+    ],
+    "examples": [
+     {
+      "ticker": "ACN",
+      "style": "analyst_note",
+      "draft_line": "GAAP net income climbed to $2.03 billion in the fourth quarter, with gross margin edging up to 32.0%.",
+      "value_text": "32.0%",
+      "metric": "gross_margin",
+      "metric_text": "gross margin",
+      "reason": "ambiguous",
+      "explanation": "A margin change written with % could mean relative growth or percentage points. Specify which meaning is intended before comparing it with a filing."
+     },
+     {
+      "ticker": "ALL",
+      "style": "chatgpt_markdown",
+      "draft_line": "Total revenues rose to **$18.6 billion**, net income reached **$3.2 billion**, and adjusted net income was **$2.3 billion**, or **$8.99 per diluted share**.",
+      "value_text": "$3.2 billion",
+      "metric": "net_income",
+      "metric_text": "net income",
+      "reason": "ambiguous",
+      "explanation": "Allstate's 10-Q reports net income available to common stockholders of $3.241 billion for Q2 2026 (quarter ended Jun 30, 2026), alongside $3.271 billion, the net-income figure NoCap serves. $3.2 billion matches the available-to-common figure, so the draft's net-income meaning is ambiguous."
+     },
+     {
+      "ticker": "AME",
+      "style": "analyst_note",
+      "draft_line": "Electronic Instruments Group sales increased to a record $1.37 billion, up 13%, with adjusted operating income of $413.7 million.",
+      "value_text": "$1.37 billion",
+      "metric": "segment_revenue",
+      "metric_text": "Electronic Instruments Group sales",
+      "reason": "no_evidence",
+      "explanation": "No filing fact for Ametek Inc's Electronic Instruments Group revenue for Q4 2025 (quarter ended Dec 31, 2025)."
+     }
+    ],
+    "top_templates": [
+     [
+      "A margin change written with % could mean relative growth or percentage points. Specify which meaning is intended before comparing it with a filing.",
+      2
+     ],
+     [
+      "No filing fact for <Company>'s diluted EPS for <period> (…).",
+      2
+     ],
+     [
+      "No filing fact for <Company>'s CNA Property and Casualty revenue growth for <period> (…).",
+      2
+     ],
+     [
+      "No filing fact for <Company>'s Loews Hotels net income for <period> (…).",
+      2
+     ],
+     [
+      "“…” makes N-percentage-point an item within a reported figure, not the figure itself, and NoCap holds no filing fact for that item, so it can't check it.",
+      2
+     ],
+     [
+      "<Company>'s N-Q reports net income available to common stockholders of N for <period> (…), alongside N, the net-income figure NoCap serves. N matches the availa",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Electronic Instruments Group revenue for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Electronic Instruments Group revenue growth for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Electromechanical Group revenue for <period> (…).",
+      1
+     ],
+     [
+      "No filing fact for <Company>'s Electromechanical Group revenue growth for <period> (…).",
+      1
+     ]
+    ]
+   }
+  ]
+ },
+ "coverage": {
+  "figures_in_source": 1161,
+  "verified_any": 411,
+  "verified_filed_fact": 277,
+  "rate_any": 0.354,
+  "rate_filed_fact": 0.2386,
+  "wrong_on_source_figures": 13,
+  "outcomes": {
+   "✗": 13,
+   "?": 727,
+   "✓ filed fact": 277,
+   "✓ release statement": 134,
+   "not extracted": 10
+  },
+  "by_style": {
+   "analyst_note": {
+    "✗": 7,
+    "?": 166,
+    "✓ filed fact": 79,
+    "✓ release statement": 40,
+    "rate_any": 0.4075
+   },
+   "bullet_recap": {
+    "✓ filed fact": 84,
+    "✓ release statement": 50,
+    "?": 162,
+    "✗": 4,
+    "rate_any": 0.4467
+   },
+   "chatgpt_markdown": {
+    "✓ filed fact": 79,
+    "?": 164,
+    "✓ release statement": 30,
+    "not extracted": 8,
+    "✗": 1,
+    "rate_any": 0.3865
+   },
+   "news_story": {
+    "✓ filed fact": 35,
+    "✓ release statement": 14,
+    "?": 235,
+    "✗": 1,
+    "not extracted": 2,
+    "rate_any": 0.1707
+   }
+  }
+ },
+ "costs": {
+  "write": {
+   "stage": "write",
+   "cap_usd": 3.4,
+   "ledger_total_usd": 2.040482,
+   "this_run_usd": 2.040482,
+   "attempts_this_run": 50,
+   "stub": false
+  },
+  "check": {
+   "stage": "check",
+   "cap_usd": 4.0,
+   "ledger_total_usd": 1.117326,
+   "this_run_usd": 1.117326,
+   "attempts_this_run": 184,
+   "stub": false
+  }
+ },
+ "per_draft": [
+  {
+   "draft_id": "ACN-2026Q4",
+   "ticker": "ACN",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 6,
+   "wrong": 4,
+   "unverifiable": 14,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AFL-2026Q2",
+   "ticker": "AFL",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 33,
+   "not_in_source": 0,
+   "claims": 33,
+   "verified": 15,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AKAM-2026Q2",
+   "ticker": "AKAM",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 21,
+   "not_in_source": 0,
+   "claims": 21,
+   "verified": 16,
+   "wrong": 0,
+   "unverifiable": 5,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ALL-2026Q2",
+   "ticker": "ALL",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 15,
+   "wrong": 0,
+   "unverifiable": 9,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AMAT-2026Q3",
+   "ticker": "AMAT",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 21,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 14,
+   "wrong": 0,
+   "unverifiable": 8,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AME-2025Q4",
+   "ticker": "AME",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 9,
+   "wrong": 1,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "AOS-2026Q3",
+   "ticker": "AOS",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "APD-2026Q3",
+   "ticker": "APD",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 5,
+   "claims": 24,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 15,
+   "approximate": 0
+  },
+  {
+   "draft_id": "BF-B-2026Q4",
+   "ticker": "BF-B",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 11,
+   "wrong": 1,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "BIIB-2026Q3",
+   "ticker": "BIIB",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 10,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CASY-2027Q1",
+   "ticker": "CASY",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 22,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CINF-2026Q3",
+   "ticker": "CINF",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 25,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CMI-2025Q4",
+   "ticker": "CMI",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 25,
+   "approximate": 0
+  },
+  {
+   "draft_id": "COP-2026Q2",
+   "ticker": "COP",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 27,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 3,
+   "wrong": 1,
+   "unverifiable": 21,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CSGP-2026Q3",
+   "ticker": "CSGP",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 6,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "CSX-2026Q3",
+   "ticker": "CSX",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 13,
+   "wrong": 0,
+   "unverifiable": 9,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DAL-2026Q3",
+   "ticker": "DAL",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 5,
+   "wrong": 0,
+   "unverifiable": 17,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DE-2026Q3",
+   "ticker": "DE",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 3,
+   "wrong": 2,
+   "unverifiable": 17,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DOC-2025Q4",
+   "ticker": "DOC",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 1,
+   "wrong": 0,
+   "unverifiable": 23,
+   "approximate": 0
+  },
+  {
+   "draft_id": "DUK-2026Q2",
+   "ticker": "DUK",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 20,
+   "not_in_source": 0,
+   "claims": 20,
+   "verified": 3,
+   "wrong": 0,
+   "unverifiable": 17,
+   "approximate": 0
+  },
+  {
+   "draft_id": "EFX-2026Q3",
+   "ticker": "EFX",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 13,
+   "wrong": 0,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ERIE-2026Q3",
+   "ticker": "ERIE",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 15,
+   "approximate": 0
+  },
+  {
+   "draft_id": "FIS-2026Q2",
+   "ticker": "FIS",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 5,
+   "wrong": 0,
+   "unverifiable": 17,
+   "approximate": 0
+  },
+  {
+   "draft_id": "FTNT-2026Q3",
+   "ticker": "FTNT",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 2,
+   "claims": 24,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 15,
+   "approximate": 0
+  },
+  {
+   "draft_id": "GILD-2026Q3",
+   "ticker": "GILD",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 21,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 12,
+   "wrong": 1,
+   "unverifiable": 9,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ILMN-2026Q3",
+   "ticker": "ILMN",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 7,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ISRG-2026Q3",
+   "ticker": "ISRG",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 10,
+   "wrong": 0,
+   "unverifiable": 14,
+   "approximate": 0
+  },
+  {
+   "draft_id": "L-2026Q2",
+   "ticker": "L",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 8,
+   "wrong": 1,
+   "unverifiable": 15,
+   "approximate": 0
+  },
+  {
+   "draft_id": "LOW-2026Q2",
+   "ticker": "LOW",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "LYB-2026Q3",
+   "ticker": "LYB",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 21,
+   "not_in_source": 0,
+   "claims": 18,
+   "verified": 5,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "MU-2026Q4",
+   "ticker": "MU",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 20,
+   "not_in_source": 0,
+   "claims": 20,
+   "verified": 16,
+   "wrong": 0,
+   "unverifiable": 4,
+   "approximate": 0
+  },
+  {
+   "draft_id": "NKE-2027Q1",
+   "ticker": "NKE",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 20,
+   "not_in_source": 0,
+   "claims": 21,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 21,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ORLY-2026Q2",
+   "ticker": "ORLY",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 9,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "P-2027Q2",
+   "ticker": "P",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 21,
+   "not_in_source": 0,
+   "claims": 21,
+   "verified": 17,
+   "wrong": 0,
+   "unverifiable": 4,
+   "approximate": 0
+  },
+  {
+   "draft_id": "PEP-2026Q3",
+   "ticker": "PEP",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 27,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 27,
+   "approximate": 0
+  },
+  {
+   "draft_id": "PG-2027Q1",
+   "ticker": "PG",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 5,
+   "claims": 24,
+   "verified": 5,
+   "wrong": 0,
+   "unverifiable": 19,
+   "approximate": 0
+  },
+  {
+   "draft_id": "RDDT-2026Q3",
+   "ticker": "RDDT",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 17,
+   "wrong": 0,
+   "unverifiable": 6,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ROK-2026Q3",
+   "ticker": "ROK",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 26,
+   "verified": 10,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "SHW-2026Q3",
+   "ticker": "SHW",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 10,
+   "wrong": 0,
+   "unverifiable": 13,
+   "approximate": 0
+  },
+  {
+   "draft_id": "SYF-2026Q3",
+   "ticker": "SYF",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 23,
+   "wrong": 1,
+   "unverifiable": 1,
+   "approximate": 0
+  },
+  {
+   "draft_id": "TMUS-2026Q3",
+   "ticker": "TMUS",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "TROW-2026Q3",
+   "ticker": "TROW",
+   "style": "news_story",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 24,
+   "approximate": 0
+  },
+  {
+   "draft_id": "TSCO-2026Q2",
+   "ticker": "TSCO",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 23,
+   "not_in_source": 0,
+   "claims": 23,
+   "verified": 14,
+   "wrong": 0,
+   "unverifiable": 9,
+   "approximate": 0
+  },
+  {
+   "draft_id": "UHS-2026Q1",
+   "ticker": "UHS",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 22,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 0,
+   "wrong": 0,
+   "unverifiable": 22,
+   "approximate": 0
+  },
+  {
+   "draft_id": "VRT-2025Q4",
+   "ticker": "VRT",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 1,
+   "claims": 24,
+   "verified": 6,
+   "wrong": 0,
+   "unverifiable": 18,
+   "approximate": 0
+  },
+  {
+   "draft_id": "WMB-2026Q2",
+   "ticker": "WMB",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 8,
+   "wrong": 0,
+   "unverifiable": 16,
+   "approximate": 0
+  },
+  {
+   "draft_id": "WST-2026Q3",
+   "ticker": "WST",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 25,
+   "not_in_source": 0,
+   "claims": 25,
+   "verified": 6,
+   "wrong": 0,
+   "unverifiable": 19,
+   "approximate": 0
+  },
+  {
+   "draft_id": "WY-2026Q3",
+   "ticker": "WY",
+   "style": "analyst_note",
+   "status": "ok",
+   "figures": 24,
+   "not_in_source": 0,
+   "claims": 24,
+   "verified": 12,
+   "wrong": 1,
+   "unverifiable": 11,
+   "approximate": 0
+  },
+  {
+   "draft_id": "WYNN-2026Q2",
+   "ticker": "WYNN",
+   "style": "bullet_recap",
+   "status": "ok",
+   "figures": 26,
+   "not_in_source": 0,
+   "claims": 26,
+   "verified": 14,
+   "wrong": 0,
+   "unverifiable": 12,
+   "approximate": 0
+  },
+  {
+   "draft_id": "ZBRA-2026Q2",
+   "ticker": "ZBRA",
+   "style": "chatgpt_markdown",
+   "status": "ok",
+   "figures": 26,
+   "not_in_source": 0,
+   "claims": 22,
+   "verified": 11,
+   "wrong": 0,
+   "unverifiable": 11,
+   "approximate": 0
+  }
+ ],
+ "notes": [
+  "The drafts are written from the same release sentences the release-statement matcher reads, so a release-statement ✓ is partly circular; a filed-fact ✓ (10-Q/10-K XBRL, or the release's own table) is not.",
+  "Provenance compares values only: a source_match figure may still carry the wrong measure, period or basis, so each possible false alarm needs a human read before any fix."
+ ]
+}

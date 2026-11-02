@@ -1,0 +1,21 @@
+{
+ "request_sha256": "eac9925155bf82f7a692150a55dac66f3921ddfe5ff9474f283c5f71a7275a1b",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:28:53Z",
+ "response_id": "resp_6ae865e5b4676c4af98c4701",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1941,
+  "output_tokens": 1734,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1271
+ },
+ "cost_usd": 0.04103,
+ "latency_s": 11.83,
+ "output_text": "{\"draft\": \"# Zebra Technologies Q2 2026 Earnings Summary\\n\\nZebra Technologies delivered a strong second-quarter performance, with net sales climbing to **$1,557 million**, up **20.4%** year over year.\\n\\n**Revenue and Growth**\\n- Net sales rose from **$1,293 million** in the prior year to **$1,557 million**.\\n- Consolidated organic net sales increased **9.2%** year over year.\\n\\n**Profitability**\\n- Gross profit climbed to **$825 million**, while gross margin improved to **53.0%**.\\n- Net income surged to **$233 million**, or **$4.85** per diluted share.\\n- Non-GAAP diluted EPS grew to **$6.35**.\\n- Adjusted EBITDA jumped to **$431 million**, or **27.7%** of adjusted net sales.\\n- Results included recorded IEEPA tariff recoveries of **$73 million**.\\n\\n**Segment Performance**\\n- Connected Frontline net sales rose to **$903 million**, with organic net sales growth of **7.5%**.\\n- Asset Visibility & Automation net sales climbed to **$654 million**, with organic net sales growth of **11.4%**.\\n\\n**Cash Flow and Capital Returns**\\n- For the first six months of 2026, net cash provided by operating activities was **$387 million**, resulting in free cash flow of **$361 million**.\\n- Share repurchases totaled **$268 million** in the quarter.\\n\\n**Outlook**\\n- The company expects third-quarter sales growth between **17%** and **20%** compared to the prior year.\\n- For the full year, sales growth is expected between **14%** and **16%**, with Non-GAAP diluted earnings per share expected in the range of **$20.75** to **$21.25**.\\n\\n**Bottom Line**\\nThe company posted broad-based growth, stronger profitability, and solid free cash flow, while continuing to return capital to shareholders and guiding for continued expansion in the second half.\"}",
+ "ticker": "ZBRA",
+ "stub": false
+}

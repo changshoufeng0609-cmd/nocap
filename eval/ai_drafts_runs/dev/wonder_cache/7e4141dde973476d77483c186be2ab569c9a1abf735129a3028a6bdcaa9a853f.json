@@ -1,0 +1,21 @@
+{
+ "request_sha256": "7e4141dde973476d77483c186be2ab569c9a1abf735129a3028a6bdcaa9a853f",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:30Z",
+ "response_id": "resp_6ae86591649ec0574dd343c3",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1834,
+  "output_tokens": 1316,
+  "cached_tokens": 372,
+  "reasoning_tokens": 947
+ },
+ "cost_usd": 0.032242,
+ "latency_s": 9.04,
+ "output_text": "{\"draft\": \"Erie Indemnity third-quarter profit edges lower on higher commissions\\nErie Indemnity Company reported net income of $182.0 million, or $3.48 per diluted share, in the third quarter of 2026, compared with $182.9 million, or $3.50 per diluted share, in the third quarter of 2025.\\nOperating income before taxes slipped $1.5 million, or 0.7 percent, from a year earlier. Management fee revenue from policy issuance and renewal services rose $21.7 million, or 2.6 percent, while management fee revenue from administrative services climbed $0.9 million, or 4.7 percent.\\nCommissions grew $24.0 million in the quarter, driven primarily by higher agent incentive compensation and growth in direct and affiliated assumed written premium. Non-commission expense declined $1.1 million, even as technology and infrastructure costs increased $6.9 million amid higher costs tied to technology initiatives, including internal-use software impairments, depreciation and amortization expense, and cloud usage.\\nIncome from investments before taxes totaled $19.9 million, down from $21.6 million a year earlier. Net investment income advanced to $25.4 million from $21.0 million, while net realized and unrealized investment losses were $5.4 million.\\nFor the first nine months of 2026, the company posted net income of $512.8 million, or $9.80 per diluted share, compared with $496.0 million, or $9.48 per diluted share, in the first nine months of 2025. Operating income before taxes rose $18.8 million, or 3.4 percent, over that period.\"}",
+ "ticker": "ERIE",
+ "stub": false
+}

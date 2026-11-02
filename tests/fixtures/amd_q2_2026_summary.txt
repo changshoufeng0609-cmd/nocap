@@ -1,0 +1,13 @@
+# AMD Q2 2026 Earnings Summary: Record Revenue Driven by AI and Data Center Growth
+
+Advanced Micro Devices (AMD) reported outstanding financial results for the second quarter of 2026, which ended on June 27, 2026. The company achieved record revenue and strong profitability growth, primarily driven by increasing demand for artificial intelligence (AI) computing, data center processors, and high-performance semiconductor solutions.
+
+**Revenue and Profitability**
+
+AMD's quarterly revenue increased **50% year over year to $11.54 billion**, compared with $7.69 billion in the same period last year. Net income surged 163% to $2.30 billion, while diluted earnings per share (EPS) rose 156% from $0.54 to $1.38.
+
+The company's gross margin improved significantly from 40% to 54%, reflecting stronger product demand and a more favorable business mix.
+
+However, gaming revenue declined 31% to $779 million, reflecting weaker semi-custom chip sales. Meanwhile, the Embedded segment grew 19% to $977 million as demand improved across industrial and other markets.
+
+AMD continued strengthening its AI ecosystem through partnerships with major technology companies, including Microsoft and Anthropic. Despite strong financial performance, AMD faces challenges from intense competition with NVIDIA and Intel.

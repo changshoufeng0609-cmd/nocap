@@ -1,0 +1,21 @@
+{
+ "request_sha256": "2009691f7c15dd5b8d001c2fc8f4830f136c5ad0640c4bb2ea080e366f57fe9c",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:27Z",
+ "response_id": "resp_6ae8658f3f54329359854c19",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2542,
+  "output_tokens": 1933,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1610
+ },
+ "cost_usd": 0.048828,
+ "latency_s": 18.29,
+ "output_text": "{\"draft\": \"Earnings Rise in the Second Quarter as Full-Year Guidance Is Reaffirmed\\nDuke Energy reported second-quarter 2026 earnings on Thursday, with reported earnings per share of $1.38 and adjusted earnings per share of $1.43, while both measures stood at $1.25 in the year-earlier period.\\nThe company said higher adjusted results were driven by recovery of infrastructure investments, while the gap between reported and adjusted earnings included charges related to regulatory settlements.\\nElectric Utilities and Infrastructure posted reported segment income of $1,271 million, up from $1,194 million a year earlier, and adjusted segment income climbed to $1,310 million, an increase of $0.15 per share.\\nGas Utilities and Infrastructure segment income rose to $10 million from $6 million, while the Other segment recorded a loss of $204 million, narrower than a loss of $228 million a year earlier and an improvement of $0.03 per share.\\nThe reported effective tax rate rose to 12.3%, while the adjusted rate was 12.6%, compared with 10.6% in the year-earlier period on both bases.\\nThe company reaffirmed its 2026 adjusted earnings guidance of $6.55 to $6.80 per share and its long-term adjusted growth rate of 5% to 7% through 2030, measured off a 2025 midpoint of $6.30, with confidence in earning in the top half of the range beginning in 2028.\"}",
+ "ticker": "DUK",
+ "stub": false
+}

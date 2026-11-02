@@ -1,0 +1,21 @@
+{
+ "request_sha256": "680f7930b8b49d8d71cde60c994ad5ab76b40c9b4e25c227a8dc27e8975da093",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:26Z",
+ "response_id": "resp_6ae8658e37b1c1e267ea446f",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 4071,
+  "output_tokens": 1415,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1089
+ },
+ "cost_usd": 0.04317,
+ "latency_s": 11.0,
+ "output_text": "{\"draft\": \"Equifax Q3 2026: Strong Growth Despite Mortgage Weakness\\nDiversified strength lifted revenue to $1.693 billion, up 10%, even as the U.S. mortgage market weakened late in the quarter.\\nProfitability improved alongside the top line, with local currency revenue growth of 9%. Net income attributable to Equifax climbed to $211.7 million, up 32%, while diluted EPS rose to $1.79 per share, up 39%. Adjusted EPS advanced to $2.26, up 11%, and adjusted EBITDA margin expanded to 33.1%.\\nWorkforce Solutions generated $693.9 million in revenue, up 7%, with an operating margin of 44.1%. USIS delivered $599.1 million, up 13%, and posted an operating margin of 24.3%. International contributed $399.5 million, up 9% on a reported basis, rounding out broad-based segment growth.\\nCash returns remained a priority as the company returned $158 million to shareholders, including repurchasing 0.5 million shares for $92 million and paying $66 million in dividends. Diversified Markets revenue rose 8%, supporting performance across business units despite mortgage headwinds.\\nOutlook: Management maintained its Diversified Markets revenue guidance while reducing full-year 2026 revenue guidance at the midpoint to $6.661 billion to reflect weaker U.S. Mortgage-related revenue. The company expects to deliver 2026 Adjusted EPS Guidance of $8.50 per share.\"}",
+ "ticker": "EFX",
+ "stub": false
+}

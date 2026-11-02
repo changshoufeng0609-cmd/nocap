@@ -1,0 +1,578 @@
+{
+ "stage": "write",
+ "batch": "fresh",
+ "finished_utc": "2026-11-02T10:41:21Z",
+ "stub": false,
+ "model": "muse-wonder-1.0",
+ "effort": "low",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "max_output_tokens": 8000,
+ "planned": 50,
+ "drafts": 50,
+ "fresh_calls": 50,
+ "cached": 0,
+ "errors": {},
+ "skipped_budget": [],
+ "stopped": null,
+ "guard": {
+  "stage": "write",
+  "cap_usd": 3.4,
+  "ledger_total_usd": 2.293622,
+  "this_run_usd": 2.293622,
+  "attempts_this_run": 51,
+  "stub": false
+ },
+ "cost_per_fresh_draft_usd": 0.041838,
+ "per_draft": [
+  {
+   "ticker": "ABNB",
+   "cost_usd": 0.036232,
+   "usage": {
+    "input_tokens": 4618,
+    "output_tokens": 888,
+    "cached_tokens": 0,
+    "reasoning_tokens": 506
+   },
+   "cached": false
+  },
+  {
+   "ticker": "AEP",
+   "cost_usd": 0.045636,
+   "usage": {
+    "input_tokens": 1859,
+    "output_tokens": 1910,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1481
+   },
+   "cached": false
+  },
+  {
+   "ticker": "AIG",
+   "cost_usd": 0.036198,
+   "usage": {
+    "input_tokens": 3143,
+    "output_tokens": 1252,
+    "cached_tokens": 372,
+    "reasoning_tokens": 921
+   },
+   "cached": false
+  },
+  {
+   "ticker": "AMT",
+   "cost_usd": 0.059244,
+   "usage": {
+    "input_tokens": 3926,
+    "output_tokens": 2177,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1648
+   },
+   "cached": false
+  },
+  {
+   "ticker": "AWK",
+   "cost_usd": 0.035648,
+   "usage": {
+    "input_tokens": 2687,
+    "output_tokens": 1245,
+    "cached_tokens": 0,
+    "reasoning_tokens": 831
+   },
+   "cached": false
+  },
+  {
+   "ticker": "BBY",
+   "cost_usd": 0.03552,
+   "usage": {
+    "input_tokens": 2370,
+    "output_tokens": 1302,
+    "cached_tokens": 0,
+    "reasoning_tokens": 914
+   },
+   "cached": false
+  },
+  {
+   "ticker": "BKR",
+   "cost_usd": 0.044022,
+   "usage": {
+    "input_tokens": 3324,
+    "output_tokens": 1607,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1283
+   },
+   "cached": false
+  },
+  {
+   "ticker": "BNY",
+   "cost_usd": 0.037676,
+   "usage": {
+    "input_tokens": 2319,
+    "output_tokens": 1420,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1179
+   },
+   "cached": false
+  },
+  {
+   "ticker": "CAT",
+   "cost_usd": 0.039824,
+   "usage": {
+    "input_tokens": 3386,
+    "output_tokens": 1314,
+    "cached_tokens": 0,
+    "reasoning_tokens": 965
+   },
+   "cached": false
+  },
+  {
+   "ticker": "CB",
+   "cost_usd": 0.039538,
+   "usage": {
+    "input_tokens": 2423,
+    "output_tokens": 1563,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1199
+   },
+   "cached": false
+  },
+  {
+   "ticker": "COF",
+   "cost_usd": 0.042724,
+   "usage": {
+    "input_tokens": 1996,
+    "output_tokens": 1737,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1412
+   },
+   "cached": false
+  },
+  {
+   "ticker": "CSCO",
+   "cost_usd": 0.04718,
+   "usage": {
+    "input_tokens": 3845,
+    "output_tokens": 1590,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1163
+   },
+   "cached": false
+  },
+  {
+   "ticker": "CTSH",
+   "cost_usd": 0.054598,
+   "usage": {
+    "input_tokens": 4198,
+    "output_tokens": 1961,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1510
+   },
+   "cached": false
+  },
+  {
+   "ticker": "CVS",
+   "cost_usd": 0.036324,
+   "usage": {
+    "input_tokens": 3161,
+    "output_tokens": 1184,
+    "cached_tokens": 0,
+    "reasoning_tokens": 693
+   },
+   "cached": false
+  },
+  {
+   "ticker": "DASH",
+   "cost_usd": 0.04259,
+   "usage": {
+    "input_tokens": 3881,
+    "output_tokens": 1424,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1056
+   },
+   "cached": false
+  },
+  {
+   "ticker": "DG",
+   "cost_usd": 0.032314,
+   "usage": {
+    "input_tokens": 2137,
+    "output_tokens": 1259,
+    "cached_tokens": 372,
+    "reasoning_tokens": 960
+   },
+   "cached": false
+  },
+  {
+   "ticker": "DGX",
+   "cost_usd": 0.034028,
+   "usage": {
+    "input_tokens": 2292,
+    "output_tokens": 1243,
+    "cached_tokens": 0,
+    "reasoning_tokens": 847
+   },
+   "cached": false
+  },
+  {
+   "ticker": "DIS",
+   "cost_usd": 0.05577,
+   "usage": {
+    "input_tokens": 3496,
+    "output_tokens": 2160,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1759
+   },
+   "cached": false
+  },
+  {
+   "ticker": "EG",
+   "cost_usd": 0.039486,
+   "usage": {
+    "input_tokens": 2055,
+    "output_tokens": 1634,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1296
+   },
+   "cached": false
+  },
+  {
+   "ticker": "EW",
+   "cost_usd": 0.050566,
+   "usage": {
+    "input_tokens": 3505,
+    "output_tokens": 1898,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1477
+   },
+   "cached": false
+  },
+  {
+   "ticker": "EXE",
+   "cost_usd": 0.042576,
+   "usage": {
+    "input_tokens": 1444,
+    "output_tokens": 1840,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1483
+   },
+   "cached": false
+  },
+  {
+   "ticker": "EXPD",
+   "cost_usd": 0.032982,
+   "usage": {
+    "input_tokens": 1869,
+    "output_tokens": 1346,
+    "cached_tokens": 372,
+    "reasoning_tokens": 900
+   },
+   "cached": false
+  },
+  {
+   "ticker": "FAST",
+   "cost_usd": 0.052238,
+   "usage": {
+    "input_tokens": 3028,
+    "output_tokens": 2077,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1677
+   },
+   "cached": false
+  },
+  {
+   "ticker": "HUBB",
+   "cost_usd": 0.04147,
+   "usage": {
+    "input_tokens": 2866,
+    "output_tokens": 1571,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1302
+   },
+   "cached": false
+  },
+  {
+   "ticker": "IBKR",
+   "cost_usd": 0.03263,
+   "usage": {
+    "input_tokens": 2131,
+    "output_tokens": 1276,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1006
+   },
+   "cached": false
+  },
+  {
+   "ticker": "J",
+   "cost_usd": 0.046368,
+   "usage": {
+    "input_tokens": 3867,
+    "output_tokens": 1545,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1206
+   },
+   "cached": false
+  },
+  {
+   "ticker": "JBHT",
+   "cost_usd": 0.033706,
+   "usage": {
+    "input_tokens": 2040,
+    "output_tokens": 1348,
+    "cached_tokens": 372,
+    "reasoning_tokens": 948
+   },
+   "cached": false
+  },
+  {
+   "ticker": "LITE",
+   "cost_usd": 0.037866,
+   "usage": {
+    "input_tokens": 2935,
+    "output_tokens": 1377,
+    "cached_tokens": 372,
+    "reasoning_tokens": 958
+   },
+   "cached": false
+  },
+  {
+   "ticker": "LLY",
+   "cost_usd": 0.035164,
+   "usage": {
+    "input_tokens": 2656,
+    "output_tokens": 1227,
+    "cached_tokens": 0,
+    "reasoning_tokens": 934
+   },
+   "cached": false
+  },
+  {
+   "ticker": "MAS",
+   "cost_usd": 0.042016,
+   "usage": {
+    "input_tokens": 1789,
+    "output_tokens": 1743,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1418
+   },
+   "cached": false
+  },
+  {
+   "ticker": "MCHP",
+   "cost_usd": 0.03993,
+   "usage": {
+    "input_tokens": 3321,
+    "output_tokens": 1403,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1084
+   },
+   "cached": false
+  },
+  {
+   "ticker": "MCO",
+   "cost_usd": 0.042426,
+   "usage": {
+    "input_tokens": 2165,
+    "output_tokens": 1759,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1325
+   },
+   "cached": false
+  },
+  {
+   "ticker": "META",
+   "cost_usd": 0.036726,
+   "usage": {
+    "input_tokens": 1965,
+    "output_tokens": 1514,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1173
+   },
+   "cached": false
+  },
+  {
+   "ticker": "MLM",
+   "cost_usd": 0.042342,
+   "usage": {
+    "input_tokens": 3229,
+    "output_tokens": 1542,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1049
+   },
+   "cached": false
+  },
+  {
+   "ticker": "NXPI",
+   "cost_usd": 0.0378,
+   "usage": {
+    "input_tokens": 1795,
+    "output_tokens": 1531,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1083
+   },
+   "cached": false
+  },
+  {
+   "ticker": "PKG",
+   "cost_usd": 0.027402,
+   "usage": {
+    "input_tokens": 1974,
+    "output_tokens": 1046,
+    "cached_tokens": 372,
+    "reasoning_tokens": 717
+   },
+   "cached": false
+  },
+  {
+   "ticker": "PM",
+   "cost_usd": 0.056306,
+   "usage": {
+    "input_tokens": 4140,
+    "output_tokens": 2058,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1582
+   },
+   "cached": false
+  },
+  {
+   "ticker": "ROL",
+   "cost_usd": 0.030246,
+   "usage": {
+    "input_tokens": 2040,
+    "output_tokens": 1175,
+    "cached_tokens": 372,
+    "reasoning_tokens": 927
+   },
+   "cached": false
+  },
+  {
+   "ticker": "ROST",
+   "cost_usd": 0.039726,
+   "usage": {
+    "input_tokens": 1765,
+    "output_tokens": 1704,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1272
+   },
+   "cached": false
+  },
+  {
+   "ticker": "SBUX",
+   "cost_usd": 0.046498,
+   "usage": {
+    "input_tokens": 2843,
+    "output_tokens": 1827,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1430
+   },
+   "cached": false
+  },
+  {
+   "ticker": "SCHW",
+   "cost_usd": 0.047588,
+   "usage": {
+    "input_tokens": 3022,
+    "output_tokens": 1775,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1468
+   },
+   "cached": false
+  },
+  {
+   "ticker": "SJM",
+   "cost_usd": 0.050352,
+   "usage": {
+    "input_tokens": 2913,
+    "output_tokens": 1935,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1406
+   },
+   "cached": false
+  },
+  {
+   "ticker": "TECH",
+   "cost_usd": 0.046578,
+   "usage": {
+    "input_tokens": 2053,
+    "output_tokens": 1989,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1662
+   },
+   "cached": false
+  },
+  {
+   "ticker": "TYL",
+   "cost_usd": 0.048076,
+   "usage": {
+    "input_tokens": 2234,
+    "output_tokens": 1957,
+    "cached_tokens": 0,
+    "reasoning_tokens": 1680
+   },
+   "cached": false
+  },
+  {
+   "ticker": "UNH",
+   "cost_usd": 0.035942,
+   "usage": {
+    "input_tokens": 2904,
+    "output_tokens": 1287,
+    "cached_tokens": 372,
+    "reasoning_tokens": 798
+   },
+   "cached": false
+  },
+  {
+   "ticker": "VICI",
+   "cost_usd": 0.039532,
+   "usage": {
+    "input_tokens": 3233,
+    "output_tokens": 1330,
+    "cached_tokens": 0,
+    "reasoning_tokens": 960
+   },
+   "cached": false
+  },
+  {
+   "ticker": "VLTO",
+   "cost_usd": 0.043154,
+   "usage": {
+    "input_tokens": 2017,
+    "output_tokens": 1825,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1523
+   },
+   "cached": false
+  },
+  {
+   "ticker": "VMC",
+   "cost_usd": 0.041986,
+   "usage": {
+    "input_tokens": 1405,
+    "output_tokens": 1889,
+    "cached_tokens": 372,
+    "reasoning_tokens": 1410
+   },
+   "cached": false
+  },
+  {
+   "ticker": "VTR",
+   "cost_usd": 0.036776,
+   "usage": {
+    "input_tokens": 2834,
+    "output_tokens": 1272,
+    "cached_tokens": 0,
+    "reasoning_tokens": 916
+   },
+   "cached": false
+  },
+  {
+   "ticker": "WDAY",
+   "cost_usd": 0.060366,
+   "usage": {
+    "input_tokens": 2365,
+    "output_tokens": 2616,
+    "cached_tokens": 372,
+    "reasoning_tokens": 2278
+   },
+   "cached": false
+  }
+ ]
+}

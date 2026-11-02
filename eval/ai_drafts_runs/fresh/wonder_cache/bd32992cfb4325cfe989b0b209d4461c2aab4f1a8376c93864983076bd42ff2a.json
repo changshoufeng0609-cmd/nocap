@@ -1,0 +1,21 @@
+{
+ "request_sha256": "bd32992cfb4325cfe989b0b209d4461c2aab4f1a8376c93864983076bd42ff2a",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:41:10Z",
+ "response_id": "resp_6ae868c63fc82332b4814405",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1974,
+  "output_tokens": 1046,
+  "cached_tokens": 372,
+  "reasoning_tokens": 717
+ },
+ "cost_usd": 0.027402,
+ "latency_s": 69.03,
+ "output_text": "{\"draft\": \"Packaging Corporation of America — Q2 2026\\nResults:\\n- Net sales: $2.5 billion, compared with $2.2 billion a year earlier\\n- Net income: $192 million, or $2.15 per share\\n- Net income excluding special items: $210 million, or $2.35 per share\\n- Earnings per share excluding special items slipped ($.13) from a year earlier\\n- Acquired Greif operations contributed $.14 of earnings\\n- Earnings came in $.02 above guidance of $2.33 per share\\n- Legacy business earnings declined ($.27)\\nOperations:\\n- Total corrugated products shipments climbed 24.3% per day\\n- Legacy corrugated products shipments grew 4.1% per day\\n- Containerboard production reached 1,415,000 tons\\n- Containerboard inventory fell 25,000 tons from the first quarter and rose 40,000 tons from a year earlier\\n- Export sales were reduced by approximately 30,000 tons from first-quarter levels\\nSegments:\\n- Paper segment sales volume rose 6.3% from a year earlier\\n- Facility closure and write-off charges totaled $14.1 million for the quarter\\n- Wallula mill restructuring charges were $6.3 million for the quarter\\n- Acquisition and integration-related costs were $3.3 million for the quarter\\nOutlook:\\n- Third-quarter earnings expected at $2.91 per share, excluding special items\\n- Operations include 90 corrugated products plants and related facilities\"}",
+ "ticker": "PKG",
+ "stub": false
+}

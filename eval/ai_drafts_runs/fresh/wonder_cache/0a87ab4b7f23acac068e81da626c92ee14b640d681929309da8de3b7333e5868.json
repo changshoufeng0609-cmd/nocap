@@ -1,0 +1,21 @@
+{
+ "request_sha256": "0a87ab4b7f23acac068e81da626c92ee14b640d681929309da8de3b7333e5868",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:56Z",
+ "response_id": "resp_6ae868b8222af65edd374095",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 3233,
+  "output_tokens": 1330,
+  "cached_tokens": 0,
+  "reasoning_tokens": 960
+ },
+ "cost_usd": 0.039532,
+ "latency_s": 9.11,
+ "output_text": "{\"draft\": \"Vici Properties Q3 2026: AFFO Growth Despite CECL Hit\\nVici Properties delivered higher AFFO per share in the third quarter as revenue climbed, even as a CECL allowance change weighed heavily on reported earnings.\\nTotal revenues reached $1.1 billion, up 5.8% year-over-year. The result included $132.0 million of non-cash leasing and financing adjustments and $19.0 million of other income, pointing to continued flow-through from the portfolio.\\nNet income attributable to common stockholders slipped 55.1% to $342.5 million, or $0.31 per share, with the decline driven by the $478.2 million aggregate change in the CECL allowance. AFFO attributable to common stockholders fared better, growing 7.5% to $685.2 million, while AFFO per share rose 4.3% to $0.62.\\nOn capital, the company issued $1.75 billion of investment grade senior notes at an adjusted weighted average interest rate of 5.422% to refinance 2026 maturities. It ended the quarter with $270.3 million in cash and cash equivalents, approximately $17.2 billion in total debt and approximately $2.5 billion in liquidity. The quarterly cash dividend was declared at $0.46 per share, up 2.2% year-over-year, and, subsequent to quarter-end, the board authorized a share repurchase program for up to $2.0 billion.\\nOutlook: Vici Properties raised AFFO guidance for full year 2026 to between $2,695 million and $2,705 million, or between $2.47 and $2.48 per diluted share.\"}",
+ "ticker": "VICI",
+ "stub": false
+}

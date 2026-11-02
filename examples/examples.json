@@ -23,6 +23,14 @@
       "file": "roundup_q2_2026.txt",
       "as_of": "2026-07-29T16:00:00Z",
       "context": "Microsoft, Alphabet and JPMorgan Chase, quarter ended June 30, 2026"
+    },
+    {
+      "id": "reddit-wonder-recap",
+      "title": "Reddit Q3 2026 recap by Muse Wonder",
+      "description": "Muse Wonder wrote this recap from Reddit's own earnings-release sentences, and one EPS figure was then changed. Filed facts and the release's own words confirm the rest; guidance and untracked figures stay unverified.",
+      "file": "reddit_q3_2026.txt",
+      "as_of": null,
+      "context": "Reddit, third quarter of 2026"
     }
   ]
 }

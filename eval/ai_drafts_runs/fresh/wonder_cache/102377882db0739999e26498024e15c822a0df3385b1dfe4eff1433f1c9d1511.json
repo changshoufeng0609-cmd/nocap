@@ -1,0 +1,21 @@
+{
+ "request_sha256": "102377882db0739999e26498024e15c822a0df3385b1dfe4eff1433f1c9d1511",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:40:01Z",
+ "response_id": "resp_6ae86881cb7163380fe94cf9",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 1789,
+  "output_tokens": 1743,
+  "cached_tokens": 0,
+  "reasoning_tokens": 1418
+ },
+ "cost_usd": 0.042016,
+ "latency_s": 16.54,
+ "output_text": "{\"draft\": \"Masco: Margin Expansion Lifts Earnings\\nStrong operating execution drove solid earnings growth on modest sales gains in the third quarter.\\nRevenue rose 3 percent to $1,966 million, while net sales climbed 4 percent excluding the divestiture and currency impacts. Plumbing Products net sales grew 4 percent, or 5 percent in local currency and excluding the divestiture. In local currency, North American net sales increased 5 percent, while International net sales slipped 5 percent, or 1 percent excluding the divestiture.\\nProfitability improved markedly, with gross margin reaching 36.6 percent and operating profit totaling $338 million. Operating profit margin was 17.2 percent, while adjusted operating profit margin expanded to 17.9 percent. Earnings per share were $1.17, and adjusted earnings per share grew 23 percent to $1.19 per share.\\nCash generation supported continued capital returns, with $322 million returned to shareholders through dividends and share repurchases in the quarter. Liquidity at the end of the third quarter was $1,610 million, including availability under the revolving credit facility. The board also declared a quarterly dividend of $0.32 per share.\\nOutlook: For 2026, the company expects earnings per share in the range of $4.51 to $4.61 per share, and adjusted earnings per share of $4.65 to $4.75 per share, raised from previous adjusted guidance of $4.40 to $4.60 per share.\"}",
+ "ticker": "MAS",
+ "stub": false
+}

@@ -17,7 +17,9 @@ never makes a figure ✗: a sentence can show what a figure is, but a number pro
 A release sentence states the claim's figure only when all of these hold (release_statement, _agree):
 - the same quarter: the release reports the claim's resolved fiscal quarter and was accepted by as_of, and the sentence
   and its lead name no other period (another quarter, fiscal or calendar year, half, six or nine months, full year,
-  "ended" another date) and no forward-looking or "respectively" wording;
+  "ended" another date) and no forward-looking or "respectively" wording. A year named without a quarter word, even
+  the release's own fiscal year ("For fiscal 2026, free cash flow was $893 million"), and a section heading of the
+  release's body that names one ("Fiscal 2026 Financial Stewardship"), make a figure the year's, never the quarter's;
 - the same number, written the same way: "11.2%" is "11.2 percent", but "$93.9 billion" is not "$93.87 billion", and
   per-share amounts, millions, billions and counts stay apart. A prior-period comparison base ("from $84.4 billion last
   year", "compared to $2.610 billion") is never the current figure;
@@ -889,9 +891,32 @@ def _sentences(text: str) -> list[tuple[int, int]]:
     return [(s, e) for s, e in out if text[s:e].strip()]
 
 
+# Round 10a: a year named without a quarter word is the year's, not the release's quarter ("For fiscal 2026, free cash
+# flow was $893 million", "in 2026"), in any quarter's release. Dates ("ended April 30, 2026", "January 2025") are no
+# year of their own; "fourth quarter of fiscal 2026", "Q4 2026" and a bare quarter sentence keep naming the quarter, and a
+# comparison base naming the prior year is read as before (_COMPARISON_BASE_RE).
+_DATE_WORDS_RE = re.compile(rf"\b{_MONTH}\.?\s+(?:\d{{1,2}},?\s+)?\d{{4}}\b", re.I)
+_ANY_QUARTER_RE = re.compile(r"\bquarter(?:s|ly)?\b|\bthree[\s-]+months?\b|\b1[2-7][\s-]+weeks?\b"
+                             r"|(?<![\w-])(?:f?q[1-4]|[1-4]q)(?![\w-])", re.I)
+_YEAR_WORD_RE = re.compile(r"(?<![\d$,.])(?:19|20)\d{2}(?!\d|,\d|\s?%)")  # "In 2026, ..." too, never "2,026"
+
+
+def _names_a_year_only(text: str) -> bool:
+    """Whether text names a fiscal or calendar year and no quarter (above): its figures are the year's."""
+    undated = _DATE_WORDS_RE.sub(" ", _COMPARISON_BASE_RE.sub(" ", text))
+    return (bool(_FISCAL_YEAR_RE.search(undated) or _YEAR_WORD_RE.search(undated))
+            and not _ANY_QUARTER_RE.search(undated))
+
+
 def _names_only_its_quarter(text: str, unit: Unit) -> bool:
     """Whether a sentence (or lead) of the release names no period but the release's own quarter (a comparison base
     aside)."""
+    return not _names_a_year_only(text) and _names_no_other_period(text, unit)  # round 10a: a year is not the quarter
+
+
+def _names_no_other_period(text: str, unit: Unit) -> bool:
+    """_names_only_its_quarter as it read before round 10a, which took the release's fiscal year for its quarter: what
+    release_statement still reads as another figure of the release, which can conflict with a match."""
     text = _COMPARISON_BASE_RE.sub(" ", text)
     if _OTHER_SPAN_RE.search(text):
         return False
@@ -1020,9 +1045,12 @@ def _quote(sentence: str, num: _Num, start: int, lead: str = "") -> str:
 
 def release_statement(claim: Claim, store: EvidenceStore, entity: tuple[int, str],
                       period: Optional[periods.ResolvedPeriod], as_of: Optional[datetime],
-                      line: Optional[_v.DraftLine]) -> Optional[Statement]:
+                      line: Optional[_v.DraftLine], *, skip_names: bool = False) -> Optional[Statement]:
     """The release sentence that states the claim's figure for its resolved quarter, or None (see the module doc).
-    entity is the claim's resolved (cik, ticker), period its resolved fiscal quarter, line its draft sentence."""
+    entity is the claim's resolved (cik, ticker), period its resolved fiscal quarter, line its draft sentence.
+    skip_names: read a sentence's figures past parentheses without digits, such as a drug's generic name ("Trodelvy®
+    (sacituzumab govitecan-hziy) sales increased 42% to $506 million"): only table_conflict, whose outcome is "?", reads
+    sentences so (round 10a)."""
     if period is None or period.fiscal_period not in periods.QUARTERS:
         return None
     cik, ticker = int(entity[0]), str(entity[1])
@@ -1035,20 +1063,27 @@ def release_statement(claim: Claim, store: EvidenceStore, entity: tuple[int, str
         read.figure.comparison = read.figure.comparison | frozenset(named_base_comparisons(
             text, period.fiscal_year, period.fiscal_period, period.period_end.year if period.period_end else None))
     releases: dict[str, list[_Stated]] = {}
-    for unit in units(store, ticker):
-        if (unit.cik != cik or (unit.fiscal_year, unit.fiscal_period) != (period.fiscal_year, period.fiscal_period)
-                or (as_of is not None and unit.accepted_at > as_of)):
+    chosen = [unit for unit in units(store, ticker)
+              if unit.cik == cik and (unit.fiscal_year, unit.fiscal_period) == (period.fiscal_year, period.fiscal_period)
+              and (as_of is None or unit.accepted_at <= as_of)
+              and not (period.period_end is not None and unit.period_end is not None
+                       and abs((unit.period_end - period.period_end).days) > 7)]
+    sections: dict[tuple[str, str], set[int]] = {}
+    for unit in chosen:
+        sections.setdefault((unit.accession, unit.exhibit), set())
+    for key in sections:
+        sections[key] = _year_sections([u for u in chosen if (u.accession, u.exhibit) == key])
+    for unit in chosen:
+        if unit.lead and not _names_no_other_period(unit.lead, unit):
             continue
-        if (period.period_end is not None and unit.period_end is not None
-                and abs((unit.period_end - period.period_end).days) > 7):
-            continue
-        if unit.lead and not _names_only_its_quarter(unit.lead, unit):
-            continue
-        releases.setdefault(unit.accession, []).extend(_stated(unit, read, company))
+        year_section = unit.seq in sections[(unit.accession, unit.exhibit)] or (
+            bool(unit.lead) and _names_a_year_only(unit.lead))  # a bullet under "Fiscal 2026 highlights:"
+        releases.setdefault(unit.accession, []).extend(_stated(unit, read, company, skip_names=skip_names,
+                                                               year_section=year_section))
     hits: list[tuple[tuple[Any, ...], Statement]] = []
     for stated in releases.values():
-        matches = [x for x in stated if x.num.digits == read.digits and _agree(read.figure, x.figure, read.words)
-                   and _companions_stated(read, x.sentence)]
+        matches = [x for x in stated if not x.year and x.num.digits == read.digits
+                   and _agree(read.figure, x.figure, read.words) and _companions_stated(read, x.sentence)]
         if not matches:
             continue
         m = min(matches, key=lambda x: (x.unit.exhibit, x.unit.seq, x.s0))
@@ -1067,16 +1102,71 @@ class _Stated(NamedTuple):
     sentence: str
     num: _Num
     figure: _Figure
+    year: bool = False  # round 10a: the year's figure (_year_figure): it may conflict with a match, never be one
 
 
-def _stated(unit: Unit, read: "_ClaimFigure", company: frozenset[str]) -> list[_Stated]:
+# Round 10a: a release's section heading that names a year and no quarter ("Fiscal 2026 Financial Stewardship") makes
+# the sentences under it the year's, as long as the index shows every unit between them: a heading without digits is
+# not indexed, so after a gap another section ("Fourth Quarter Results") may have begun. Only the body's headings count:
+# the title block before the dateline ("Raises Full-Year 2026 Adjusted EBITDA Guidance", "updates 2026 outlook", above
+# the quarter's headline figures) heads no section, nor does a title ("Brown-Forman Reports Fiscal 2026 Results").
+_TITLE_VERB_RE = re.compile(r"\b(?:reports?|reported|announces?|announced|delivers?|posts?|releases?)\b", re.I)
+_SENTENCE_END_RE = re.compile(r"[.!?][\"”’)]*\s*$")
+
+
+def _section_heading(text: str) -> bool:
+    words = _WORD_RE.findall(text)
+    return (0 < len(words) <= 8 and not re.search(r"[.!?;,]\s*$", text) and not _numbers(text)
+            and not _TITLE_VERB_RE.search(text))
+
+
+def _year_sections(release: list[Unit]) -> set[int]:
+    """The seqs of one release's units that sit under a year-only section heading (above)."""
+    scoped: set[int] = set()
+    year, previous, body = False, None, False
+    for unit in sorted(release, key=lambda u: u.seq):
+        if previous is not None and unit.seq != previous + 1:
+            year = False  # an unindexed unit may be another heading
+        if _section_heading(unit.text):
+            year = body and _names_a_year_only(unit.text)
+        elif year:
+            scoped.add(unit.seq)
+        if not body and _SENTENCE_END_RE.search(unit.text) and len(_WORD_RE.findall(unit.text)) >= 6:
+            body = True  # the dateline's paragraph: the units before it are the release's title block
+        previous = unit.seq
+    return scoped
+
+
+def _year_figure(sentence: str, num: _Num, nums: list[_Num]) -> bool:
+    """Whether a figure of a sentence that names its quarter is still the year's: the words right after it, or those
+    from the previous figure (or the sentence's start) to it, name a year and no quarter ("Fourth-quarter revenue was
+    $5.0 billion and fiscal 2026 revenue was $19.8 billion")."""
+    breaks = [b for b, _ in _breaks(sentence) if b >= num.end]
+    after = [n.start for n in nums if n.start >= num.end]
+    tail = sentence[num.end:min(breaks + after + [len(sentence)])]
+    before = [n.end for n in nums if n.end <= num.start]
+    head = sentence[max(before, default=0):num.start]
+    return _names_a_year_only(tail) or _names_a_year_only(head)
+
+
+_NAME_PAREN_RE = re.compile(r"\([^()\d]*\)")  # a parenthesis without digits: a generic name, a ticker, a mark
+
+
+def _stated(unit: Unit, read: "_ClaimFigure", company: frozenset[str], *, skip_names: bool = False,
+            year_section: bool = False) -> list[_Stated]:
     """Every figure of one unit that is written like the claim's (same unit class), read in its sentence; sentences
-    that name another period, forward-looking ones and flattened table rows give none."""
+    that name another period, forward-looking ones and flattened table rows give none. skip_names: parentheses without
+    digits are read as spaces (release_statement). year_section: the unit is under a year-only heading
+    (_year_sections), so a figure of a sentence that names no quarter is the year's. A year's figure is kept, marked, as
+    a conflict for a match (release_statement), as before round 10a, but is never a match."""
     out = []
     for s0, s1 in _sentences(unit.text):
-        sentence = unit.text[s0:s1]
-        if not _names_only_its_quarter(sentence, unit):
-            continue
+        sentence = written = unit.text[s0:s1]
+        if skip_names:  # offsets kept, so the receipt quotes the sentence as written
+            sentence = _NAME_PAREN_RE.sub(lambda m: " " * len(m.group()), sentence)
+        if not _names_no_other_period(sentence, unit):
+            continue  # another period: neither a match nor a conflict
+        year_only = not _names_only_its_quarter(sentence, unit) or (year_section and not _ANY_QUARTER_RE.search(sentence))
         nums = _numbers(sentence)
         if len(nums) >= 6 and len(nums) * 2 > len(_words(sentence)):
             continue  # a flattened table row, not a sentence: "Total Revenues $ 4.4 $ 5.9 $ 8.0 ..."
@@ -1094,7 +1184,7 @@ def _stated(unit: Unit, read: "_ClaimFigure", company: frozenset[str]) -> list[_
                     bases = frozenset(named_base_comparisons(f"{sentence} {lead}", unit.fiscal_year, unit.fiscal_period,
                                                              unit.period_end.year if unit.period_end else None))
                 figure.comparison = figure.comparison | bases
-            out.append(_Stated(unit, s0, sentence, num, figure))
+            out.append(_Stated(unit, s0, written, num, figure, year_only or _year_figure(sentence, num, nums)))
     return out
 
 
@@ -1191,3 +1281,147 @@ def fallback(verdict: Verdict, claim: Claim, store: EvidenceStore, *, as_of: Any
     except Exception:  # release text is a bonus: a failure here never changes the structured verdict
         log.exception("release-text fallback failed for claim %s", claim.id)
         return verdict
+
+
+# ---------------------------------------------------------------------------
+# Round 10a: a release table cell against the release's own words
+# ---------------------------------------------------------------------------
+def table_conflict(verdict: Verdict, claim: Claim, store: EvidenceStore, *, as_of: Any = None,
+                   context: Optional[str] = None, entity: Optional[tuple[int, str]] = None,
+                   draft: Optional[str] = None) -> Verdict:
+    """verdict, or "?" (ambiguous, never ✓) when it is a "✗" against a cell of a release table that NoCap mapped to the
+    claim's measure, and the company's own earnings release for the claim's quarter states the claim's figure for the
+    same measure in words (release_statement, the matcher fallback uses). The table's cell can be another column than
+    the sentence's figure: Gilead's "Trodelvy | 336" is its U.S. sales, while the release says "Trodelvy ... sales
+    increased 42% to $506 million". NoCap never marks wrong a figure the company's own release states. A filed 10-Q or
+    10-K figure is not a mapped cell, and keeps its "✗"; any failure here returns verdict unchanged."""
+    if verdict.status != "wrong" or verdict.reason == "look_ahead" or not verdict.evidence:
+        return verdict
+    cell = verdict.evidence[0]
+    if cell.source != "press_release" or claim.forward_looking or not math.isfinite(claim.value):
+        return verdict
+    try:
+        as_of_dt = _v.to_utc(as_of)
+        claim = claim.model_copy(update={"span_text": _v._without_markdown(claim.span_text),
+                                         "metric_text": _v._without_markdown(claim.metric_text)})
+        draft = _v._without_markdown(draft) if draft else draft
+        own = entity or _v.resolve_claim_entity(claim, store, context)
+        if own is None:
+            return verdict
+        cik, ticker = int(own[0]), str(own[1])
+        if cik != cell.cik or not units(store, ticker):
+            return verdict
+        line = _v.draft_line(claim, draft)
+        read = claim_figure(claim, line, _company_words(store, cik, ticker, claim))
+        if read is None:
+            return verdict
+        change = read.figure.kind == "change" or (claim.metric == "revenue_growth" and read.figure.kind != "level")
+        period = claim_period(claim, store, cik, context, as_of_dt, change)
+        st = release_statement(claim, store, (cik, ticker), period, as_of_dt, line, skip_names=True)
+        if st is None or period is None:
+            return verdict
+        cal = periods.calendar(store, cik)
+        label = periods.label(periods.ResolvedPeriod(period.fiscal_year, period.fiscal_period, None), cal)
+        row = (cell.locator or "").split("|", 1)[0].strip() or _v.METRIC_LABELS.get(cell.metric, cell.metric)
+        when = f"{st.unit.accepted_at:%b} {st.unit.accepted_at.day}, {st.unit.accepted_at.year}"
+        name = " ".join(re.sub(r"\([^)]*\)", " ", claim.entity or "").split())
+        name = name if name.casefold() not in _v.GENERIC_ENTITIES else ticker
+        owner = name if name.endswith(("'s", "’s")) else _v.possessive(name)
+        explanation = (f"{owner} 8-K earnings release table gives “{row}” as {_v.fmt_value(cell.value, cell.metric, claim)}"
+                       f" for {label}, but its earnings release (accepted {when}) states: “{st.quote}” The cell may be "
+                       f"another column of the table (a region or a product line, for example), so NoCap can't tell "
+                       f"which figure is right and doesn't mark {claim.value_text} wrong.")
+        return Verdict(claim_id=verdict.claim_id, status="unverifiable", reason="ambiguous", explanation=explanation,
+                       evidence=[cell, _fact(claim, st, read.digits)], as_of=verdict.as_of)
+    except Exception:  # a safety net: a failure here never changes the structured verdict
+        log.exception("release-text table check failed for claim %s", claim.id)
+        return verdict
+
+
+# ---------------------------------------------------------------------------
+# Round 10a: net income as the company's own release states it
+# ---------------------------------------------------------------------------
+_NET_INCOME_MEASURES = (frozenset({"net", "income"}), frozenset({"net", "earning"}), frozenset({"net", "profit"}))
+# A sentence with any non-GAAP wording states no GAAP figure here, whatever its basis phrase looks like ("On a
+# non-GAAP(*) basis, ... net income was $2 billion": the asterisk keeps _BASIS_PHRASE_RE from reading it)
+_NOT_GAAP_SENTENCE_RE = re.compile(r"non[\s‐‑-]?gaap|\badjust(?:ed|ing|ments?)\b|\bexclud(?:ing|es?|ed)\b|\bexclusive\s+of\b"
+                                   r"|\bcore\b|\bunderlying\b|\bpro[\s-]?forma\b|\bcomparable\b|\borganic\b"
+                                   r"|\boperating\s+(?:basis|earnings|net\s+income)\b|\bconstant[\s-]+currenc", re.I)
+_FIGURE_TAIL_RE = re.compile(r"[^,;:()]*")  # the words right after a figure, to its clause's end
+_YEAR_WORDS_RE = re.compile(r"\bfull[\s-]+(?:fiscal[\s-]+)?year\b|\bfiscal\s+year\b|\bfor\s+the\s+year\b"
+                            r"|\b(?:twelve|12)[\s-]+months\b|\byear\s+ended\b", re.I)
+
+
+def _stated_periods(words: str, unit: Unit, cal: list[periods.CalEntry]) -> set[tuple[int, str]]:
+    """The fiscal periods (fiscal_year, "Q1".."Q4" or "FY") a figure of `unit` can be for, read from the words that
+    date it in its own clause: the release's quarter, its fiscal year (a fourth quarter's release reports both), or a
+    period the words name outright. Words naming nothing leave the release's quarter, and in a fourth quarter's release
+    also its year: a summary sentence may give either."""
+    quarter = (unit.fiscal_year, unit.fiscal_period)
+    year = (unit.fiscal_year, "FY")
+    p = periods.parse(words)
+    if p.kind in ("ytd", "conflict") or p.shift is not None:
+        return set()
+    if p.year is not None or p.end is not None:
+        rp = periods.resolve_in_calendar(words, cal)
+        return {(rp.fiscal_year, rp.fiscal_period)} if rp is not None else set()
+    if p.kind == "quarter":
+        return {quarter} if p.quarter in (None, int(unit.fiscal_period[1])) else set()
+    if p.kind == "annual" or _YEAR_WORDS_RE.search(words):
+        return {year} if unit.fiscal_period == "Q4" else set()
+    return {quarter, year} if unit.fiscal_period == "Q4" else {quarter}
+
+
+def net_income_statement(store: EvidenceStore, cik: int, ticker: str, digits: str, cls: str,
+                         wanted: set[tuple[int, str]], *, as_of: Optional[datetime] = None
+                         ) -> Optional[tuple[Unit, str, tuple[int, str]]]:
+    """(unit, quote, period) of a sentence of the company's own earnings releases that states its GAAP net income at
+    the figure written `digits` (number class `cls`, as _numbers reads it) for one of the `wanted` fiscal periods, or
+    None. "Net income" here is the release's unqualified line ("GAAP net income for fiscal 2026 was $8.52 billion,
+    compared with $7.83 billion in fiscal 2025"): no adjusted, attributable, per-share or other measure. A current
+    figure is dated by its clause (_stated_periods); a comparison base only by the period the words right after it
+    name ("compared with $1.45 billion for the fourth quarter of fiscal 2025") or by "a year ago" from its sentence's
+    current figure. Used only to keep a figure from "✗" (receipts.verify._Check._release_net_income)."""
+    cal = periods.calendar(store, cik)
+    company = frozenset(_words(ticker)) | frozenset(
+        w for w in _words(re.sub(r"/[A-Z]+/?", " ", str((getattr(store, "company", lambda _: {})(cik) or {})
+                                                        .get("name") or ""))) if w not in _MEASURE_NOUNS)
+    for unit in units(store, ticker):
+        if unit.cik != cik or (as_of is not None and unit.accepted_at > as_of):
+            continue
+        for s0, s1 in _sentences(unit.text):
+            sentence = unit.text[s0:s1]
+            lead = unit.lead if s0 == 0 else ""
+            if digits not in sentence.replace(",", "") or _NOT_GAAP_SENTENCE_RE.search(f"{sentence} {lead}"):
+                continue
+            nums = _numbers(sentence)
+            read = []
+            for num in nums:
+                fig = _figure(sentence, num.start, num.end, company, numbers=nums, count=False, lead=lead, neg=num.neg)
+                if (num.cls == cls and not fig.forward and not num.neg and not fig.qualifiers - {"gaap"}
+                        and fig.measure in _NET_INCOME_MEASURES and fig.kind != "change"):
+                    read.append((num, fig))
+            current: set[tuple[int, str]] = set()
+            for num, fig in read:
+                if not fig.base:
+                    current |= _stated_periods(sentence[fig.measure_start:num.end] + " " +
+                                               _FIGURE_TAIL_RE.match(sentence, num.end).group(), unit, cal)
+            for num, fig in read:
+                if num.digits != digits:
+                    continue
+                if fig.base:
+                    tail = _FIGURE_TAIL_RE.match(sentence, num.end).group()
+                    named = periods.parse(tail)
+                    if named.year is not None or named.end is not None:
+                        rp = periods.resolve_in_calendar(tail, cal)
+                        found = {(rp.fiscal_year, rp.fiscal_period)} if rp is not None else set()
+                    elif named.shift == "year":
+                        found = {(fy - 1, fp) for fy, fp in current}
+                    else:
+                        found = set()
+                else:
+                    found = _stated_periods(sentence[fig.measure_start:num.end] + " " +
+                                            _FIGURE_TAIL_RE.match(sentence, num.end).group(), unit, cal)
+                for period in sorted(found & wanted):
+                    return unit, _quote(sentence, num, fig.measure_start, lead if fig.inherited else ""), period
+    return None

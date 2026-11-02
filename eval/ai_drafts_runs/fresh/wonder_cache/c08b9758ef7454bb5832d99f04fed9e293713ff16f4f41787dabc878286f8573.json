@@ -1,0 +1,21 @@
+{
+ "request_sha256": "c08b9758ef7454bb5832d99f04fed9e293713ff16f4f41787dabc878286f8573",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:39:19Z",
+ "response_id": "resp_6ae868578224cf67518745bc",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2055,
+  "output_tokens": 1634,
+  "cached_tokens": 372,
+  "reasoning_tokens": 1296
+ },
+ "cost_usd": 0.039486,
+ "latency_s": 15.16,
+ "output_text": "{\"draft\": \"Everest Group third-quarter profit slips on reserve development\\n\\nEverest Group reported third-quarter net income of $233 million, or $6.12 per diluted share, compared with $255 million, or $6.09 per diluted share, in the same period a year earlier.\\n\\nThe company's net operating income declined to $290 million, or $7.62 per diluted share, from $316 million, or $7.54 per diluted share, a year earlier. Everest posted an annualized total shareholder return of 14.2%, along with an annualized net income return on equity of 6.0% and an annualized net operating income return on equity of 7.4%.\\n\\nBook value per share stood at $381.04 at September 30, 2026, compared with $379.83 at December 31, 2025. The company repurchased $474 million of common shares during the quarter.\\n\\nGross written premium from Core businesses slipped 4.0% year over year to $3.7 billion. Within that total, Reinsurance Treaty premium fell 6.2% on a comparable basis, while Global Wholesale & Specialty premium climbed 3.2% on a comparable basis.\\n\\nCore businesses posted a combined ratio of 105.8%. Everest recorded net unfavorable reserve development of approximately $268 million in prior year loss reserves, and the Group recorded a pre-tax underwriting loss of $223 million.\\n\\nNet investment income rose to $634 million from $540 million in the prior year quarter, helped by higher alternative investment returns.\"}",
+ "ticker": "EG",
+ "stub": false
+}

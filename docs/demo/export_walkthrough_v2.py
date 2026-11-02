@@ -8,10 +8,13 @@ assets/historical/2026-10-30-walkthrough-v2-*.json (the v2 MP4 itself stays in g
 when the October 31 end-card update replaces the first v2.1 export, that export's records go to
 assets/historical/2026-10-31-walkthrough-v21-*.json (both of its MP4s stay in git history at commit 121a6cb);
 when the November 1 coverage-line update replaces the October 31 end-card export, its records go to
-assets/historical/2026-10-31-walkthrough-v21-endcard-*.json (both of its MP4s stay in git history at commit 5d6f7ed).
-Re-running after the X cut is validated adds it without touching the history.
+assets/historical/2026-10-31-walkthrough-v21-endcard-*.json (both of its MP4s stay in git history at commit 5d6f7ed);
+when the November 2 results-card update replaces the November 1 walkthrough, its records go to
+assets/historical/2026-11-01-walkthrough-v21-coverage-*.json (its MP4 stays in git history at commit 78847a2).
+Re-running after the X cut is validated adds it without touching the history. A source folder with only the main cut
+(the November 2 update leaves the X cut alone) keeps the current X cut and its record after checking their hashes.
 
-  python export_walkthrough_v2.py --source data/eval_runs/demo-walkthrough-v21-endcard-20261101
+  python export_walkthrough_v2.py --source data/eval_runs/demo-walkthrough-v21-results-20261102
 """
 from __future__ import annotations
 
@@ -104,6 +107,50 @@ COVERAGE_UPDATE = {
         'receipts-demo.gif': ('Unchanged: its 20 seconds (16.56-36.56 s) decode identically, so the export kept it rather than '
                               're-cutting it with a palette shifted by the new end card')},
 }
+# The November 1 coverage-line walkthrough (commit 78847a2), replaced on November 2 by the same walkthrough with the
+# comprehensive-test results card. The X cut has no results card, so it stays as exported on November 1.
+V21_COVERAGE_HISTORY = {'manifest': 'historical/2026-11-01-walkthrough-v21-coverage-manifest.json',
+                        'validation': 'historical/2026-11-01-walkthrough-v21-coverage-validation.json'}
+V21_COVERAGE = {'receipts-demo.mp4': '9d5bb223148b3cc80d19ed5985433d8c501cd855212ff2bb8667825d91274897'}
+RESULTS_UPDATE = {
+    'date': '2026-11-02',
+    'change': ('The walkthrough\'s results card ("results") and its line (c25) now show the comprehensive test of the November 2 '
+               'round-8 release: "1,000 frozen test items from 400 S&P 500 companies"; 306/360 planted errors caught (none marked '
+               '✓; the other 54 came back ?); 736/738 times a ✓ was right; 17/1,298 true figures flagged ✗; the October 29 '
+               'held-out results (44/48, 1/47, 20/20) as one secondary line; caveat: one frozen run of the November 2 release, '
+               'machine-made labels, details in eval/spot500_methods.md. The new line, "Across 1,000 test items, NoCap caught 306 '
+               'of 360 planted errors and never marked one verified." (8.236 s), replaced "On held-out tests, NoCap caught 44 of '
+               '48 planted errors, with one false alarm in 47 clean sentences." (8.524 s).'),
+    'reason': ('The comprehensive test of the November 2 round-8 release is the current headline accuracy result (README.md '
+               'Results; eval/spot500_methods.md, "Results of the one live run (November 2, 2026, after round 8)"). The card '
+               'had shown only the October 29 held-out test, which stays as one secondary line.'),
+    'approval': 'Owner-approved (November 2), for the walkthrough; the X cut has no results card and is not re-exported',
+    'narration': ('c25 synthesized on 2026-11-02 with the same local Kokoro-82M files (SHA-256 unchanged), voice am_fenrir, speed '
+                  '1.0; local Whisper small and medium both transcribed it as written. Over its span it measures -13.3 LUFS in the '
+                  'export (the old line -13.5; its neighbors -13.6 and -13.5).'),
+    'unchanged': ('Footage, every shot boundary, the other 25 lines and their times, the other four cards, the music bed and the '
+                  'runtime (171.88 s): the results slot keeps its October 31 length, so the end card and its line stay put. The '
+                  'audio was rendered with --keep-audio-from: the November 1 loudness measurements, and the November 1 narration '
+                  'outside 150.280-160.029 s. Before this change the pipeline reproduced the November 1 MP4 byte for byte here; '
+                  'after it, the old line still gives the same plan and the same AAC packets.'),
+    'previous_video_sha256': V21_COVERAGE,
+    'comparison_with_previous': {
+        'receipts-demo.mp4': {
+            'results_card_s': [150.23, 160.654],
+            'changed_by_design': 'frames 3756-4016 (150.24-160.64 s): the results card, its fades and caption 25',
+            'decoded_frames_identical': '0-3735 (0.00-149.40 s) and 4036-4296 (161.44-171.84 s), with the same H.264 packets',
+            'reencoded_same_pixels': ('3736-3755 (149.44-150.20 s), the keyframe group before the card: PSNR >= 57.9 dB, under '
+                                      '0.21% of samples off by more than 2 levels; 4017-4035 (160.68-161.40 s) of the end card: '
+                                      'PSNR >= 52.8 dB, under 1.5% of samples off by more than 2 levels'),
+            'audio': ('AAC packets identical up to 150.72 s (7,065 of 8,058) and for the last 42 (0.9 s). Before encoding, the '
+                      'mix is bit-identical outside 150.729-162.631 s: the new line, then the music duck settling after it (at '
+                      'most 0.0035, -49 dBFS, after the card). From 150.72 s the encoder chose different packets for the '
+                      'unchanged end-card audio (difference 35 dB below the signal); integrated -14.0 LUFS, true peak -1.5 dBTP'),
+            'captions': 'cue 25 only: new text and end 159.566 s instead of 159.854 s; 26 cues'},
+        'plan': 'shots identical; cue c25 lasts 8.236 s instead of 8.524 s',
+        'nocap-x.mp4': 'not re-exported: the X cut has no results card',
+        'receipts-demo.gif': 'unchanged: its 20 seconds (16.56-36.56 s) decode identically'},
+}
 
 
 def sha(path):
@@ -175,6 +222,15 @@ def main():
                                               'duration_s': previous['duration_s'], 'commit': '5d6f7ed'}
             historical['v21_endcard_x_56s'] = {**V21_ENDCARD_HISTORY, 'video_sha256': V21_ENDCARD['nocap-x.mp4'],
                                                'duration_s': previous['x_cut']['duration_s'], 'commit': '5d6f7ed'}
+        elif previous['asset_sha256']['receipts-demo.mp4'] == V21_COVERAGE['receipts-demo.mp4'] != sha(video):
+            # The November 2 results-card update replaces the November 1 walkthrough only; the X cut stays current.
+            assert not x, 'the November 2 update re-exports the walkthrough only'
+            for name in ('manifest', 'validation'):
+                target = ASSETS / V21_COVERAGE_HISTORY[name]
+                if not target.exists():
+                    shutil.copy2(ASSETS / f'{name}.json', target)
+            historical['v21_coverage_172s'] = {**V21_COVERAGE_HISTORY, 'video_sha256': V21_COVERAGE['receipts-demo.mp4'],
+                                               'duration_s': previous['duration_s'], 'commit': '78847a2'}
     for entry in historical.values():
         for key in ('manifest', 'validation'):
             assert (ASSETS / entry[key]).exists(), entry[key]
@@ -192,6 +248,13 @@ def main():
                 and previous.get('gif', {}).get('start_s') == start
                 and gif_frames(ASSETS / 'receipts-demo.mp4', start) == gif_frames(video, start))
 
+    # Without a newly validated X cut, keep the current one and its record, after checking that the files still match it.
+    kept_x = None
+    if not x and previous.get('x_cut'):
+        kept_x = previous['x_cut']
+        for name in X_ASSETS:
+            assert sha(ASSETS / name) == previous['asset_sha256'][name], name
+
     for source_name, target_name in ((video.name, 'receipts-demo.mp4'), (f'{OUTPUT["main"]}.en.srt', 'receipts-demo.en.srt'),
                                      (f'{OUTPUT["main"]}.en.vtt', 'receipts-demo.en.vtt')):
         shutil.copy2(folder / source_name, ASSETS / target_name)
@@ -208,7 +271,7 @@ def main():
                         '-loop', '0', str(gif)], check=True)
     covered = [shot['name'] for shot in manifest['timeline'] if shot['end'] > start and shot['start'] < end]
 
-    names = ('receipts-demo.mp4', 'receipts-demo.gif', 'receipts-demo.en.srt', 'receipts-demo.en.vtt') + (X_ASSETS if x else ())
+    names = ('receipts-demo.mp4', 'receipts-demo.gif', 'receipts-demo.en.srt', 'receipts-demo.en.vtt') + (X_ASSETS if x or kept_x else ())
     record = {
         'schema_version': 4, 'product_brand': 'NoCap', 'version': 'v2.1 walkthrough',
         'source_render': str(source.relative_to(ROOT)), 'capture_take': str(capture.relative_to(ROOT)),
@@ -217,6 +280,7 @@ def main():
         'end_card_update': (COVERAGE_UPDATE if 'v21_endcard_172s' in historical
                             else END_CARD_UPDATE if 'v21_172s' in historical else None),
         'earlier_end_card_updates': [END_CARD_UPDATE] if 'v21_endcard_172s' in historical else [],
+        'results_card_update': RESULTS_UPDATE if 'v21_coverage_172s' in historical else None,
         'format': manifest['format'], 'product_pixels': manifest['product_pixels'],
         'duration_s': manifest['duration_s'], 'video_probe': manifest['video_probe'],
         'asset_sha256': {name: sha(ASSETS / name) for name in names},
@@ -235,7 +299,7 @@ def main():
         'x_cut': ({'files': list(X_ASSETS), 'duration_s': x[2]['duration_s'], 'video_probe': x[2]['video_probe'],
                    'narration_segments': x[2]['narration']['segments'], 'captions': x[2]['captions'], 'caption_font_px': x[2]['caption_font_px'],
                    'timeline': x[2]['timeline'], 'edit_overlays': x[2]['edit_overlays'], 'audio': x[2]['audio'],
-                   'cards_sha256': x[2]['cards_sha256'], 'source_validation': x[3]} if x else None),
+                   'cards_sha256': x[2]['cards_sha256'], 'source_validation': x[3]} if x else kept_x),
         'fresh_fix_evidence': '../fix-live-2026-10-29.json',
         'voice_selection': '../voice-selection-v2.json',
         'music_license': 'Original work synthesized by music_bed.py for this project (see ../narration-license.md)',
@@ -245,7 +309,7 @@ def main():
     }
     (ASSETS / 'manifest.json').write_text(json.dumps(record, indent=2) + '\n')
     print(json.dumps({'assets': record['asset_sha256'], 'gif_bytes': gif.stat().st_size, 'gif_kept': keep_gif, 'gif_interval': [start, round(end, 2)],
-                      'x_cut': bool(x), 'historical_exports': sorted(historical)}, indent=2))
+                      'x_cut': 're-exported' if x else 'kept' if kept_x else None, 'historical_exports': sorted(historical)}, indent=2))
 
 
 if __name__ == '__main__':

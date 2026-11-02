@@ -1,0 +1,21 @@
+{
+ "request_sha256": "b8a063128c2e72e8381325a722372ea72e6a2c6a172c6f51f127440e41a418ca",
+ "prompt_version": "ai-drafts-prompt-v1",
+ "model": "muse-wonder-1.0",
+ "served_model": "muse-wonder-1.0",
+ "effort": "low",
+ "created_utc": "2026-11-02T10:27:56Z",
+ "response_id": "resp_6ae865ab4bd89deb811a443e",
+ "status": "completed",
+ "usage": {
+  "input_tokens": 2285,
+  "output_tokens": 1229,
+  "cached_tokens": 372,
+  "reasoning_tokens": 733
+ },
+ "cost_usd": 0.032306,
+ "latency_s": 9.37,
+ "output_text": "{\"draft\": \"# LyondellBasell Q3 2026 Earnings Summary\\n\\nLyondellBasell reported third-quarter results marked by solid earnings, strong operating cash generation and a larger cash balance after a planned debt repayment.\\n\\n**Earnings and Profitability**\\n- Net income came to **$758 million**, or **$2.32** per diluted share.\\n- Excluding identified items, net income was **$828 million**, or **$2.54** per diluted share.\\n- Identified items totaled **$70 million**, net of tax, and weighed on earnings by **$0.22** per diluted share, including closure costs for a European propylene oxide joint venture.\\n- EBITDA reached **$1.4 billion**, climbing to **$1.5 billion** excluding identified items.\\n\\n**Market and Operations**\\n- Integrated polyethylene margins ended the quarter approximately **50%** above prior-year levels, supported by positive polyethylene price momentum in September.\\n- Volumes slipped sequentially, reflecting the sale of certain European assets.\\n- Through the Value Enhancement Program, utilization of the Channelview PO/TBA asset increased to approximately **110%**.\\n\\n**Cash Flow and Capital Allocation**\\n- Cash from operating activities generated **$1.7 billion**, including a release of working capital.\\n- Capital expenditures were **$303 million**.\\n- Shareholder returns through dividends totaled **$224 million**.\\n- Cash increased by approximately **$600 million** during the quarter, including the planned **€500 million** debt repayment.\\n\\n**Balance Sheet and Liquidity**\\n- Cash and cash equivalents stood at **$3.2 billion** at the end of the quarter.\\n- Available liquidity totaled **$7.7 billion**.\\n- The company also repaid its **€500 million** note maturity in September as planned.\\n\\n**Outlook**\\n- For the fourth quarter, the company expects operating rates of **85%** for North American O&P assets, **60%** for European O&P assets and **75%** for Intermediates & Derivatives assets, reflecting planned maintenance.\\n\\n**Bottom Line**\\nThe company delivered solid adjusted profitability and strong cash generation in the quarter, ending with higher cash and substantial liquidity while continuing dividends, capital spending and planned debt repayment.\"}",
+ "ticker": "LYB",
+ "stub": false
+}
