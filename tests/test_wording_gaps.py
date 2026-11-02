@@ -1554,3 +1554,179 @@ def test_extraction_keeps_a_stated_base_period_after_a_quoted_change(snapshot, t
                                  period_text="second quarter of 2026"))
     assert "quarter of 2025" in c.span_text
     assert verify(c, snapshot, context=CARR_CONTEXT).status == status
+
+
+# --- Round 7. A non-GAAP margin is checked only against non-GAAP evidence -----------------------------------------
+# Releases often file the GAAP figure that opens a reconciliation under the table's non-GAAP basis: Walmart's
+# "Operating income, as reported | 8,708" (Q4 FY2026), Williams-Sonoma's "Operating income | 328,059" (Q2 FY2025),
+# Federal Realty's "Operating income | 180,654" (Q4 2025), Illinois Tool Works' "Net Income | 768" (Q1 2026), Snap-on's
+# "Gross profit | 596.1" (Q4 2024), each equal to the same release's GAAP figure. An adjusted margin was checked against
+# the GAAP margin they give. Genuine non-GAAP rows: AMD Q2 2026 non-GAAP operating income $3,094M on revenue $11,536M
+# (26.82%; GAAP 17.25%), non-GAAP gross margin 56% (GAAP 54%); Delta 2025 "Operating income, adjusted" $5,804M on
+# "Operating revenue, adjusted" $58,287M (9.96%; on reported revenue $63,364M, 9.16%); Invesco Q3 2025 adjusted
+# operating income $406.1M on net revenues $1,186.3M (34.23%; on operating revenues $1,640.4M, 24.76%).
+
+def margin_claim(span, value, entity, period_text, metric_text, metric="other", period_type="quarter", basis=None,
+                 unit="%"):
+    value_text = f"{value}%" if unit == "%" else value
+    c = claim(span, value_text, value if unit == "%" else float(value.split()[0]), metric=metric,
+              metric_text=metric_text, unit=unit, entity=entity, period_text=period_text, basis=basis)
+    return c.model_copy(update={"period_type": period_type})
+
+
+@pytest.mark.parametrize("c", [
+    margin_claim("Walmart's adjusted operating margin was 4.6% in the quarter.", 4.6, "Walmart", "Q4 FY2026",
+                 "adjusted operating margin"),
+    margin_claim("Walmart's adjusted operating margin was 4.9% in the quarter.", 4.9, "Walmart", "Q4 FY2026",
+                 "adjusted operating margin"),
+    margin_claim("Williams-Sonoma's adjusted operating margin was 17.9%.", 17.9, "Williams-Sonoma", "Q2 FY2025",
+                 "adjusted operating margin"),
+    margin_claim("Williams-Sonoma's adjusted operating margin was 18.5%.", 18.5, "Williams-Sonoma", "Q2 FY2025",
+                 "adjusted operating margin"),
+    margin_claim("Federal Realty's adjusted operating margin was 53.8%.", 53.8, "Federal Realty", "Q4 2025",
+                 "adjusted operating margin"),
+    margin_claim("Illinois Tool Works' adjusted net margin was 19.1%.", 19.1, "Illinois Tool Works", "Q1 2026",
+                 "adjusted net margin"),
+    margin_claim("Illinois Tool Works' adjusted net margin was 20.0%.", 20.0, "Illinois Tool Works", "Q1 2026",
+                 "adjusted net margin"),
+    margin_claim("Snap-on's adjusted gross margin was 45.9%.", 45.9, "Snap-on", "Q4 2024", "adjusted gross margin",
+                 metric="gross_margin"),
+    margin_claim("Federal Realty's adjusted operating margin expanded 18.7 percentage points year over year.",
+                 "18.7 percentage points", "Federal Realty", "Q4 2025", "adjusted operating margin", unit="other"),
+])
+def test_an_adjusted_margin_is_never_checked_against_a_gaap_row_filed_as_non_gaap(snapshot, c):
+    if c.unit == "other":
+        c = c.model_copy(update={"comparison": "YoY"})
+    v = verify(c, snapshot)
+    assert unread(v), v.explanation
+
+
+@pytest.mark.parametrize("c,filed", [
+    (margin_claim("Walmart's operating margin was 4.6% in the quarter.", 4.6, "Walmart", "Q4 FY2026",
+                  "operating margin"), "4.57%"),
+    (margin_claim("Williams-Sonoma's operating margin was 17.9%.", 17.9, "Williams-Sonoma", "Q2 FY2025",
+                  "operating margin"), "17.86%"),
+    (margin_claim("Illinois Tool Works' net margin was 19.1%.", 19.1, "Illinois Tool Works", "Q1 2026", "net margin"),
+     "19.12%"),
+    (margin_claim("Delta's operating margin was 9.2% in 2025.", 9.2, "Delta", "fiscal 2025", "operating margin",
+                  period_type="annual"), "9.19%"),
+])
+def test_a_plain_margin_keeps_its_gaap_check(snapshot, c, filed):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("c,filed", [
+    (margin_claim("Our second quarter adjusted operating margin was 26.8%.", 26.8, "AMD", "Q2 2026",
+                  "adjusted operating margin"), "26.82%"),
+    (margin_claim("Our second quarter adjusted gross margin was 56%.", 56, "AMD", "Q2 2026", "adjusted gross margin",
+                  metric="gross_margin"), "56.0%"),
+    (margin_claim("Delta's adjusted operating margin was 10.0% in 2025.", 10.0, "Delta", "fiscal 2025",
+                  "adjusted operating margin", period_type="annual"), "9.96%"),
+    (margin_claim("Invesco's adjusted operating margin was 34.2% in the third quarter of 2025.", 34.2, "Invesco",
+                  "Q3 2025", "adjusted operating margin"), "34.23%"),
+])
+def test_a_true_adjusted_margin_verifies_against_non_gaap_evidence(snapshot, c, filed):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation
+    assert "8-K press release" in v.explanation
+    assert any(f.basis == "non-GAAP" for f in v.evidence) and not any(
+        f.basis == "non-GAAP" and f.metric != "revenue" and "reported" in (f.locator or "") for f in v.evidence)
+
+
+@pytest.mark.parametrize("c,expected", [
+    (margin_claim("Our second quarter adjusted operating margin was 30.0%.", 30.0, "AMD", "Q2 2026",
+                  "adjusted operating margin"), 26.82),
+    (margin_claim("Delta's adjusted operating margin was 12.0% in 2025.", 12.0, "Delta", "fiscal 2025",
+                  "adjusted operating margin", period_type="annual"), 9.96),
+    (margin_claim("Invesco's adjusted operating margin was 33.0% in the third quarter of 2025.", 33.0, "Invesco",
+                  "Q3 2025", "adjusted operating margin"), 34.23),
+])
+def test_a_wrong_adjusted_margin_is_wrong_against_non_gaap_evidence(snapshot, c, expected):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("wrong", "value_mismatch"), v.explanation
+    assert v.expected_value == pytest.approx(expected, abs=0.01)
+
+
+@pytest.mark.parametrize("c,words", [
+    (margin_claim("Our second quarter adjusted operating margin was 17.3%.", 17.3, "AMD", "Q2 2026",
+                  "adjusted operating margin"), "GAAP operating margin"),
+    (margin_claim("Delta's adjusted operating margin was 9.2% in 2025.", 9.2, "Delta", "fiscal 2025",
+                  "adjusted operating margin", period_type="annual"), "on reported revenue"),
+    (margin_claim("Invesco's adjusted operating margin was 24.8% in the third quarter of 2025.", 24.8, "Invesco",
+                  "Q3 2025", "adjusted operating margin"), "on reported revenue"),
+])
+def test_an_adjusted_margin_that_fits_only_a_gaap_or_reported_base_is_unread(snapshot, c, words):
+    v = verify(c, snapshot)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous") and words in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("c", [
+    margin_claim("Our second quarter GAAP gross margin was 56%.", 56, "AMD", "Q2 2026", "GAAP gross margin",
+                 metric="gross_margin"),
+    margin_claim("Our second quarter GAAP gross margin was 56%.", 56, "AMD", "Q2 2026", "GAAP gross margin",
+                 metric="gross_margin", basis="GAAP"),
+    margin_claim("Our second quarter GAAP operating margin was 26.8%.", 26.8, "AMD", "Q2 2026", "GAAP operating margin"),
+])
+def test_a_gaap_margin_never_matches_a_non_gaap_one(snapshot, c):
+    assert verify(c, snapshot).status != "verified"
+
+
+def test_a_true_adjusted_margin_change_still_verifies(snapshot):
+    c = margin_claim("AMD's adjusted operating margin expanded 15.1 percentage points year over year.",
+                     "15.1 percentage points", "AMD", "Q2 2026", "adjusted operating margin", unit="other")
+    v = verify(c.model_copy(update={"comparison": "YoY"}), snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and "15.15 percentage points" in v.explanation, v.explanation
+
+
+@pytest.mark.parametrize("label,gaap,expected", [
+    ("Operating income, as reported | 8,708", (), True),
+    ("Operating income | 180,654", ("same",), True),
+    ("Operating income | 63,956", (), False),
+    ("Adjusted operating income | 7,135", ("same",), False),
+    ("Non‐GAAP operating income | 709.9", (), False),
+    ("Operating income, GAAP basis | 1,000", (), True),
+])
+def test_the_gaap_row_reading(label, gaap, expected):
+    from datetime import date, datetime, timezone
+    from receipts.types import Fact
+    from receipts.verify import Obs
+
+    def row(basis):
+        return Fact(cik=1, ticker="X", metric="operating_income", basis=basis, value=1.0, unit="USD",
+                    period_end=date(2026, 6, 30), source="press_release", form="8-K", accession="a",
+                    accepted_at=datetime(2026, 7, 30, tzinfo=timezone.utc), url="u", locator=label)
+    reported = [Obs(1.0, (row("GAAP"),))] if gaap else []
+    assert verifier._gaap_row(row("non-GAAP"), reported) is expected
+
+
+# --- Round 7. An operating margin's own words in the span qualify it, as for gross and net margins ---------------
+# AMD Q2 2026 operating margin: GAAP 17.25%, non-GAAP 26.82%. With metric_text "operating margin" alone, a qualifier
+# in the span ("core", "comparable", "excluding special items", a segment) was dropped and the figure checked against
+# the GAAP margin; gross and net margins already read those words.
+
+def amd_margin(span, value, metric_text="operating margin"):
+    return margin_claim(span, value, "AMD", "Q2 2026", metric_text)
+
+
+@pytest.mark.parametrize("span", [
+    "Our second quarter core operating margin was 30.0%.",
+    "Our second quarter comparable operating margin was 30.0%.",
+    "Our second quarter operating margin, excluding special items, was 30.0%.",
+    "AMD's Data Center operating margin was 17.3%.",
+])
+def test_a_qualifier_in_the_span_leaves_an_operating_margin_unread(snapshot, span):
+    v = verify(amd_margin(span, 30.0 if "30.0" in span else 17.3), snapshot)
+    assert unread(v), v.explanation
+
+
+@pytest.mark.parametrize("span,value,filed", [
+    ("Our second quarter operating margin was 17.3%.", 17.3, "17.25%"),
+    ("AMD's GAAP operating margin was 17.3% in the quarter.", 17.3, "17.25%"),
+    ("AMD reported an operating margin of 17.3%.", 17.3, "17.25%"),
+    ("Operating margin was 17.3%, up from 11.7% a year ago.", 17.3, "17.25%"),
+    ("Our operating margin, as adjusted, was 26.8%.", 26.8, "26.82%"),
+])
+def test_an_operating_margin_with_only_framing_words_keeps_its_check(snapshot, span, value, filed):
+    v = verify(amd_margin(span, value), snapshot)
+    assert (v.status, v.reason) == ("verified", "match") and filed in v.explanation, v.explanation

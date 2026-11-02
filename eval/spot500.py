@@ -5,6 +5,8 @@
 .venv/bin/python eval/spot500.py --live --output eval/spot500_runs/live-20261101.json
 .venv/bin/python eval/spot500.py --set v2 --stub oracle --output eval/spot500_runs/v2-oracle-<date>.json
 .venv/bin/python eval/spot500.py --set v2 --live --output eval/spot500_runs/v2-live-<date>.json
+.venv/bin/python eval/spot500.py --set v3 --stub oracle --output eval/spot500_runs/v3-oracle-<date>.json
+.venv/bin/python eval/spot500.py --set v3 --live --output eval/spot500_runs/v3-live-<date>.json
 
 Live mode requires MODEL_API_KEY already exported; this runner never reads .env.
 Each output and its .run directory are single use, including interrupted runs.
@@ -36,8 +38,10 @@ CORPUS = ROOT / "eval/corpus/spot500_v1.jsonl"
 MANIFEST = ROOT / "eval/spot500_manifest.json"
 V2_CORPUS = ROOT / "eval/corpus/spot500_v2.jsonl"
 V2_MANIFEST = ROOT / "eval/spot500_v2_manifest.json"
+V3_CORPUS = ROOT / "eval/corpus/spot500_v3.jsonl"
+V3_MANIFEST = ROOT / "eval/spot500_v3_manifest.json"
 RUNS = ROOT / "eval/spot500_runs"
-SETS = ("v1", "v2")
+SETS = ("v1", "v2", "v3")
 DEFAULT_BUDGET = 0.95
 
 
@@ -71,6 +75,8 @@ def set_files(spot_set: str = "v1") -> tuple[Path, Path]:
         return CORPUS, MANIFEST
     if spot_set == "v2":
         return V2_CORPUS, V2_MANIFEST
+    if spot_set == "v3":
+        return V3_CORPUS, V3_MANIFEST
     raise ValueError(f"Unknown spot500 set: {spot_set}")
 
 

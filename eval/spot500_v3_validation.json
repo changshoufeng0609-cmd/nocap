@@ -1,0 +1,287 @@
+{
+  "actual_provider_cost_usd": 0.0,
+  "baseline_commit": "84b8fd48a94de10027e041be69595362a0d4ca40",
+  "baseline_role": "the deployed code (private 84b8fd4); receipts/ is unchanged on this branch",
+  "corpus_sha256": "5eed4cb0a5c7f52d99e90054e825e6fdf0ebe87eab6e2af14453ccbde4555f46",
+  "counts": {
+    "by_company": {
+      "AEE": 3,
+      "ALB": 3,
+      "AMAT": 3,
+      "APP": 1,
+      "AWK": 2,
+      "AXON": 6,
+      "BLK": 1,
+      "BMY": 1,
+      "C": 1,
+      "CCI": 1,
+      "CLX": 3,
+      "DECK": 3,
+      "DLR": 1,
+      "DVN": 1,
+      "GWW": 3,
+      "HST": 3,
+      "ILMN": 1,
+      "KDP": 3,
+      "KO": 3,
+      "MOS": 3,
+      "MTB": 1,
+      "OMC": 1,
+      "PHM": 3,
+      "SNDK": 4,
+      "TECH": 3,
+      "TJX": 3,
+      "TMUS": 3,
+      "TRGP": 1,
+      "USB": 3,
+      "WMB": 1
+    },
+    "by_feature": {
+      "balance_sheet": 5,
+      "bank": 5,
+      "bank_revenue": 1,
+      "cash_and_equivalents": 2,
+      "eps_diluted": 15,
+      "free_cash_flow": 3,
+      "gross_margin": 3,
+      "growth": 25,
+      "guidance": 5,
+      "margin_change": 3,
+      "net_income": 12,
+      "non_gaap": 6,
+      "noninterest_revenue": 3,
+      "operating_cash_flow": 6,
+      "operating_income": 3,
+      "operating_margin": 1,
+      "reit_or_utility": 10,
+      "revenue": 22,
+      "segment_revenue": 2,
+      "tax_rate": 1,
+      "total_assets": 3
+    },
+    "by_mutator": {
+      "basis": 2,
+      "direction": 5,
+      "entity": 5,
+      "forward_looking_control": 5,
+      "look_ahead": 5,
+      "none": 32,
+      "period": 5,
+      "scale": 5,
+      "value": 5
+    },
+    "by_sector": {
+      "Communication Services": 3,
+      "Consumer Discretionary": 3,
+      "Consumer Staples": 3,
+      "Energy": 3,
+      "Financials": 4,
+      "Health Care": 3,
+      "Industrials": 2,
+      "Information Technology": 2,
+      "Materials": 2,
+      "Real Estate": 3,
+      "Utilities": 2
+    },
+    "companies": 30,
+    "gold_claims": 115,
+    "items": 69
+  },
+  "deviations": {
+    "basis_mutants": {
+      "applied": 2,
+      "nominal": 5,
+      "reason": "the whole eligible pool has two basis candidates, both SNDK (v1 pool 26, v2 pool 14)"
+    },
+    "beyond_the_requested_scan": "companies named in the lines the fixes added to receipts/ are also excluded; only EL is new",
+    "features_without_eligible_carriers": [
+      "16_or_17_week_quarter",
+      "net_margin",
+      "shares_outstanding",
+      "total_debt"
+    ],
+    "variable_week_quota": {
+      "applied": 0,
+      "nominal": 2,
+      "reason": "AZO and KR (v1) and PEP (v2) are excluded; COST and DPZ have no eligible sentences"
+    }
+  },
+  "env_files_read": false,
+  "estimated_live_cost_usd": 0.345,
+  "exclusion_derivation_sha256": "2e5ecef757b5f553e531b7e11871aa0efafd8c945476e54a1671e89d91af786e",
+  "exclusions": {
+    "distinct": 95,
+    "groups": {
+      "original": 11,
+      "reviewer_probe_companies": 3,
+      "spot500_v1_companies": 30,
+      "spot500_v2_companies": 30,
+      "verifier_fix_code_companies": 7,
+      "verifier_fix_test_companies": 28
+    },
+    "probable_false_positive": {
+      "ED": "matched only by Comcast's row label 'Pro Forma Consolidated Revenue'"
+    },
+    "reviewer_probe_companies": [
+      "BAX",
+      "CSGP",
+      "TGT"
+    ],
+    "verifier_fix_code_companies": [
+      "CMCSA",
+      "DIS",
+      "ED",
+      "EL",
+      "FDS",
+      "MPC",
+      "SYY"
+    ],
+    "verifier_fix_test_companies": [
+      "AKAM",
+      "AMD",
+      "AMGN",
+      "AXP",
+      "CARR",
+      "CMCSA",
+      "CNC",
+      "DIS",
+      "ED",
+      "EXR",
+      "FDS",
+      "GEHC",
+      "HPE",
+      "INTC",
+      "JPM",
+      "LEN",
+      "MNST",
+      "MRK",
+      "MSI",
+      "PFE",
+      "RF",
+      "SJM",
+      "SYY",
+      "TFC",
+      "TGT",
+      "TSLA",
+      "UDR",
+      "VLO"
+    ]
+  },
+  "independent_full_rebuild": {
+    "command": "python eval/build_spot500.py --data-root /Users/shou-fengchang/Desktop/Meta/data --set v3 --output-dir /tmp/spot500v3-work/v3-rebuild-b",
+    "corpus_byte_identical": true,
+    "manifest_byte_identical": true
+  },
+  "isolation": {
+    "applied_to": [
+      "source pool load",
+      "exclusion derivation",
+      "v3 freeze build",
+      "v3 independent rebuild",
+      "in-place v1 and v2 rebuilds",
+      "oracle CLI run and reuse check"
+    ],
+    "audit_hook": "refused socket connect/getaddrinfo, any .env* open, and any write under /Users/shou-fengchang/Desktop/Meta/data",
+    "source_data_paths_modified": 0
+  },
+  "live_budget_usd": 0.95,
+  "manifest_sha256": "fb9844b4385a8d0b94054fd93b2cb224c4d4021097578baa9965c9eab46e1ba0",
+  "network_calls": 0,
+  "nocap_verifier_extraction_or_live_run_on_v3": false,
+  "oracle": {
+    "command": "python eval/spot500.py --set v3 --stub oracle --output eval/spot500_runs/v3-oracle-20261102.json",
+    "cost_usd": 0.0,
+    "inputs_unchanged": true,
+    "mode": "stub:oracle",
+    "note": "Gold-emitting stub: 100% by construction, not verifier or extraction quality",
+    "record": "eval/spot500_runs/v3-oracle-20261102.json",
+    "record_sha256": "15036b937188cf2845d72f4eaf2a768e5701e68e0c14965f71d7fd0e6eb1ab82",
+    "set": "v3",
+    "total": {
+      "caught_errors": 32,
+      "conflicting_matches": 0,
+      "duplicate_matches": 0,
+      "errors": 0,
+      "expected_reasons": 32,
+      "extra_claims": 0,
+      "extra_wrong": 0,
+      "false_alarm_original_items": 0,
+      "false_alarm_true_claims": 0,
+      "gold_claims": 115,
+      "guidance_claims": 9,
+      "guidance_expected_reason": 9,
+      "guidance_items": 5,
+      "items": 69,
+      "missing_records": 0,
+      "original_items": 32,
+      "original_true_claims": 56,
+      "original_true_unverifiable": 0,
+      "original_true_wrong": 0,
+      "skipped": 0,
+      "status_and_reason_correct": 115,
+      "status_correct": 115,
+      "target_claims": 32,
+      "target_unverifiable": 0,
+      "target_verified": 0,
+      "true_claims": 74,
+      "unverifiable_guidance": 9,
+      "unverifiable_true_claims": 0,
+      "verified_guidance": 0,
+      "verified_guidance_items": 0,
+      "verified_true_claims": 74
+    }
+  },
+  "output_reuse": {
+    "error_type": "FileExistsError",
+    "existing_output_hash_unchanged": true,
+    "exit_code": 1
+  },
+  "procedure_changes_from_spot500_v1": [
+    "seed 20261101 -> 20261103",
+    "excluded before sampling: the original 11 plus the 30 companies sampled by spot500_v1, the 30 companies sampled by spot500_v2, the 28 companies named in the verifier-fix tests added since spot500_v1, the 7 companies named in the fixed verifier's added lines and the 3 companies the reviewer's probes used; 95 distinct companies in all",
+    "variable-week quota lowered from 2 to 0, the number of eligible variable-week companies left after the exclusions",
+    "basis mutants lowered from 5 to 2: the sampled companies have 2 basis candidates after the exclusions"
+  ],
+  "provider_calls": 0,
+  "pushed": false,
+  "pytest": {
+    "command": "SPOT500_DATA_ROOT=/Users/shou-fengchang/Desktop/Meta/data PYTHONDONTWRITEBYTECODE=1 python eval/spot500_offline_tests.py -q tests/",
+    "console_log_sha256": "fb1f72290e608c0745a39c60e218a83f69a3978f50dba97c654f0012289df34b",
+    "deselected": 1,
+    "deselected_reason": "The task forbids reading any .env file; this test deliberately reads a temporary .env.",
+    "deselected_test": "tests/test_extract_backends.py::test_dotenv_can_select_the_backend_but_the_shell_wins",
+    "duration_seconds": 153.38,
+    "guard_sha256": "b234195c2102119012d81f0cf9c8e5185a9f808e9adef44605cfd84e73c7dca3",
+    "passed": 3521,
+    "skipped": 4,
+    "skipped_tests": [
+      "tests/test_split_table.py:33: no data/archive/companyfacts: the public clone doesn't carry it",
+      "tests/test_store.py:519: NVDA Q2 FY2027 8-K index not in the local cache",
+      "tests/test_store.py:535: data/facts.sqlite not built; run python -m receipts.ingest",
+      "tests/test_store.py:546: data/facts.sqlite not built; run python -m receipts.ingest"
+    ],
+    "spot500_set_tests": "tests/test_spot500_sets.py: 50 tests (21 new for v3), including the full source rebuild of v1, v2 and v3"
+  },
+  "python": "3.12.7",
+  "seed": 20261103,
+  "source_pool_sha256_equals_v1": true,
+  "v1_v2_corpus_manifest_runs_or_results_modified": false,
+  "v1_v2_reproduction": {
+    "commands": [
+      "python eval/build_spot500.py --data-root /Users/shou-fengchang/Desktop/Meta/data",
+      "python eval/build_spot500.py --data-root /Users/shou-fengchang/Desktop/Meta/data --set v2"
+    ],
+    "in_place_rebuilds_accepted": true,
+    "pinned_fields": "builder_hashes['eval/build_spot500.py'] keeps each set's freezing builder: v1 050be2e5, v2 7bdcb11c (git blobs)",
+    "v1": {
+      "corpus_sha256": "7b1c119b6a3c736d7b2fa1a91f325ffe59f5a931f08da73ebf63ab748b3948fb",
+      "manifest_sha256": "3afa85b040b97f74101b8bdfe9d53f2fec56676f313844ff179384be70b4095f"
+    },
+    "v2": {
+      "corpus_sha256": "50552717a00912d4199553796438d4d395247ad614ed533261de4119af067072",
+      "manifest_sha256": "f5ddd98250554631e1c1a6c9c7461bb2da5559c6277d46d775325e14afef703f"
+    }
+  },
+  "validated_at": "2026-11-01T18:34:57.742039+00:00",
+  "version": "spot500_v3"
+}

@@ -2,6 +2,7 @@
 
 python eval/build_spot500.py --data-root /path/to/Meta/data            # v1 (frozen; rebuilds identically)
 python eval/build_spot500.py --data-root /path/to/Meta/data --set v2   # v2: new seed, v1 companies excluded
+python eval/build_spot500.py --data-root /path/to/Meta/data --set v3   # v3: new seed; v1, v2 and fix-tested companies excluded
 """
 from __future__ import annotations
 
@@ -40,7 +41,20 @@ DIRECTION_RE = re.compile(r"\b(" + "|".join(DIRECTION_PAIRS) + r")\b", re.I)
 # The 30 companies sampled by the frozen v1 set (eval/spot500_manifest.json).
 V1_COMPANIES = frozenset("A ABNB AMT APTV AZO BBY CFG CHD CIEN DIS FE FLEX FOXA HAL HCA IP IVZ JBHT KR "
                          "MLM MPC MTD NRG PLTR PNC PWR TKO TWLO WELL WFC".split())
+# The 30 companies sampled by the frozen v2 set (eval/spot500_v2_manifest.json).
+V2_COMPANIES = frozenset("AMGN AMP BE CF CHTR CNP COF DE DOC EXE FITB ICE KEY KIM MCHP MSCI PEP PSX RF RL "
+                         "SWKS TFC TROW TSN TTWO UBER ULTA UNH VMC WTW".split())
+# Companies the verifier fixes made after v1's live run were tested or written on,
+# copied from the frozen derivation eval/spot500_v3_exclusions.json, which the
+# build checks. ED is matched only by the row label "Pro Forma Consolidated Revenue".
+V3_FIX_TEST_COMPANIES = frozenset("AKAM AMD AMGN AXP CARR CMCSA CNC DIS ED EXR FDS GEHC HPE INTC JPM LEN MNST "
+                                  "MRK MSI PFE RF SJM SYY TFC TGT TSLA UDR VLO".split())
+V3_FIX_CODE_COMPANIES = frozenset("CMCSA DIS ED EL FDS MPC SYY".split())
+V3_PROBE_COMPANIES = frozenset("BAX CSGP TGT".split())
 BUILDER_FILES = ('eval/build_spot500.py', 'eval/spot500_sources.py', 'eval/build_corpus.py')
+# A hard quota with its nominal size, as the changes from v1 name it.
+HARD_QUOTAS = (('banks', 3, 'bank', 'banks'), ('REITs or utilities', 2, 'REIT/utility', 'REITs or utilities'),
+               ('variable-week companies', 2, 'variable-week', 'variable-week companies'))
 
 
 @dataclass(frozen=True)
@@ -59,9 +73,17 @@ class SpotSet:
     # Five named companies form the variable-week stratum. Excluding an earlier
     # set's picks can exhaust it; such a set reserves all eligible ones left.
     variable_week_cap: bool = False
+    # From v3: named exclusion groups (key, companies, description), the earlier
+    # sets among them, the frozen derivation file with its SHA-256, and a cap
+    # that lowers any hard quota to the eligible companies left.
+    exclusion_groups: tuple = ()
+    previous_sets: tuple = ()
+    derivation: tuple = ()
+    cap_quotas: bool = False
     # The builder file that froze a set is provenance, not something a later
-    # builder edit can recompute. v1 keeps the hash of its freezing builder, the
-    # git blob eval/build_spot500.py at 050be2e5fe97f9920308e9d63643b7ee8c9771c7.
+    # builder edit can recompute. Each set keeps the hash of the builder that
+    # froze it, the git blob eval/build_spot500.py at its freezing commit:
+    # v1 050be2e5fe97f9920308e9d63643b7ee8c9771c7, v2 7bdcb11ccb371e897e58ed710dd58ee68a267162.
     frozen_builder_hashes: tuple = ()
 
     @property
@@ -70,7 +92,7 @@ class SpotSet:
 
     @property
     def excluded(self):
-        return EXCLUDED | self.extra_excluded
+        return EXCLUDED.union(self.extra_excluded, *(companies for _, companies, _ in self.exclusion_groups))
 
 
 SETS = {
@@ -81,7 +103,24 @@ SETS = {
     'v2': SpotSet('v2', 20261102, '6099dc974adf4c934d4732c4bb01d18ee1b622d6',
                   'worktree source baseline; uncommitted builder parameterization and new evaluation files',
                   'corpus/spot500_v2.jsonl', 'spot500_v2_manifest.json',
-                  extra_excluded=V1_COMPANIES, extra_excluded_from='v1', variable_week_cap=True),
+                  extra_excluded=V1_COMPANIES, extra_excluded_from='v1', variable_week_cap=True,
+                  frozen_builder_hashes=(('eval/build_spot500.py',
+                                          '0aeacfcb74fb48003a17760516b4cb807c0ec2eab40a55fe26ca7025082c49f9'),)),
+    'v3': SpotSet('v3', 20261103, '84b8fd48a94de10027e041be69595362a0d4ca40',
+                  'the deployed code that v3 measures; uncommitted builder change and new evaluation files',
+                  'corpus/spot500_v3.jsonl', 'spot500_v3_manifest.json',
+                  exclusion_groups=(
+                      ('spot500_v1_companies', V1_COMPANIES, 'companies sampled by spot500_v1'),
+                      ('spot500_v2_companies', V2_COMPANIES, 'companies sampled by spot500_v2'),
+                      ('verifier_fix_test_companies', V3_FIX_TEST_COMPANIES,
+                       'companies named in the verifier-fix tests added since spot500_v1'),
+                      ('verifier_fix_code_companies', V3_FIX_CODE_COMPANIES,
+                       "companies named in the fixed verifier's added lines"),
+                      ('reviewer_probe_companies', V3_PROBE_COMPANIES, "companies the reviewer's probes used")),
+                  previous_sets=('v1', 'v2'),
+                  derivation=('spot500_v3_exclusions.json',
+                              '2e5ecef757b5f553e531b7e11871aa0efafd8c945476e54a1671e89d91af786e'),
+                  cap_quotas=True),
 }
 
 
@@ -370,13 +409,15 @@ FEATURE_PRIORITIES = ('net_margin', 'margin_change', 'bank_revenue', 'cash_and_e
 
 
 def select_companies(companies, docs, sentences, *, count=30, seed=SEED, excluded=EXCLUDED,
-                     variable_week_cap=False):
+                     variable_week_cap=False, cap_quotas=False):
     """Seeded, coverage-constrained sector sample; consult source tags only.
 
     Excluded companies leave the eligible pool before any reservation, so
     every quota and the sector fill draw only from the remaining companies.
     With variable_week_cap, the variable-week quota of two is lowered to the
-    number of eligible variable-week companies left; otherwise it is strict.
+    number of eligible variable-week companies left; cap_quotas does the same
+    for every hard quota (banks, REITs or utilities, variable-week). Otherwise
+    the quotas are strict.
     """
     rng = random.Random(seed)
     historical = defaultdict(list)
@@ -398,10 +439,13 @@ def select_companies(companies, docs, sentences, *, count=30, seed=SEED, exclude
         chosen.extend(picks)
         reservations.append({'constraint': name, 'minimum': minimum, 'selected': picks})
 
-    reserve('banks', [t for t in eligible if is_bank(companies[t])], 3)
-    reserve('REITs or utilities', [t for t in eligible if is_utility_reit(companies[t])], 2)
+    banks = [t for t in eligible if is_bank(companies[t])]
+    reserve('banks', banks, min(3, len(banks)) if cap_quotas else 3)
+    reits_or_utilities = [t for t in eligible if is_utility_reit(companies[t])]
+    reserve('REITs or utilities', reits_or_utilities, min(2, len(reits_or_utilities)) if cap_quotas else 2)
     variable_week = [t for t in eligible if t in IRREGULAR]
-    reserve('variable-week companies', variable_week, min(2, len(variable_week)) if variable_week_cap else 2)
+    reserve('variable-week companies', variable_week,
+            min(2, len(variable_week)) if variable_week_cap or cap_quotas else 2)
     basis_companies = [t for t in eligible if any(mutate_single_basis(s, docs[s['doc_id']], companies)
                                                 for s in historical[t])]
     # Basis needs explicit printed labels, so reserve its feasible source stratum.
@@ -451,7 +495,7 @@ def build_items(companies, docs, sentences, spot=None):
     """Pure source-to-items transform. No extraction, store facts, or verifier calls."""
     spot = spot or SETS['v1']
     selected, selection = select_companies(companies, docs, sentences, seed=spot.seed, excluded=spot.excluded,
-                                           variable_week_cap=spot.variable_week_cap)
+                                           variable_week_cap=spot.variable_week_cap, cap_quotas=spot.cap_quotas)
     companies = {t: companies[t] for t in selected}
     docs = {k: d for k, d in docs.items() if d['ticker'] in companies}
     sentences = sorted((s for s in sentences if s['ticker'] in companies), key=lambda s: s['sentence_id'])
@@ -461,12 +505,17 @@ def build_items(companies, docs, sentences, spot=None):
         rng.shuffle(candidates[mutator])
     selected_sentences, mutants, used = {}, [], Counter()
     # Scarce mutation types get first choice. A source can produce at most two mutants.
+    # A capped set takes fewer than five only when its candidates run out, and records it.
+    shortfalls = {}
     for mutator in sorted(MUTATORS, key=lambda m: (len(candidates[m]), m)):
         taken_companies = set()
         for _ in range(5):
             options = [(s, m) for s, m in candidates[mutator] if used[s['sentence_id']] < 2
                        and not any(old_s['sentence_id'] == s['sentence_id'] and old_m.mutator == mutator
                                    for old_s, old_m in mutants)]
+            if not options and spot.cap_quotas:
+                shortfalls[mutator] = {'quota': 5, 'taken': _, 'candidates': len(candidates[mutator])}
+                break
             if not options:
                 raise ValueError(f'Need five source-screened {mutator} mutations; found {len(candidates[mutator])}')
             represented = {s['ticker'] for s in selected_sentences.values()}
@@ -521,6 +570,8 @@ def build_items(companies, docs, sentences, spot=None):
         raise ValueError('Duplicate item inputs')
     selection.update(selected_companies=selected, mutation_candidate_counts={m: len(candidates[m]) for m in MUTATORS},
                      selected_sentence_ids=sorted([*selected_sentences, *(s['sentence_id'] for s in chosen_controls)]))
+    if shortfalls:
+        selection['mutant_shortfalls'] = shortfalls
     return items, selection
 
 
@@ -553,10 +604,40 @@ def reference_set(spot):
             'corpus': f'eval/{earlier.corpus}', 'corpus_sha256': frozen['corpus_sha256']}
 
 
+def exclusion_sources(spot):
+    """Check v3-style exclusion groups against the frozen sets and derivation (read-only)."""
+    groups = {key: companies for key, companies, _ in spot.exclusion_groups}
+    references = []
+    for name in spot.previous_sets:
+        earlier = SETS[name]
+        manifest_bytes = (ROOT / 'eval' / earlier.manifest).read_bytes()
+        frozen = json.loads(manifest_bytes)
+        if (frozen['version'] != earlier.version
+                or frozen['corpus_sha256'] != digest((ROOT / 'eval' / earlier.corpus).read_bytes())):
+            raise ValueError(f'Frozen {earlier.version} files changed')
+        if frozenset(frozen['selection']['selected_companies']) != groups[f'{earlier.version}_companies']:
+            raise ValueError(f'Exclusions differ from the frozen {earlier.version} companies')
+        references.append({'version': earlier.version, 'seed': frozen['seed'],
+                           'manifest': f'eval/{earlier.manifest}', 'manifest_sha256': digest(manifest_bytes),
+                           'corpus': f'eval/{earlier.corpus}', 'corpus_sha256': frozen['corpus_sha256']})
+    path, expected = spot.derivation
+    raw = (ROOT / 'eval' / path).read_bytes()
+    if digest(raw) != expected:
+        raise ValueError(f'Frozen exclusion derivation changed: eval/{path}')
+    derivation = json.loads(raw)
+    for key, field in (('verifier_fix_test_companies', 'verifier_fix_tests'),
+                       ('verifier_fix_code_companies', 'verifier_fix_code'),
+                       ('reviewer_probe_companies', 'reviewer_probes')):
+        if frozenset(derivation[field]['companies']) != groups[key]:
+            raise ValueError(f'{key} differ from eval/{path}')
+    return references, {'file': f'eval/{path}', 'sha256': expected, 'record': derivation}
+
+
 def build_from_sources(companies, docs, sentences, provenance, *, spot=None):
     from eval.eval import DEFAULT_EST_COST_PER_ITEM
     spot = spot or SETS['v1']
     reference = reference_set(spot) if spot.extra_excluded_from else None
+    references, derivation = exclusion_sources(spot) if spot.exclusion_groups else (None, None)
     items, selection = build_items(companies, docs, sentences, spot)
     selected = set(selection['selected_companies'])
     chosen_sids = set(selection['selected_sentence_ids'])
@@ -604,6 +685,27 @@ def build_from_sources(companies, docs, sentences, provenance, *, spot=None):
             'applied_to': 'the eligible company pool, before every reservation and the sector fill; '
                           'the sampling frame and source screening are unchanged'}
         manifest['reference_set'] = reference
+    if derivation:
+        # As for v2: only the seed, the exclusions and any quota they exhaust differ from v1.
+        parts = [f"the {len(companies)} {description}" for _, companies, description in spot.exclusion_groups]
+        changes = [f"seed {SEED} -> {spot.seed}",
+                   f"excluded before sampling: the original {len(EXCLUDED)} plus {', '.join(parts[:-1])} and "
+                   f"{parts[-1]}; {len(spot.excluded)} distinct companies in all"]
+        for constraint, nominal, label, plural in HARD_QUOTAS:
+            quota = next(r for r in selection['reservations'] if r['constraint'] == constraint)
+            if quota['minimum'] < nominal:
+                changes.append(f"{label} quota lowered from {nominal} to {quota['minimum']}, the number of eligible "
+                               f"{plural} left after the exclusions")
+        for mutator, short in sorted(selection.get('mutant_shortfalls', {}).items()):
+            changes.append(f"{mutator} mutants lowered from {short['quota']} to {short['taken']}: the sampled "
+                           f"companies have {short['candidates']} {mutator} candidates after the exclusions")
+        manifest['procedure']['changes_from_spot500_v1'] = changes
+        manifest['exclusions'] = {
+            'original': sorted(EXCLUDED), **{key: sorted(companies) for key, companies, _ in spot.exclusion_groups},
+            'applied_to': 'the eligible company pool, before every reservation and the sector fill; '
+                          'the sampling frame and source screening are unchanged'}
+        manifest['reference_sets'] = references
+        manifest['exclusion_derivation'] = derivation
     return raw, json.dumps(manifest, sort_keys=True, indent=2, ensure_ascii=False).encode() + b'\n'
 
 

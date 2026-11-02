@@ -1,0 +1,976 @@
+{
+  "started_at": "2026-11-02T00:20:50.990556+00:00",
+  "cap_usd": 0.95,
+  "max_attempts": 64,
+  "charge_usd": 0.37353815,
+  "calls": 64,
+  "estimated_calls": 0,
+  "tokens": {
+    "input_tokens": 141204,
+    "cached_tokens": 24396,
+    "output_tokens": 52675,
+    "reasoning_tokens": 38753
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "request_sha256": "faf5361f2348498faa22ebda91e3a1c26b3f7a124e5b2ecbcf6b487a5d8cb395",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00913575,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2212,
+        "output_tokens": 1499,
+        "cached_tokens": 0,
+        "reasoning_tokens": 1234
+      }
+    },
+    {
+      "attempt": 2,
+      "request_sha256": "2a2614e53d30068544a81d4bf784eae9b9ca9bb9d2529f05e5dfe417f70d3c52",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00954825,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2236,
+        "output_tokens": 1589,
+        "cached_tokens": 0,
+        "reasoning_tokens": 1229
+      }
+    },
+    {
+      "attempt": 3,
+      "request_sha256": "e6cdd414f813b4a6947e12c1600ce24c11636ec2b858a8fc5a335bf93a5cd5fb",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.007516,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2198,
+        "output_tokens": 1122,
+        "cached_tokens": 0,
+        "reasoning_tokens": 880
+      }
+    },
+    {
+      "attempt": 4,
+      "request_sha256": "659ab321c4308467a84bc097adaaebaf5f3b1e77ed478775fa632bd6dc646cd2",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0060745,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2211,
+        "output_tokens": 779,
+        "cached_tokens": 0,
+        "reasoning_tokens": 532
+      }
+    },
+    {
+      "attempt": 5,
+      "request_sha256": "3713a5134f8ba8cd9e2d83bad77a0a14ed38a97402d97845e26174cad1e0e3a4",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00679725,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2218,
+        "output_tokens": 947,
+        "cached_tokens": 0,
+        "reasoning_tokens": 684
+      }
+    },
+    {
+      "attempt": 6,
+      "request_sha256": "66ba54400eb07c95d30552d1142bb7f866f61c031d211b507a862a67f2e044db",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0056505,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2205,
+        "output_tokens": 681,
+        "cached_tokens": 0,
+        "reasoning_tokens": 461
+      }
+    },
+    {
+      "attempt": 7,
+      "request_sha256": "04a69bd00aac31f40d565bc657d3e6a4201b3f94e66a09e10d30929d0a8fb345",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00634025,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2206,
+        "output_tokens": 843,
+        "cached_tokens": 0,
+        "reasoning_tokens": 594
+      }
+    },
+    {
+      "attempt": 8,
+      "request_sha256": "1dbea38b9a6b6bb02fe173a2fe650faa3b6ab7a7f3715e65b304ad7c34a8ff80",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00523875,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2202,
+        "output_tokens": 585,
+        "cached_tokens": 0,
+        "reasoning_tokens": 467
+      }
+    },
+    {
+      "attempt": 9,
+      "request_sha256": "4d9d2d5f11511c920d8c1a3384b6575e40112c595e5a6d93b0e3918aa387813e",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0058955,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2197,
+        "output_tokens": 741,
+        "cached_tokens": 0,
+        "reasoning_tokens": 501
+      }
+    },
+    {
+      "attempt": 10,
+      "request_sha256": "45c6d1d7f8396cad61961bb191a9cbe4689a29db112220ea9748b32f404922ac",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00549725,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2232,
+        "output_tokens": 637,
+        "cached_tokens": 0,
+        "reasoning_tokens": 289
+      }
+    },
+    {
+      "attempt": 11,
+      "request_sha256": "aa4dce8028940ecb83357ba0455f9a1d27db7c5bedaca9b6b863686d429561ad",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0074465,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2224,
+        "output_tokens": 1098,
+        "cached_tokens": 0,
+        "reasoning_tokens": 828
+      }
+    },
+    {
+      "attempt": 12,
+      "request_sha256": "d2cc65a8338c0b74d026556fab1f0ce87176b783fd3555108ee923beb5714e3f",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00642125,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2213,
+        "output_tokens": 860,
+        "cached_tokens": 0,
+        "reasoning_tokens": 627
+      }
+    },
+    {
+      "attempt": 13,
+      "request_sha256": "0d22e5bfaef84add2b6597090daa57fdb15e5e65c865ad3462062831f50a1270",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00722225,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 1052,
+        "cached_tokens": 0,
+        "reasoning_tokens": 801
+      }
+    },
+    {
+      "attempt": 14,
+      "request_sha256": "b99f01effb5ebbceff198ee3868ad7991236aaa4fbfcd1373785bb088b4e608f",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00616175,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2223,
+        "output_tokens": 796,
+        "cached_tokens": 0,
+        "reasoning_tokens": 449
+      }
+    },
+    {
+      "attempt": 15,
+      "request_sha256": "2d023a4c0f056ed78787aa9f232d748484a80e90f33d9866d9cc14f7256e760d",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00616625,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2213,
+        "output_tokens": 800,
+        "cached_tokens": 0,
+        "reasoning_tokens": 567
+      }
+    },
+    {
+      "attempt": 16,
+      "request_sha256": "8862285b6b7304c615510bf94564b02d398d6712712807c05e06878d9af42667",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00701475,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2205,
+        "output_tokens": 1002,
+        "cached_tokens": 0,
+        "reasoning_tokens": 861
+      }
+    },
+    {
+      "attempt": 17,
+      "request_sha256": "292769a89ae86d4766b010a89ae16f90a79573ddbffd222b743ead93749cdd34",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0057375,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2193,
+        "output_tokens": 705,
+        "cached_tokens": 0,
+        "reasoning_tokens": 567
+      }
+    },
+    {
+      "attempt": 18,
+      "request_sha256": "d6925fee4140f84082c38a61a25f1c00bc8f921e768b7c20af3bbbe7702e2e82",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005452,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2206,
+        "output_tokens": 634,
+        "cached_tokens": 0,
+        "reasoning_tokens": 380
+      }
+    },
+    {
+      "attempt": 19,
+      "request_sha256": "17ae5795fe7e2ababc12cdb14cab80125380f7437edba4de04793b8535a6b993",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005373,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2204,
+        "output_tokens": 616,
+        "cached_tokens": 0,
+        "reasoning_tokens": 381
+      }
+    },
+    {
+      "attempt": 20,
+      "request_sha256": "a56d984ff1537d742b82f1ca023ccbae603236e9ee7609e5aaef2cf37a97b132",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0053665,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2192,
+        "output_tokens": 618,
+        "cached_tokens": 0,
+        "reasoning_tokens": 499
+      }
+    },
+    {
+      "attempt": 21,
+      "request_sha256": "fff026dd74db049607441844579693dc02ff1fc5aabfc14e25f34454c4b78480",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0067205,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2211,
+        "output_tokens": 931,
+        "cached_tokens": 0,
+        "reasoning_tokens": 680
+      }
+    },
+    {
+      "attempt": 22,
+      "request_sha256": "74632f603ae3497e33f172f5d2c70f59916d39c3e549af00d4c7c8d94918800f",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00624525,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2215,
+        "output_tokens": 818,
+        "cached_tokens": 0,
+        "reasoning_tokens": 577
+      }
+    },
+    {
+      "attempt": 23,
+      "request_sha256": "d303fe8b4c5161c5d8f73ff84af28036867a9c43045c84ab32482cd1c4fc4645",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00729875,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2218,
+        "output_tokens": 1065,
+        "cached_tokens": 0,
+        "reasoning_tokens": 809
+      }
+    },
+    {
+      "attempt": 24,
+      "request_sha256": "7e0e3f4dc001c1a8ad980f47a95c4b18f672614c7ef59bd0b60366de7f2dc31d",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0064065,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2191,
+        "output_tokens": 863,
+        "cached_tokens": 0,
+        "reasoning_tokens": 734
+      }
+    },
+    {
+      "attempt": 25,
+      "request_sha256": "d9f269b3792af4cec6aaef1d6e1aea9a5779c2befc5e27737c7a1589558ec702",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.004368,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2199,
+        "output_tokens": 381,
+        "cached_tokens": 0,
+        "reasoning_tokens": 241
+      }
+    },
+    {
+      "attempt": 26,
+      "request_sha256": "f4c513ccfdffbdcdc9f035d3aa94b292693a69bd5e0281624878878bf493b961",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00463575,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2199,
+        "output_tokens": 444,
+        "cached_tokens": 0,
+        "reasoning_tokens": 305
+      }
+    },
+    {
+      "attempt": 27,
+      "request_sha256": "2fb293481a60b5154f4c6b25bcf36b15a73ea380308632775b16f3a3cc4a79c2",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00234245,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 430,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 309
+      }
+    },
+    {
+      "attempt": 28,
+      "request_sha256": "0b588c9cf43bdeb5e37b25fc9d39c0238daa292003bb253b439ad065868faf44",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00473175,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 466,
+        "cached_tokens": 0,
+        "reasoning_tokens": 332
+      }
+    },
+    {
+      "attempt": 29,
+      "request_sha256": "fc1e1e9f28fbf8e64d9afd72c5d4ea88399aaa64b4449417a3403ea58a9b496a",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.006428,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2198,
+        "output_tokens": 866,
+        "cached_tokens": 0,
+        "reasoning_tokens": 632
+      }
+    },
+    {
+      "attempt": 30,
+      "request_sha256": "ebb54777a2be9fe5d5eb83a6f2dbcbe8273c113ea9c2279ead604363a7de765e",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0065245,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2214,
+        "output_tokens": 884,
+        "cached_tokens": 0,
+        "reasoning_tokens": 630
+      }
+    },
+    {
+      "attempt": 31,
+      "request_sha256": "7525e5f7cab007a579245c0d3c7caa6043da1a9b387f68eec23448cd7ef11451",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00640625,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 860,
+        "cached_tokens": 0,
+        "reasoning_tokens": 728
+      }
+    },
+    {
+      "attempt": 32,
+      "request_sha256": "17f8626b8d0a0bb5c6b977fdb35254abc2b2fc8b21e7545c8791e12fa828c42e",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00507525,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2197,
+        "output_tokens": 548,
+        "cached_tokens": 0,
+        "reasoning_tokens": 398
+      }
+    },
+    {
+      "attempt": 33,
+      "request_sha256": "40341e91ee77df97cb94f478473d0dae751578f590421628960ef085a2713b8f",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00485425,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2197,
+        "output_tokens": 496,
+        "cached_tokens": 0,
+        "reasoning_tokens": 360
+      }
+    },
+    {
+      "attempt": 34,
+      "request_sha256": "2602da491167d3898fddc8ac3fa16e83c11546f308a51bf924450e2ebbfdd8bb",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005139,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2197,
+        "output_tokens": 563,
+        "cached_tokens": 0,
+        "reasoning_tokens": 427
+      }
+    },
+    {
+      "attempt": 35,
+      "request_sha256": "ec4f31b38b7af48cff87a38fe27d523c71c4cfbd0c742f92924650ee8e044e1a",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0096375,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2236,
+        "output_tokens": 1610,
+        "cached_tokens": 0,
+        "reasoning_tokens": 1239
+      }
+    },
+    {
+      "attempt": 36,
+      "request_sha256": "0397efca8a2ec32b5ea05d4c864bf0186b91af10f82cf046d944f452254c7cb0",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0037072,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2198,
+        "output_tokens": 752,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 516
+      }
+    },
+    {
+      "attempt": 37,
+      "request_sha256": "4ffd91138e5821af39dc6c98ebbd64ad1812dd8ef70a72a8722224628e8ccffc",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.006268,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2206,
+        "output_tokens": 826,
+        "cached_tokens": 0,
+        "reasoning_tokens": 591
+      }
+    },
+    {
+      "attempt": 38,
+      "request_sha256": "c03055721e3c34bc7246b2915314f51dc925656cfe6adff017bbff2c0dde6a88",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00670425,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2198,
+        "output_tokens": 931,
+        "cached_tokens": 0,
+        "reasoning_tokens": 665
+      }
+    },
+    {
+      "attempt": 39,
+      "request_sha256": "3210bcd1f7f7f2aa66370dda862f9766e5dc788625d34c0f855f94d2e6b67688",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00695025,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 988,
+        "cached_tokens": 0,
+        "reasoning_tokens": 860
+      }
+    },
+    {
+      "attempt": 40,
+      "request_sha256": "e7b4e65a681ca95063fd1e9edeca8396310eb2aae7a9b31f7347791a6e3a0189",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00483075,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2202,
+        "output_tokens": 489,
+        "cached_tokens": 0,
+        "reasoning_tokens": 354
+      }
+    },
+    {
+      "attempt": 41,
+      "request_sha256": "a5890eb7d99ebeb8ee5726c400ab11c82655e954b679e8cc44c571d55112a640",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.006234,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2189,
+        "output_tokens": 823,
+        "cached_tokens": 0,
+        "reasoning_tokens": 693
+      }
+    },
+    {
+      "attempt": 42,
+      "request_sha256": "0fac7e2ee33edd5f6c92376dd90ba73cd8810e4d773f5435a329e32ff3b63be6",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0058735,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2193,
+        "output_tokens": 737,
+        "cached_tokens": 0,
+        "reasoning_tokens": 609
+      }
+    },
+    {
+      "attempt": 43,
+      "request_sha256": "d72ffdf5bc792860bdb642278292cdfdfeacfa981dae995bd78bfef24947283c",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005076,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 547,
+        "cached_tokens": 0,
+        "reasoning_tokens": 424
+      }
+    },
+    {
+      "attempt": 44,
+      "request_sha256": "f1695f7c4d19ad7981888d9783d92f656ae33306e5972078db7f09dd0deabf44",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.004311,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 367,
+        "cached_tokens": 0,
+        "reasoning_tokens": 233
+      }
+    },
+    {
+      "attempt": 45,
+      "request_sha256": "7efed049e16ffc0c30736dc9b8505df03cf2a71d8ff9c0e61c4ff1031b2e1741",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0047442,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2198,
+        "output_tokens": 996,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 761
+      }
+    },
+    {
+      "attempt": 46,
+      "request_sha256": "b76016076f879bdc80acd43b819729e1e2fc884d68a1daf5cb7e3637ff064251",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00521275,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2205,
+        "output_tokens": 578,
+        "cached_tokens": 0,
+        "reasoning_tokens": 355
+      }
+    },
+    {
+      "attempt": 47,
+      "request_sha256": "0faed9e3a99ec501fda298882a22b94b4e4f199b248d52d7f36fe1bcb09a178c",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00447675,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 406,
+        "cached_tokens": 0,
+        "reasoning_tokens": 283
+      }
+    },
+    {
+      "attempt": 48,
+      "request_sha256": "2447cb6c4c051d181894762d9b38494aa42050e3fd07e25be83b5851878e760c",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0017687,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 295,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 159
+      }
+    },
+    {
+      "attempt": 49,
+      "request_sha256": "114192a0589e73f0bd69f06bc701118ed98648c77c3054ea5194e049048a5c80",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00655975,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2198,
+        "output_tokens": 897,
+        "cached_tokens": 0,
+        "reasoning_tokens": 663
+      }
+    },
+    {
+      "attempt": 50,
+      "request_sha256": "61cfe04e6655c91a08da9bc7f101a6c2a4f20483c38ff624b12bf4b7174779e6",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00626645,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2236,
+        "output_tokens": 1343,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 972
+      }
+    },
+    {
+      "attempt": 51,
+      "request_sha256": "769191f3883aaf729e6f1d6a95fd91bdb7c1852af3ad9ed63c664158036c5b86",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0055145,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2205,
+        "output_tokens": 649,
+        "cached_tokens": 0,
+        "reasoning_tokens": 429
+      }
+    },
+    {
+      "attempt": 52,
+      "request_sha256": "48bb921e7d52adc35e4cfce89ae350bc9876ba548ddd1dfa2ded1e2cb00b71e8",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.004074449999999999,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2213,
+        "output_tokens": 834,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 601
+      }
+    },
+    {
+      "attempt": 53,
+      "request_sha256": "406048f9a8089ba9dbf514f2224a4e94b08f4a3ef45180163887b913a45cc0aa",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00503625,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2193,
+        "output_tokens": 540,
+        "cached_tokens": 0,
+        "reasoning_tokens": 405
+      }
+    },
+    {
+      "attempt": 54,
+      "request_sha256": "941bac37614347b6bc5516e4b7e45c8dc29bd01a7490e24291e68f229e2d3ce5",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0035237,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2211,
+        "output_tokens": 705,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 457
+      }
+    },
+    {
+      "attempt": 55,
+      "request_sha256": "342fc94a6018d038f5d6f1e55da284b4e2978458b86f9fd1745b06420ae23487",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00683225,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2212,
+        "output_tokens": 957,
+        "cached_tokens": 0,
+        "reasoning_tokens": 694
+      }
+    },
+    {
+      "attempt": 56,
+      "request_sha256": "c8e4d54bba7c4fb29d8a4e4561dbd07341248efc47cc21252e8dd9382cb9f25e",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00620345,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2206,
+        "output_tokens": 1337,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 1080
+      }
+    },
+    {
+      "attempt": 57,
+      "request_sha256": "b63799abdb339763d7f7f41fc56cb849b929276958127b7c52bddf76275d4128",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0049137,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2201,
+        "output_tokens": 1035,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 787
+      }
+    },
+    {
+      "attempt": 58,
+      "request_sha256": "fa9ad4cc151a8eaed488f9d7b9ee1cf22f76d30c8383cde8db256a83d9ab09e3",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005084,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2204,
+        "output_tokens": 548,
+        "cached_tokens": 0,
+        "reasoning_tokens": 313
+      }
+    },
+    {
+      "attempt": 59,
+      "request_sha256": "46e69223276036917a4de9f748fb88ea4c1fc8e1010f7956a67585862a568599",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.00423345,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2211,
+        "output_tokens": 872,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 617
+      }
+    },
+    {
+      "attempt": 60,
+      "request_sha256": "1475b6e5c4944a7ffea2cee66be4e656f132981bce6b887be15f305c2774b45b",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005902,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2209,
+        "output_tokens": 739,
+        "cached_tokens": 0,
+        "reasoning_tokens": 501
+      }
+    },
+    {
+      "attempt": 61,
+      "request_sha256": "d050119b78f62f75b23d08086d80685360a0c60936a037376d37d29f1a3de6a5",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.005829,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2205,
+        "output_tokens": 723,
+        "cached_tokens": 0,
+        "reasoning_tokens": 471
+      }
+    },
+    {
+      "attempt": 62,
+      "request_sha256": "bf072392fa5e797f693216fe25e78f2f3e2cb88364666f69d1f084b9c4a8b732",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0025792,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2200,
+        "output_tokens": 486,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 344
+      }
+    },
+    {
+      "attempt": 63,
+      "request_sha256": "feac7bc816677bf0063996a2595b96e6ed133e24d4d7961a60c32ce3f5e22510",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.007149,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2207,
+        "output_tokens": 1033,
+        "cached_tokens": 0,
+        "reasoning_tokens": 772
+      }
+    },
+    {
+      "attempt": 64,
+      "request_sha256": "da68820641a8d02ea4354427dcb86c6cc3717c572cfa25c55eb4ab38016448a6",
+      "started": true,
+      "estimate_usd": 0.05,
+      "charge_usd": 0.0108102,
+      "cost_is_estimate": false,
+      "status": "completed",
+      "usage": {
+        "input_tokens": 2233,
+        "output_tokens": 2413,
+        "cached_tokens": 2033,
+        "reasoning_tokens": 1912
+      }
+    }
+  ]
+}

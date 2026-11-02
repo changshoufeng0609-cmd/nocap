@@ -1407,6 +1407,15 @@ def interpret(claim: Claim, why: Optional[list[str]] = None) -> Optional[Reading
         return None
     if unit == "%" and re.fullmatch(r"\s*(?:(?:total|consolidated|gaap|non-gaap|adjusted)\s+)*operating\s+margins?\s*",
                                     mt, re.I):
+        # The figure's own words in the span are read as for any level metric, as gross and net margins are: "core",
+        # "comparable" or "excluding special items" there names another measure than the GAAP operating margin. "As
+        # adjusted" stays the adjusted (non-GAAP) margin it was read as before.
+        blank_as = lambda text: re.sub(r"\bas(?=\s+adjusted\b)", "  ", text or "", flags=re.I)  # noqa: E731
+        own = claim.model_copy(update={"metric": "operating_margin", "span_text": blank_as(claim.span_text),
+                                       "metric_text": blank_as(claim.metric_text)})
+        checked = _level_reading(own, company, None, why=why)
+        if checked is None or checked.segment:
+            return None
         return Reading("operating_margin", None, None, derived="operating_margin")
     if _MARGIN_RE.search(mt):
         return None
@@ -1495,6 +1504,29 @@ _DISTINCT_MEASURE_ROW_RE = re.compile(r"\borganic(?:ally)?\b|\bpro[\s-]*forma\b"
 def _kept_out_of_revenue(f: Fact) -> bool:
     """A release row level() never reads as company revenue: _not_revenue_row, or an organic or pro forma row."""
     return _not_revenue_row(f) or bool(_DISTINCT_MEASURE_ROW_RE.search((f.locator or "").split("|", 1)[0]))
+
+
+# A release table of non-GAAP figures often opens with the GAAP figure it reconciles from: "Operating income | 180,654"
+# or "Operating income, as reported | 8,708" filed under the table's non-GAAP basis. Such a row is the GAAP figure when
+# its label names no non-GAAP measure and either says GAAP or "(as) reported" or, for an amount, equals the same
+# filing's GAAP figure for that line and period. A non-GAAP margin never takes it as its numerator or rate: "adjusted
+# operating margin" was checked against the GAAP margin it gives. A row that names its measure ("Adjusted operating
+# income") is kept even where it equals the GAAP figure, and so is a printed rate that does: NVIDIA's non-GAAP table
+# prints "Gross margin | 75.0%", as its GAAP one does.
+_ROW_NON_GAAP_RE = re.compile(r"\b(?:non[\s-]?gaap|adjusted|managed|fte|(?:fully[\s-])?taxable[\s-]equivalent|underlying"
+                              r"|organic|pro[\s-]?forma|excluding|excl\.|ex-|ongoing|core|comparable|normali[sz]ed"
+                              r"|recurring|cash)", re.I)
+_ROW_GAAP_RE = re.compile(r"\bgaap\b|\breported\b", re.I)
+
+
+def _gaap_row(f: Fact, gaap: Iterable[Obs] = ()) -> bool:
+    """Whether a non-GAAP release fact is the GAAP figure of its reconciliation table (see above); gaap: the GAAP
+    observations of the same amount line and period (none for a rate)."""
+    label = re.sub(r"[‐‑‒–—―−]", "-", (f.locator or "").split("|", 1)[0])  # "Non‐GAAP" with a Unicode hyphen
+    if _ROW_NON_GAAP_RE.search(label):
+        return False
+    return bool(_ROW_GAAP_RE.search(label)) or (f.unit == "USD" and any(
+        o.primary.accession == f.accession and o.primary.value == f.value for o in gaap))
 
 
 def form_phrase(f: Fact) -> str:
@@ -2516,11 +2548,17 @@ class _Check:
         return len({a for f in facts for a in (f.accession, *f.derived_from)}) == 1
 
     def income_margin(self, cik: int, rp: ResolvedPeriod, basis: Optional[str], metric: str,
-                      *, strict: bool = True) -> list[Obs]:
-        """Shared income/revenue machinery; new margins keep both inputs within one filing and duration."""
+                      *, strict: bool = True, reported_base: bool = False) -> list[Obs]:
+        """Shared income/revenue machinery; new margins keep both inputs within one filing and duration. A non-GAAP
+        margin takes the release's own non-GAAP revenue as its base where the release gives one (Delta's "Operating
+        revenue, adjusted"), else reported revenue; reported_base=True: reported revenue only (_diag_reported_base)."""
         revenue = self.level(cik, "revenue", rp, None)
         income = self.level(cik, metric, rp, basis)
-        adjusted_revenue = self.level(cik, "revenue", rp, basis) if strict and basis == "non-GAAP" else []
+        adjusted_revenue = []
+        if basis == "non-GAAP":
+            reported = self.level(cik, metric, rp, None)
+            income = [o for o in income if not _gaap_row(o.primary, reported)]  # never a GAAP row as non-GAAP
+            adjusted_revenue = [] if reported_base else self.level(cik, "revenue", rp, basis)
         out = []
         for i in income:
             # Use adjusted revenue if the release provides it; otherwise its reported revenue, as for
@@ -2566,9 +2604,12 @@ class _Check:
     def _gross_margin_levels(self, cik: int, rp: ResolvedPeriod, basis: Optional[str],
                              *, rounding: bool) -> list[Obs]:
         """Prefer stated rates; otherwise use one filing's numerator and compatible sales base."""
+        rates, gross_reported = self.level(cik, "gross_margin", rp, basis), []
+        if basis == "non-GAAP":  # never a GAAP rate or gross profit row as the non-GAAP one (_gaap_row)
+            rates = [o for o in rates if not _gaap_row(o.primary)]
+            gross_reported = self.level(cik, "gross_profit", rp, None)
         stated = [Obs(o.value, o.facts, _half_unit(o.primary) if rounding else 0.0)
-                  for o in self.level(cik, "gross_margin", rp, basis)
-                  if o.primary.unit == "%" and self._same_margin_filing(o.facts)]
+                  for o in rates if o.primary.unit == "%" and self._same_margin_filing(o.facts)]
         # A stated rate is the company's own figure. A calculation from one filing's sales base stands beside it only
         # where it rounds to a public stated rate (AMD prints "55%" and its dollars give 55.45%), so a claim finer
         # than the stated rate can still be checked, while a calculation on another base (Walmart's total revenues
@@ -2576,7 +2617,7 @@ class _Check:
         # available calculation.
         public_stated = [o for o in stated if self.public(o)]
         revenue = self.level(cik, "revenue", rp, None)
-        gross = self.level(cik, "gross_profit", rp, basis)
+        gross = [o for o in self.level(cik, "gross_profit", rp, basis) if not _gaap_row(o.primary, gross_reported)]
         cost = self.level(cik, "cost_of_revenue", rp, None) if basis != "non-GAAP" else []
 
         def same_inputs(*obs: Obs) -> bool:
@@ -2913,7 +2954,8 @@ class _Check:
             return direction
         if measure := self._non_gaap_measure_mismatch(actual):
             return measure
-        for diagnose in (self._diag_not_revenue_row, self._diag_split, self._diag_split_basis, self._diag_bank,
+        for diagnose in (self._diag_reported_base, self._diag_not_revenue_row, self._diag_split, self._diag_split_basis,
+                         self._diag_bank,
                          self._diag_period, self._diag_scale,
                          self._diag_basis, self._diag_entity):
             v = diagnose(rp, actual)
@@ -3619,6 +3661,23 @@ class _Check:
             f"{self.co_s} {form_phrase(fact)} reports {row} of {self.fmt(actual.value)}; "
             f"the draft's {self.c.metric_text or self.mlabel(False)} may be a different non-GAAP measure.",
             evidence=actual.facts)
+
+    def _diag_reported_base(self, rp: ResolvedPeriod, actual: Obs) -> Optional[Verdict]:
+        """A non-GAAP income margin that misses the release's own adjusted revenue base but fits on reported revenue:
+        "?", never "✗", since the draft may have divided by reported revenue."""
+        if self.basis != "non-GAAP" or self.growth_base or self.derived not in ("operating_margin", "net_margin"):
+            return None
+        net = self.derived == "net_margin"
+        hits = [o for o in self.matches(self.income_margin(self.cik, rp, self.basis,
+                                                           "net_income" if net else "operating_income",
+                                                           strict=net, reported_base=True)) if self.public(o)]
+        if not hits:
+            return None
+        best = _best_obs(hits)
+        return self.verdict("unverifiable", "ambiguous",
+                            f"{self.c.value_text} is {self.co_s} non-GAAP {self.mlabel(False)} on reported revenue for "
+                            f"{self.plabel(rp)}; on the adjusted revenue base its release reports, it is "
+                            f"{self.fmt_observation(actual)}.", evidence=[*best.facts, *actual.facts])
 
     def _diag_not_revenue_row(self, rp: ResolvedPeriod, actual: Obs) -> Optional[Verdict]:
         """A figure that matches only with a release row level() keeps out of revenue (a comparable-sales,

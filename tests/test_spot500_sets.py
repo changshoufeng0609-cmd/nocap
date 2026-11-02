@@ -1,4 +1,4 @@
-"""Versioned spot500 sets: v1 stays reproducible, v2 changes only its seed and exclusions.
+"""Versioned spot500 sets: v1 and v2 stay reproducible; later sets change only seed, exclusions and exhausted quotas.
 
 Source-only checks; no verifier, extraction or provider is involved. The full
 source rebuild needs the gitignored SEC archive and runs only when
@@ -20,8 +20,8 @@ from eval import build_spot500 as spot
 from eval import spot500
 
 ROOT = Path(__file__).resolve().parents[1]
-V1, V2 = spot.SETS["v1"], spot.SETS["v2"]
-V1_FREEZE_COMMIT = "050be2e5fe97f9920308e9d63643b7ee8c9771c7"
+V1, V2, V3 = spot.SETS["v1"], spot.SETS["v2"], spot.SETS["v3"]
+FREEZE_COMMITS = {"v1": "050be2e5fe97f9920308e9d63643b7ee8c9771c7", "v2": "7bdcb11ccb371e897e58ed710dd58ee68a267162"}
 DOC = {"doc_id": "EXCO-FY2026Q3", "ticker": "EXCO", "fy": 2026, "fp": "Q3", "period_end": "2026-09-30",
        "context": "Example Co (EXCO), third quarter of fiscal 2026", "quarter_days": 91}
 
@@ -84,14 +84,16 @@ def test_v1_set_matches_its_frozen_manifest_and_pins_only_its_own_builder():
         assert hashes[path] == sha((ROOT / path).read_bytes()), f"{path} changed; v1 no longer rebuilds identically"
 
 
-def test_pinned_v1_builder_hash_is_the_freezing_commit_blob():
+@pytest.mark.parametrize("spot_set", [V1, V2], ids=["v1", "v2"])
+def test_pinned_builder_hash_is_the_freezing_commit_blob(spot_set):
     if shutil.which("git") is None:
         pytest.skip("git is unavailable")
-    blob = subprocess.run(["git", "cat-file", "blob", f"{V1_FREEZE_COMMIT}:eval/build_spot500.py"],
+    blob = subprocess.run(["git", "cat-file", "blob", f"{FREEZE_COMMITS[spot_set.name]}:eval/build_spot500.py"],
                           cwd=ROOT, capture_output=True)
     if blob.returncode:
-        pytest.skip("the v1 freeze commit is not in this clone's history")
-    assert sha(blob.stdout) == dict(V1.frozen_builder_hashes)["eval/build_spot500.py"]
+        pytest.skip(f"the {spot_set.name} freeze commit is not in this clone's history")
+    pinned = dict(spot_set.frozen_builder_hashes)["eval/build_spot500.py"]
+    assert sha(blob.stdout) == pinned == frozen_manifest(spot_set)["builder_hashes"]["eval/build_spot500.py"]
 
 
 def test_v2_changes_only_the_seed_and_excludes_every_v1_company():
@@ -103,7 +105,10 @@ def test_v2_changes_only_the_seed_and_excludes_every_v1_company():
     assert V2.excluded == spot.EXCLUDED | spot.V1_COMPANIES and len(V2.excluded) == 41
     assert V2.extra_excluded_from == "v1" and V2.variable_week_cap
     assert (V2.version, V2.corpus, V2.manifest) == ("spot500_v2", "corpus/spot500_v2.jsonl", "spot500_v2_manifest.json")
-    assert not V2.frozen_builder_hashes
+    # The builder changed after the v2 freeze, so v2 now pins its freezing builder too, exactly as v1 does.
+    assert dict(V2.frozen_builder_hashes) == {
+        "eval/build_spot500.py": frozen_manifest(V2)["builder_hashes"]["eval/build_spot500.py"]}
+    assert spot.builder_hashes(V2) == frozen_manifest(V2)["builder_hashes"]
 
 
 def test_defaults_are_the_v1_set():
@@ -212,7 +217,7 @@ def test_builder_cli_writes_each_set_to_its_own_frozen_paths(tmp_path, monkeypat
 
 def test_builder_cli_rejects_an_unknown_set(tmp_path):
     with pytest.raises(SystemExit):
-        spot.main(["--data-root", str(tmp_path), "--set", "v3"])
+        spot.main(["--data-root", str(tmp_path), "--set", "v9"])
 
 
 # ---------------------------------------------------------------- committed v2 freeze
@@ -266,11 +271,11 @@ def test_committed_v2_passes_the_runner_freeze_and_the_oracle_scores_by_construc
 
 @pytest.mark.skipif(not os.environ.get("SPOT500_DATA_ROOT"),
                     reason="set SPOT500_DATA_ROOT to the source data root for the full rebuild (about two minutes)")
-def test_full_source_rebuild_reproduces_v1_and_v2_byte_for_byte():
+def test_full_source_rebuild_reproduces_every_set_byte_for_byte():
     from eval.spot500_sources import load_sources
 
     sources = load_sources(Path(os.environ["SPOT500_DATA_ROOT"]))
-    for spot_set in (V1, V2):
+    for spot_set in (V1, V2, V3):
         raw, manifest = spot.build_from_sources(*deepcopy(sources), spot=spot_set)
         assert raw == (ROOT / "eval" / spot_set.corpus).read_bytes(), spot_set.name
         assert manifest == (ROOT / "eval" / spot_set.manifest).read_bytes(), spot_set.name
@@ -315,7 +320,7 @@ def test_runner_defaults_to_v1_and_passes_the_set_through(monkeypatch, tmp_path)
     assert spot500.set_files() == (spot500.CORPUS, spot500.MANIFEST)
     assert spot500.set_files("v2") == (spot500.V2_CORPUS, spot500.V2_MANIFEST)
     with pytest.raises(ValueError, match="Unknown"):
-        spot500.set_files("v3")
+        spot500.set_files("v9")
     seen = []
 
     def fake_load(spot_set="v1"):
@@ -332,7 +337,7 @@ def test_runner_defaults_to_v1_and_passes_the_set_through(monkeypatch, tmp_path)
     assert spot500.main(["--set", "v2", "--stub", "oracle", "--output", str(tmp_path / "o.json")]) == 0
     assert seen == [("load", "v1"), ("run", "v1"), ("load", "v2"), ("run", "v2")]
     with pytest.raises(SystemExit):
-        spot500.main(["--set", "v3", "--stub", "oracle", "--output", str(tmp_path / "o.json")])
+        spot500.main(["--set", "v9", "--stub", "oracle", "--output", str(tmp_path / "o.json")])
 
 
 def test_v2_load_refuses_files_labelled_as_another_set(v2_frozen, tmp_path, monkeypatch):
@@ -416,3 +421,189 @@ def test_v1_runs_keep_their_unrestricted_paths_and_record_format(tmp_path, monke
     monkeypatch.setattr(spot500, "MANIFEST", manifest)
     result = spot500.run(rows, tmp_path / "anywhere.json", stub=True, evidence_dir=tmp_path, budget=.95)
     assert "set" not in result and result["corpus_sha256"] == spot500.file_digest(corpus)
+
+
+# ---------------------------------------------------------------- v3: fresh companies for the fixed verifier
+
+def derivation_record():
+    return json.loads((ROOT / "eval" / V3.derivation[0]).read_bytes())
+
+
+def test_v3_excludes_both_earlier_sets_and_every_derived_company():
+    from eval import spot500_exclusions as exclusions
+
+    groups = {key: companies for key, companies, _ in V3.exclusion_groups}
+    record = derivation_record()
+    assert V3.seed == 20261103 and V3.cap_quotas and V3.previous_sets == ("v1", "v2")
+    assert groups["spot500_v1_companies"] == set(frozen_manifest(V1)["selection"]["selected_companies"])
+    assert groups["spot500_v2_companies"] == set(frozen_manifest(V2)["selection"]["selected_companies"])
+    assert groups["verifier_fix_test_companies"] == set(record["verifier_fix_tests"]["companies"])
+    assert groups["verifier_fix_code_companies"] == set(record["verifier_fix_code"]["companies"])
+    assert groups["reviewer_probe_companies"] == {"BAX", "CSGP", "TGT"} == set(exclusions.PROBES)
+    assert V3.excluded == spot.EXCLUDED.union(*groups.values()) and len(V3.excluded) == 95
+    assert sha((ROOT / "eval" / V3.derivation[0]).read_bytes()) == V3.derivation[1]
+    # The test scan covers every test file added since v1's live run except the spot500 set tests.
+    tests = record["verifier_fix_tests"]
+    assert tests["listed"] == ["tests/test_spot500_sets.py", "tests/test_wording_gaps.py"]
+    assert [row["path"] for row in tests["scanned"]] == ["tests/test_wording_gaps.py"]
+    assert not V3.frozen_builder_hashes
+
+
+def test_exclusion_derivation_reproduces_from_git_history():
+    from eval import spot500_exclusions as exclusions
+
+    record = derivation_record()
+    rows, table = exclusions.companies_table(ROOT / "data/snapshot/facts.sqlite")
+    if table != record["companies_table"]:
+        pytest.skip("the snapshot companies table changed after the v3 derivation")
+    if shutil.which("git") is None or subprocess.run(
+            ["git", "cat-file", "-e", f"{exclusions.UNTIL}^{{commit}}"], cwd=ROOT, capture_output=True).returncode:
+        pytest.skip("the derivation range is not in this clone's history")
+    assert exclusions.encode(exclusions.derive(ROOT / "data/snapshot/facts.sqlite")) == (
+        ROOT / "eval" / V3.derivation[0]).read_bytes()
+
+
+ROWS = [("A", "AGILENT TECHNOLOGIES, INC.", ["a", "agilent technologies"]),
+        ("AXP", "AMERICAN EXPRESS CO", ["american express", "axp"]),
+        ("AEP", "AMERICAN ELECTRIC POWER CO INC", ["american electric power", "aep"]),
+        ("GE", "GENERAL ELECTRIC CO", ["ge", "ge aerospace", "general electric"]),
+        ("GEHC", "GE HealthCare Technologies Inc.", ["ge healthcare", "gehc"]),
+        ("MMM", "3M CO", ["3m", "mmm"]),
+        ("TGT", "TARGET CORP", ["target", "tgt"]),
+        ("VLO", "VALERO ENERGY CORP/TX", ["valero energy", "vlo"])]
+
+
+@pytest.mark.parametrize("line,named,rejected", [
+    ("Valero's net income rose.", {"VLO": {"leading word"}}, {}),
+    ("valero energy as a lowercase phrase", {}, {"VLO": {"name without a capital letter"}}),
+    ("American Express raised its outlook.", {"AXP": {"alias"}}, {}),
+    ("American companies", {}, {}),  # a leading word shared by two companies never counts
+    ("Revenue was $8,810.3M.", {}, {"MMM": {"name inside a number"}}),
+    ("3M reported sales.", {"MMM": {"alias"}}, {}),
+    ("A bank reported.", {}, {"A": {"one-letter ticker outside quotes or parentheses"}}),
+    ('entity="A"', {"A": {"ticker"}}, {}),
+    ("Agilent (A) reported.", {"A": {"leading word", "ticker"}}, {}),
+    ("GE HealthCare reported.", {"GEHC": {"alias"}}, {"GE": {"ticker inside another company's name (GEHC)"}}),
+    ('TGT_10Q = "0000027419-26-000042"', {"TGT": {"ticker"}}, {}),
+    ("the mutation target and AXPX", {}, {"TGT": {"name without a capital letter"}}),
+])
+def test_scanner_rules(line, named, rejected):
+    from eval import spot500_exclusions as exclusions
+
+    found, missed = exclusions.Scanner(ROWS).scan([("x.py", 1, line)])
+    assert {t: set(ev) for t, ev in found.items()} == named
+    assert {t: set(ev) for t, ev in missed.items()} == rejected
+
+
+def test_derivation_reads_added_lines_with_their_new_line_numbers():
+    from eval import spot500_exclusions as exclusions
+
+    diff = ("diff --git a/receipts/x.py b/receipts/x.py\n--- a/receipts/x.py\n+++ b/receipts/x.py\n"
+            "@@ -3,0 +4,2 @@ def f():\n+# Valero's row\n++++ not a header\n"
+            "diff --git a/receipts/gone.py b/receipts/gone.py\n--- a/receipts/gone.py\n+++ /dev/null\n"
+            "@@ -1 +0,0 @@\n-old\n")
+    assert list(exclusions.added_lines(diff)) == [("receipts/x.py", 4, "# Valero's row"),
+                                                  ("receipts/x.py", 5, "+++ not a header")]
+
+
+def test_cap_quotas_lower_every_hard_quota_only_when_it_is_exhausted():
+    companies, docs, sentences = pool()
+    # Enough of every stratum: the cap changes nothing.
+    assert spot.select_companies(companies, docs, sentences, cap_quotas=True) == spot.select_companies(
+        companies, docs, sentences)
+    banks = sorted(t for t in companies if spot.is_bank(companies[t]))
+    reits = sorted(t for t in companies if spot.is_utility_reit(companies[t]))
+    excluded = spot.EXCLUDED | set(banks[1:]) | set(reits[1:]) | spot.IRREGULAR
+    for name in ("banks", "REITs or utilities"):
+        with pytest.raises(ValueError, match=name):
+            strict_excluded = excluded if name == "banks" else excluded - set(banks)
+            spot.select_companies(companies, docs, sentences, excluded=strict_excluded, variable_week_cap=True)
+    selected, metadata = spot.select_companies(companies, docs, sentences, excluded=excluded, cap_quotas=True)
+    quotas = {r["constraint"]: (r["minimum"], r["selected"]) for r in metadata["reservations"]}
+    assert quotas["banks"] == (1, banks[:1]) and quotas["REITs or utilities"] == (1, reits[:1])
+    assert quotas["variable-week companies"] == (0, [])
+    assert len(selected) == 30 and not set(selected) & excluded
+
+
+def test_frozen_v3_files_are_consistent_and_disjoint_from_every_exclusion():
+    raw = (ROOT / "eval" / V3.corpus).read_bytes()
+    manifest, items = frozen_manifest(V3), frozen_items(V3)
+    v1_manifest = frozen_manifest(V1)
+    assert manifest["corpus_sha256"] == sha(raw)
+    assert manifest["items"] == [{"item_id": it["item_id"], "sha256": sha(spot.canonical(it))} for it in items]
+    assert manifest["version"] == "spot500_v3" and manifest["seed"] == V3.seed == 20261103
+    assert {it["corpus_version"] for it in items} == {"spot500_v3"}
+    assert all(it["item_id"].startswith("spot500-v3-") for it in items)
+    companies = set(manifest["selection"]["selected_companies"])
+    assert len(companies) == manifest["counts"]["companies"] == 30
+    assert companies == {it["ticker"] for it in items} == {row["ticker"] for row in manifest["company_list"]}
+    assert not companies & V3.excluded and manifest["excluded_tickers"] == sorted(V3.excluded)
+    for earlier in (V1, V2):
+        earlier_items = frozen_items(earlier)
+        assert not {it["item_hash"] for it in items} & {it["item_hash"] for it in earlier_items}
+        assert not {it["source"]["sentence_id"] for it in items} & {it["source"]["sentence_id"] for it in earlier_items}
+    # The exclusions exhausted two strata; both deviations are recorded where they apply.
+    mutators = manifest["counts"]["by_mutator"]
+    assert {m: mutators[m] for m in spot.MUTATORS} == {**{m: 5 for m in spot.MUTATORS}, "basis": 2}
+    assert mutators["forward_looking_control"] == 5 and 60 <= len(items) <= 80
+    assert manifest["selection"]["mutant_shortfalls"] == {"basis": {"quota": 5, "taken": 2, "candidates": 2}}
+    quotas = {r["constraint"]: r["minimum"] for r in manifest["selection"]["reservations"]}
+    assert (quotas["banks"], quotas["REITs or utilities"], quotas["variable-week companies"]) == (3, 2, 0)
+    changes = manifest["procedure"]["changes_from_spot500_v1"]
+    assert changes[0] == "seed 20261101 -> 20261103" and "95 distinct companies in all" in changes[1]
+    assert changes[2:] == [
+        "variable-week quota lowered from 2 to 0, the number of eligible variable-week companies left after the exclusions",
+        "basis mutants lowered from 5 to 2: the sampled companies have 2 basis candidates after the exclusions"]
+    for item in items:
+        for gold in item["gold_claims"]:
+            assert item["text"][slice(*gold["span"])] == gold["value_text"]
+    # Same frame and screening as v1; the earlier sets and the derivation are pinned by hash.
+    assert manifest["source_pool_sha256"] == v1_manifest["source_pool_sha256"]
+    assert manifest["sources"]["indexes"] == v1_manifest["sources"]["indexes"]
+    assert [ref["version"] for ref in manifest["reference_sets"]] == ["spot500_v1", "spot500_v2"]
+    for ref, earlier in zip(manifest["reference_sets"], (V1, V2)):
+        assert ref["manifest_sha256"] == sha((ROOT / "eval" / earlier.manifest).read_bytes())
+        assert ref["corpus_sha256"] == sha((ROOT / "eval" / earlier.corpus).read_bytes())
+    assert manifest["exclusion_derivation"] == {"file": "eval/spot500_v3_exclusions.json", "sha256": V3.derivation[1],
+                                                "record": derivation_record()}
+    for key, companies_, _ in V3.exclusion_groups:
+        assert manifest["exclusions"][key] == sorted(companies_)
+    for key in ("quarters", "items", "outputs_used_for_selection", "human_review"):
+        assert manifest["procedure"][key] == v1_manifest["procedure"][key]
+    assert manifest["cost_estimate"]["total_usd"] == len(items) * manifest["cost_estimate"]["per_item_usd"] < 1
+    assert manifest["builder_hashes"] == spot.builder_hashes(V3), "builder changed after the v3 freeze"
+
+
+def test_committed_v3_passes_the_runner_freeze_and_the_oracle_scores_by_construction():
+    manifest, items = spot500.load_items("v3")
+    assert manifest["corpus_sha256"] == sha(spot500.V3_CORPUS.read_bytes())
+    total = spot500.score(items, {it["item_id"]: {"pairs": spot500.oracle_pairs(it)} for it in items})["total"]
+    assert total["status_and_reason_correct"] == total["gold_claims"] == manifest["counts"]["gold_claims"]
+    assert total["caught_errors"] == total["expected_reasons"] == total["target_claims"] == 32
+    assert total["false_alarm_original_items"] == total["verified_guidance"] == total["extra_claims"] == 0
+
+
+@pytest.mark.parametrize("spot_set", ["v2", "v3"])
+def test_each_later_set_has_its_own_single_use_live_run(tmp_path, monkeypatch, spot_set):
+    rows = [item("original", version=f"spot500_{spot_set}")]
+    corpus, manifest = freeze(tmp_path / "frozen", rows, version=f"spot500_{spot_set}")
+    runs = tmp_path / "spot500_runs"
+    runs.mkdir()
+    monkeypatch.setattr(spot500, f"{spot_set.upper()}_CORPUS", corpus)
+    monkeypatch.setattr(spot500, f"{spot_set.upper()}_MANIFEST", manifest)
+    monkeypatch.setattr(spot500, "RUNS", runs)
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
+    assert spot500.load_items(spot_set)[1] == rows
+    other = "v3" if spot_set == "v2" else "v2"
+    (runs / f"{other}-live-20261102.json").write_text("{}")
+    # Another set's live record does not use this set's live run; the key check is reached.
+    with pytest.raises(ValueError, match="Export MODEL_API_KEY"):
+        spot500.run(rows, runs / f"{spot_set}-live-20261102.json", stub=False, evidence_dir=runs, budget=.95,
+                    spot_set=spot_set)
+    (runs / f"{spot_set}-live-20261102.run").mkdir()
+    with pytest.raises(FileExistsError, match="single use"):
+        spot500.run(rows, runs / f"{spot_set}-live-20261103.json", stub=False, evidence_dir=runs, budget=.95,
+                    spot_set=spot_set)
+    with pytest.raises(ValueError, match=f"must be eval/spot500_runs/{spot_set}-live-"):
+        spot500.run(rows, runs / f"{other}-live-20261104.json", stub=False, evidence_dir=runs, budget=.95,
+                    spot_set=spot_set)

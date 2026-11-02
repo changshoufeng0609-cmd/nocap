@@ -1,0 +1,630 @@
+{
+  "companies_table": {
+    "rows": 500,
+    "sha256": "0a4fdf75170fd2a6726940d29ae9e2f8581bf8695bdbb5ac1bb1054af1acc303",
+    "table": "companies (ticker, name, aliases)"
+  },
+  "method": "the scan reads git history, test and verifier source text, and the\nsnapshot's companies table (ticker, name, aliases). It never runs NoCap.\n\nA source line names a company when, against that table:\n- alias: one of its aliases (except the bare ticker key) appears as whole words,\n  case-insensitively, with at least one capital letter in the matched text and\n  not glued to a number (the \"3M\" in \"$8,810.3M\" is not 3M);\n- leading word: the first word of its name or of an alias appears the same way,\n  if that word has four or more characters and begins no other company's name\n  or alias (\"Valero\", \"FactSet\", \"Akamai\");\n- ticker: the ticker appears case-sensitively, not touching a letter or digit.\n  A one-letter ticker counts only when quoted or in parentheses (\"A\" as an\n  article does not), and a ticker inside another company's matched name does\n  not count (\"GE\" in \"GE HealthCare\").\nOver-matching only removes companies from the sample, so the rules favour recall.",
+  "range": {
+    "since": "50a4eac488691bc820b83ba29c8630d4eed39d80",
+    "since_role": "the commit recording spot500_v1's one live run",
+    "until": "84b8fd48a94de10027e041be69595362a0d4ca40",
+    "until_role": "the deployed code that spot500_v3 measures"
+  },
+  "reviewer_probes": {
+    "companies": [
+      "BAX",
+      "CSGP",
+      "TGT"
+    ],
+    "source": "used by the owner's reviewer in probes"
+  },
+  "verifier_fix_code": {
+    "command": "git diff -U0 --no-color 50a4eac488691bc820b83ba29c8630d4eed39d80..84b8fd48a94de10027e041be69595362a0d4ca40 -- receipts/",
+    "companies": [
+      "CMCSA",
+      "DIS",
+      "ED",
+      "EL",
+      "FDS",
+      "MPC",
+      "SYY"
+    ],
+    "diff_sha256": "7eb7f280dfbb9f29fdb6e47c1920d2d2aae7a0dd86c592f7b6b4975f3c60c6f5",
+    "evidence": {
+      "CMCSA": {
+        "alias": {
+          "line": 1490,
+          "match": "Comcast",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1490,
+          "match": "Comcast",
+          "path": "receipts/verify.py"
+        }
+      },
+      "DIS": {
+        "alias": {
+          "line": 2103,
+          "match": "Walt Disney",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 2103,
+          "match": "Walt",
+          "path": "receipts/verify.py"
+        }
+      },
+      "ED": {
+        "leading word": {
+          "line": 1112,
+          "match": "CONSOLIDATED",
+          "path": "receipts/verify.py"
+        }
+      },
+      "EL": {
+        "alias": {
+          "line": 1490,
+          "match": "Estee Lauder",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1490,
+          "match": "Estee",
+          "path": "receipts/verify.py"
+        }
+      },
+      "FDS": {
+        "leading word": {
+          "line": 1490,
+          "match": "FactSet",
+          "path": "receipts/verify.py"
+        }
+      },
+      "MPC": {
+        "ticker": {
+          "line": 2103,
+          "match": "MPC",
+          "path": "receipts/verify.py"
+        }
+      },
+      "SYY": {
+        "alias": {
+          "line": 1478,
+          "match": "Sysco",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1478,
+          "match": "Sysco",
+          "path": "receipts/verify.py"
+        }
+      }
+    },
+    "note": "beyond the requested test scan: the companies the fixed verifier's own added lines name",
+    "rejected": {
+      "A": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 24,
+          "line": 1342,
+          "match": "A",
+          "path": "receipts/extract.py"
+        }
+      },
+      "BBY": {
+        "name without a capital letter": {
+          "count": 4,
+          "line": 3639,
+          "match": "best",
+          "path": "receipts/verify.py"
+        }
+      },
+      "EXE": {
+        "name without a capital letter": {
+          "count": 1,
+          "line": 1609,
+          "match": "expand",
+          "path": "receipts/verify.py"
+        }
+      },
+      "F": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 1,
+          "line": 1970,
+          "match": "F",
+          "path": "receipts/verify.py"
+        }
+      },
+      "FSLR": {
+        "name without a capital letter": {
+          "count": 11,
+          "line": 1342,
+          "match": "first",
+          "path": "receipts/extract.py"
+        }
+      },
+      "P": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 15,
+          "line": 95,
+          "match": "P",
+          "path": "receipts/verify.py"
+        }
+      },
+      "Q": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 3,
+          "line": 1633,
+          "match": "Q",
+          "path": "receipts/verify.py"
+        }
+      }
+    },
+    "scope": "added lines only"
+  },
+  "verifier_fix_tests": {
+    "command": "git diff --name-only --diff-filter=A 50a4eac488691bc820b83ba29c8630d4eed39d80..84b8fd48a94de10027e041be69595362a0d4ca40 -- tests/",
+    "companies": [
+      "AKAM",
+      "AMD",
+      "AMGN",
+      "AXP",
+      "CARR",
+      "CMCSA",
+      "CNC",
+      "DIS",
+      "ED",
+      "EXR",
+      "FDS",
+      "GEHC",
+      "HPE",
+      "INTC",
+      "JPM",
+      "LEN",
+      "MNST",
+      "MRK",
+      "MSI",
+      "PFE",
+      "RF",
+      "SJM",
+      "SYY",
+      "TFC",
+      "TGT",
+      "TSLA",
+      "UDR",
+      "VLO"
+    ],
+    "dropped": {
+      "tests/test_spot500_sets.py": "the spot500 set tests themselves, not a verifier fix"
+    },
+    "evidence": {
+      "AKAM": {
+        "leading word": {
+          "line": 6,
+          "match": "Akamai",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 20,
+          "match": "AKAM",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "AMD": {
+        "ticker": {
+          "line": 846,
+          "match": "AMD",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "AMGN": {
+        "alias": {
+          "line": 6,
+          "match": "Amgen",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 6,
+          "match": "Amgen",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 19,
+          "match": "AMGN",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "AXP": {
+        "alias": {
+          "line": 835,
+          "match": "American Express",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "CARR": {
+        "alias": {
+          "line": 870,
+          "match": "Carrier",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 870,
+          "match": "Carrier",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1481,
+          "match": "CARR",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "CMCSA": {
+        "alias": {
+          "line": 589,
+          "match": "Comcast",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 589,
+          "match": "Comcast",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "CNC": {
+        "alias": {
+          "line": 21,
+          "match": "Centene",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 21,
+          "match": "Centene",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 21,
+          "match": "CNC",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "DIS": {
+        "alias": {
+          "line": 6,
+          "match": "Disney",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 6,
+          "match": "Disney",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 23,
+          "match": "DIS",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "ED": {
+        "leading word": {
+          "line": 1021,
+          "match": "Consolidated",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "EXR": {
+        "alias": {
+          "line": 537,
+          "match": "Extra Space Storage",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 536,
+          "match": "Extra",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "FDS": {
+        "leading word": {
+          "line": 1020,
+          "match": "FactSet",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "GEHC": {
+        "alias": {
+          "line": 1021,
+          "match": "GE HealthCare",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "HPE": {
+        "alias": {
+          "line": 871,
+          "match": "Hewlett Packard Enterprise",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 871,
+          "match": "Hewlett",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "INTC": {
+        "alias": {
+          "line": 1274,
+          "match": "Intel",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1274,
+          "match": "Intel",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1279,
+          "match": "INTC",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "JPM": {
+        "alias": {
+          "line": 646,
+          "match": "JPMorgan",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 646,
+          "match": "JPMorgan",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "LEN": {
+        "alias": {
+          "line": 657,
+          "match": "Lennar",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 657,
+          "match": "Lennar",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "MNST": {
+        "alias": {
+          "line": 833,
+          "match": "Monster Beverage",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 833,
+          "match": "Monster",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "MRK": {
+        "alias": {
+          "line": 869,
+          "match": "Merck",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 869,
+          "match": "Merck",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "MSI": {
+        "alias": {
+          "line": 1022,
+          "match": "Motorola Solutions",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1022,
+          "match": "Motorola",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "PFE": {
+        "alias": {
+          "line": 251,
+          "match": "Pfizer",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 251,
+          "match": "Pfizer",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1401,
+          "match": "PFE",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "RF": {
+        "alias": {
+          "line": 25,
+          "match": "Regions",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 25,
+          "match": "Regions",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 25,
+          "match": "RF",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "SJM": {
+        "alias": {
+          "line": 858,
+          "match": "J.M. Smucker",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "SYY": {
+        "alias": {
+          "line": 776,
+          "match": "Sysco",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 776,
+          "match": "Sysco",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "TFC": {
+        "alias": {
+          "line": 24,
+          "match": "Truist",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 24,
+          "match": "Truist",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 24,
+          "match": "TFC",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "TGT": {
+        "alias": {
+          "line": 22,
+          "match": "Target",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 22,
+          "match": "Target",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 22,
+          "match": "TGT",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "TSLA": {
+        "alias": {
+          "line": 266,
+          "match": "Tesla",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 266,
+          "match": "Tesla",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "UDR": {
+        "ticker": {
+          "line": 542,
+          "match": "UDR",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "VLO": {
+        "leading word": {
+          "line": 868,
+          "match": "Valero",
+          "path": "tests/test_wording_gaps.py"
+        }
+      }
+    },
+    "listed": [
+      "tests/test_spot500_sets.py",
+      "tests/test_wording_gaps.py"
+    ],
+    "rejected": {
+      "A": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 11,
+          "line": 68,
+          "match": "A",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "F": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 1,
+          "line": 1187,
+          "match": "F",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "FSLR": {
+        "name without a capital letter": {
+          "count": 32,
+          "line": 880,
+          "match": "first",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "GE": {
+        "ticker inside another company's name (GEHC)": {
+          "count": 8,
+          "line": 1021,
+          "match": "GE",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "HD": {
+        "name without a capital letter": {
+          "count": 1,
+          "line": 687,
+          "match": "home",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "J": {
+        "ticker inside another company's name (SJM)": {
+          "count": 2,
+          "line": 858,
+          "match": "J",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "MMM": {
+        "name inside a number": {
+          "count": 1,
+          "line": 658,
+          "match": "3M",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "Q": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 13,
+          "line": 19,
+          "match": "Q",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "TTWO": {
+        "name without a capital letter": {
+          "count": 1,
+          "line": 1447,
+          "match": "take",
+          "path": "tests/test_wording_gaps.py"
+        }
+      }
+    },
+    "scanned": [
+      {
+        "path": "tests/test_wording_gaps.py",
+        "sha256": "daa3bb470f6f6290064d706c696783004a560cf708a4c5c51837df82e79bd6b9"
+      }
+    ]
+  },
+  "version": "spot500_v3"
+}
