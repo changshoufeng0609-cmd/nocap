@@ -4,6 +4,8 @@
 .venv/bin/python eval/spot500_report.py eval/spot500_runs/v3-live-20261102.json
 .venv/bin/python eval/spot500_report.py eval/spot500_runs/full-live-<date>.json \
     --slice company_in_development --slice company_fresh
+.venv/bin/python eval/spot500_report.py eval/spot500_runs/full2-live-<date>.json \
+    --slice company_new --slice-without company_in_development
 
 Offline and deterministic. It reads only the run record and that set's frozen corpus,
 rescoring with the runner's own scorer (and refusing if that differs from the record),
@@ -180,6 +182,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("run", type=Path)
     parser.add_argument("--slice", action="append", default=[], metavar="FEATURE",
                         help="also report the items tagged with this feature")
+    parser.add_argument("--slice-without", action="append", default=[], metavar="FEATURE",
+                        help="also report the items NOT tagged with this feature")
     parser.add_argument("--json", action="store_true", help="print JSON instead of Markdown")
     args = parser.parse_args(argv)
     run, items = load_run(args.run)
@@ -190,6 +194,11 @@ def main(argv: list[str] | None = None) -> int:
         if not subset:
             raise SystemExit(f"No items carry the feature {feature!r}.")
         report[feature] = summarize(subset, run["records"])
+    for feature in args.slice_without:
+        subset = [item for item in items if feature not in item["features"]]
+        if not subset:
+            raise SystemExit(f"Every item carries the feature {feature!r}.")
+        report[f"without {feature}"] = summarize(subset, run["records"])
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
         return 0
@@ -198,6 +207,8 @@ def main(argv: list[str] | None = None) -> int:
     lines += render("All items", report["all"])
     for feature in args.slice:
         lines += render(feature, report[feature])
+    for feature in args.slice_without:
+        lines += render(f"without {feature}", report[f"without {feature}"])
     print("\n".join(lines))
     return 0
 

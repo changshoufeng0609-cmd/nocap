@@ -88,10 +88,10 @@ Post one only when a reply calls for it.
 
 When someone asks how accurate the 500-company version is:
 
-<!-- 225 as typed, X count 226. Comprehensive one-shot test of the current version, run Nov 2: 1,000 frozen items from 391 companies, 310/376 caught, 14/1,271 true figures wrong, 741/744 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, all companies). Seeded labels, run once: README.md:72. -->
+<!-- 228 as typed, X count 230. Comprehensive one-shot test of the current version, run Nov 2: 1,000 frozen items from 400 companies, 306/360 caught, 0 ✓, 17/1,298 true figures wrong, 736/738 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, after round 8). Seeded labels, run once: README.md:72. -->
 
 ```text
-A one-shot test of the current version on 1,000 frozen items from 391 S&P 500 companies (Nov 2): 310/376 planted errors caught, only 14/1,271 true figures flagged wrong, and 741 of 744 ✓ marks were right. Seeded and run once.
+A one-shot test of the current version on 1,000 frozen items from 400 S&P 500 companies (Nov 2): 306/360 planted errors caught and none marked ✓; only 17/1,298 true figures flagged wrong; 736 of 738 ✓ marks were right. Run once.
 ```
 
 When the $5 daily cap has been reached:

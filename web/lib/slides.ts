@@ -18,7 +18,7 @@ const finite = (x: unknown): x is number => typeof x === "number" && Number.isFi
 const text = (x: unknown, max = 6000): x is string => typeof x === "string" && x.length <= max;
 const date = (x: unknown): x is string => text(x, 40) && Number.isFinite(Date.parse(x));
 const units = ["USD", "%", "USD/share", "shares", "other"];
-const reasons = ["match", "value_mismatch", "period_mismatch", "scale_mismatch", "basis_mismatch", "entity_mismatch", "look_ahead", "forward_looking", "no_evidence", "ambiguous", "approximate"];
+const reasons = ["match", "value_mismatch", "period_mismatch", "scale_mismatch", "basis_mismatch", "entity_mismatch", "look_ahead", "forward_looking", "no_evidence", "ambiguous", "approximate", "release_statement"];
 
 export function isSlideBox(x: unknown): x is SlideBox {
   return Array.isArray(x) && x.length === 4 && x.every((n) => finite(n) && n >= 0 && n <= 1000) && x[0] < x[2] && x[1] < x[3];
@@ -28,7 +28,7 @@ function isFact(x: unknown): x is Fact {
   if (!object(x) || !finite(x.cik) || !text(x.ticker, 15) || !text(x.metric, 100) || !finite(x.value) ||
       !units.includes(x.unit as string) || !["GAAP", "non-GAAP"].includes(x.basis as string) ||
       !date(x.period_end) || (x.period_start != null && !date(x.period_start)) || !date(x.accepted_at) ||
-      !["xbrl", "press_release", "derived"].includes(x.source as string) || !text(x.form, 30) ||
+      !["xbrl", "press_release", "derived", "release_text"].includes(x.source as string) || !text(x.form, 30) ||
       !text(x.accession, 100) || !text(x.url, 2000) || (x.locator != null && !text(x.locator)) ||
       (x.segment != null && !text(x.segment)) || (x.fiscal_year != null && !finite(x.fiscal_year)) ||
       (x.fiscal_period != null && !text(x.fiscal_period, 20)) ||

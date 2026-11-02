@@ -58,7 +58,7 @@ SAM 3.1 找出簡報裡的圖表區域，交給 Muse Spark 1.3 讀數字。框�
 
 ### 回覆三：測到什麼，還不知道什麼
 
-<!-- Length: 341 characters (Threads counting rule above). Comprehensive test of the current version, run once Nov 2 on 1,000 frozen items from 391 companies: 310/376 caught, 14/1,271 true figures wrong, 741/744 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, all companies); evidence-map.md (comprehensive-test row). 44/48 planted errors: README.md:61. 1/47 unmodified sentences: README.md:62. 20/20 trap-draft errors: README.md:64. 22/110 true figures (20%): README.md:63. Frozen held-out source, run once Oct 29, no rerun after later fixes, and machine-assisted labels without independent human review: README.md:72. -->
+<!-- Length: 355 characters (Threads counting rule above). Comprehensive test of the current version, run once Nov 2 on 1,000 frozen items from 400 companies: 306/360 caught, 0 ✓, 17/1,298 true figures wrong, 736/738 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, after round 8); evidence-map.md (comprehensive-test row). 44/48 planted errors: README.md:61. 1/47 unmodified sentences: README.md:62. 20/20 trap-draft errors: README.md:64. 22/110 true figures (20%): README.md:63. Frozen held-out source, run once Oct 29, no rerun after later fixes, and machine-assisted labels without independent human review: README.md:72. -->
 
 ```text
 測試結果也把限制一起攤開。
@@ -67,7 +67,7 @@ SAM 3.1 找出簡報裡的圖表區域，交給 Muse Spark 1.3 讀數字。框�
 
 代價是保守：110 個真實數字中，22 個（20%）仍被留為 ?。
 
-11 月 2 日用目前上線的版本做了一次通盤測試：391 家公司、1,000 題，凍結後只跑一次。376 個植入錯誤抓到 310 個（82%）；1,271 個真實數字只有 14 個被判錯（1.1%）；判成 ✓ 的 744 個數字中，741 個是對的。
+11 月 2 日用目前上線的版本做了通盤測試：400 家公司、1,000 道沒用過的題目，凍結後只跑一次。360 個植入錯誤抓到 306 個（85%），沒有一個被判成 ✓；1,298 個真實數字只有 17 個被判錯（1.3%）；判成 ✓ 的 738 個數字中，736 個是對的。
 
 這些都是小型、樣本彼此相關的植入錯誤測試，不是一般準確率，也不能代表全部公司的表現。標記由機器輔助產生，尚未經獨立人工審查；後續程式修正後，沒有重跑這兩組測試。
 ```
@@ -113,7 +113,7 @@ NoCap 檢查 AI 撰寫的 NVIDIA 財報新聞草稿，開啟 SEC 文件憑據，
 
 作者備註：以獨立開發者 Robert Chang 的第一人稱發文。開頭兩行共 139 字；全文低於 3,000 字。若要標註頁面，可考慮 Meta、Cerebral Valley，但作者必須先確認正確頁面與標註對象。本次未查證任何官方帳號或活動標籤，因此草稿不含活動 hashtag 或 handle。
 
-<!-- Length: 2641 characters as typed (recounted Nov 2 for the comprehensive test), first two lines unchanged. Comprehensive test of the current version: 1,000 items, 391 companies, 310/376 caught, 14/1,271 wrong, 741/744 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, all companies). Earlier note, characters as typed, including line breaks and full URLs; first two lines: 139. Solo builder Robert Chang: docs/submission/README.md:3. Stakes: docs/submission/writeup.md:19. Hackathon/from Oct 27: README.md:7, :152. Receipts/uncertainty: README.md:3, :133, :136. Model rule and versions/roles: README.md:26, :30-37. All 500/latest eight quarters/snapshot: README.md:20, :140. Oct 31/one day/467/latest four/1,969/$42.97: README.md:31. One whole-Meta-10-K request/101,135 input tokens: README.md:70. SAM both real BAC charts: README.md:69; demonstration limit: README.md:73. 44/48, 1/47, 22/110 (20%), 20/20: README.md:61-64; frozen/run once Oct 29/limitations: README.md:72. Window, $5 per UTC day, $0 replays: README.md:17-19, :22. Product/demo/public source links: README.md:17, :13, :21. -->
+<!-- Length: 2703 characters as typed (recounted Nov 2 for the comprehensive test), first two lines unchanged. Comprehensive test of the current version: 1,000 items, 400 companies, 306/360 caught, 0 ✓, 17/1,298 wrong, 736/738 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, after round 8). Earlier note, characters as typed, including line breaks and full URLs; first two lines: 139. Solo builder Robert Chang: docs/submission/README.md:3. Stakes: docs/submission/writeup.md:19. Hackathon/from Oct 27: README.md:7, :153. Receipts/uncertainty: README.md:3, :133, :136. Model rule and versions/roles: README.md:26, :30-37. All 500/latest eight quarters/snapshot: README.md:20, :140. Oct 31/one day/467/latest four/1,969/$42.97: README.md:31. One whole-Meta-10-K request/101,135 input tokens: README.md:70. SAM both real BAC charts: README.md:69; demonstration limit: README.md:73. 44/48, 1/47, 22/110 (20%), 20/20: README.md:61-64; frozen/run once Oct 29/limitations: README.md:72. Window, $5 per UTC day, $0 replays: README.md:17-19, :22. Product/demo/public source links: README.md:17, :13, :21. -->
 <!-- verify-at-release -->
 
 ```text
@@ -138,12 +138,12 @@ The held-out results:
 • 20/20 trap-draft errors caught.
 • 22/110 true figures (20%) left ?.
 
-A comprehensive one-shot test of the current deployed version (November 2), on 1,000 frozen items from 391 S&P 500 companies:
-• 310/376 planted errors caught (82%).
-• Only 14/1,271 true figures flagged wrong (1.1%).
-• When NoCap said ✓, it was right 741 of 744 times.
+A comprehensive one-shot test of the current deployed version (November 2), on 1,000 frozen items from 400 S&P 500 companies:
+• 306/360 planted errors caught (85%); none marked ✓.
+• Only 17/1,298 true figures flagged wrong (1.3%).
+• When NoCap said ✓, it was right 736 of 738 times.
 
-Both tests were frozen and run once: the held-out set on October 29, before the coverage expansion and later verifier fixes, and the comprehensive test on November 2 (three smaller earlier spot checks are in the repository). Labels are machine-assisted and await independent human review. The results describe these frozen samples, not every possible draft.
+Both tests were frozen and run once: the held-out set on October 29, before the coverage expansion and later verifier fixes, and the comprehensive test on November 2 (a first comprehensive test of the previous version and three smaller spot checks are in the repository). Labels are machine-assisted and await independent human review. The results describe these frozen samples, not every possible draft.
 
 Live checks are open through 2026-11-17 16:00 UTC under a shared $5 per UTC-day cap. Saved examples and recorded samples always replay at $0.
 

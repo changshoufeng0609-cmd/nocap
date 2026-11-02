@@ -1,0 +1,1635 @@
+{
+  "companies_table": {
+    "rows": 500,
+    "sha256": "0a4fdf75170fd2a6726940d29ae9e2f8581bf8695bdbb5ac1bb1054af1acc303",
+    "table": "companies (ticker, name, aliases)"
+  },
+  "method": "the scan reads git history, test and verifier source text, and the\nsnapshot's companies table (ticker, name, aliases). It never runs NoCap.\n\nA source line names a company when, against that table:\n- alias: one of its aliases (except the bare ticker key) appears as whole words,\n  case-insensitively, with at least one capital letter in the matched text and\n  not glued to a number (the \"3M\" in \"$8,810.3M\" is not 3M);\n- leading word: the first word of its name or of an alias appears the same way,\n  if that word has four or more characters and begins no other company's name\n  or alias (\"Valero\", \"FactSet\", \"Akamai\");\n- ticker: the ticker appears case-sensitively, not touching a letter or digit.\n  A one-letter ticker counts only when quoted or in parentheses (\"A\" as an\n  article does not), and a ticker inside another company's matched name does\n  not count (\"GE\" in \"GE HealthCare\").\nOver-matching only removes companies from the sample, so the rules favour recall.\nAs for v3, with one addition: the test scan reads every test file added in the range and the lines added to test files that already existed.",
+  "range": {
+    "since": "22cd636b1a09232a37d8ac19d7d95af09847db9f",
+    "since_role": "the integration tip full2 starts from",
+    "until": "8c2fd7815ccd0d1108a5df39428f6b0f091a0c65",
+    "until_role": "the round-8 merge that spot500_full2 measures"
+  },
+  "reviewer_probes": {
+    "companies": [],
+    "source": "no new probe companies"
+  },
+  "verifier_fix_code": {
+    "command": "git diff -U0 --no-color 22cd636b1a09232a37d8ac19d7d95af09847db9f..8c2fd7815ccd0d1108a5df39428f6b0f091a0c65 -- receipts/",
+    "companies": [
+      "AAPL",
+      "ALLE",
+      "AMD",
+      "AMZN",
+      "BDX",
+      "CBOE",
+      "CHTR",
+      "COF",
+      "COO",
+      "COST",
+      "D",
+      "DLTR",
+      "DPZ",
+      "FCX",
+      "FSLR",
+      "GM",
+      "GPN",
+      "GS",
+      "GWW",
+      "HD",
+      "ILMN",
+      "INCY",
+      "JBHT",
+      "KEY",
+      "KEYS",
+      "LOW",
+      "MCD",
+      "META",
+      "MLM",
+      "MPWR",
+      "MRK",
+      "MRSH",
+      "MSFT",
+      "NDAQ",
+      "NSC",
+      "NVDA",
+      "ODFL",
+      "ON",
+      "RVTY",
+      "SBAC",
+      "SNA",
+      "SO",
+      "TFC",
+      "TGT",
+      "VRTX",
+      "VTRS",
+      "WM",
+      "WMT"
+    ],
+    "diff_sha256": "fe1a1dad53778b512e98bc522f21031a50460e3d756ba8a2e7cd033e50e3a95e",
+    "evidence": {
+      "AAPL": {
+        "alias": {
+          "line": 681,
+          "match": "Apple",
+          "path": "receipts/extract.py"
+        },
+        "leading word": {
+          "line": 681,
+          "match": "Apple",
+          "path": "receipts/extract.py"
+        },
+        "ticker": {
+          "line": 2295,
+          "match": "AAPL",
+          "path": "receipts/verify.py"
+        }
+      },
+      "ALLE": {
+        "alias": {
+          "line": 904,
+          "match": "Allegion",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 904,
+          "match": "Allegion",
+          "path": "receipts/verify.py"
+        }
+      },
+      "AMD": {
+        "ticker": {
+          "line": 2779,
+          "match": "AMD",
+          "path": "receipts/verify.py"
+        }
+      },
+      "AMZN": {
+        "alias": {
+          "line": 98,
+          "match": "Amazon",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 98,
+          "match": "Amazon",
+          "path": "receipts/verify.py"
+        }
+      },
+      "BDX": {
+        "ticker": {
+          "line": 434,
+          "match": "BDX",
+          "path": "receipts/store.py"
+        }
+      },
+      "CBOE": {
+        "leading word": {
+          "line": 2299,
+          "match": "Cboe",
+          "path": "receipts/verify.py"
+        },
+        "ticker": {
+          "line": 2299,
+          "match": "CBOE",
+          "path": "receipts/verify.py"
+        }
+      },
+      "CHTR": {
+        "alias": {
+          "line": 1310,
+          "match": "Charter",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1310,
+          "match": "Charter",
+          "path": "receipts/verify.py"
+        }
+      },
+      "COF": {
+        "leading word": {
+          "line": 2300,
+          "match": "Capital",
+          "path": "receipts/verify.py"
+        }
+      },
+      "COO": {
+        "ticker": {
+          "line": 434,
+          "match": "COO",
+          "path": "receipts/store.py"
+        }
+      },
+      "COST": {
+        "alias": {
+          "line": 728,
+          "match": "Costco",
+          "path": "receipts/extract.py"
+        },
+        "leading word": {
+          "line": 728,
+          "match": "Costco",
+          "path": "receipts/extract.py"
+        },
+        "ticker": {
+          "line": 100,
+          "match": "COST",
+          "path": "receipts/verify.py"
+        }
+      },
+      "D": {
+        "alias": {
+          "line": 436,
+          "match": "Dominion",
+          "path": "receipts/store.py"
+        },
+        "leading word": {
+          "line": 436,
+          "match": "Dominion",
+          "path": "receipts/store.py"
+        }
+      },
+      "DLTR": {
+        "alias": {
+          "line": 95,
+          "match": "Dollar Tree",
+          "path": "receipts/verify.py"
+        },
+        "ticker": {
+          "line": 100,
+          "match": "DLTR",
+          "path": "receipts/verify.py"
+        }
+      },
+      "DPZ": {
+        "alias": {
+          "line": 176,
+          "match": "Domino",
+          "path": "receipts/store.py"
+        },
+        "leading word": {
+          "line": 176,
+          "match": "Domino",
+          "path": "receipts/store.py"
+        }
+      },
+      "FCX": {
+        "leading word": {
+          "line": 434,
+          "match": "Freeport",
+          "path": "receipts/store.py"
+        },
+        "ticker": {
+          "line": 434,
+          "match": "FCX",
+          "path": "receipts/store.py"
+        }
+      },
+      "FSLR": {
+        "leading word": {
+          "line": 700,
+          "match": "First",
+          "path": "receipts/extract.py"
+        }
+      },
+      "GM": {
+        "ticker": {
+          "line": 2300,
+          "match": "GM",
+          "path": "receipts/verify.py"
+        }
+      },
+      "GPN": {
+        "leading word": {
+          "line": 2300,
+          "match": "Global",
+          "path": "receipts/verify.py"
+        }
+      },
+      "GS": {
+        "alias": {
+          "line": 667,
+          "match": "Goldman",
+          "path": "receipts/extract.py"
+        },
+        "leading word": {
+          "line": 667,
+          "match": "Goldman",
+          "path": "receipts/extract.py"
+        },
+        "ticker": {
+          "line": 667,
+          "match": "GS",
+          "path": "receipts/extract.py"
+        }
+      },
+      "GWW": {
+        "ticker": {
+          "line": 435,
+          "match": "GWW",
+          "path": "receipts/store.py"
+        }
+      },
+      "HD": {
+        "alias": {
+          "line": 98,
+          "match": "Home Depot",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 98,
+          "match": "Home",
+          "path": "receipts/verify.py"
+        }
+      },
+      "ILMN": {
+        "alias": {
+          "line": 2970,
+          "match": "Illumina",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 2970,
+          "match": "Illumina",
+          "path": "receipts/verify.py"
+        }
+      },
+      "INCY": {
+        "alias": {
+          "line": 95,
+          "match": "Incyte",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 95,
+          "match": "Incyte",
+          "path": "receipts/verify.py"
+        },
+        "ticker": {
+          "line": 100,
+          "match": "INCY",
+          "path": "receipts/verify.py"
+        }
+      },
+      "JBHT": {
+        "alias": {
+          "line": 490,
+          "match": "HUNT J B TRANSPORT SERVICES",
+          "path": "receipts/store.py"
+        },
+        "leading word": {
+          "line": 490,
+          "match": "HUNT",
+          "path": "receipts/store.py"
+        }
+      },
+      "KEY": {
+        "ticker": {
+          "line": 2307,
+          "match": "KEY",
+          "path": "receipts/verify.py"
+        }
+      },
+      "KEYS": {
+        "ticker": {
+          "line": 438,
+          "match": "KEYS",
+          "path": "receipts/store.py"
+        }
+      },
+      "LOW": {
+        "alias": {
+          "line": 176,
+          "match": "Lowe",
+          "path": "receipts/store.py"
+        },
+        "leading word": {
+          "line": 176,
+          "match": "Lowe",
+          "path": "receipts/store.py"
+        }
+      },
+      "MCD": {
+        "alias": {
+          "line": 176,
+          "match": "McDonald",
+          "path": "receipts/store.py"
+        },
+        "leading word": {
+          "line": 176,
+          "match": "McDonald",
+          "path": "receipts/store.py"
+        }
+      },
+      "META": {
+        "alias": {
+          "line": 3379,
+          "match": "Meta Platforms",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 3379,
+          "match": "Meta",
+          "path": "receipts/verify.py"
+        }
+      },
+      "MLM": {
+        "alias": {
+          "line": 1448,
+          "match": "Martin Marietta",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1448,
+          "match": "Martin",
+          "path": "receipts/verify.py"
+        }
+      },
+      "MPWR": {
+        "ticker": {
+          "line": 435,
+          "match": "MPWR",
+          "path": "receipts/store.py"
+        }
+      },
+      "MRK": {
+        "alias": {
+          "line": 917,
+          "match": "Merck",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 917,
+          "match": "Merck",
+          "path": "receipts/verify.py"
+        }
+      },
+      "MRSH": {
+        "leading word": {
+          "line": 435,
+          "match": "Marsh",
+          "path": "receipts/store.py"
+        },
+        "ticker": {
+          "line": 435,
+          "match": "MRSH",
+          "path": "receipts/store.py"
+        }
+      },
+      "MSFT": {
+        "alias": {
+          "line": 680,
+          "match": "Microsoft",
+          "path": "receipts/extract.py"
+        },
+        "leading word": {
+          "line": 680,
+          "match": "Microsoft",
+          "path": "receipts/extract.py"
+        }
+      },
+      "NDAQ": {
+        "alias": {
+          "line": 670,
+          "match": "NASDAQ",
+          "path": "receipts/extract.py"
+        },
+        "leading word": {
+          "line": 670,
+          "match": "NASDAQ",
+          "path": "receipts/extract.py"
+        }
+      },
+      "NSC": {
+        "alias": {
+          "line": 1310,
+          "match": "Norfolk Southern",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1310,
+          "match": "Norfolk",
+          "path": "receipts/verify.py"
+        }
+      },
+      "NVDA": {
+        "alias": {
+          "line": 746,
+          "match": "NVIDIA",
+          "path": "receipts/extract.py"
+        },
+        "leading word": {
+          "line": 746,
+          "match": "NVIDIA",
+          "path": "receipts/extract.py"
+        }
+      },
+      "ODFL": {
+        "ticker": {
+          "line": 436,
+          "match": "ODFL",
+          "path": "receipts/store.py"
+        }
+      },
+      "ON": {
+        "ticker": {
+          "line": 436,
+          "match": "ON",
+          "path": "receipts/store.py"
+        }
+      },
+      "RVTY": {
+        "alias": {
+          "line": 4123,
+          "match": "Revvity",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 4123,
+          "match": "Revvity",
+          "path": "receipts/verify.py"
+        }
+      },
+      "SBAC": {
+        "alias": {
+          "line": 431,
+          "match": "SBA Communications",
+          "path": "receipts/store.py"
+        },
+        "ticker": {
+          "line": 436,
+          "match": "SBAC",
+          "path": "receipts/store.py"
+        }
+      },
+      "SNA": {
+        "alias": {
+          "line": 96,
+          "match": "Snap-on",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 96,
+          "match": "Snap",
+          "path": "receipts/verify.py"
+        },
+        "ticker": {
+          "line": 100,
+          "match": "SNA",
+          "path": "receipts/verify.py"
+        }
+      },
+      "SO": {
+        "alias": {
+          "line": 1310,
+          "match": "Southern",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1310,
+          "match": "Southern",
+          "path": "receipts/verify.py"
+        }
+      },
+      "TFC": {
+        "alias": {
+          "line": 1310,
+          "match": "Truist",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 1310,
+          "match": "Truist",
+          "path": "receipts/verify.py"
+        }
+      },
+      "TGT": {
+        "alias": {
+          "line": 98,
+          "match": "Target",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 98,
+          "match": "Target",
+          "path": "receipts/verify.py"
+        }
+      },
+      "VRTX": {
+        "leading word": {
+          "line": 2296,
+          "match": "Vertex",
+          "path": "receipts/verify.py"
+        }
+      },
+      "VTRS": {
+        "alias": {
+          "line": 96,
+          "match": "Viatris",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 96,
+          "match": "Viatris",
+          "path": "receipts/verify.py"
+        },
+        "ticker": {
+          "line": 100,
+          "match": "VTRS",
+          "path": "receipts/verify.py"
+        }
+      },
+      "WM": {
+        "ticker": {
+          "line": 436,
+          "match": "WM",
+          "path": "receipts/store.py"
+        }
+      },
+      "WMT": {
+        "alias": {
+          "line": 94,
+          "match": "Walmart",
+          "path": "receipts/verify.py"
+        },
+        "leading word": {
+          "line": 94,
+          "match": "Walmart",
+          "path": "receipts/verify.py"
+        },
+        "ticker": {
+          "line": 100,
+          "match": "WMT",
+          "path": "receipts/verify.py"
+        }
+      }
+    },
+    "rejected": {
+      "A": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 41,
+          "line": 669,
+          "match": "A",
+          "path": "receipts/extract.py"
+        }
+      },
+      "BBY": {
+        "name without a capital letter": {
+          "count": 4,
+          "line": 3676,
+          "match": "best",
+          "path": "receipts/verify.py"
+        }
+      },
+      "DHI": {
+        "name without a capital letter": {
+          "count": 5,
+          "line": 188,
+          "match": "d r horton",
+          "path": "receipts/store.py"
+        }
+      },
+      "EXE": {
+        "name without a capital letter": {
+          "count": 1,
+          "line": 896,
+          "match": "expand",
+          "path": "receipts/verify.py"
+        }
+      },
+      "EXR": {
+        "name without a capital letter": {
+          "count": 1,
+          "line": 179,
+          "match": "extra",
+          "path": "receipts/rewrite.py"
+        }
+      },
+      "J": {
+        "ticker inside another company's name (JBHT)": {
+          "count": 1,
+          "line": 490,
+          "match": "J",
+          "path": "receipts/store.py"
+        }
+      },
+      "L": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 2,
+          "line": 669,
+          "match": "L",
+          "path": "receipts/extract.py"
+        }
+      },
+      "P": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 5,
+          "line": 669,
+          "match": "P",
+          "path": "receipts/extract.py"
+        }
+      },
+      "V": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 2,
+          "line": 669,
+          "match": "V",
+          "path": "receipts/extract.py"
+        }
+      }
+    },
+    "scope": "added lines only"
+  },
+  "verifier_fix_tests": {
+    "command": "git diff --name-only --diff-filter=A 22cd636b1a09232a37d8ac19d7d95af09847db9f..8c2fd7815ccd0d1108a5df39428f6b0f091a0c65 -- tests/",
+    "companies": [
+      "AAPL",
+      "ALLE",
+      "AMD",
+      "AMGN",
+      "AMZN",
+      "AOS",
+      "AXON",
+      "BAC",
+      "BDX",
+      "CASY",
+      "CHRW",
+      "CHTR",
+      "CNC",
+      "COO",
+      "COST",
+      "D",
+      "DHI",
+      "DLTR",
+      "DOV",
+      "DPZ",
+      "EL",
+      "FCX",
+      "FLEX",
+      "FRT",
+      "FSLR",
+      "GOOGL",
+      "GS",
+      "GWW",
+      "HD",
+      "HIG",
+      "ILMN",
+      "INCY",
+      "JBHT",
+      "KEY",
+      "LOW",
+      "MCD",
+      "MCO",
+      "META",
+      "MGM",
+      "MLM",
+      "MPWR",
+      "MRSH",
+      "MSFT",
+      "MTD",
+      "NDAQ",
+      "NSC",
+      "NVDA",
+      "O",
+      "ODFL",
+      "ON",
+      "ORLY",
+      "PRU",
+      "RVTY",
+      "SBAC",
+      "SJM",
+      "SNA",
+      "SO",
+      "STZ",
+      "TFC",
+      "TGT",
+      "VRTX",
+      "VTRS",
+      "WM",
+      "WMT",
+      "WRB"
+    ],
+    "dropped": {
+      "tests/test_spot500_sets.py": "the spot500 set tests themselves, not a verifier fix"
+    },
+    "evidence": {
+      "AAPL": {
+        "alias": {
+          "line": 132,
+          "match": "Apple",
+          "path": "tests/test_context_inference.py"
+        },
+        "leading word": {
+          "line": 132,
+          "match": "Apple",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "ALLE": {
+        "alias": {
+          "line": 2101,
+          "match": "Allegion",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2101,
+          "match": "Allegion",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "AMD": {
+        "ticker": {
+          "line": 2124,
+          "match": "AMD",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "AMGN": {
+        "alias": {
+          "line": 1817,
+          "match": "Amgen",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1817,
+          "match": "Amgen",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "AMZN": {
+        "alias": {
+          "line": 60,
+          "match": "Amazon",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 60,
+          "match": "Amazon",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "AOS": {
+        "leading word": {
+          "line": 47,
+          "match": "Smith",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 47,
+          "match": "AOS",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "AXON": {
+        "leading word": {
+          "line": 2104,
+          "match": "Axon",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "BAC": {
+        "alias": {
+          "line": 75,
+          "match": "Bank of America",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 75,
+          "match": "BAC",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "BDX": {
+        "ticker": {
+          "line": 17,
+          "match": "BDX",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "CASY": {
+        "ticker": {
+          "line": 17,
+          "match": "CASY",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "CHRW": {
+        "alias": {
+          "line": 18,
+          "match": "C.H. Robinson Worldwide",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 18,
+          "match": "CHRW",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "CHTR": {
+        "alias": {
+          "line": 1736,
+          "match": "Charter",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1736,
+          "match": "Charter",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1740,
+          "match": "CHTR",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "CNC": {
+        "alias": {
+          "line": 1828,
+          "match": "Centene",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1828,
+          "match": "Centene",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "COO": {
+        "ticker": {
+          "line": 18,
+          "match": "COO",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "COST": {
+        "alias": {
+          "line": 1,
+          "match": "Costco",
+          "path": "tests/fixtures/cost_fy2026_q4_summary.txt"
+        },
+        "leading word": {
+          "line": 1,
+          "match": "Costco",
+          "path": "tests/fixtures/cost_fy2026_q4_summary.txt"
+        },
+        "ticker": {
+          "line": 146,
+          "match": "COST",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "D": {
+        "alias": {
+          "line": 22,
+          "match": "Dominion",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 22,
+          "match": "Dominion",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "DHI": {
+        "alias": {
+          "line": 19,
+          "match": "D.R. Horton",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 19,
+          "match": "Horton",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 19,
+          "match": "DHI",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "DLTR": {
+        "alias": {
+          "line": 2038,
+          "match": "Dollar Tree",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "DOV": {
+        "alias": {
+          "line": 2159,
+          "match": "Dover",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2159,
+          "match": "Dover",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "DPZ": {
+        "alias": {
+          "line": 19,
+          "match": "Domino",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 19,
+          "match": "Domino",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 19,
+          "match": "DPZ",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "EL": {
+        "alias": {
+          "line": 6,
+          "match": "Estée Lauder",
+          "path": "tests/test_period_named_in_draft.py"
+        },
+        "leading word": {
+          "line": 6,
+          "match": "Estée",
+          "path": "tests/test_period_named_in_draft.py"
+        },
+        "ticker": {
+          "line": 2017,
+          "match": "EL",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "FCX": {
+        "leading word": {
+          "line": 20,
+          "match": "Freeport",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 20,
+          "match": "FCX",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "FLEX": {
+        "leading word": {
+          "line": 1965,
+          "match": "Flex",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "FRT": {
+        "alias": {
+          "line": 1939,
+          "match": "Federal Realty",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1939,
+          "match": "Federal",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "FSLR": {
+        "leading word": {
+          "line": 1,
+          "match": "First",
+          "path": "tests/fixtures/msft_fy2027_q1_release.txt"
+        }
+      },
+      "GOOGL": {
+        "alias": {
+          "line": 60,
+          "match": "Google",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 60,
+          "match": "Google",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "GS": {
+        "alias": {
+          "line": 134,
+          "match": "Goldman",
+          "path": "tests/test_context_inference.py"
+        },
+        "leading word": {
+          "line": 134,
+          "match": "Goldman",
+          "path": "tests/test_context_inference.py"
+        },
+        "ticker": {
+          "line": 134,
+          "match": "GS",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "GWW": {
+        "alias": {
+          "line": 47,
+          "match": "WW', 'Grainger",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 20,
+          "match": "GWW",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "HD": {
+        "alias": {
+          "line": 2086,
+          "match": "Home Depot",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2086,
+          "match": "Home",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "HIG": {
+        "leading word": {
+          "line": 62,
+          "match": "Hartford",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "ILMN": {
+        "alias": {
+          "line": 2184,
+          "match": "Illumina",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2184,
+          "match": "Illumina",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 2187,
+          "match": "ILMN",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "INCY": {
+        "alias": {
+          "line": 2039,
+          "match": "Incyte",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2039,
+          "match": "Incyte",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "JBHT": {
+        "alias": {
+          "line": 48,
+          "match": "JB', 'Hunt",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 21,
+          "match": "Hunt",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 21,
+          "match": "JBHT",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "KEY": {
+        "alias": {
+          "line": 2245,
+          "match": "KeyCorp",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2245,
+          "match": "KeyCorp",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 2245,
+          "match": "KEY",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "LOW": {
+        "alias": {
+          "line": 21,
+          "match": "Lowe",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 21,
+          "match": "Lowe",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 21,
+          "match": "LOW",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "MCD": {
+        "alias": {
+          "line": 33,
+          "match": "McDonald",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 33,
+          "match": "McDonald",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 33,
+          "match": "MCD",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "MCO": {
+        "ticker": {
+          "line": 34,
+          "match": "MCO",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "META": {
+        "alias": {
+          "line": 21,
+          "match": "Meta Platforms",
+          "path": "tests/test_period_named_in_draft.py"
+        },
+        "leading word": {
+          "line": 3,
+          "match": "Meta",
+          "path": "tests/test_period_named_in_draft.py"
+        }
+      },
+      "MGM": {
+        "ticker": {
+          "line": 2102,
+          "match": "MGM",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "MLM": {
+        "alias": {
+          "line": 1860,
+          "match": "Martin Marietta",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1860,
+          "match": "Martin",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1864,
+          "match": "MLM",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "MPWR": {
+        "ticker": {
+          "line": 22,
+          "match": "MPWR",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "MRSH": {
+        "leading word": {
+          "line": 22,
+          "match": "Marsh",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 22,
+          "match": "MRSH",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "MSFT": {
+        "alias": {
+          "line": 1,
+          "match": "Microsoft",
+          "path": "tests/fixtures/msft_fy2027_q1_release.txt"
+        },
+        "leading word": {
+          "line": 1,
+          "match": "Microsoft",
+          "path": "tests/fixtures/msft_fy2027_q1_release.txt"
+        },
+        "ticker": {
+          "line": 18,
+          "match": "MSFT",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "MTD": {
+        "leading word": {
+          "line": 2152,
+          "match": "Mettler",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "NDAQ": {
+        "alias": {
+          "line": 21,
+          "match": "NASDAQ",
+          "path": "tests/test_context_inference.py"
+        },
+        "leading word": {
+          "line": 21,
+          "match": "NASDAQ",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "NSC": {
+        "alias": {
+          "line": 1737,
+          "match": "Norfolk Southern",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1737,
+          "match": "Norfolk",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1741,
+          "match": "NSC",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "NVDA": {
+        "alias": {
+          "line": 21,
+          "match": "NVIDIA",
+          "path": "tests/test_context_inference.py"
+        },
+        "leading word": {
+          "line": 21,
+          "match": "NVIDIA",
+          "path": "tests/test_context_inference.py"
+        },
+        "ticker": {
+          "line": 21,
+          "match": "NVDA",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "O": {
+        "leading word": {
+          "line": 1939,
+          "match": "Realty",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "ODFL": {
+        "ticker": {
+          "line": 22,
+          "match": "ODFL",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "ON": {
+        "ticker": {
+          "line": 23,
+          "match": "ON",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "ORLY": {
+        "alias": {
+          "line": 34,
+          "match": "O'Reilly Automotive",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 34,
+          "match": "ORLY",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "PRU": {
+        "alias": {
+          "line": 60,
+          "match": "Prudential",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 60,
+          "match": "Prudential",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "RVTY": {
+        "alias": {
+          "line": 1933,
+          "match": "Revvity",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1933,
+          "match": "Revvity",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1940,
+          "match": "RVTY",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "SBAC": {
+        "ticker": {
+          "line": 23,
+          "match": "SBAC",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "SJM": {
+        "alias": {
+          "line": 46,
+          "match": "JM', 'Smucker",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 46,
+          "match": "SJM",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "SNA": {
+        "alias": {
+          "line": 2039,
+          "match": "Snap-on",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2039,
+          "match": "Snap",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "SO": {
+        "alias": {
+          "line": 1737,
+          "match": "Southern",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1737,
+          "match": "Southern",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "STZ": {
+        "alias": {
+          "line": 1935,
+          "match": "Constellation Brands",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1942,
+          "match": "STZ",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "TFC": {
+        "alias": {
+          "line": 1737,
+          "match": "Truist",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1737,
+          "match": "Truist",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 1742,
+          "match": "TFC",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "TGT": {
+        "alias": {
+          "line": 2139,
+          "match": "Target",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2139,
+          "match": "Target",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "VRTX": {
+        "leading word": {
+          "line": 2211,
+          "match": "Vertex",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "ticker": {
+          "line": 2227,
+          "match": "VRTX",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "VTRS": {
+        "alias": {
+          "line": 2039,
+          "match": "Viatris",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 2039,
+          "match": "Viatris",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "WM": {
+        "ticker": {
+          "line": 23,
+          "match": "WM",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "WMT": {
+        "alias": {
+          "line": 1938,
+          "match": "Walmart",
+          "path": "tests/test_wording_gaps.py"
+        },
+        "leading word": {
+          "line": 1938,
+          "match": "Walmart",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "WRB": {
+        "alias": {
+          "line": 47,
+          "match": "Berkley",
+          "path": "tests/test_release_names.py"
+        },
+        "leading word": {
+          "line": 47,
+          "match": "Berkley",
+          "path": "tests/test_release_names.py"
+        },
+        "ticker": {
+          "line": 47,
+          "match": "WRB",
+          "path": "tests/test_release_names.py"
+        }
+      }
+    },
+    "listed": [
+      "tests/fixtures/cost_fy2026_q4_summary.txt",
+      "tests/fixtures/msft_fy2027_q1_release.txt",
+      "tests/test_context_inference.py",
+      "tests/test_period_named_in_draft.py",
+      "tests/test_release_names.py"
+    ],
+    "modified_command": "git diff -U0 --no-color --diff-filter=M 22cd636b1a09232a37d8ac19d7d95af09847db9f..8c2fd7815ccd0d1108a5df39428f6b0f091a0c65 -- tests/",
+    "modified_diff_sha256": "9308d6ef3f4ee832095ae885b1ca35658ea123493df31d3b71a042a6ad7bfd43",
+    "modified_files": [
+      "tests/test_api.py",
+      "tests/test_entity_scale.py",
+      "tests/test_wording_gaps.py"
+    ],
+    "rejected": {
+      "A": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 10,
+          "line": 99,
+          "match": "A",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "C": {
+        "ticker inside another company's name (CHRW)": {
+          "count": 1,
+          "line": 18,
+          "match": "C",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "CARR": {
+        "name without a capital letter": {
+          "count": 2,
+          "line": 60,
+          "match": "carrier",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "FICO": {
+        "name without a capital letter": {
+          "count": 1,
+          "line": 1866,
+          "match": "fair",
+          "path": "tests/test_wording_gaps.py"
+        }
+      },
+      "J": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 1,
+          "line": 21,
+          "match": "J",
+          "path": "tests/test_release_names.py"
+        }
+      },
+      "LYV": {
+        "name without a capital letter": {
+          "count": 2,
+          "line": 6,
+          "match": "live",
+          "path": "tests/test_context_inference.py"
+        }
+      },
+      "Q": {
+        "one-letter ticker outside quotes or parentheses": {
+          "count": 5,
+          "line": 80,
+          "match": "Q",
+          "path": "tests/test_release_names.py"
+        }
+      }
+    },
+    "scanned": [
+      {
+        "path": "tests/fixtures/cost_fy2026_q4_summary.txt",
+        "sha256": "17e6a7209c55ece2d6374fbc85eddbffbb8279abfa34685c2de5e92f20ee2494"
+      },
+      {
+        "path": "tests/fixtures/msft_fy2027_q1_release.txt",
+        "sha256": "736506dddbdb2205736c6aa817ba91ef3416c6ab239e25269f6696c4f104d6e9"
+      },
+      {
+        "path": "tests/test_context_inference.py",
+        "sha256": "5bef62b77f8d82265443a624e74d194a313e3e6962b0c33e96d83a36dd0d89df"
+      },
+      {
+        "path": "tests/test_period_named_in_draft.py",
+        "sha256": "1c942d58facfd68a4e689d17692543f5f08bd45dd74d15126ec58b30e0df7639"
+      },
+      {
+        "path": "tests/test_release_names.py",
+        "sha256": "9b21499d2c66ed77f2492f96f63ba6c6634331eb35ffec91cf1bdc6f0b08490c"
+      }
+    ]
+  },
+  "version": "spot500_full2"
+}

@@ -1,0 +1,628 @@
+{
+  "actual_provider_cost_usd": 0.0,
+  "branch_base": "8c2fd78 (rebased); receipts/ and data/snapshot/ equal 8c2fd78",
+  "company_history": {
+    "derivation": {
+      "added_test_files": [
+        "tests/fixtures/cost_fy2026_q4_summary.txt",
+        "tests/fixtures/msft_fy2027_q1_release.txt",
+        "tests/test_context_inference.py",
+        "tests/test_period_named_in_draft.py",
+        "tests/test_release_names.py"
+      ],
+      "code_named": 48,
+      "modified_test_files": [
+        "tests/test_api.py",
+        "tests/test_entity_scale.py",
+        "tests/test_wording_gaps.py"
+      ],
+      "tests_named": 65
+    },
+    "derived_beyond_full": [
+      "ALLE",
+      "AOS",
+      "AXON",
+      "BDX",
+      "CASY",
+      "CBOE",
+      "CHRW",
+      "CHTR",
+      "COF",
+      "COO",
+      "COST",
+      "D",
+      "DHI",
+      "DLTR",
+      "DOV",
+      "DPZ",
+      "FCX",
+      "FLEX",
+      "FSLR",
+      "GM",
+      "GPN",
+      "GS",
+      "GWW",
+      "HD",
+      "HIG",
+      "ILMN",
+      "INCY",
+      "JBHT",
+      "KEY",
+      "KEYS",
+      "LOW",
+      "MCD",
+      "MCO",
+      "MGM",
+      "MLM",
+      "MPWR",
+      "MRSH",
+      "MTD",
+      "NDAQ",
+      "NSC",
+      "ODFL",
+      "ON",
+      "ORLY",
+      "PRU",
+      "RVTY",
+      "SBAC",
+      "SO",
+      "STZ",
+      "VRTX",
+      "VTRS",
+      "WM",
+      "WRB"
+    ],
+    "in_development": 104,
+    "in_development_absent_from_set": {
+      "BDX": "every historical sentence was used by an earlier set",
+      "COST": "no historical sentence passes the frame screening",
+      "DAL": "no historical sentence passes the frame screening",
+      "DOV": "every historical sentence was used by an earlier set",
+      "DPZ": "no historical sentence passes the frame screening",
+      "ED": "not in the frame: no stored release and 10-Q pair",
+      "FCX": "every historical sentence was used by an earlier set",
+      "FRT": "no historical sentence passes the frame screening",
+      "LNT": "not in the frame: no stored release and 10-Q pair",
+      "NSC": "every historical sentence was used by an earlier set",
+      "O": "no historical sentence passes the frame screening",
+      "PRU": "no historical sentence passes the frame screening",
+      "SO": "not in the frame: no stored release and 10-Q pair",
+      "TSLA": "not in the frame: no stored release and 10-Q pair",
+      "UDR": "no historical sentence passes the frame screening",
+      "WRB": "no historical sentence passes the frame screening"
+    },
+    "oracle_by_feature": {
+      "company_in_development": 232,
+      "company_new": 78,
+      "company_seen": 690
+    },
+    "slices": {
+      "company_in_development": {
+        "by_mutator": {
+          "basis": 1,
+          "direction": 13,
+          "entity": 19,
+          "forward_looking_control": 9,
+          "look_ahead": 15,
+          "none": 137,
+          "period": 15,
+          "scale": 10,
+          "value": 13
+        },
+        "companies": 88,
+        "gold_claims": 384,
+        "guidance_controls": 9,
+        "items": 232,
+        "mutants": 86,
+        "originals": 137
+      },
+      "company_new": {
+        "by_mutator": {
+          "direction": 5,
+          "entity": 2,
+          "forward_looking_control": 7,
+          "look_ahead": 3,
+          "none": 44,
+          "period": 3,
+          "scale": 6,
+          "value": 8
+        },
+        "companies": 28,
+        "gold_claims": 142,
+        "guidance_controls": 7,
+        "items": 78,
+        "mutants": 27,
+        "originals": 44
+      },
+      "company_seen": {
+        "by_mutator": {
+          "direction": 42,
+          "entity": 38,
+          "forward_looking_control": 34,
+          "look_ahead": 42,
+          "none": 409,
+          "period": 42,
+          "scale": 44,
+          "value": 39
+        },
+        "companies": 284,
+        "gold_claims": 1221,
+        "guidance_controls": 34,
+        "items": 690,
+        "mutants": 247,
+        "originals": 409
+      }
+    }
+  },
+  "company_history_derivation_sha256": "3874b07e871278317b8f390106b2fb6c7eaf0dcae81b49579f01dddeb3785f65",
+  "corpus_sha256": "10aeb6cf7dc9bae3f1301e697cc56aea68dd174cea074eb4e58626b19ea7fed0",
+  "cost": {
+    "admission_cap_usd": 6.0,
+    "estimate_limit_usd": 5.5,
+    "forecast_usd": [
+      3.69,
+      5.49
+    ],
+    "full_live_reference": {
+      "calls": 940,
+      "charge_usd": 3.6941
+    },
+    "harness_estimate_usd": 5.0,
+    "unique_extraction_requests": 940
+  },
+  "counts": {
+    "by_company_history": {
+      "company_in_development": {
+        "by_mutator": {
+          "basis": 1,
+          "direction": 13,
+          "entity": 19,
+          "forward_looking_control": 9,
+          "look_ahead": 15,
+          "none": 137,
+          "period": 15,
+          "scale": 10,
+          "value": 13
+        },
+        "companies": 88,
+        "gold_claims": 384,
+        "guidance_controls": 9,
+        "items": 232,
+        "mutants": 86,
+        "originals": 137
+      },
+      "company_new": {
+        "by_mutator": {
+          "direction": 5,
+          "entity": 2,
+          "forward_looking_control": 7,
+          "look_ahead": 3,
+          "none": 44,
+          "period": 3,
+          "scale": 6,
+          "value": 8
+        },
+        "companies": 28,
+        "gold_claims": 142,
+        "guidance_controls": 7,
+        "items": 78,
+        "mutants": 27,
+        "originals": 44
+      },
+      "company_seen": {
+        "by_mutator": {
+          "direction": 42,
+          "entity": 38,
+          "forward_looking_control": 34,
+          "look_ahead": 42,
+          "none": 409,
+          "period": 42,
+          "scale": 44,
+          "value": 39
+        },
+        "companies": 284,
+        "gold_claims": 1221,
+        "guidance_controls": 34,
+        "items": 690,
+        "mutants": 247,
+        "originals": 409
+      }
+    },
+    "by_feature": {
+      "balance_sheet": 5,
+      "bank": 40,
+      "bank_revenue": 5,
+      "capital_returned": 20,
+      "cash_and_equivalents": 5,
+      "company_in_development": 232,
+      "company_new": 78,
+      "company_seen": 690,
+      "eps_diluted": 202,
+      "free_cash_flow": 49,
+      "gross_margin": 31,
+      "growth": 410,
+      "guidance": 50,
+      "impact": 21,
+      "margin_change": 29,
+      "net_income": 97,
+      "net_interest_income": 11,
+      "net_margin": 3,
+      "non_gaap": 148,
+      "noninterest_expense": 28,
+      "operating_cash_flow": 86,
+      "operating_income": 80,
+      "operating_margin": 44,
+      "opex": 27,
+      "reit_or_utility": 34,
+      "revenue": 312,
+      "segment_revenue": 63,
+      "tax_rate": 30,
+      "variable_week_company": 4
+    },
+    "by_mutator": {
+      "basis": 1,
+      "direction": 60,
+      "entity": 59,
+      "forward_looking_control": 50,
+      "look_ahead": 60,
+      "none": 590,
+      "period": 60,
+      "scale": 60,
+      "value": 60
+    },
+    "by_sector": {
+      "Communication Services": 17,
+      "Consumer Discretionary": 42,
+      "Consumer Staples": 29,
+      "Energy": 13,
+      "Financials": 63,
+      "Health Care": 54,
+      "Industrials": 74,
+      "Information Technology": 72,
+      "Materials": 19,
+      "Real Estate": 12,
+      "Utilities": 5
+    },
+    "companies": 400,
+    "gold_claims": 1747,
+    "items": 1000,
+    "items_by_sector": {
+      "Communication Services": 43,
+      "Consumer Discretionary": 96,
+      "Consumer Staples": 70,
+      "Energy": 33,
+      "Financials": 156,
+      "Health Care": 121,
+      "Industrials": 210,
+      "Information Technology": 194,
+      "Materials": 38,
+      "Real Estate": 25,
+      "Utilities": 14
+    }
+  },
+  "deviations": {
+    "features_below_target": {
+      "balance_sheet": {
+        "frame_companies": 2,
+        "frame_sentences": 4,
+        "items": 5,
+        "short_because": "the 3-per-company cap leaves 2 sentences out"
+      },
+      "bank_revenue": {
+        "frame_companies": 1,
+        "frame_sentences": 4,
+        "items": 5,
+        "short_because": "the 3-per-company cap leaves 1 sentences out"
+      },
+      "cash_and_equivalents": {
+        "frame_companies": 2,
+        "frame_sentences": 4,
+        "items": 5,
+        "short_because": "the 3-per-company cap leaves 2 sentences out"
+      },
+      "net_interest_income": {
+        "frame_companies": 6,
+        "frame_sentences": 12,
+        "items": 11,
+        "short_because": "the 3-per-company cap leaves 3 sentences out"
+      },
+      "net_margin": {
+        "frame_companies": 1,
+        "frame_sentences": 1,
+        "items": 3,
+        "short_because": "every frame sentence carrying it is already used"
+      },
+      "variable_week_company": {
+        "frame_companies": 2,
+        "frame_sentences": 7,
+        "items": 4,
+        "short_because": "the 3-per-company cap leaves 3 sentences out"
+      }
+    },
+    "mutant_shortfalls": {
+      "basis": {
+        "candidates": 1,
+        "quota": 60,
+        "taken": 1
+      },
+      "entity": {
+        "candidates": 60,
+        "quota": 60,
+        "taken": 59
+      }
+    },
+    "probable_false_positive_tags": {
+      "CBOE": "exchange name",
+      "COF": "Capital Market",
+      "FSLR": "First Quarter in the Microsoft fixture",
+      "GM": "Nasdaq tier GM in a listing pattern",
+      "GPN": "Global Market",
+      "NDAQ": "exchange name",
+      "SO": "Norfolk Southern"
+    }
+  },
+  "earlier_sets_modified": false,
+  "earlier_sets_reproduction": {
+    "full": {
+      "corpus_sha256": "53e2fd50615d696e7358f81d4e443eaf553374e9718904a370570d35781f5a01"
+    },
+    "in_place_rebuilds_accepted": [
+      "v1",
+      "v2",
+      "v3",
+      "full"
+    ],
+    "pinned_fields": "builder_hashes['eval/build_spot500.py'] keeps each set's freezing builder: v1 050be2e5, v2 7bdcb11c, v3 02d6e41f, full 9bff2eb6",
+    "v1": {
+      "corpus_sha256": "7b1c119b6a3c736d7b2fa1a91f325ffe59f5a931f08da73ebf63ab748b3948fb"
+    },
+    "v2": {
+      "corpus_sha256": "50552717a00912d4199553796438d4d395247ad614ed533261de4119af067072"
+    },
+    "v3": {
+      "corpus_sha256": "5eed4cb0a5c7f52d99e90054e825e6fdf0ebe87eab6e2af14453ccbde4555f46"
+    }
+  },
+  "env_files_read": false,
+  "expected_runtime_minutes": {
+    "concurrency_1": "about 50",
+    "concurrency_4": "about 15 (full's run: 15.5)"
+  },
+  "frame": {
+    "added_without_items": {
+      "PGR": "no sentence passes the screening"
+    },
+    "companies_added": {
+      "ACN": [
+        "EX-99"
+      ],
+      "ADP": [
+        "EX-99"
+      ],
+      "CARR": [
+        "EX-99"
+      ],
+      "CDNS": [
+        "EX-99.01"
+      ],
+      "CL": [
+        "EX-99"
+      ],
+      "CMI": [
+        "EX-99"
+      ],
+      "CTAS": [
+        "EX-99"
+      ],
+      "D": [
+        "EX-99"
+      ],
+      "DG": [
+        "EX-99"
+      ],
+      "ETN": [
+        "EX-99"
+      ],
+      "F": [
+        "EX-99"
+      ],
+      "GE": [
+        "EX-99"
+      ],
+      "GEHC": [
+        "EX-99"
+      ],
+      "GEN": [
+        "EX-99.01"
+      ],
+      "GEV": [
+        "EX-99"
+      ],
+      "GIS": [
+        "EX-99"
+      ],
+      "HON": [
+        "EX-99"
+      ],
+      "INTU": [
+        "EX-99.01"
+      ],
+      "MAR": [
+        "EX-99"
+      ],
+      "MAS": [
+        "EX-99"
+      ],
+      "NOC": [
+        "EX-99"
+      ],
+      "OTIS": [
+        "EX-99"
+      ],
+      "PFE": [
+        "EX-99"
+      ],
+      "PFG": [
+        "EX-99"
+      ],
+      "PGR": [
+        "EX-99"
+      ],
+      "PPG": [
+        "EX-99"
+      ],
+      "ROK": [
+        "EX-99"
+      ],
+      "RTX": [
+        "EX-99"
+      ],
+      "SKYD": [
+        "EX-99"
+      ],
+      "SLB": [
+        "EX-99"
+      ],
+      "SNA": [
+        "EX-99"
+      ],
+      "TGT": [
+        "EX-99"
+      ],
+      "TXN": [
+        "EX-99"
+      ],
+      "VLO": [
+        "EX-99.01"
+      ],
+      "VZ": [
+        "EX-99"
+      ],
+      "XEL": [
+        "EX-99.01"
+      ]
+    },
+    "documents_added": 71,
+    "not_added": {
+      "TSLA": "the release has no exhibit label"
+    },
+    "strict_frame_equals_full": true
+  },
+  "independent_full_rebuild": {
+    "command": "python eval/build_spot500.py --data-root /Users/shou-fengchang/Desktop/Meta/data --set full2 --output-dir /tmp/spot500full2-work/full2-rebuild-b",
+    "corpus_byte_identical": true,
+    "manifest_byte_identical": true
+  },
+  "isolation": {
+    "applied_to": [
+      "frame load",
+      "derivation",
+      "full2 freeze build",
+      "independent rebuild",
+      "in-place v1, v2, v3 and full rebuilds",
+      "oracle CLI run and reuse check"
+    ],
+    "archive_paths_modified": 0,
+    "audit_hook": "refused socket connect/getaddrinfo, any .env* open, and any write under /Users/shou-fengchang/Desktop/Meta/data",
+    "snapshot_facts_sqlite_sha256": "e3bf1791ab966513682e9048bc3e733280c549995ba0b1769993d89bc2da7082",
+    "snapshot_note": "the newer data/snapshot paths are the main checkout's tracked files, refreshed when the integration branch moved to 8c2fd78 (git status clean); facts.sqlite, which the frame reads, is byte-identical, and the archive is untouched",
+    "snapshot_paths_newer_than_start": 2313
+  },
+  "live_runs_of_full2": 0,
+  "manifest_sha256": "343cc6795d087e300c16fd67f80c9bfaa5f4d08588cc6874f27fd13483094235",
+  "measured_code": "8c2fd7815ccd0d1108a5df39428f6b0f091a0c65",
+  "measured_code_role": "wip/day3-handoff at 8c2fd78: the names fix, round 8 and a period-rule fix",
+  "merged": false,
+  "network_calls": 0,
+  "nocap_verifier_extraction_or_live_run_on_full2": false,
+  "oracle": {
+    "command": "python eval/spot500.py --set full2 --stub oracle --budget 6 --output eval/spot500_runs/full2-oracle-20261102.json",
+    "cost_usd": 0.0,
+    "inputs_unchanged": true,
+    "note": "Gold-emitting stub: 100% by construction, not verifier or extraction quality",
+    "record": "eval/spot500_runs/full2-oracle-20261102.json",
+    "record_sha256": "896327c2a4e38280d03f9096043c8a4f3afebd32f992c3d37dddf5717cc8c2ac",
+    "total": {
+      "caught_errors": 360,
+      "conflicting_matches": 0,
+      "duplicate_matches": 0,
+      "errors": 0,
+      "expected_reasons": 360,
+      "extra_claims": 0,
+      "extra_wrong": 0,
+      "false_alarm_original_items": 0,
+      "false_alarm_true_claims": 0,
+      "gold_claims": 1747,
+      "guidance_claims": 89,
+      "guidance_expected_reason": 89,
+      "guidance_items": 50,
+      "items": 1000,
+      "missing_records": 0,
+      "original_items": 590,
+      "original_true_claims": 1097,
+      "original_true_unverifiable": 0,
+      "original_true_wrong": 0,
+      "skipped": 0,
+      "status_and_reason_correct": 1747,
+      "status_correct": 1747,
+      "target_claims": 360,
+      "target_unverifiable": 0,
+      "target_verified": 0,
+      "true_claims": 1298,
+      "unverifiable_guidance": 89,
+      "unverifiable_true_claims": 0,
+      "verified_guidance": 0,
+      "verified_guidance_items": 0,
+      "verified_true_claims": 1298
+    }
+  },
+  "output_reuse": {
+    "error_type": "FileExistsError",
+    "existing_output_hash_unchanged": true,
+    "exit_code": 1
+  },
+  "procedure_changes_from_spot500_v1": [
+    "seed 20261101 -> 20261105",
+    "the full set's frame, unchanged, plus 36 companies whose earnings 8-K has no exhibit read as EX-99.1 but a release headed EX-99.01 (5) or a single plain EX-99 (31); no earlier company's pairs change",
+    "every company in the frame with an unused historical sentence, with up to 3 original sentences each, chosen by seed; no company is excluded",
+    "sentences used by spot500_v1 (40), spot500_v2 (39), spot500_v3 (37), spot500_full (624) removed by source record SHA-256, and 15 frame sentences with identical text; earlier companies stay with their unused sentences",
+    "every item tagged company_in_development (104 companies: the full set's plus those the round-8 fixes name), company_new (in no earlier set) or company_seen",
+    "60 mutants per mutator, 50 guidance controls from different companies, at least 20 items per source feature where the frame allows, and 1000 items in all",
+    "basis mutants lowered from 60 to 1: the frame has 1 basis candidates without the earlier sets' sentences",
+    "entity mutants lowered from 60 to 59: the frame has 60 entity candidates without the earlier sets' sentences, 1 of them blocked by the 3-per-company cap or the two-mutant limit",
+    "balance_sheet: 5 items, below 20: the 3-per-company cap leaves 2 sentences out (4 frame sentences at 2 companies)",
+    "bank_revenue: 5 items, below 20: the 3-per-company cap leaves 1 sentences out (4 frame sentences at 1 companies)",
+    "cash_and_equivalents: 5 items, below 20: the 3-per-company cap leaves 2 sentences out (4 frame sentences at 2 companies)",
+    "net_interest_income: 11 items, below 20: the 3-per-company cap leaves 3 sentences out (12 frame sentences at 6 companies)",
+    "net_margin: 3 items, below 20: every frame sentence carrying it is already used (1 frame sentences at 1 companies)",
+    "variable_week_company: 4 items, below 20: the 3-per-company cap leaves 3 sentences out (7 frame sentences at 2 companies)"
+  ],
+  "provider_calls": 0,
+  "pushed": false,
+  "pytest": {
+    "command": "SPOT500_DATA_ROOT=/Users/shou-fengchang/Desktop/Meta/data PYTHONDONTWRITEBYTECODE=1 python eval/spot500_offline_tests.py -q tests/",
+    "console_log_sha256": "4dfe67d18a67c0e7d20f24c7de5a623b961fcb107b898cb9848640add06c0404",
+    "deselected": 1,
+    "deselected_test": "tests/test_extract_backends.py::test_dotenv_can_select_the_backend_but_the_shell_wins",
+    "duration_seconds": 442.75,
+    "passed": 3787,
+    "skipped": 4,
+    "skipped_tests": [
+      "tests/test_split_table.py:33: no data/archive/companyfacts: the public clone doesn't carry it",
+      "tests/test_store.py:519: NVDA Q2 FY2027 8-K index not in the local cache",
+      "tests/test_store.py:535: data/facts.sqlite not built; run python -m receipts.ingest",
+      "tests/test_store.py:546: data/facts.sqlite not built; run python -m receipts.ingest"
+    ]
+  },
+  "python": "3.12.7",
+  "seed": 20261105,
+  "sentence_exclusions": {
+    "identical_text": 15,
+    "spot500_full": 624,
+    "spot500_v1": 40,
+    "spot500_v2": 39,
+    "spot500_v3": 37
+  },
+  "validated_at": "2026-11-02T06:01:03.475413+00:00",
+  "version": "spot500_full2"
+}

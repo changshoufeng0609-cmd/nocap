@@ -28,6 +28,7 @@ export const REASON_TEXT: Record<ReasonCode, string> = {
   no_evidence: "No filed figure to check against",
   ambiguous: "Period, company, or basis is ambiguous",
   approximate: "Estimate within tolerance",
+  release_statement: "Stated in the company's 8-K earnings release",
 };
 
 export function reasonText(reason: string): string {
@@ -64,6 +65,7 @@ export const SOURCE_LABEL: Record<Fact["source"], string> = {
   xbrl: "XBRL",
   press_release: "Press release",
   derived: "Derived",
+  release_text: "Earnings release",
 };
 
 export interface FiledValue {

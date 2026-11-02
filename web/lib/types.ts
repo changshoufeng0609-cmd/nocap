@@ -13,7 +13,9 @@ export type ReasonCode =
   | "forward_looking"
   | "no_evidence"
   | "ambiguous"
-  | "approximate";
+  | "approximate"
+  /** Verified by the company's own filed 8-K earnings release text, for a figure no filing fact covers. */
+  | "release_statement";
 
 export type Unit = "USD" | "%" | "USD/share" | "shares" | "other";
 export type Scale = "units" | "thousands" | "millions" | "billions";
@@ -52,7 +54,8 @@ export interface Fact {
   period_end: string;
   fiscal_year?: number | null;
   fiscal_period?: string | null;
-  source: "xbrl" | "press_release" | "derived";
+  /** release_text: a sentence of the filed 8-K earnings release, quoted in `locator`. */
+  source: "xbrl" | "press_release" | "derived" | "release_text";
   derived_from?: string[];
   form: string;
   accession: string;

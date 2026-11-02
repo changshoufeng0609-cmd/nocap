@@ -81,7 +81,9 @@ class Fact(BaseModel):
     period_end: date
     fiscal_year: Optional[int] = None
     fiscal_period: Optional[str] = None  # "Q1".."Q4" or "FY"
-    source: Literal["xbrl", "press_release", "derived"]
+    # release_text: a sentence of the company's filed 8-K earnings release that states a figure the other sources
+    # don't hold (receipts.release_text); locator holds the quoted sentence
+    source: Literal["xbrl", "press_release", "derived", "release_text"]
     derived_from: list[str] = []   # accessions used, e.g. Q4 = FY - 9M or a YTD difference
     form: str                      # "10-Q", "10-K", or "8-K"
     accession: str
@@ -103,6 +105,8 @@ ReasonCode = Literal[
     "no_evidence",      # no filing fact for this metric and period
     "ambiguous",        # period, entity, or basis cannot be resolved; ambiguity never yields "wrong"
     "approximate",      # an estimate (for example read off a chart axis) that is within tolerance
+    "release_statement",  # verified: the company's own filed 8-K earnings release states this figure in words
+                          # (receipts.release_text); only for a figure no filing fact covers, never "wrong"
 ]
 Status = Literal["verified", "wrong", "unverifiable", "approximate"]  # shown as ✓ ✗ ? ≈
 

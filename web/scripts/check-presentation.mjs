@@ -11,7 +11,7 @@ const compiled = mkdtempSync(join(tmpdir(), "receipts-presentation-"));
 let passed = 0;
 try {
   execFileSync(process.execPath, [join(root, "node_modules/typescript/bin/tsc"), "--noEmit", "false", "--incremental", "false", "--outDir", compiled, "--module", "commonjs", "--target", "es2020", "--skipLibCheck", "lib/claims.ts", "lib/calculations.ts"], { cwd: root, stdio: "pipe" });
-  const { displayCounts, displayStatus, valueIsWrong, filedValue, correction } = await import(pathToFileURL(join(compiled, "claims.js")).href);
+  const { displayCounts, displayStatus, valueIsWrong, filedValue, correction, reasonText, SOURCE_LABEL } = await import(pathToFileURL(join(compiled, "claims.js")).href);
   const { receiptCalculation } = await import(pathToFileURL(join(compiled, "calculations.js")).href);
   const { formatClaimed, formatExpectedValue, formatValue } = await import(pathToFileURL(join(compiled, "format.js")).href);
   const claim = { metric: "revenue_growth", unit: "%", comparison: "YoY", metric_text: "revenue growth", value: 20, scale: "units" };
@@ -111,6 +111,18 @@ try {
     assert.equal(receiptCalculation({ ...claim, metric: "gross_margin" }, { ...verdict, evidence: [{ ...current, metric: "gross_margin", unit: "%", value: 75 }, current] }), null);
   });
   check("unverifiable evidence cannot become a displayed calculation", () => assert.equal(receiptCalculation(claim, { ...verdict, status: "unverifiable" }), null));
+  check("a release-text receipt reads as the release's own sentence, with no derived arithmetic", () => {
+    const quote = "Global comparable sales increased 1.3%: U.S. increased 0.8%";
+    const sentence = { ...current, ticker: "MCD", metric: "other", value: 0.8, unit: "%", source: "release_text", form: "8-K", locator: quote };
+    const c = { ...claim, metric: "other", metric_text: "U.S. comparable sales", value: 0.8, comparison: "none" };
+    const v = { ...verdict, reason: "release_statement", evidence: [sentence] };
+    assert.equal(reasonText("release_statement"), "Stated in the company's 8-K earnings release");
+    assert.equal(SOURCE_LABEL.release_text, "Earnings release");
+    assert.equal(displayStatus(v), "verified");
+    assert.deepEqual(filedValue(c, v), { value: 0.8, unit: "%" });
+    assert.equal(receiptCalculation(c, v), null);
+    assert.equal(correction(c, v), null);
+  });
   console.log(`\n${passed} presentation checks passed; no network or model calls.`);
 } catch (error) {
   if (error.stdout) process.stderr.write(error.stdout);

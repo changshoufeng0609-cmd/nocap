@@ -43,7 +43,7 @@ KEEPALIVE = ": keep-alive\n\n"  # an SSE comment; EventSource-style parsers igno
 # receipts module these import is listed (tests/test_code_review_fixes.py checks it): splits.py holds the split table.
 RESULT_MODULES = ("types.py", "extract.py", "coverage.py", "periods.py", "verify.py", "store.py", "splits.py",
                   "stream.py", "balance_sheet.py", "fiscal_labels.py", "ingest.py", "edgar.py",
-                  "filing_xbrl.py", "press_release.py", "release_gates.py")
+                  "filing_xbrl.py", "press_release.py", "release_gates.py", "release_text.py")
 
 Event = tuple[str, dict[str, Any]]
 
@@ -101,8 +101,21 @@ def code_fingerprint() -> str:
 
 def data_fingerprint(data_dir: Path) -> str:
     """The content fingerprint in <data_dir>/manifest.json (scripts/build_snapshot.py writes it), else the size and
-    mtime of facts.sqlite and of every press-release JSONL, so editing data/ invalidates recorded streams."""
+    mtime of facts.sqlite and of every press-release JSONL, so editing data/ invalidates recorded streams. The
+    release-text index (<data_dir>/release_text/manifest.json, scripts/build_release_text.py) decides verdicts too, so
+    its manifest's hash is appended when it exists."""
     data_dir = Path(data_dir)
+    return _base_data_fingerprint(data_dir) + _release_text_fingerprint(data_dir)
+
+
+def _release_text_fingerprint(data_dir: Path) -> str:
+    try:
+        return "+rt-" + hashlib.sha256((data_dir / "release_text" / "manifest.json").read_bytes()).hexdigest()[:12]
+    except OSError:
+        return ""
+
+
+def _base_data_fingerprint(data_dir: Path) -> str:
     try:
         fp = json.loads((data_dir / "manifest.json").read_text(encoding="utf-8")).get("fingerprint")
         if isinstance(fp, str) and fp:

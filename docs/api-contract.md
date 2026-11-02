@@ -35,7 +35,7 @@ The number-coverage fields below were included in that protected Preview. Missin
   counted exactly once (`receipts.types.count_key`). Check, Fix, Slide and Private `counts` use the same buckets, as
   do the web UI and the CLI. Streams recorded before 2026-10-31 omit `not_public` and count ◷ under its status;
   clients accept both forms.
-- **Reasons:** `verdict.reason` is one of the ReasonCode values in `receipts/types.py`.
+- **Reasons:** `verdict.reason` is one of the ReasonCode values in `receipts/types.py`. Streams recorded before 2026-11-02 never carry `release_statement`.
 - **Explanation:** `verdict.explanation` is plain English the UI can show verbatim. Derived net margins and margin changes name their input figures, periods and filing accessions.
 - **Cache:** enabled recorded caches use `sha256(text + as_of + context)`. A cached response replays the same event sequence, with `cached: true`. Vercel defaults to reading committed snapshot caches only; ordinary drafts create no new extraction/event-cache files. Local persistence remains enabled by default. See [retention policy](deploy.md#draft-cache-policy-and-retention).
 - **Limits:** text of at most 12,000 characters and a 64 KiB JSON body, a per-instance per-IP rate limit, and durable estimated spend admission. Blank-line passages longer than 6,000 characters are split with source offsets preserved; extraction keeps at most 10 passage calls in flight, with the existing output limit and deadline. Admission reserves every passage's request-size estimate and allowed attempts before dispatch, so long or highly fragmented drafts can be refused by the daily budget. The body is read incrementally; the application rejects before retaining a chunk that exceeds the limit and stops consuming the remainder. SQLite coordinates processes sharing its file; optional PostgreSQL coordinates instances sharing the primary database and namespace. Vercel requires a shared ledger by default and rejects paid work when it is unavailable; cached examples remain usable. Unknown attempt usage retains conservative charges. These are admission controls, not a provider billing ceiling; see [spend protection](spend-protection.md).
@@ -203,9 +203,9 @@ than promising that the server does not retain drafts.
 ## Receipt fields the UI shows (from Fact)
 - `form`, `accession`, `accepted_at` (shown in UTC)
 - `url`, a link to the EDGAR document
-- `locator`, the verbatim row label or cell text for press-release facts
+- `locator`, the verbatim row label or cell text for press-release facts, or the quoted sentence for release-text facts
 - `concept`, the us-gaap concept for XBRL facts
-- `source`: xbrl, press_release, or derived
+- `source`: xbrl, press_release, derived, or release_text (a sentence of the company's filed 8-K earnings release that states a figure no stored fact covers; it backs only a ✓ with reason `release_statement`, never a ✗)
 - `fiscal_year` and `fiscal_period`
 - `value` with its `unit`, in full units. The UI formats it, for example $96.221B.
 

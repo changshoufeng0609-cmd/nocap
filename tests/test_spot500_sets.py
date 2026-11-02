@@ -2,7 +2,7 @@
 
 Source-only checks; no verifier, extraction or provider is involved. The full
 source rebuild needs the gitignored SEC archive and runs only when
-SPOT500_DATA_ROOT names it (about four minutes).
+SPOT500_DATA_ROOT names it (about seven minutes).
 """
 from collections import Counter
 from copy import deepcopy
@@ -22,7 +22,7 @@ from eval import build_spot500 as spot
 from eval import spot500
 
 ROOT = Path(__file__).resolve().parents[1]
-V1, V2, V3, FULL = spot.SETS["v1"], spot.SETS["v2"], spot.SETS["v3"], spot.SETS["full"]
+V1, V2, V3, FULL, FULL2 = (spot.SETS[name] for name in ("v1", "v2", "v3", "full", "full2"))
 FREEZE_COMMITS = {"v1": "050be2e5fe97f9920308e9d63643b7ee8c9771c7", "v2": "7bdcb11ccb371e897e58ed710dd58ee68a267162",
                   "v3": "02d6e41f7f140c54db2e04fa03a5a0bbf9544576"}
 DOC = {"doc_id": "EXCO-FY2026Q3", "ticker": "EXCO", "fy": 2026, "fp": "Q3", "period_end": "2026-09-30",
@@ -273,7 +273,7 @@ def test_committed_v2_passes_the_runner_freeze_and_the_oracle_scores_by_construc
 
 
 @pytest.mark.skipif(not os.environ.get("SPOT500_DATA_ROOT"),
-                    reason="set SPOT500_DATA_ROOT to the source data root for the full rebuild (about four minutes)")
+                    reason="set SPOT500_DATA_ROOT to the source data root for the full rebuild (about seven minutes)")
 def test_full_source_rebuild_reproduces_every_set_byte_for_byte():
     from eval.spot500_sources import load_sources
 
@@ -286,6 +286,10 @@ def test_full_source_rebuild_reproduces_every_set_byte_for_byte():
     raw, manifest = spot.build(Path(os.environ["SPOT500_DATA_ROOT"]), FULL)
     assert raw == (ROOT / "eval" / FULL.corpus).read_bytes()
     assert manifest == (ROOT / "eval" / FULL.manifest).read_bytes()
+    # full2 also reads the releases labelled EX-99.01 or a single plain EX-99.
+    raw, manifest = spot.build(Path(os.environ["SPOT500_DATA_ROOT"]), FULL2)
+    assert raw == (ROOT / "eval" / FULL2.corpus).read_bytes()
+    assert manifest == (ROOT / "eval" / FULL2.manifest).read_bytes()
 
 
 # ---------------------------------------------------------------- runner
@@ -597,7 +601,7 @@ def test_committed_v3_passes_the_runner_freeze_and_the_oracle_scores_by_construc
     assert total["false_alarm_original_items"] == total["verified_guidance"] == total["extra_claims"] == 0
 
 
-@pytest.mark.parametrize("spot_set", ["v2", "v3", "full"])
+@pytest.mark.parametrize("spot_set", ["v2", "v3", "full", "full2"])
 def test_each_later_set_has_its_own_single_use_live_run(tmp_path, monkeypatch, spot_set):
     rows = [item("original", version=f"spot500_{spot_set}")]
     corpus, manifest = freeze(tmp_path / "frozen", rows, version=f"spot500_{spot_set}")
@@ -883,3 +887,216 @@ def test_live_concurrency_keeps_one_dispatch_per_request_and_an_exact_ledger(ful
     assert result["metering"]["calls"] == len(cache) == 8 and result["concurrency"] == 4
     assert all(row["status"] == "completed" for row in result["metering"]["attempts"])
     assert result["cost_usd"] == pytest.approx(8 * .0003375) and not result["cost_is_estimate"]
+
+
+# ---------------------------------------------------------------- full2: the round-8 version, on new sentences
+
+def exhibit(text):
+    return f"<html><body><p>{text}</p><p>Example Co reports results.</p></body></html>".encode()
+
+
+@pytest.mark.parametrize("text,label", [
+    ("EX-99.1 Press release", "99.1"), ("EX-99.01", "99.01"), ("Exhibit 99", "99"), ("EX-99 Release", "99"),
+    ("Exhibit 99.2 Commentary", "99.2"), ("Quarterly results", None),
+])
+def test_exhibit_header_label_reads_the_opening_like_the_strict_rule(text, label):
+    assert spot.exhibit_header_label(exhibit(text)) == label
+
+
+@pytest.fixture
+def exhibit_archive(tmp_path):
+    """Synthetic 8-Ks: (accession, [(filename, opening text)])."""
+    import gzip
+    filings = {"0001-26-000001": [("ex9901.htm", "EX-99.01 Press release")],
+               "0001-26-000002": [("ex99.htm", "EX-99 Press release")],
+               "0001-26-000003": [("ex99a.htm", "EX-99 Press release"), ("ex99b.htm", "EX-99 Slides")],
+               "0001-26-000004": [("ex991.htm", "EX-99.1 Press release"), ("ex9901.htm", "EX-99.01 Press release")],
+               "0001-26-000005": [("release.htm", "Quarterly results")],
+               "0001-26-000006": [("ex99.htm", "EX-99 Press release"), ("ex992.htm", "EX-99.2 Commentary")]}
+    index, folder = {}, tmp_path / "archive/exhibits"
+    folder.mkdir(parents=True)
+    for accession, docs in filings.items():
+        for name, text in docs:
+            url = f"https://www.sec.gov/Archives/edgar/data/1/{accession.replace('-', '')}/{name}"
+            key = sha(url.encode())
+            (folder / f"{key}.gz").write_bytes(gzip.compress(exhibit(text)))
+            index[url] = {"cik": 1, "accession": accession, "key": key, "sha256": sha(exhibit(text))}
+    (folder / "index.json").write_text(json.dumps(index))
+    return tmp_path, index
+
+
+def test_fallback_exhibit_rule_reads_ex99_01_and_a_single_plain_ex99_only_without_ex99_1(exhibit_archive):
+    from eval import spot500_sources as sources
+
+    root, index = exhibit_archive
+    rule = spot.fallback_exhibit_rule(root, sources.is_exhibit_991)
+    accepted = {url.rsplit("/", 2)[1][-6:] + "/" + url.rsplit("/", 1)[1]: rule(url, exhibit_text)
+                for url, exhibit_text in ((u, spot.gzip.decompress((root / "archive/exhibits" / (r["key"] + ".gz")).read_bytes()))
+                                          for u, r in sorted(index.items()))}
+    assert accepted == {
+        "000001/ex9901.htm": True,    # EX-99.01 read as 99.1
+        "000002/ex99.htm": True,      # the 8-K's single EX-99-type exhibit
+        "000003/ex99a.htm": False, "000003/ex99b.htm": False,   # two plain EX-99: neither
+        "000004/ex991.htm": True, "000004/ex9901.htm": False,   # an EX-99.1 exists: no fallback
+        "000005/release.htm": False,  # no label: stays out, as TSLA does
+        "000006/ex99.htm": False, "000006/ex992.htm": False}    # EX-99 beside EX-99.2 is not single
+
+
+def test_history_tag_puts_development_first_then_new_or_seen():
+    from dataclasses import replace
+
+    probe = replace(FULL2, development_groups=(("dev", frozenset({"DEV"}), "test"),))
+    assert [spot.history_tag(probe, t, frozenset({"DEV", "OLD"})) for t in ("DEV", "OLD", "NEW")] == [
+        "company_in_development", "company_seen", "company_new"]
+    assert [spot.history_tag(FULL, t) for t in ("AAPL", "ZZZZ")] == ["company_in_development", "company_fresh"]
+
+
+def test_full2_definition_and_its_pending_derivation():
+    seeds = {s.seed for s in (V1, V2, V3, FULL)}
+    assert FULL2.seed == 20261105 and FULL2.seed not in seeds
+    assert FULL2.full and FULL2.exhibit_fallback and FULL2.history_seen and not FULL2.exclude_original
+    assert FULL2.exclude_sentences_of == ("v1", "v2", "v3", "full") and FULL2.excluded == frozenset()
+    groups = {key: companies for key, companies, _ in FULL2.development_groups}
+    assert groups["spot500_full_in_development"] == set(frozen_manifest(FULL)["company_history"]["in_development"])
+    assert spot.SETS["full"].in_development == groups["spot500_full_in_development"]
+    if not FULL2.derivation:
+        with pytest.raises(ValueError, match="pending"):
+            spot.full2_history_sources(FULL2)
+    else:
+        assert sha((ROOT / "eval" / FULL2.derivation[0]).read_bytes()) == FULL2.derivation[1]
+
+
+def test_full2_derivation_scans_added_test_files_and_lines_added_to_existing_ones(monkeypatch):
+    from eval import spot500_exclusions as exclusions
+
+    monkeypatch.setattr(exclusions, "FULL2_UNTIL", None)
+    with pytest.raises(ValueError, match="merge commit"):
+        exclusions.derive_full2(ROOT / "data/snapshot/facts.sqlite")
+    outputs = {
+        "--name-only": "tests/test_new_fix.py\ntests/test_spot500_sets.py\n",
+        "--diff-filter=M": ("diff --git a/tests/test_old.py b/tests/test_old.py\n--- a/tests/test_old.py\n"
+                            "+++ b/tests/test_old.py\n@@ -9,0 +10,1 @@\n+    span = \"Valero's revenue\"\n"
+                            "diff --git a/tests/test_spot500_sets.py b/tests/test_spot500_sets.py\n"
+                            "--- a/tests/test_spot500_sets.py\n+++ b/tests/test_spot500_sets.py\n"
+                            "@@ -1,0 +2,1 @@\n+# Walmart\n"),
+        "receipts/": "",
+    }
+
+    def fake_git(*args):
+        if args[1] == "show":
+            return "def test_fix():\n    assert lookup('Intel')\n"
+        key = next(k for k in outputs if k in args)
+        return outputs[key]
+    monkeypatch.setattr(exclusions, "git", fake_git)
+    record = exclusions.derive_full2(ROOT / "data/snapshot/facts.sqlite", "f" * 40)
+    tests = record["verifier_fix_tests"]
+    assert tests["companies"] == ["INTC", "VLO"]   # the new file and an existing file's added line
+    assert tests["modified_files"] == ["tests/test_old.py"] and "WMT" not in tests["companies"]
+    assert [row["path"] for row in tests["scanned"]] == ["tests/test_new_fix.py"]
+
+
+def test_full2_has_the_full_allowance(tmp_path, monkeypatch):
+    rows = [item("original", version="spot500_full2")]
+    corpus, manifest = freeze(tmp_path / "frozen", rows, version="spot500_full2")
+    runs = tmp_path / "spot500_runs"
+    runs.mkdir()
+    monkeypatch.setattr(spot500, "FULL2_CORPUS", corpus)
+    monkeypatch.setattr(spot500, "FULL2_MANIFEST", manifest)
+    monkeypatch.setattr(spot500, "RUNS", runs)
+    assert spot500.BUDGET_ALLOWANCES["full2"] == spot500.BUDGET_ALLOWANCES["full"] == (6.0, 5.5)
+    assert spot500.load_items("full2")[1] == rows
+    with pytest.raises(ValueError, match="at most \\$6"):
+        spot500.run(rows, runs / "full2-oracle-x.json", stub=True, evidence_dir=runs, budget=6.5, spot_set="full2")
+    assert spot500.run(rows, runs / "full2-oracle-x.json", stub=True, evidence_dir=runs, budget=6.0,
+                       spot_set="full2")["set"] == "full2"
+
+
+def test_full2_history_derivation_reproduces_from_git_history():
+    from eval import spot500_exclusions as exclusions
+
+    record = json.loads((ROOT / "eval" / FULL2.derivation[0]).read_bytes())
+    assert record["range"] == {"since": exclusions.FULL2_SINCE, "until": exclusions.FULL2_UNTIL,
+                               "since_role": "the integration tip full2 starts from",
+                               "until_role": "the round-8 merge that spot500_full2 measures"}
+    assert exclusions.FULL2_UNTIL == FULL2.commit
+    _, table = exclusions.companies_table(ROOT / "data/snapshot/facts.sqlite")
+    if table != record["companies_table"]:
+        pytest.skip("the snapshot companies table changed after the full2 derivation")
+    if shutil.which("git") is None or subprocess.run(
+            ["git", "cat-file", "-e", f"{exclusions.FULL2_UNTIL}^{{commit}}"], cwd=ROOT, capture_output=True).returncode:
+        pytest.skip("the derivation range is not in this clone's history")
+    assert exclusions.encode(exclusions.derive_full2(ROOT / "data/snapshot/facts.sqlite")) == (
+        ROOT / "eval" / FULL2.derivation[0]).read_bytes()
+
+
+def test_frozen_full2_meets_its_design_and_reuses_nothing():
+    raw = (ROOT / "eval" / FULL2.corpus).read_bytes()
+    manifest, items = frozen_manifest(FULL2), frozen_items(FULL2)
+    scale = spot.FULL_SCALE
+    assert manifest["corpus_sha256"] == sha(raw) and manifest["version"] == "spot500_full2"
+    assert manifest["commit"] == FULL2.commit == "8c2fd7815ccd0d1108a5df39428f6b0f091a0c65"
+    assert manifest["items"] == [{"item_id": it["item_id"], "sha256": sha(spot.canonical(it))} for it in items]
+    assert {it["corpus_version"] for it in items} == {"spot500_full2"}
+    assert all(it["item_id"].startswith("spot500-full2-") for it in items) and len(items) == scale["total"]
+    assert manifest["excluded_tickers"] == []
+    companies = set(manifest["selection"]["selected_companies"])
+    assert companies == {it["ticker"] for it in items} and len(companies) == manifest["counts"]["companies"]
+    # Frame: full's, unchanged, plus the companies the exhibit fallback pairs.
+    frame = manifest["frame"]
+    assert frame["strict_frame_sha256"] == frozen_manifest(FULL)["source_pool_sha256"]
+    added = frame["companies_added"]
+    assert len(added) == 36 and "TSLA" not in added
+    assert not set(added) & set(frozen_manifest(FULL)["selection"]["selected_companies"])
+    assert {label for labels in added.values() for label in labels} == {"EX-99", "EX-99.01"}
+    assert {t for t, labels in added.items() if labels == ["EX-99.01"]} == {"CDNS", "GEN", "INTU", "VLO", "XEL"}
+    assert set(added) - companies == {"PGR"}   # its releases pass the rule; no sentence passes the screen
+    # Company history: exactly one of three tags per item.
+    seen = spot.earlier_companies(FULL2)
+    tags = ("company_in_development", "company_new", "company_seen")
+    for item in items:
+        assert [t for t in tags if t in item["features"]] == [spot.history_tag(FULL2, item["ticker"], seen)]
+    slices = manifest["counts"]["by_company_history"]
+    for tag in tags:
+        tagged = [it for it in items if tag in it["features"]]
+        assert slices[tag]["items"] == len(tagged) and slices[tag]["companies"] == len({it["ticker"] for it in tagged})
+    assert sum(slices[tag]["items"] for tag in tags) == len(items)
+    assert set(manifest["company_history"]["in_development"]) == FULL2.in_development and len(FULL2.in_development) == 104
+    assert not (set(manifest["selection"]["company_history"]["company_new"]) & seen)
+    originals = [it for it in items if it["mutator"] == "none"]
+    per_company = Counter(it["ticker"] for it in originals)
+    assert set(per_company) == companies and max(per_company.values()) <= scale["per_company"]
+    mutants = [it for it in items if it["mutator"] in spot.MUTATORS]
+    shortfalls = manifest["selection"]["mutant_shortfalls"]
+    assert Counter(it["mutator"] for it in mutants) == {
+        m: shortfalls[m]["taken"] if m in shortfalls else scale["mutants"] for m in spot.MUTATORS}
+    controls = [it for it in items if it["mutator"] == "forward_looking_control"]
+    assert len(controls) == len({it["ticker"] for it in controls}) == scale["controls"]
+    # No sentence of v1, v2, v3 or full returns, by record, id, identical text or item.
+    earlier = (V1, V2, V3, FULL)
+    earlier_records = {r["sha256"] for s in earlier for r in frozen_manifest(s)["source_records"] if r["kind"] == "sentence"}
+    assert not {r["sha256"] for r in manifest["source_records"] if r["kind"] == "sentence"} & earlier_records
+    earlier_items = [it for s in earlier for it in frozen_items(s)]
+    assert not {it["source"]["sentence_id"] for it in items} & {it["source"]["sentence_id"] for it in earlier_items}
+    assert not {it["source"]["original_text"] for it in items} & {it["source"]["original_text"] for it in earlier_items}
+    assert not {it["item_hash"] for it in items} & {it["item_hash"] for it in earlier_items}
+    by_feature = Counter(f for it in items for f in it["features"])
+    for feature, entry in manifest["selection"]["feature_coverage"].items():
+        assert entry["items"] == by_feature[feature], feature
+        assert (entry["items"] >= scale["feature_target"]) != ("short_because" in entry), feature
+    for ref, earlier_set in zip(manifest["reference_sets"], earlier):
+        assert ref["manifest_sha256"] == sha((ROOT / "eval" / earlier_set.manifest).read_bytes())
+    assert manifest["company_history_derivation"]["sha256"] == FULL2.derivation[1]
+    assert manifest["cost_estimate"]["total_usd"] == 5.0 <= manifest["cost_estimate"]["estimate_limit_usd"] == 5.5
+    assert manifest["builder_hashes"] == spot.builder_hashes(FULL2), "builder changed after the full2 freeze"
+
+
+def test_committed_full2_passes_the_runner_freeze_and_the_oracle_scores_by_construction():
+    manifest, items = spot500.load_items("full2")
+    result = spot500.score(items, {it["item_id"]: {"pairs": spot500.oracle_pairs(it)} for it in items})
+    total = result["total"]
+    assert total["status_and_reason_correct"] == total["gold_claims"] == manifest["counts"]["gold_claims"]
+    assert total["caught_errors"] == total["target_claims"] == sum(
+        n for m, n in manifest["counts"]["by_mutator"].items() if m in spot.MUTATORS)
+    assert total["false_alarm_original_items"] == total["verified_guidance"] == total["extra_claims"] == 0
+    for tag in ("company_in_development", "company_new", "company_seen"):
+        assert result["by_feature"][tag]["items"] == manifest["counts"]["by_company_history"][tag]["items"]

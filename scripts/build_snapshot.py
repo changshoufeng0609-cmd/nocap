@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import shutil
@@ -55,6 +56,7 @@ OUT = DATA / "snapshot"
 MAX_BYTES = 112 * 1024 * 1024
 EXAMPLES = REPO / "examples" / "examples.json"
 BALANCE_SHEET_ARCHIVE = DATA / "archive" / "companyfacts"  # the companyfacts receipts.balance_sheet reads
+RELEASE_ARCHIVE = DATA / "archive" / "exhibits"  # the archived earnings exhibits scripts/build_release_text.py indexes
 # Snapshot facts are stored in FACTS_COMPACT without the columns their filing and company rows repeat; a view named
 # facts joins them back in the table's own column order, so Store and the API read the snapshot unchanged. At the
 # full S&P 500 this keeps facts.sqlite near 38 MB rather than 56 MB, under GitHub's 50 MB per-file warning.
@@ -315,6 +317,22 @@ def bake_examples(build: Path, old: Path, *, allow_model: bool) -> list[dict]:
     return report
 
 
+def build_release_text_index(build: Path) -> int:
+    """data/snapshot/release_text for the new snapshot: rebuilt from the archived earnings exhibits against the new
+    facts.sqlite when the archive is present (scripts/build_release_text.py), else the committed index carried over.
+    Returns the indexed units, or 0 when there is neither."""
+    out = build / "release_text"
+    if (RELEASE_ARCHIVE / "index.json").exists():
+        spec = importlib.util.spec_from_file_location("build_release_text", REPO / "scripts" / "build_release_text.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return int(module.build(RELEASE_ARCHIVE, build / "facts.sqlite", out).get("sentences", 0))
+    if (OUT / "release_text" / "manifest.json").exists():
+        shutil.copytree(OUT / "release_text", out)
+        return int(read_json(out / "manifest.json").get("sentences", 0))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--no-model", action="store_true", help="fail instead of calling the model")
@@ -337,6 +355,7 @@ def main(argv=None) -> int:
             evidence.close()
             edgar.close()
         recorded = copy_recordings(DATA / "recordings", build / "recordings", build / "filing_texts")
+        release_text = build_release_text_index(build)  # before baking: the recordings' fingerprint covers its manifest
         material = f"{db_digest}|{pr_digest}" + (f"|{text_digest}" if text_count else "")
         fingerprint = hashlib.sha256(material.encode()).hexdigest()[:24]
         previous = read_json(OUT / "manifest.json")

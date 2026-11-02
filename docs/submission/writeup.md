@@ -20,7 +20,7 @@ NoCap checks an earnings draft's financial numbers against SEC filings before pu
 
 Paste a draft and NoCap marks each figure ✓ verified, ✗ wrong, ◷ not public yet or ? unverifiable. Click a figure for its receipt: the filed value, the reason, the arithmetic for derived figures, and the 8-K, 10-Q or 10-K with its accession number and EDGAR acceptance time. Fix with receipts proposes corrected numbers and rechecks the whole draft; Check a slide and Ask apply the same verifier to chart images and questions.
 
-In a frozen held-out test, NoCap caught 44 of 48 planted errors, with 1 false alarm in 47 unmodified sentences, and all 20 in AI-written trap drafts. It covers every S&P 500 company. A one-shot test of the current version on 1,000 items caught 310 of 376 planted errors, and 741 of 744 ✓ marks were right.
+In a frozen held-out test, NoCap caught 44 of 48 planted errors, with 1 false alarm in 47 unmodified sentences, and all 20 in AI-written trap drafts. It covers every S&P 500 company. A one-shot test of the current version caught 306 of 360 planted errors, passed none as verified, and 736 of 738 ✓ marks were right.
 
 Try it at https://receipts-nocap.vercel.app: live checks run through November 17, 16:00 UTC, under a $5 daily cap, and saved examples always work. <!-- verify-at-release --> All code was built during the hackathon, from October 27. The full history stays private because it contains narration audio that could not be shared publicly; a public branch reconstructs it. <!-- verify-at-release --> The video records the real interface with cached and recorded model responses and a synthetic voice.
 

@@ -821,6 +821,26 @@ def _distinct_sales(claim: Claim) -> bool:
     return bool(_DISTINCT_AFTER_RE.match(span, pos + len(claim.value_text)))
 
 
+# Words that never change what a figure measures (round 9). ChatGPT-style drafts that trial users paste use them freely:
+# "revenue increased approximately 4% year over year", "Operating income also grew 3%", "gross margin declined slightly
+# to 11.02%". A hedge word right before its number is still read as a hedge (hedge_of); bounds and comparisons ("more
+# than", "nearly", "almost", "at least", "below", "above", "exceeding") are not here and stay qualifiers, and so does
+# "representing", which introduces shares ("representing 85% of total revenue") as well as growth.
+_NEUTRAL_WORDS = frozenset(
+    # hedges, away from the number they hedge
+    "approximately approx about roughly around some "
+    # discourse adverbs
+    "also again further still meanwhile however additionally moreover likewise "
+    # degree adverbs on a change
+    "slightly modestly moderately marginally significantly substantially considerably sharply strongly steadily "
+    # evaluative adjectives
+    "all-time strong solid robust healthy "
+    # reporting and linking verbs, a subject pronoun, a period preposition, a restating link, totals of the world. Not
+    # "both": "revenue and EPS both up more than 20%" gives two figures one loose number ("were both" is framing).
+    "achieves achieved achieving delivers delivering reflects reflected compares comparison announced remained remains "
+    "flat unchanged essentially we during or worldwide global".split())
+
+
 def _leftover_words(text: str, phrase: tuple[int, int], company: set[str], qualifier: Optional[str]) -> list[str]:
     """Words of a metric description outside its metric phrase that are not framing (change and comparison words,
     totals, bases, periods, the company, the qualifier taken as segment). Any left means the wording says more than
@@ -833,7 +853,7 @@ def _leftover_words(text: str, phrase: tuple[int, int], company: set[str], quali
         k = w.casefold().strip(".")
         if k.endswith("s'") and k[:-1] in company:
             k = k[:-1]  # Interactive Brokers' is the company possessive, not a scope qualifier.
-        if (k in _FRAME_WORDS or k in _GENERIC_QUALIFIERS or k in company or k in qual
+        if (k in _FRAME_WORDS or k in _GENERIC_QUALIFIERS or k in _NEUTRAL_WORDS or k in company or k in qual
                 or k in {"diluted", "basic", "consolidated", "gaap", "non-gaap", "segment", "percent", "percentage",
                          "points", "fiscal", "quarterly", "annual"}
                 or re.fullmatch(r"(?:fy|q[1-4])?'?\d{0,4}", k)):
@@ -2337,13 +2357,37 @@ def resolve_claim_entity(claim: Claim, store: EvidenceStore, context: Optional[s
     return ents[0][:2] if len(ents) == 1 else None
 
 
+# Markdown emphasis markers ("**4%**", "__record__") around words and numbers; an underscore inside a word stays.
+_MARKDOWN_EMPHASIS_RE = re.compile(r"\*{1,3}|(?<!\w)_{1,3}|_{1,3}(?!\w)")
+
+
+def _without_markdown(text: str) -> str:
+    """text with markdown emphasis markers blanked, keeping every offset."""
+    return _MARKDOWN_EMPHASIS_RE.sub(lambda m: " " * len(m.group()), text or "")
+
+
 # ---------------------------------------------------------------------------
 # The check
 # ---------------------------------------------------------------------------
 def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Optional[str] = None,
            named: Optional[Sequence[tuple[int, str, str]]] = None,
            entity: Optional[tuple[int, str]] = None, draft: Optional[str] = None) -> Verdict:
-    """The verdict for one claim. as_of: datetime or ISO string; evidence accepted later is look-ahead.
+    """The verdict for one claim: the check against filed facts (_verify_filed, which documents the arguments),
+    then the release-text hook."""
+    verdict = _verify_filed(claim, store, as_of=as_of, context=context, named=named, entity=entity, draft=draft)
+    # --- release-text hook: a "?" for lack of evidence (no_evidence, and nothing else) becomes ✓ only when the
+    # company's own filed 8-K earnings release for the claim's quarter states the same figure in words
+    # (receipts.release_text). It never makes a figure ✗, and no match returns the verdict unchanged. Imported here:
+    # it imports this module.
+    from receipts import release_text
+    return release_text.fallback(verdict, claim, store, as_of=as_of, context=context, entity=entity, draft=draft)
+    # --- end of the release-text hook
+
+
+def _verify_filed(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Optional[str] = None,
+                  named: Optional[Sequence[tuple[int, str, str]]] = None,
+                  entity: Optional[tuple[int, str]] = None, draft: Optional[str] = None) -> Verdict:
+    """The verdict for one claim from filed facts. as_of: datetime or ISO string; evidence accepted later is look-ahead.
     context: the document-context line (company and fiscal period) used for extraction.
     named: the companies the same draft names (named_in_draft): the only ones a wrong figure may be attributed to,
     besides those its context line names.
@@ -2354,6 +2398,10 @@ def verify(claim: Claim, store: EvidenceStore, *, as_of: Any = None, context: Op
     item's shared head ("a charge of $22 million, $22 million"). Without it, or when the span isn't at its offsets,
     the verdict is read from the claim alone, as before."""
     as_of_dt = to_utc(as_of)
+    # Markdown emphasis is no wording: "increased approximately **4% year over year**" reads as it would unbolded.
+    claim = claim.model_copy(update={"span_text": _without_markdown(claim.span_text),
+                                     "metric_text": _without_markdown(claim.metric_text)})
+    draft = _without_markdown(draft) if draft else draft
 
     def plain(status: str, reason: str, explanation: str) -> Verdict:
         return Verdict(claim_id=claim.id, status=status, reason=reason, explanation=explanation, as_of=as_of_dt)

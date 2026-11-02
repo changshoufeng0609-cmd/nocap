@@ -4,6 +4,7 @@ python eval/build_spot500.py --data-root /path/to/Meta/data            # v1 (fro
 python eval/build_spot500.py --data-root /path/to/Meta/data --set v2   # v2: new seed, v1 companies excluded
 python eval/build_spot500.py --data-root /path/to/Meta/data --set v3   # v3: new seed; v1, v2 and fix-tested companies excluded
 python eval/build_spot500.py --data-root /path/to/Meta/data --set full # every eligible company, about 1,000 items
+python eval/build_spot500.py --data-root /path/to/Meta/data --set full2 # full's frame plus EX-99/EX-99.01 releases
 """
 from __future__ import annotations
 
@@ -12,7 +13,9 @@ from collections import Counter, defaultdict
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import date
+import gzip
 import hashlib
+import html as html_module
 import json
 from pathlib import Path
 import random
@@ -73,6 +76,24 @@ FULL_SUPERSEDED = {'commit': '7a68626363949935aecf49ff636137b98f0c8a7a', 'merged
 # Full-set scale: total items, mutants per mutator, guidance controls, originals per company,
 # and the item count every source feature should reach where the frame allows.
 FULL_SCALE = {'total': 1000, 'mutants': 60, 'controls': 50, 'per_company': 3, 'feature_target': 20}
+# The full set's company_in_development list (52), carried into full2 unchanged.
+FULL_IN_DEVELOPMENT = (EXCLUDED | V3_FIX_TEST_COMPANIES | V3_FIX_CODE_COMPANIES | FULL_FIX_TEST_COMPANIES
+                       | FULL_FIX_CODE_COMPANIES | FULL_PROBE_COMPANIES | FULL_TASK_NAMED_COMPANIES)
+# full2 measures the round-8 version once, on sentences no earlier set used. Its frame adds companies whose
+# earnings 8-K labels the release EX-99.01, or plain EX-99 as its single EX-99-type exhibit, read only when no
+# exhibit of that 8-K is EX-99.1, so no earlier company's pairs change (eval/spot500_frame_gaps.py).
+EXHIBIT_LABEL = re.compile(r"\b(?:EX[ -]?|Exhibit\s+)99(?:[.-]([0-9]+))?\b", re.I)
+# Companies the round-8 and name-resolution fixes were tested or written on, derived over 22cd636..8c2fd78 into
+# eval/spot500_full2_history.json (checked by the build). Probable false positives, kept as tags: FSLR ("First
+# Quarter" in a fixture), SO ("Norfolk Southern"), and GM, GPN and COF (Nasdaq tiers in a listing pattern).
+FULL2_FIX_TEST_COMPANIES = frozenset((
+    "AAPL ALLE AMD AMGN AMZN AOS AXON BAC BDX CASY CHRW CHTR CNC COO COST D DHI DLTR DOV DPZ EL FCX "
+    "FLEX FRT FSLR GOOGL GS GWW HD HIG ILMN INCY JBHT KEY LOW MCD MCO META MGM MLM MPWR MRSH MSFT MTD "
+    "NDAQ NSC NVDA O ODFL ON ORLY PRU RVTY SBAC SJM SNA SO STZ TFC TGT VRTX VTRS WM WMT WRB").split())
+FULL2_FIX_CODE_COMPANIES = frozenset((
+    "AAPL ALLE AMD AMZN BDX CBOE CHTR COF COO COST D DLTR DPZ FCX FSLR GM GPN GS GWW HD ILMN INCY "
+    "JBHT KEY KEYS LOW MCD META MLM MPWR MRK MRSH MSFT NDAQ NSC NVDA ODFL ON RVTY SBAC SNA SO TFC TGT "
+    "VRTX VTRS WM WMT").split())
 BUILDER_FILES = ('eval/build_spot500.py', 'eval/spot500_sources.py', 'eval/build_corpus.py')
 # A hard quota with its nominal size, as the changes from v1 name it.
 HARD_QUOTAS = (('banks', 3, 'bank', 'banks'), ('REITs or utilities', 2, 'REIT/utility', 'REITs or utilities'),
@@ -110,10 +131,14 @@ class SpotSet:
     # named in development: (key, companies, description) groups whose union is in_development.
     exclude_original: bool = True
     development_groups: tuple = ()
+    # full2: the exhibit-label fallback frame, and three company-history tags (in_development, new, seen).
+    exhibit_fallback: bool = False
+    history_seen: bool = False
     # The builder file that froze a set is provenance, not something a later
     # builder edit can recompute. Each set keeps the hash of the builder that
     # froze it, the git blob eval/build_spot500.py at its freezing commit: v1 050be2e5fe97f9920308e9d63643b7ee8c9771c7,
-    # v2 7bdcb11ccb371e897e58ed710dd58ee68a267162, v3 02d6e41f7f140c54db2e04fa03a5a0bbf9544576.
+    # v2 7bdcb11ccb371e897e58ed710dd58ee68a267162, v3 02d6e41f7f140c54db2e04fa03a5a0bbf9544576,
+    # full 9bff2eb62f9fa6c55153687d3355cb9b7216e96e.
     frozen_builder_hashes: tuple = ()
 
     @property
@@ -176,7 +201,24 @@ SETS = {
                          "companies named in the fixed verifier's added lines"),
                         ('reviewer_probe_companies', FULL_PROBE_COMPANIES, "companies the reviewer's probes used"),
                         ('owner_named_probe_companies', FULL_TASK_NAMED_COMPANIES,
-                         'probe company the owner names, which no scanned line names'))),
+                         'probe company the owner names, which no scanned line names')),
+                    frozen_builder_hashes=(('eval/build_spot500.py',
+                                            '2e9a365c9e56a72febb58de9a77b3bd3fd0d5b8591e28860ea491ca455208511'),)),
+    'full2': SpotSet('full2', 20261105, '8c2fd7815ccd0d1108a5df39428f6b0f091a0c65',
+                     'the fixed code full2 measures (wip/day3-handoff, round 8 and the names fix); uncommitted '
+                     'evaluation files',
+                     'corpus/spot500_full2.jsonl', 'spot500_full2_manifest.json',
+                     full=True, exclude_sentences_of=('v1', 'v2', 'v3', 'full'), exclude_original=False,
+                     exhibit_fallback=True, history_seen=True,
+                     development_groups=(
+                         ('spot500_full_in_development', FULL_IN_DEVELOPMENT,
+                          'companies the full set tags company_in_development'),
+                         ('round8_fix_test_companies', FULL2_FIX_TEST_COMPANIES,
+                          'companies named in the round-8 and name-resolution fix tests'),
+                         ('round8_fix_code_companies', FULL2_FIX_CODE_COMPANIES,
+                          "companies named in the lines the round-8 fixes add to the verifier")),
+                     derivation=('spot500_full2_history.json',
+                                 '3874b07e871278317b8f390106b2fb6c7eaf0dcae81b49579f01dddeb3785f65')),
 }
 
 
@@ -690,6 +732,23 @@ def full_exclusion_sources(spot):
     return references, records
 
 
+def earlier_companies(spot):
+    """Every company an earlier set sampled (read-only): company_seen versus company_new in full2."""
+    out = set()
+    for name in spot.exclude_sentences_of:
+        out |= set(json.loads((ROOT / 'eval' / SETS[name].manifest).read_bytes())['selection']['selected_companies'])
+    return frozenset(out)
+
+
+def history_tag(spot, ticker, seen=None):
+    """One company-history tag: in development first; then, with earlier sets known, new or seen."""
+    if ticker in spot.in_development:
+        return 'company_in_development'
+    if seen is None:
+        return 'company_fresh'
+    return 'company_seen' if ticker in seen else 'company_new'
+
+
 def build_full_items(companies, docs, sentences, spot):
     """Every eligible company at FULL_SCALE. Pure source-to-items transform, like build_items.
 
@@ -817,9 +876,9 @@ def build_full_items(companies, docs, sentences, spot):
     items += [make_item(s, docs[s['doc_id']], companies[s['ticker']], version=spot.version)
               for s in sorted(chosen_controls, key=lambda s: s['sentence_id'])]
     # Company history, a tag only: selection above never reads it.
+    seen = earlier_companies(spot) if spot.history_seen else None
     for item in items:
-        item['features'] = sorted([*item['features'], 'company_in_development'
-                                   if item['ticker'] in spot.in_development else 'company_fresh'])
+        item['features'] = sorted([*item['features'], history_tag(spot, item['ticker'], seen)])
     if len({it['item_hash'] for it in items}) != len(items):
         raise ValueError('Duplicate item inputs')
     selection = {
@@ -834,6 +893,9 @@ def build_full_items(companies, docs, sentences, spot):
         'selected_sentence_ids': sorted([*chosen, *(s['sentence_id'] for s in chosen_controls)])}
     if shortfalls:
         selection['mutant_shortfalls'] = shortfalls
+    if seen is not None:
+        selection['company_history'] = {tag: sorted(t for t in eligible if history_tag(spot, t, seen) == tag)
+                                        for tag in ('company_in_development', 'company_new', 'company_seen')}
     return items, selection
 
 
@@ -841,9 +903,73 @@ def encode_jsonl(items):
     return b''.join(canonical(item) + b'\n' for item in items)
 
 
+def exhibit_header_label(raw):
+    """The release label in an exhibit's opening text, read as is_exhibit_991 reads it: '99.1', '99.01', '99', ..."""
+    header = base.normalize_ws(html_module.unescape(re.sub(r"<[^>]+>", " ", raw.decode("utf-8", errors="replace"))))[:4000]
+    match = EXHIBIT_LABEL.search(header)
+    return None if match is None else '99' if match.group(1) is None else f'99.{match.group(1)}'
+
+
+def fallback_exhibit_rule(data_root, strict):
+    """strict (is_exhibit_991), or, for an 8-K none of whose archived exhibits passes it, a release headed
+    EX-99.01, or headed plain EX-99 when that is the 8-K's single EX-99-type exhibit."""
+    data_root = Path(data_root)
+    index = json.loads((data_root / 'archive/exhibits/index.json').read_text())
+    by_accession = defaultdict(list)
+    for url, row in sorted(index.items()):
+        by_accession[row['accession']].append((url, row))
+    read = {}
+
+    def exhibits(accession):
+        if accession not in read:
+            rows = []
+            for url, row in by_accession[accession]:
+                raw = gzip.decompress((data_root / 'archive/exhibits' / (row['key'] + '.gz')).read_bytes())
+                rows.append((strict(url, raw), exhibit_header_label(raw)))
+            read[accession] = rows
+        return read[accession]
+
+    def rule(url, raw):
+        if strict(url, raw):
+            return True
+        rows = exhibits(index[url]['accession'])
+        if any(passed for passed, _ in rows):
+            return False
+        label = exhibit_header_label(raw)
+        return label == '99.01' or (label == '99' and sum(passed or found is not None for passed, found in rows) == 1)
+    return rule
+
+
+def load_full2_frame(data_root, *, progress=True):
+    """full's frame, unchanged, plus the companies the fallback exhibit rule gives a release/10-Q pair."""
+    from eval import spot500_sources as sources
+    data_root = Path(data_root)
+    with patch.object(sources, 'EXCLUDED', frozenset()):
+        companies, docs, sentences, provenance = sources.load_sources(data_root, progress=progress)
+    strict_frame = digest(canonical([companies, docs, sentences]))
+    universe = {row['ticker'] for row in json.loads(sources.UNIVERSE.read_text())['universe']}
+    strict = sources.is_exhibit_991
+    with patch.multiple(sources, EXCLUDED=frozenset(), is_exhibit_991=fallback_exhibit_rule(data_root, strict)):
+        added = sources.load_sources(data_root, tickers=universe - set(companies), progress=False)
+    index = json.loads((data_root / 'archive/exhibits/index.json').read_text())
+    labels = {}
+    for doc_id, doc in sorted(added[1].items()):
+        raw = gzip.decompress((data_root / 'archive/exhibits' / (index[doc['url']]['key'] + '.gz')).read_bytes())
+        doc['exhibit'] = 'EX-99.1' if strict(doc['url'], raw) else f"EX-{exhibit_header_label(raw)}"
+        labels[doc_id] = doc['exhibit']
+    fallback = {'rule': fallback_exhibit_rule.__doc__.strip().replace('\n    ', ' '),
+                'strict_frame_sha256': strict_frame, 'companies': sorted(added[0]), 'documents': labels}
+    return ({**companies, **added[0]}, {**docs, **added[1]}, [*sentences, *added[2]],
+            {**provenance, 'records': [*provenance['records'], *added[3]['records']],
+             'screen_counts': {**provenance['screen_counts'], **added[3]['screen_counts']},
+             'exhibit_fallback': fallback})
+
+
 def build(data_root, spot=None):
     from eval import spot500_sources as sources
     spot = spot or SETS['v1']
+    if spot.exhibit_fallback:
+        return build_from_sources(*load_full2_frame(data_root), spot=spot)
     # A set that keeps the original development companies screens them too; spot500_sources.py
     # itself is unchanged, so every earlier set's frame and builder hashes stay the same.
     with patch.object(sources, 'EXCLUDED', sources.EXCLUDED if spot.exclude_original else frozenset()):
@@ -1008,9 +1134,161 @@ def build_full_from_sources(companies, docs, sentences, provenance, spot):
     return raw, json.dumps(manifest, sort_keys=True, indent=2, ensure_ascii=False).encode() + b'\n'
 
 
+def full2_history_sources(spot):
+    """Check full2's earlier sets, carried development list and round-8 derivation (read-only)."""
+    if not spot.derivation:
+        raise ValueError('full2 waits for the round-8 merge: its company_in_development derivation is pending')
+    groups = {key: companies for key, companies, _ in spot.development_groups}
+    references = []
+    for name in spot.exclude_sentences_of:
+        earlier = SETS[name]
+        manifest_bytes = (ROOT / 'eval' / earlier.manifest).read_bytes()
+        frozen = json.loads(manifest_bytes)
+        if (frozen['version'] != earlier.version
+                or frozen['corpus_sha256'] != digest((ROOT / 'eval' / earlier.corpus).read_bytes())):
+            raise ValueError(f'Frozen {earlier.version} files changed')
+        references.append({'version': earlier.version, 'seed': frozen['seed'],
+                           'manifest': f'eval/{earlier.manifest}', 'manifest_sha256': digest(manifest_bytes),
+                           'corpus': f'eval/{earlier.corpus}', 'corpus_sha256': frozen['corpus_sha256']})
+    full = json.loads((ROOT / 'eval' / SETS['full'].manifest).read_bytes())
+    if frozenset(full['company_history']['in_development']) != groups['spot500_full_in_development']:
+        raise ValueError("The carried development list differs from the full manifest's")
+    path, expected = spot.derivation
+    raw = (ROOT / 'eval' / path).read_bytes()
+    if digest(raw) != expected:
+        raise ValueError(f'Frozen company-history derivation changed: eval/{path}')
+    record = json.loads(raw)
+    for key, field in (('round8_fix_test_companies', 'verifier_fix_tests'), ('round8_fix_code_companies', 'verifier_fix_code')):
+        if frozenset(record[field]['companies']) != groups[key]:
+            raise ValueError(f'{key} differ from eval/{path}')
+    return references, {'file': f'eval/{path}', 'sha256': expected, 'record': record}
+
+
+def build_full2_from_sources(companies, docs, sentences, provenance, spot):
+    from eval.eval import DEFAULT_EST_COST_PER_ITEM
+    references, derivation = full2_history_sources(spot)
+    fallback = provenance.get('exhibit_fallback')
+    if fallback is None:
+        raise ValueError('full2 needs the frame from load_full2_frame')
+    full_manifest = json.loads((ROOT / 'eval' / SETS['full'].manifest).read_bytes())
+    if fallback['strict_frame_sha256'] != full_manifest['source_pool_sha256']:
+        raise ValueError("Without the exhibit fallback, the frame differs from the full set's")
+    provenance = {k: v for k, v in provenance.items() if k != 'exhibit_fallback'}
+    items, selection = build_full_items(companies, docs, sentences, spot)
+    selected = set(selection['selected_companies'])
+    chosen_sids = set(selection['selected_sentence_ids'])
+    raw = encode_jsonl(items)
+    scale, groups, removed = FULL_SCALE, spot.development_groups, selection['removed_sentences']
+    tags = ('company_in_development', 'company_new', 'company_seen')
+    history = {}
+    for tag in tags:
+        tagged = [it for it in items if tag in it['features']]
+        history[tag] = {'companies': len({it['ticker'] for it in tagged}), 'items': len(tagged),
+                        'originals': sum(it['mutator'] == 'none' for it in tagged),
+                        'mutants': sum(it['mutator'] in MUTATORS for it in tagged),
+                        'guidance_controls': sum(it['mutator'] == 'forward_looking_control' for it in tagged),
+                        'gold_claims': sum(len(it['gold_claims']) for it in tagged),
+                        'by_mutator': dict(sorted(Counter(it['mutator'] for it in tagged).items()))}
+    added = defaultdict(set)
+    for doc_id, label in fallback['documents'].items():
+        added[docs[doc_id]['ticker']].add(label)
+    added = {t: sorted(labels) for t, labels in sorted(added.items())}
+    historical = {s['ticker'] for s in sentences if s['kind'] != 'forward_looking'}
+    absent = {t: 'not in the frame: no stored release and 10-Q pair' if t not in companies
+              else 'no historical sentence passes the frame screening' if t not in historical
+              else 'every historical sentence was used by an earlier set' for t in sorted(spot.in_development - selected)}
+    counts = {'companies': len(selected), 'items': len(items), 'gold_claims': sum(len(it['gold_claims']) for it in items),
+              'by_company': dict(sorted(Counter(it['ticker'] for it in items).items())),
+              'by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[t]['sub_industry']] for t in selected).items())),
+              'items_by_sector': dict(sorted(Counter(SECTOR_BY_INDUSTRY[companies[it['ticker']]['sub_industry']]
+                                                     for it in items).items())),
+              'by_mutator': dict(sorted(Counter(it['mutator'] for it in items).items())),
+              'by_feature': dict(sorted(Counter(f for it in items for f in it['features']).items())),
+              'by_company_history': history}
+    by_label = Counter(label for labels in added.values() for label in labels)
+    changes = [f"seed {SEED} -> {spot.seed}",
+               f"the full set's frame, unchanged, plus {len(added)} companies whose earnings 8-K has no exhibit read as "
+               f"EX-99.1 but a release headed EX-99.01 ({by_label['EX-99.01']}) or a single plain EX-99 "
+               f"({by_label['EX-99']}); no earlier company's pairs change",
+               f"every company in the frame with an unused historical sentence, with up to {scale['per_company']} "
+               f"original sentences each, chosen by seed; no company is excluded",
+               "sentences used by " + ", ".join(f"{v} ({len(ids)})" for v, ids in removed.items() if v != 'identical_text')
+               + f" removed by source record SHA-256, and {len(removed['identical_text'])} frame sentences with identical "
+               "text; earlier companies stay with their unused sentences",
+               f"every item tagged company_in_development ({len(spot.in_development)} companies: the full set's plus "
+               f"those the round-8 fixes name), company_new (in no earlier set) or company_seen",
+               f"{scale['mutants']} mutants per mutator, {scale['controls']} guidance controls from different companies, "
+               f"at least {scale['feature_target']} items per source feature where the frame allows, and "
+               f"{scale['total']} items in all"]
+    for mutator, short in sorted(selection.get('mutant_shortfalls', {}).items()):
+        blocked = short['candidates'] - short['taken']
+        changes.append(f"{mutator} mutants lowered from {short['quota']} to {short['taken']}: the frame has "
+                       f"{short['candidates']} {mutator} candidates without the earlier sets' sentences"
+                       + (f", {blocked} of them blocked by the {scale['per_company']}-per-company cap or the "
+                          f"two-mutant limit" if blocked else ''))
+    for feature, entry in selection['feature_coverage'].items():
+        if 'short_because' in entry:
+            changes.append(f"{feature}: {entry['items']} items, below {scale['feature_target']}: {entry['short_because']} "
+                           f"({entry['frame_sentences']} frame sentences at {entry['frame_companies']} companies)")
+    if len(items) != scale['total']:
+        changes.append(f"{len(items)} items instead of {scale['total']}: the frame ran out of unused sentences")
+    manifest = {
+        'version': spot.version, 'seed': spot.seed, 'commit': spot.commit, 'commit_role': spot.commit_role,
+        'procedure': {
+            'selection': f"Python Random({spot.seed}); every company in the frame with an unused historical sentence, "
+                         f"each with at least one and at most {scale['per_company']} original sentences; in order: "
+                         f"{scale['controls']} guidance controls at distinct companies, every candidate of a mutator "
+                         f"with no more candidates than its quota, feature coverage to {scale['feature_target']} items "
+                         f"(scarcest feature first), the other mutators (scarce first, v1's preferences), one original "
+                         f"per company, and a seeded round-robin fill to {scale['total']} items; source-only mutation "
+                         f"feasibility",
+            'quarters': 'latest two stored release/10-Q pairs; no 10-K-only Q4; numeric companyfacts screening',
+            'items': f"{scale['mutants']} per mutator where candidates allow; at most two mutants per original; v1's "
+                     f"gold rules, mutators and feasibility checks",
+            'outputs_used_for_selection': False, 'human_review': False, 'changes_from_spot500_v1': changes},
+        'excluded_tickers': sorted(spot.excluded),
+        'exclusions': {'companies': sorted(spot.excluded),
+                       'note': 'none: every company in the frame with an unused historical sentence is eligible'},
+        'sentence_exclusions': {**removed, 'method': 'source record SHA-256 from each earlier frozen manifest; a frame '
+                                                     'sentence with identical text is removed as well'},
+        'company_history': {
+            'tags': {'company_in_development': "the full set's development companies plus every company named in the "
+                                               "round-8 and name-resolution fix tests or fix code",
+                     'company_new': 'a company no earlier set (v1, v2, v3, full) sampled',
+                     'company_seen': 'every other company: sampled by an earlier set, here with other sentences'},
+            'seen_sets': [f'spot500_{name}' for name in spot.exclude_sentences_of],
+            'in_development': sorted(spot.in_development), **{key: sorted(c) for key, c, _ in groups},
+            'in_development_absent_from_set': absent,
+            'method': "the full set's list carried unchanged, plus v3's mechanical derivation re-run over the round-8 "
+                      "range; selection never reads the tags"},
+        'company_history_derivation': derivation,
+        'frame': {'strict_frame_sha256': fallback['strict_frame_sha256'], 'equals': 'spot500_full source_pool_sha256',
+                  'exhibit_rule': fallback['rule'], 'companies_added': added, 'documents_added': fallback['documents']},
+        'reference_sets': references,
+        'company_list': [{'ticker': t, 'name': companies[t]['name'], 'sector': SECTOR_BY_INDUSTRY[companies[t]['sub_industry']],
+                          'sub_industry': companies[t]['sub_industry']} for t in sorted(selected)],
+        'selection': selection, 'counts': counts, 'corpus_sha256': digest(raw),
+        'items': [{'item_id': it['item_id'], 'sha256': digest(canonical(it))} for it in items],
+        'source_records': ([{'kind': 'company', 'id': t, 'sha256': digest(canonical(companies[t]))} for t in sorted(selected)]
+                           + [{'kind': 'document', 'id': k, 'sha256': digest(canonical(d))}
+                              for k, d in sorted(docs.items()) if d['ticker'] in selected]
+                           + [{'kind': 'sentence', 'id': s['sentence_id'], 'sha256': digest(canonical(s))}
+                              for s in sentences if s['sentence_id'] in chosen_sids]),
+        'source_pool_sha256': digest(canonical([companies, docs, sentences])),
+        'sources': {**provenance, 'records': [r for r in provenance['records'] if r['ticker'] in selected],
+                    'screen_counts': {k: v for k, v in provenance['screen_counts'].items() if docs[k]['ticker'] in selected}},
+        'builder_hashes': builder_hashes(spot),
+        'cost_estimate': {'per_item_usd': DEFAULT_EST_COST_PER_ITEM, 'total_usd': round(len(items) * DEFAULT_EST_COST_PER_ITEM, 6),
+                          'source': 'eval/eval.py DEFAULT_EST_COST_PER_ITEM', 'estimate_limit_usd': 5.5,
+                          'live_budget_usd': 6.0}}
+    return raw, json.dumps(manifest, sort_keys=True, indent=2, ensure_ascii=False).encode() + b'\n'
+
+
 def build_from_sources(companies, docs, sentences, provenance, *, spot=None):
     from eval.eval import DEFAULT_EST_COST_PER_ITEM
     spot = spot or SETS['v1']
+    if spot.full and spot.exhibit_fallback:
+        return build_full2_from_sources(companies, docs, sentences, provenance, spot)
     if spot.full:
         return build_full_from_sources(companies, docs, sentences, provenance, spot)
     reference = reference_set(spot) if spot.extra_excluded_from else None

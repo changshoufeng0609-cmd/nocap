@@ -1,0 +1,485 @@
+[
+  {
+    "ticker": "MSFT",
+    "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/msft-ex99_1.htm",
+    "source_sha256": "e2ba11aa6c71945f7b7bb03470b94b6c3e63744bb1dae03bc485856690a60225",
+    "filing": {
+      "accession": "0001193125-26-436122",
+      "cik": 789019,
+      "form": "8-K",
+      "filed": "2026-10-28",
+      "accepted_at": "2026-10-28T20:04:44Z",
+      "report_date": "2026-10-28",
+      "items": "2.02,9.01",
+      "primary_doc": "msft-20261028.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/msft-20261028.htm"
+    },
+    "company": {
+      "cik": 789019,
+      "ticker": "MSFT",
+      "name": "MICROSOFT CORP",
+      "aliases": "[\"microsoft\", \"msft\"]",
+      "fiscal_year_end": "0630"
+    },
+    "periods": [
+      {
+        "cik": 789019,
+        "fiscal_year": 2023,
+        "fiscal_period": "FY",
+        "period_start": "2022-07-01",
+        "period_end": "2023-06-30",
+        "source": "0000950170-23-035122"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2024,
+        "fiscal_period": "FY",
+        "period_start": "2023-07-01",
+        "period_end": "2024-06-30",
+        "source": "0000950170-24-087843"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q1",
+        "period_start": "2023-07-01",
+        "period_end": "2023-09-30",
+        "source": "0000950170-23-054855"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q2",
+        "period_start": "2023-10-01",
+        "period_end": "2023-12-31",
+        "source": "0000950170-24-008814"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q3",
+        "period_start": "2024-01-01",
+        "period_end": "2024-03-31",
+        "source": "0000950170-24-048288"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q4",
+        "period_start": "2024-04-01",
+        "period_end": "2024-06-30",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2025,
+        "fiscal_period": "FY",
+        "period_start": "2024-07-01",
+        "period_end": "2025-06-30",
+        "source": "0000950170-25-100235"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q1",
+        "period_start": "2024-07-01",
+        "period_end": "2024-09-30",
+        "source": "0000950170-24-118967"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q2",
+        "period_start": "2024-10-01",
+        "period_end": "2024-12-31",
+        "source": "0000950170-25-010491"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q3",
+        "period_start": "2025-01-01",
+        "period_end": "2025-03-31",
+        "source": "0000950170-25-061046"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q4",
+        "period_start": "2025-04-01",
+        "period_end": "2025-06-30",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2026,
+        "fiscal_period": "FY",
+        "period_start": "2025-07-01",
+        "period_end": "2026-06-30",
+        "source": "0001193125-26-323660"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "period_start": "2025-07-01",
+        "period_end": "2025-09-30",
+        "source": "0001193125-25-256321"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q2",
+        "period_start": "2025-10-01",
+        "period_end": "2025-12-31",
+        "source": "0001193125-26-027207"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q3",
+        "period_start": "2026-01-01",
+        "period_end": "2026-03-31",
+        "source": "0001193125-26-191507"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q4",
+        "period_start": "2026-04-01",
+        "period_end": "2026-06-30",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 789019,
+        "fiscal_year": 2027,
+        "fiscal_period": "Q1",
+        "period_start": "2026-07-01",
+        "period_end": "2026-09-30",
+        "source": "0001193125-26-436133"
+      }
+    ]
+  },
+  {
+    "ticker": "COST",
+    "url": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/costex9918-k92426.htm",
+    "source_sha256": "10a2a28b913d8026f9396d42d733dca2c9dbd99b57a08a7cbf3ea83004353187",
+    "filing": {
+      "accession": "0000909832-26-000084",
+      "cik": 909832,
+      "form": "8-K",
+      "filed": "2026-09-24",
+      "accepted_at": "2026-09-24T20:17:37Z",
+      "report_date": "2026-09-24",
+      "items": "2.02,9.01",
+      "primary_doc": "cost-20260924.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/cost-20260924.htm"
+    },
+    "company": {
+      "cik": 909832,
+      "ticker": "COST",
+      "name": "COSTCO WHOLESALE CORP /NEW",
+      "aliases": "[\"cost\", \"costco\", \"costco wholesale\", \"costco wholesale corp new\"]",
+      "fiscal_year_end": "0830"
+    },
+    "periods": [
+      {
+        "cik": 909832,
+        "fiscal_year": 2023,
+        "fiscal_period": "FY",
+        "period_start": "2022-08-29",
+        "period_end": "2023-09-03",
+        "source": "0000909832-23-000042"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2023,
+        "fiscal_period": "Q3",
+        "period_start": "2023-02-13",
+        "period_end": "2023-05-07",
+        "source": "0000909832-23-000028"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "period_start": "2023-05-08",
+        "period_end": "2023-09-03",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2024,
+        "fiscal_period": "FY",
+        "period_start": "2023-09-04",
+        "period_end": "2024-09-01",
+        "source": "0000909832-24-000049"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q1",
+        "period_start": "2023-09-04",
+        "period_end": "2023-11-26",
+        "source": "0000909832-23-000065"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q2",
+        "period_start": "2023-11-27",
+        "period_end": "2024-02-18",
+        "source": "0000909832-24-000017"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q3",
+        "period_start": "2024-02-19",
+        "period_end": "2024-05-12",
+        "source": "0000909832-24-000029"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q4",
+        "period_start": "2024-05-13",
+        "period_end": "2024-09-01",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2025,
+        "fiscal_period": "FY",
+        "period_start": "2024-09-02",
+        "period_end": "2025-08-31",
+        "source": "0000909832-25-000101"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q1",
+        "period_start": "2024-09-02",
+        "period_end": "2024-11-24",
+        "source": "0000909832-24-000079"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q2",
+        "period_start": "2024-11-25",
+        "period_end": "2025-02-16",
+        "source": "0000909832-25-000015"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q3",
+        "period_start": "2025-02-17",
+        "period_end": "2025-05-11",
+        "source": "0000909832-25-000033"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q4",
+        "period_start": "2025-05-12",
+        "period_end": "2025-08-31",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2026,
+        "fiscal_period": "FY",
+        "period_start": "2025-09-01",
+        "period_end": "2026-08-30",
+        "source": "0000909832-26-000093"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "period_start": "2025-09-01",
+        "period_end": "2025-11-23",
+        "source": "0000909832-25-000169"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q2",
+        "period_start": "2025-11-24",
+        "period_end": "2026-02-15",
+        "source": "0000909832-26-000029"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q3",
+        "period_start": "2026-02-16",
+        "period_end": "2026-05-10",
+        "source": "0000909832-26-000051"
+      },
+      {
+        "cik": 909832,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q4",
+        "period_start": "2026-05-11",
+        "period_end": "2026-08-30",
+        "source": "Q3+FY"
+      }
+    ]
+  },
+  {
+    "ticker": "MCD",
+    "url": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000067/exhibit991-6302026.htm",
+    "source_sha256": "0be0b983fc2593c2f147f0cb8eb84cb60200192757bd8b8bf05da75806a0023f",
+    "filing": {
+      "accession": "0000063908-26-000067",
+      "cik": 63908,
+      "form": "8-K",
+      "filed": "2026-08-04",
+      "accepted_at": "2026-08-04T11:01:40Z",
+      "report_date": "2026-08-04",
+      "items": "2.02,9.01",
+      "primary_doc": "mcd-20260804.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000067/mcd-20260804.htm"
+    },
+    "company": {
+      "cik": 63908,
+      "ticker": "MCD",
+      "name": "MCDONALDS CORP",
+      "aliases": "[\"mcd\", \"mcdonald\", \"mcdonalds\"]",
+      "fiscal_year_end": "1231"
+    },
+    "periods": [
+      {
+        "cik": 63908,
+        "fiscal_year": 2023,
+        "fiscal_period": "FY",
+        "period_start": "2023-01-01",
+        "period_end": "2023-12-31",
+        "source": "0000063908-24-000072"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2023,
+        "fiscal_period": "Q2",
+        "period_start": "2023-04-01",
+        "period_end": "2023-06-30",
+        "source": "0000063908-23-000076"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2023,
+        "fiscal_period": "Q3",
+        "period_start": "2023-07-01",
+        "period_end": "2023-09-30",
+        "source": "0000063908-23-000101"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2023,
+        "fiscal_period": "Q4",
+        "period_start": "2023-10-01",
+        "period_end": "2023-12-31",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2024,
+        "fiscal_period": "FY",
+        "period_start": "2024-01-01",
+        "period_end": "2024-12-31",
+        "source": "0000063908-25-000012"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q1",
+        "period_start": "2024-01-01",
+        "period_end": "2024-03-31",
+        "source": "0000063908-24-000092"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q2",
+        "period_start": "2024-04-01",
+        "period_end": "2024-06-30",
+        "source": "0000063908-24-000123"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q3",
+        "period_start": "2024-07-01",
+        "period_end": "2024-09-30",
+        "source": "0000063908-24-000156"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2024,
+        "fiscal_period": "Q4",
+        "period_start": "2024-10-01",
+        "period_end": "2024-12-31",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2025,
+        "fiscal_period": "FY",
+        "period_start": "2025-01-01",
+        "period_end": "2025-12-31",
+        "source": "0000063908-26-000035"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q1",
+        "period_start": "2025-01-01",
+        "period_end": "2025-03-31",
+        "source": "0000063908-25-000025"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q2",
+        "period_start": "2025-04-01",
+        "period_end": "2025-06-30",
+        "source": "0000063908-25-000039"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q3",
+        "period_start": "2025-07-01",
+        "period_end": "2025-09-30",
+        "source": "0000063908-25-000059"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2025,
+        "fiscal_period": "Q4",
+        "period_start": "2025-10-01",
+        "period_end": "2025-12-31",
+        "source": "Q3+FY"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q1",
+        "period_start": "2026-01-01",
+        "period_end": "2026-03-31",
+        "source": "0000063908-26-000051"
+      },
+      {
+        "cik": 63908,
+        "fiscal_year": 2026,
+        "fiscal_period": "Q2",
+        "period_start": "2026-04-01",
+        "period_end": "2026-06-30",
+        "source": "0000063908-26-000073"
+      }
+    ]
+  }
+]

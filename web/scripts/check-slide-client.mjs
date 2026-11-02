@@ -69,6 +69,14 @@ try {
     const seen = await run(initial + frame("claim", { ...claim, reading: "axis_estimate" }) + frame("verdict", { ...verdict, status: "approximate", reason: "approximate" }) + frame("done", { ...done, counts: { verified: 0, wrong: 0, unverifiable: 0, approximate: 1 } }));
     assert.equal(seen.at(-1)[0], "done");
   });
+  await check("accepts a release-text receipt: the quoted 8-K sentence with its EDGAR link", async () => {
+    const quote = "Microsoft Cloud revenue was $63.9 billion and increased 30% (up 31% in constant currency)";
+    const receipt = { ...fact, ticker: "MSFT", cik: 789019, metric: "segment_revenue", value: 63900000000, source: "release_text", form: "8-K", accession: "0001193125-26-436122", accepted_at: "2026-10-28T20:04:44Z", period_start: "2026-07-01", period_end: "2026-09-30", fiscal_year: 2027, fiscal_period: "Q1", locator: quote, url: "https://www.sec.gov/Archives/edgar/data/789019/000119312526436122/msft-ex99_1.htm" };
+    const seen = await run(initial + frame("claim", claim) + frame("verdict", { ...verdict, reason: "release_statement", explanation: `Matches Microsoft's 8-K earnings release for Q1 FY2027 (accepted Oct 28, 2026): “${quote}”`, evidence: [receipt] }) + frame("done", done));
+    assert.equal(seen.at(-1)[0], "done");
+    assert.equal(seen.find(([event]) => event === "verdict")[1].evidence[0].locator, quote);
+    await rejects(initial + frame("claim", claim) + frame("verdict", { ...verdict, reason: "release_statement", evidence: [{ ...receipt, url: "https://example.com/release.htm" }] }));
+  });
   for (const status of ["verified", "wrong"]) await check(`an axis estimate cannot earn ${status}`, () => rejects(initial + frame("claim", { ...claim, reading: "axis_estimate" }) + frame("verdict", { ...verdict, status })));
   await check("out-of-range and reversed boxes cannot become overlays", async () => {
     for (const box of [[-1, 0, 50, 50], [0, 0, 1001, 50], [100, 100, 50, 50], [0, 0, 0, 10]]) await rejects(initial + frame("claim", { ...claim, box }));

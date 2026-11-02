@@ -83,3 +83,11 @@ def test_slices_partition_the_items():
     whole = report.summarize(items, run["records"], bootstrap=False)["counts"]
     parts = [report.summarize(part, run["records"], bootstrap=False)["counts"] for part in (bank, rest)]
     assert all(whole[key] == sum(part.get(key, 0) for part in parts) for key in whole)
+
+
+def test_slice_without_a_feature_is_the_complement(capsys):
+    path = ROOT / "eval/spot500_runs" / RUNS["v3"]
+    assert report.main([str(path), "--slice", "bank", "--slice-without", "bank", "--json"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    whole, bank, rest = out["all"]["items"], out["bank"]["items"], out["without bank"]["items"]
+    assert bank + rest == whole and bank > 0 and rest > 0

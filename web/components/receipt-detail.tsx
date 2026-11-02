@@ -231,6 +231,11 @@ function FactReceipt({ fact, asOf, index }: { fact: Fact; asOf: string | null | 
         {formatValue(fact.value, fact.unit)}
         {fact.segment ? <span className="ml-2 font-sans text-xs text-muted-foreground">{fact.segment}</span> : null}
       </p>
+      {fact.source === "release_text" && fact.locator ? (
+        <blockquote className="mt-2 border-l-2 border-border pl-3 font-serif text-[0.95rem] leading-relaxed text-pretty">
+          <q className="before:content-['“'] after:content-['”']">{fact.locator}</q>
+        </blockquote>
+      ) : null}
       <dl className="mt-2 border-t border-dashed border-border pt-2 text-[0.8rem]">
         <Row label="Accession" className="font-mono">
           {fact.accession}

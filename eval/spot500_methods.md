@@ -1222,3 +1222,399 @@ for this release, so none is fixed here.
 
 The full set covers far more figure types and companies than v1–v3, so its rates are not a before/after comparison
 with them. Each set was run once, and none is rerun or pooled into a new score.
+
+# Frozen spot500 full2: the round-8 version, on new sentences
+
+full2 measures, once, the version that round 8 fixes: false-✗ patterns the full run found, and company-name
+resolution. The full set ran once, and it is never rerun. full2 is a new comprehensive set built by the full
+procedure, so its result is reported beside the full set's, never pooled with it.
+
+No model or provider was called while building full2. NoCap's verifier, extraction and live mode never run on its
+items before the one live run. Selection and labels use source data only, never NoCap outputs. Nobody tunes on it.
+
+**Status:** frozen against the fixed code `8c2fd78` on `wip/day3-handoff`, and run once on November 2 (results below). The range
+`22cd636..8c2fd78` holds the names fix (`950f7e9`), the merged round-8 fixes (`df90e73`) and a period-rule fix
+(`8c2fd78`). The manifest's `commit` field records `8c2fd78` as the code full2 measures.
+
+## Procedure deltas
+
+`eval/build_spot500.py --set full2` runs the full set's procedure. Only these differ:
+
+1. **Seed:** `Random(20261105)`. The seeds 20261101–20261104 belong to v1, v2, v3 and full.
+2. **Frame:** the full set's frame, unchanged, plus the companies whose earnings 8-K has no exhibit the loader reads as
+   EX-99.1 (see "The 109 S&P 500 companies without items" above).
+   - **Two fallback labels are read as the release:**
+     - a release headed EX-99.01;
+     - a release headed plain EX-99, when it is the 8-K's single EX-99-type exhibit.
+   - **When the fallback applies:** only to an 8-K none of whose archived exhibits passes the EX-99.1 rule, and only
+     for companies with no pair in the full set's frame. No earlier company's pairs change, and the build refuses to
+     run unless the strict part of the frame reproduces the full set's fingerprint.
+   - **What it adds:** 36 companies and 71 release documents. That is 30 EX-99 and 5 EX-99.01 companies from the gap
+     list, plus D (Dominion), whose latest quarter has no 10-Q XBRL but whose Q1 2026 quarter pairs with a single
+     plain EX-99.
+   - **Not added:** TSLA's release has no label and stays out. PGR's releases pass the rule, but none of its
+     sentences passes the screening.
+   - `spot500_sources.py` is unchanged: the builder loads the added companies with the rule passed in, and each new
+     document records the label it was read under.
+3. **Sentences:** every sentence used by v1, v2, v3 or full is removed, by source record SHA-256 and by identical text.
+4. **Company history, exactly one tag per item:**
+   - **`company_in_development`:** the full set's 52, plus every company named in the round-8 and name-resolution fix
+     tests or fix code. The list is derived by v3's mechanical rules over `22cd636..<round-8 merge>` into
+     `eval/spot500_full2_history.json`. This scan also reads the lines added to test files that already existed.
+   - **`company_new`:** companies that no earlier set (v1, v2, v3, full) sampled.
+   - **`company_seen`:** every other company. These appeared in an earlier set, with other sentences.
+
+   Round 8 also re-verified all of the full set's recorded claims offline, as a regression check.
+
+   **The derivation** (`eval/spot500_full2_history.json`, SHA-256
+   `3874b07e871278317b8f390106b2fb6c7eaf0dcae81b49579f01dddeb3785f65`):
+   - It reads 5 added test files (`test_release_names.py`, `test_context_inference.py`,
+     `test_period_named_in_draft.py` and two release-text fixtures), lines added to `test_api.py`,
+     `test_entity_scale.py` and `test_wording_gaps.py`, and the lines the fixes add under `receipts/`.
+   - The tests name 65 companies and the code 48.
+   - 52 companies are named beyond the full set's 52, so `company_in_development` has 104: ALLE, AOS, AXON, BDX, CASY,
+   CBOE, CHRW, CHTR, COF, COO, COST, D, DHI, DLTR, DOV, DPZ, FCX, FLEX, FSLR, GM, GPN, GS, GWW, HD, HIG, ILMN, INCY,
+   JBHT, KEY, KEYS, LOW, MCD, MCO, MGM, MLM, MPWR, MRSH, MTD, NDAQ, NSC, ODFL, ON, ORLY, PRU, RVTY, SBAC, SO, STZ,
+   VRTX, VTRS, WM, WRB.
+   - Probable false positives of the unchanged rules, kept as tags: FSLR ("First Quarter" in the Microsoft fixture), SO
+     ("Norfolk Southern"), and GM, GPN and COF (Nasdaq market tiers in an exchange-listing pattern). CBOE and NDAQ are
+     matched as exchange names.
+   - Of the 104, 88 are in the set. The other 16 cannot appear: ED, LNT, SO, TSLA have no stored release and 10-Q
+   pair; COST, DAL, DPZ, FRT, O, PRU, UDR, WRB have no historical sentence that passes the screening; BDX, DOV, FCX,
+   NSC have no sentence an earlier set did not use.
+5. **Scale:** as for the full set:
+   - 1,000 items, at most three originals per company, and every eligible company at least once;
+   - 60 mutants per mutator, with every basis candidate that remains;
+   - 50 guidance controls at distinct companies, and at least 20 items per feature where the frame allows.
+
+## Composition
+
+The frozen set has **400 companies, 1,000 items and 1,747 gold claim records**. There are 590 originals; 360 mutants
+(60 each of value, period, scale, look-ahead and direction, 59 entity and 1 basis); and 50 guidance controls at 50
+companies. The gold claims are 1,298 true figures, 360 targets and 89 guidance figures. 190 originals carry the 360
+mutants, 170 of them two each. Sampled period ends range from 2025-09-30 to 2026-10-04.
+
+**Removed sentences:** v1 40, v2 39, v3 37 and full 624, by source record SHA-256, plus 15 identical texts.
+
+**Mutation candidates** after those removals: value 1,161, scale 743, direction 525, look-ahead 181, period 146,
+entity 60, basis 1.
+
+**Deviations:**
+
+- Basis: 1 mutant instead of 60. It is the frame's only basis candidate left; v1–full used the rest.
+- Entity: 59 instead of 60. Of the 60 candidates, one is blocked by the three-sentence cap or the two-mutant limit.
+- **Features below 20 items** (marked † in the table):
+  - every frame sentence carrying the feature is used: net margin (3 items);
+  - the three-sentence cap leaves the rest out: balance sheet (5), bank revenue (5), cash and equivalents (5), net
+    interest income (11) and variable-week companies (4).
+
+By company-history slice:
+
+| Slice | Companies | Items | Originals | `value` | `period` | `scale` | `basis` | `look_ahead` | `entity` | `direction` | Guidance | Gold claims |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `company_in_development` | 88 | 232 | 137 | 13 | 15 | 10 | 1 | 15 | 19 | 13 | 9 | 384 |
+| `company_new` | 28 | 78 | 44 | 8 | 3 | 6 | 0 | 3 | 2 | 5 | 7 | 142 |
+| `company_seen` | 284 | 690 | 409 | 39 | 42 | 44 | 0 | 42 | 38 | 42 | 34 | 1221 |
+| **All** | 400 | 1000 | 590 | 60 | 60 | 60 | 1 | 60 | 59 | 60 | 50 | 1747 |
+
+The 28 `company_new` companies: ACN, ADP, CDNS, CL, CMI, CTAS, DG, ETN, F, GE, GEN, GEV, GIS, HON, INTU, MAR, MAS,
+NOC, OTIS, PFG, PPG, ROK, RTX, SKYD, SLB, TXN, VZ, XEL. All 28 come from the exhibit rule. Of the other eight
+companies it adds, seven are in development (CARR, D, GEHC, PFE, SNA, TGT, VLO), and PGR has no item.
+
+Items by overlapping source feature, mutator and slice are below. A row counts every item that carries the feature, so
+rows overlap and must not be summed. `·` means none, and † marks a feature below 20 items.
+
+| Source feature (overlapping) | Original | `value` | `period` | `scale` | `basis` | `look_ahead` | `entity` | `direction` | Guidance | Items | In development | New | Seen | Frame sentences (companies) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `balance_sheet` | 2 | 1 | · | 1 | · | 1 | · | · | · | 5 † | 5 | 0 | 0 | 4 (2) |
+| `bank` | 26 | 1 | 1 | 4 | · | 2 | · | 6 | · | 40 | 14 | 0 | 26 | 154 (13) |
+| `bank_revenue` | 3 | · | · | 1 | · | · | · | 1 | · | 5 † | 0 | 0 | 5 | 4 (1) |
+| `capital_returned` | 12 | 3 | 1 | 4 | · | · | · | · | · | 20 | 4 | 7 | 9 | 13 (9) |
+| `cash_and_equivalents` | 2 | 1 | · | 1 | · | 1 | · | · | · | 5 † | 5 | 0 | 0 | 4 (2) |
+| `eps_diluted` | 120 | 17 | 10 | 1 | · | 10 | 22 | 5 | 17 | 202 | 43 | 21 | 138 | 862 (262) |
+| `free_cash_flow` | 29 | 10 | · | 9 | · | · | · | · | 1 | 49 | 7 | 8 | 34 | 248 (105) |
+| `gross_margin` | 25 | 4 | · | · | · | 1 | · | · | 1 | 31 | 9 | 5 | 17 | 102 (40) |
+| `growth` | 241 | 12 | 42 | 19 | · | 16 | 15 | 59 | 6 | 410 | 88 | 24 | 298 | 2321 (313) |
+| `guidance` | · | · | · | · | · | · | · | · | 50 | 50 | 9 | 7 | 34 | 327 (120) |
+| `impact` | 19 | 1 | · | · | · | · | · | · | 1 | 21 | 4 | 2 | 15 | 113 (57) |
+| `margin_change` | 25 | 3 | · | · | · | · | · | 1 | · | 29 | 9 | 3 | 17 | 73 (33) |
+| `net_income` | 59 | 8 | 4 | 10 | · | 5 | 6 | 4 | 1 | 97 | 27 | 9 | 61 | 377 (140) |
+| `net_interest_income` | 9 | · | · | · | · | 1 | · | 1 | · | 11 † | 8 | 0 | 3 | 12 (6) |
+| `net_margin` | 1 | 1 | · | 1 | · | · | · | · | · | 3 † | 0 | 3 | 0 | 1 (1) |
+| `non_gaap` | 112 | 12 | · | 6 | 1 | · | · | · | 17 | 148 | 30 | 7 | 111 | 1525 (270) |
+| `noninterest_expense` | 21 | · | · | 2 | · | · | · | 2 | 3 | 28 | 5 | 0 | 23 | 76 (40) |
+| `operating_cash_flow` | 34 | 16 | 9 | 16 | · | 6 | · | 4 | 1 | 86 | 12 | 10 | 64 | 135 (78) |
+| `operating_income` | 39 | 5 | 5 | 9 | 1 | 6 | 6 | 5 | 4 | 80 | 19 | 5 | 56 | 542 (134) |
+| `operating_margin` | 30 | 6 | · | 2 | · | 1 | · | 2 | 3 | 44 | 14 | 1 | 29 | 268 (85) |
+| `opex` | 20 | 1 | · | 1 | · | 3 | · | 1 | 1 | 27 | 9 | 1 | 17 | 68 (26) |
+| `reit_or_utility` | 25 | 5 | 1 | 2 | · | · | · | 1 | · | 34 | 6 | 4 | 24 | 46 (15) |
+| `revenue` | 154 | 5 | 31 | 18 | · | 26 | 25 | 37 | 16 | 312 | 63 | 12 | 237 | 724 (253) |
+| `segment_revenue` | 60 | 1 | · | · | · | · | · | · | 2 | 63 | 16 | 5 | 42 | 1338 (233) |
+| `tax_rate` | 27 | · | · | · | · | · | · | · | 3 | 30 | 8 | 4 | 18 | 329 (123) |
+| `variable_week_company` | 4 | · | · | · | · | · | · | · | · | 4 † | 0 | 0 | 4 | 7 (2) |
+| **All items** | 590 | 60 | 60 | 60 | 1 | 60 | 59 | 60 | 50 | 1000 | 232 | 78 | 690 | |
+
+| Sector | Companies | In development | New | Seen | Items | Gold claims |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Communication Services | 17 | 6 | 2 | 9 | 43 | 77 |
+| Consumer Discretionary | 42 | 11 | 2 | 29 | 96 | 166 |
+| Consumer Staples | 29 | 9 | 3 | 17 | 70 | 129 |
+| Energy | 13 | 3 | 1 | 9 | 33 | 47 |
+| Financials | 63 | 16 | 1 | 46 | 156 | 237 |
+| Health Care | 54 | 13 | 0 | 41 | 121 | 240 |
+| Industrials | 74 | 11 | 12 | 51 | 210 | 355 |
+| Information Technology | 72 | 14 | 5 | 53 | 194 | 359 |
+| Materials | 19 | 1 | 1 | 17 | 38 | 58 |
+| Real Estate | 12 | 3 | 0 | 9 | 25 | 54 |
+| Utilities | 5 | 1 | 1 | 3 | 14 | 25 |
+| **All** | 400 | 88 | 28 | 284 | 1000 | 1747 |
+
+Items per company: 151 companies have 1, 81 have 2, 76 have 3, 54 have 4, 16 have 5, 6 have 6, 8 have 7, 2 have 8, 5
+have 9 and 1 has 10.
+
+Items per company by sector; `*` marks a development company and `+` a new one:
+
+- **Communication Services:** CHTR* 4, CMCSA* 6, DIS* 2, FOXA 2, GOOGL* 4, LYV 3, META* 3, NFLX* 2, NWSA 2, OMC 1, RDDT 3, SKYD+ 1, T 2, TKO 1, TMUS 3, TTWO 1, VZ+ 3.
+- **Consumer Discretionary:** ABNB 2, AMZN* 4, APTV 1, AZO 1, BBY 2, BKNG 2, CCL 1, CMG 1, CVNA 1, DASH 3, DECK 2, DHI* 3, DRI 1, EBAY 4, F+ 1, GM* 1, GPC* 1, HAS 2, HD* 1, HLT 3, LEN* 9, LOW* 1, LULU 1, LVS 8, MAR+ 1, MCD* 2, MGM* 3, NCLH 2, NKE 4, NVR 1, ORLY* 1, PHM 2, RCL 5, RL 4, ROST 3, SBUX 2, TPR 1, TSCO 1, ULTA 4, WSM* 1, WYNN 1, YUM 2.
+- **Consumer Staples:** ADM 4, BF-B 1, CASY* 3, CHD 4, CL+ 2, CLX 2, DG+ 5, DLTR* 3, EL* 1, GIS+ 5, HSY 1, KDP 2, KHC 2, KMB 3, KO 1, KR 3, KVUE 2, MDLZ 2, MKC 1, MNST* 2, MO 3, PG 2, PM 1, SJM* 1, STZ* 2, SYY* 3, TGT* 6, TSN 1, WMT* 2.
+- **Energy:** BKR 4, COP 2, CVX 1, DVN 4, HAL 8, KMI 1, MPC* 1, OKE 1, PSX 1, SLB+ 3, TPL 4, VLO* 2, WMB* 1.
+- **Financials:** AFL 1, AIZ 1, AJG 2, ALL 2, AMP 2, AON 1, ARES 3, AXP* 3, BAC* 1, BEN 1, BLK 1, BNY 9, BX 1, C 5, CB 1, CBOE* 1, CFG 5, CME 1, COF* 1, COIN 2, CPAY 2, ERIE 1, FDS* 4, FIS 3, FISV 2, FITB 3, GPN* 1, GS* 4, HBAN 2, HIG* 1, HOOD 1, IBKR 2, ICE 7, IVZ* 1, JPM* 1, KEY* 3, KKR 1, MA 7, MCO* 1, MET 1, MRSH* 9, MS 1, MSCI 3, MTB 3, NDAQ* 4, NTRS 1, PFG+ 2, PNC 3, PYPL 2, RF* 4, RJF 1, SCHW 1, SPGI 2, STT 3, SYF 1, TFC* 5, TROW 6, TRV 1, USB 4, V 1, WFC 1, WTW 2, XYZ 4.
+- **Health Care:** A 3, ABT 1, ALGN 1, AMGN* 1, BAX* 2, BIIB 2, BMY 2, CAH 3, CI 3, CNC* 6, COO* 2, COR 4, CRL 2, CVS 7, DGX 2, DHR 1, DVA 7, DXCM 1, ELV 5, EW 2, GEHC* 1, GILD 1, HCA 1, HSIC 1, IDXX 2, ILMN* 1, INCY* 4, IQV 3, ISRG 3, JNJ 1, LH 1, LLY 1, MCK 3, MDT 1, MRK* 2, MRNA 1, MTD* 2, PFE* 1, PODD 1, RMD 4, RVTY* 1, SOLV 4, STE 3, SYK 1, TECH 3, TMO 4, UHS 1, UNH 1, VEEV 3, VRTX* 1, VTRS* 1, WAT 2, WST 2, ZTS 2.
+- **Industrials:** ADP+ 2, ALLE* 7, AME 4, AOS* 2, AXON* 3, BA 3, BE 1, BR 1, CARR* 4, CAT 1, CHRW* 2, CMI+ 4, CPRT 1, CSX 3, CTAS+ 4, DD 1, DE 1, EFX 3, EME 3, ETN+ 3, EXPD 4, FAST 3, FIX 2, GD 3, GE+ 2, GEV+ 5, GNRC 5, GWW* 3, HII 4, HON+ 2, HONA 3, HUBB 3, HWM 1, IEX 1, IR 2, ITW* 4, J 1, JBHT* 2, JCI 1, LDOS 4, LHX 5, LII 4, LMT 1, LUV 1, MAS+ 4, MMM 5, NDSN 4, NOC+ 6, ODFL* 5, OTIS+ 3, PAYX 1, PCAR 3, PH 1, PNR 4, PWR 1, ROK+ 2, ROL 4, RSG 1, RTX+ 2, SNA* 2, SWK 1, TDG 3, TT 1, TXT 1, UAL 2, UBER 3, UNP 1, UPS 10, VLTO 5, VRSK 3, VRT 2, WAB 2, WM* 5, XYL 4.
+- **Information Technology:** AAPL* 1, ACN+ 1, ADBE 4, ADI* 3, ADSK 4, AKAM* 2, AMAT 3, AMD* 1, ANET 1, APH 1, AVGO 3, CDNS+ 1, CDW 2, CIEN 3, COHR 3, CRM 2, CRWD 3, CSCO 6, CTSH 4, DDOG 3, DELL 3, FFIV 4, FICO 1, FLEX* 9, FSLR* 3, FTNT 7, GDDY 3, GEN+ 4, GLW 2, GRMN 3, HPE* 5, HPQ 3, IBM 1, INTC* 1, INTU+ 1, IT 1, JBL 4, KEYS* 2, KLAC 2, LITE 1, LRCX 2, MPWR* 3, MRVL 4, MSFT* 2, MSI* 4, MU 1, NOW 4, NTAP 1, NVDA* 3, NXPI 1, ON* 1, ORCL 4, P 5, PANW 3, PLTR 2, Q 1, QCOM 1, SMCI 1, SNPS 1, STX 1, SWKS 1, TDY 7, TEL 3, TER 1, TRMB 1, TWLO 9, TXN+ 4, TYL 1, VRSN 4, WDAY 1, WDC 3, ZBRA 3.
+- **Materials:** ALB 1, AMCR 3, APD 1, AVY 2, CRH 2, DOW 1, ECL 4, IFF 1, IP 3, LIN 4, MLM* 1, MOS 1, NEM 1, NUE 3, PPG+ 1, SHW 1, STLD 4, SW 3, VMC 1.
+- **Real Estate:** CBRE 3, CCI 1, CSGP* 2, ESS 1, EXR* 1, INVH 2, IRM 2, KIM 1, SBAC* 3, SPG 1, VICI 7, VTR 1.
+- **Utilities:** AWK 1, CNP 3, D* 2, DUK 4, XEL+ 4.
+
+## Freeze and offline validation
+
+- **Corpus:** `eval/corpus/spot500_full2.jsonl`, SHA-256 `10aeb6cf7dc9bae3f1301e697cc56aea68dd174cea074eb4e58626b19ea7fed0`.
+- **Manifest:** `eval/spot500_full2_manifest.json`, SHA-256 `343cc6795d087e300c16fd67f80c9bfaa5f4d08588cc6874f27fd13483094235`.
+  - It records the frame rule, the companies and documents it adds, the removed sentences and the three
+    company-history groups with their derivation.
+  - It also records the four earlier sets' hashes, the changes from v1 with each deviation, the feature coverage,
+    the per-item, source-record and builder hashes, and counts by company, sector, feature, mutator and slice.
+- **Frame:** the strict part of the frame reproduces the full set's fingerprint (`d02356ff…`).
+  The build refuses to run otherwise.
+- **Rebuilds:**
+  - An independent complete source rebuild, in a separate process, produced both full2 files byte for byte.
+  - The v1, v2, v3 and full builds, run in place with this builder, were accepted unchanged. The full set now pins
+    its freezing builder (the git blob at `9bff2eb`), as v1–v3 do.
+- **Oracle:** only the oracle stub has run on full2. Its [CLI record](spot500_runs/full2-oracle-20261102.json):
+  - 1,000/1,000 items completed, with 1,747/1,747 status-and-reason matches and 360/360 targets.
+  - There were zero original false alarms and zero skips, errors or extra claims.
+  - Its `by_feature` summary gives the three slices: 232, 78 and 690 items.
+  - This is 100% **by construction**. Reusing the output was refused with `FileExistsError`.
+- **Isolation:** the builds and the oracle ran under an audit hook that refused network access, dotenv files and
+  writes under the source data root. There were zero provider calls and $0 spend.
+- **Tests:** the offline suite ran with `SPOT500_DATA_ROOT` set, so the source rebuild of all five sets also ran.
+  - Final suite: **3,787 passed, 4 skipped, 1 deselected**. The skips are existing data-dependent skips, and the
+    deselected test is the one that deliberately reads a temporary `.env`.
+  - Validation details are in the [full2 validation JSON](spot500_full2_validation.json).
+
+## Runner rules and the one live run
+
+`eval/spot500.py --set full2` follows the full set's rules:
+- an admission cap of at most $6 and a harness estimate of at most $5.50;
+- records under `eval/spot500_runs/full2-oracle-<date>.json` or `full2-live-<date>.json`;
+- each output single use, and a live run refused once any `full2-live-*` record exists.
+
+**Cost and runtime.** The harness estimate is 1,000 × $0.005 = **$5.00**, within the $5.50 limit. The full set's
+live run made 940 calls for $3.69 ($0.0039 per call) in 15.5 minutes at concurrency 4. full2 has the same shape, 940
+unique requests, so expect about $3.7 (at most about $5.5 at v1–v3's highest rate) and about 15 minutes.
+
+This branch is `8c2fd78` plus these evaluation files: its `receipts/` and `data/snapshot/` are those of `8c2fd78`.
+Run once, from this worktree (or a merge that keeps them), with `MODEL_API_KEY` exported in the shell:
+
+```bash
+/Users/shou-fengchang/Desktop/Meta/.venv/bin/python eval/spot500.py --set full2 --live --evidence-dir /Users/shou-fengchang/Desktop/Meta/data/snapshot --budget 6 --concurrency 4 --output eval/spot500_runs/full2-live-20261102.json
+```
+
+If `receipts/` changes again before the run, re-derive the development list against the new commit and refreeze.
+
+## Results of the one live run (November 2, 2026, after round 8)
+
+**Run.** 2026-11-02 06:05:10–06:33:16 UTC (14:05–14:33 Taipei), `live:meta:muse-spark-1.3`, concurrency 4,
+[result record](spot500_runs/full2-live-20261102.json), at the owner's explicit request.
+
+**Code and evidence measured.**
+- The deployed round-8 release: private `8c2fd78`, public `8abbd66`, Production `dpl_H39vsq9VaVdogc9ZBqXPtRK4xrBr`.
+- The run script checked that `receipts/` and `data/snapshot` equal the exported commit, and the input hashes were
+  identical before and after (`inputs_unchanged: true`).
+
+**Completed.** 1,000/1,000 items, with 0 errors and 0 budget skips. 940 model calls; measured usage cost
+**$3.79727435** against the $5.00 estimate and the $6 cap.
+
+Every number below comes from `spot500_report.py`:
+
+```bash
+.venv/bin/python eval/spot500_report.py eval/spot500_runs/full2-live-20261102.json --slice company_new --slice company_seen --slice company_in_development --slice-without company_in_development
+```
+
+The 95% intervals are computed as for the full set.
+
+| Measure | All 400 companies | 312 not in development | 28 new | 88 in development |
+| --- | ---: | ---: | ---: | ---: |
+| Planted errors caught (✗, or ◷ for look-ahead) | **306/360 (85.0%; 79.9–89.5%)** | **235/274 (85.8%; 79.8–90.8%)** | 18/27 (66.7%) | 71/86 (82.6%) |
+| Planted errors marked ✓ | **0/360 (0.0–1.1%)** | 0/274 | 0/27 | 0/86 |
+| Planted errors returned `?` | 54/360 | 39/274 | 9/27 | 15/86 |
+| True figures marked ✗ | **17/1,298 (1.3%; 0.7–2.1%)** | **14/1,018 (1.4%; 0.6–2.3%)** | 2/102 | 3/280 |
+| True figures verified | 736/1,298 (56.7%; 52.5–60.6%) | 574/1,018 (56.4%) | 51/102 (50.0%) | 162/280 (57.9%) |
+| True figures returned `?` (neither ✓ nor ✗) | 533/1,298 (41.1%) | 423/1,018 | 49/102 | 110/280 |
+| A ✓ that landed on a true figure | **736/738 (99.7%; 99.0–100%)** | 574/576 | 51/51 | 162/162 |
+| A ✗ that landed on a planted error | **257/275 (93.5%; 89.8–96.6%)** | 198/213 | 16/18 | 59/62 |
+| Guidance figures marked ✓ | 2/89 | 2/71 | 0/13 | 0/18 |
+
+**Other counts.**
+- Of the 1,298 true figures, 12 were not extracted as a matching claim.
+- All 49 ◷ marks landed on look-ahead copies.
+- Status was correct for 1,098/1,747 gold claims, and status and reason for 1,029/1,747.
+- There were 125 extra claims (15 ✓, 2 ✗), 99 missing claims, 2 duplicate matches and 0 conflicting matches.
+- 12/590 original items carried a false alarm.
+
+**The slices.**
+- The 28 new companies are the ones the exhibit-label fallback added. They appear in no earlier set. They caught
+  fewer planted errors (18/27), on a small sample.
+- The 284 `company_seen` companies appeared in v1–v3 or full with other sentences. Round 8 re-verified full's recorded
+  claims for every one of them.
+
+| Mutator | Planted | Caught (✗/◷) | Expected reason | Marked ✓ | `?` |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `basis` | 1 | 1 | 0 | 0 | 0 |
+| `direction` | 60 | 45 | 45 | 0 | 15 |
+| `entity` | 59 | 54 | 0 | 0 | 5 |
+| `look_ahead` (◷) | 60 | 49 | 49 | 0 | 11 |
+| `period` | 60 | 52 | 44 | 0 | 8 |
+| `scale` | 60 | 53 | 53 | 0 | 7 |
+| `value` | 60 | 52 | 51 | 0 | 8 |
+
+Selected overlapping source features count every claim in the items that carry the feature. Do not sum them.
+
+| Feature | True verified | True marked ✗ | Planted caught |
+| --- | ---: | ---: | ---: |
+| `revenue` | 317/401 | 4 | 118/142 |
+| `growth` | 444/650 | 6 | 136/163 |
+| `eps_diluted` | 153/250 | 1 | 62/65 |
+| `net_income` | 90/142 | 0 | 26/37 |
+| `operating_income` | 67/95 | 0 | 37/37 |
+| `operating_margin` | 36/71 | 0 | 9/11 |
+| `gross_margin` | 26/55 | 5 | 2/5 |
+| `operating_cash_flow` | 78/97 | 2 | 46/51 |
+| `free_cash_flow` | 43/73 | 2 | 18/19 |
+| `bank` | 27/53 | 0 | 9/14 |
+| `reit_or_utility` | 20/64 | 2 | 8/9 |
+| `non_gaap` | 78/248 | 3 | 19/19 |
+| `segment_revenue` | 22/119 | 2 | 1/1 |
+| `tax_rate` | 4/47 | 0 | · |
+
+| Sector | Companies | Planted caught | Marked ✓ | True verified | True marked ✗ |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Communication Services | 17 | 12/16 | 0 | 42/59 | 1 |
+| Consumer Discretionary | 42 | 30/34 | 0 | 81/128 | 1 |
+| Consumer Staples | 29 | 16/21 | 0 | 41/99 | 2 |
+| Energy | 13 | 12/14 | 0 | 21/33 | 0 |
+| Financials | 63 | 44/54 | 0 | 79/176 | 2 |
+| Health Care | 54 | 35/37 | 0 | 112/184 | 0 |
+| Industrials | 74 | 64/84 | 0 | 138/252 | 3 |
+| Information Technology | 72 | 73/77 | 0 | 175/260 | 6 |
+| Materials | 19 | 12/12 | 0 | 25/39 | 0 |
+| Real Estate | 12 | 6/8 | 0 | 21/46 | 1 |
+| Utilities | 5 | 2/3 | 0 | 1/22 | 1 |
+
+**No planted error was marked ✓.** All 54 missed copies returned `?`.
+
+**The 2 guidance figures marked ✓** are both TE Connectivity's "14% sales growth and 19% EPS growth in third quarter
+of fiscal 2026". These are actual results that its headline line puts next to the word "guidance". NoCap verified them
+against the 10-Q (13.8% and 19.2%), which is correct on review. The frozen labels still count them as guidance.
+
+**The 17 true figures marked ✗**, by cause (*development* marks a development company):
+- **A comparison base read as the wrong period (4).** Teledyne's "compared with $343.1 million" (two items) and
+  Comfort Systems' "compared to $2.17 billion in 2025" were read as full-year bases. CenterPoint's "$0.53 per diluted
+  share in the comparable period of 2025", the base of a non-GAAP EPS, was compared with GAAP EPS.
+- **An adjusted, core or segment margin compared with another measure (6).**
+  - Corning's "Core gross margin" (39.1%) and General Mills' "Adjusted gross margin … 33.2 percent of net sales" were
+    compared with other gross margins.
+  - Ameriprise's "Adjusted operating expenses … $2.3 billion" was compared with total operating expenses.
+  - PulteGroup's "Home Sale Gross Margin of 24.8%" was compared with a computed company margin.
+  - Axon's "Connected Devices gross margin … 51.9% from 48.6%" (*development*, 2) was compared with a 60.4% segment
+    margin from its release.
+- **A part of the business compared with the whole (2).** Nasdaq's "Other revenues of $2 million and $4 million"
+  within one division (*development*) and AT&T's operating expenses "up 11.4%", in a sentence whose segment is named
+  earlier, were compared with company totals.
+- **A conditional figure (1).** Crown Castle's growth "increases to 3.5% if DISH revenues are excluded" was compared
+  with reported revenue growth.
+- **A different revenue definition (1).** Altria's "Net revenues increased 0.8%" was compared with revenue growth
+  of 0.99%.
+- **A line with no period of its own (2).** TE Connectivity's "Free cash flow was $1.3 billion, up 17% year over
+  year" was compared with the quarter's $680 million.
+- **A label error (1).** In a direction copy of Texas Instruments' sentence, the flipped word governs both figures
+  ("Revenue decreased 11% sequentially and 28% from the same quarter a year ago"). NoCap's ✗ on the 28% is right; the
+  frozen label calls it true.
+
+These patterns are recorded for later fixes. The run is not repeated after any fix.
+
+**Where `?` remains.** The 533 true figures returned `?`, grouped by NoCap's explanation:
+- 156: a kind of figure NoCap does not track;
+- 143: a qualifier it will not match to a filed figure;
+- 77: a non-GAAP line with no matching release fact for the period;
+- 30 constant-currency and 16 "organic" figures;
+- 27: a period or company it could not resolve; 9: no single filing reports both compared periods;
+- 17: read as guidance;
+- 58 others.
+
+**Five runs.**
+
+| Run | Code | Items | Planted caught | Marked ✓ | True verified | True marked ✗ | A ✓ right |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| v1 | Nov 1 (`42d48aa`) | 75 | 27/35 | 0 | 54/72 | 0/72 | 54/54 |
+| v2 | Nov 2, early (`f22e56c`) | 74 | 27/35 | 1 | 48/75 | 4/75 | 48/49 |
+| v3 | Nov 2, morning (`84b8fd4`) | 69 | 29/32 | 0 | 58/74 | 1/74 | 58/58 |
+| full | Nov 2, before round 8 (`8d69d3c`) | 1,000 | 310/376 | 2 | 741/1,271 | 14/1,271 | 741/744 |
+| full2 | Nov 2, round 8 (`8c2fd78`) | 1,000 | 306/360 | 0 | 736/1,298 | 17/1,298 | 736/738 |
+
+full and full2 use different sentences, and full2 adds 28 companies, so the table is not a controlled before/after
+comparison. Each set ran once and is never rerun or pooled.
+
+## After the two comprehensive tests: round 9 and release statements
+
+Two changes came after full2 ran, prompted by drafts the owner pasted on the live site. Neither set is rerun, and
+neither set's numbers above include them. The checks below re-verify the runs' recorded claims offline at $0, with the
+same scripts as round 8. They are regression checks, not accuracy results.
+
+**Round 9 (`895d819`, merged `0354ba6`).** Words that never change what a figure measures no longer block a check:
+- hedges away from their number, discourse and degree adverbs ("also", "slightly"), evaluative adjectives and
+  markdown emphasis;
+- bounds ("more than", "nearly", "below") stay qualifiers.
+
+| Set | True figures | Planted errors |
+| --- | --- | --- |
+| full | `?`→✓ 7 | `?`→✗ 5, `?`→◷ 2 |
+| full2 | `?`→✓ 10 | `?`→✗ 4, `?`→◷ 1 |
+
+No verdict moved away from correct.
+
+**Release statements (index `382208a` by Codex; matcher `7b8f293` and receipt `878a7a0`, merged `73a3682`).**
+- **What it does.** A figure that stored facts leave `?` with no evidence becomes ✓ when the company's own filed 8-K
+  earnings release for that quarter states it.
+- **What must match.** The same number at its written precision, measure, qualifiers, direction and comparison. Every
+  companion figure must be in the sentence, and no rival figure for the measure.
+- **What it never does.** It never gives ✗. Guidance is excluded.
+
+Results:
+- **Planted errors and guidance figures that moved to ✓:** 0 in full and 0 in full2.
+- **True figures that moved from `?` to ✓:** 208 in full and 189 in full2.
+  - These gains are **circular**: those items are sentences taken from the same releases. They show that the matcher
+    finds the sentences, not how often real drafts get confirmed.
+- **Perturbation check.** Every claim the matcher confirmed was perturbed: 1,834 copies with a changed number, basis or
+  direction. No copy with a changed number still matched.
+- **Dev replay.** 45 of 693 claims moved from `?` to ✓, all release statements. Each is a true figure: 36 in unmutated
+  items, and 9 unaffected figures in mutated items, such as the "up 19% in constant currency" beside a planted
+  "$38.3 million".
+- **Saved examples.** Their verdicts are unchanged.
+- **The three drafts the owner pasted,** which these fixes target, so this is not a measurement:
+  - Microsoft's: all six remaining `?` (constant-currency growth, Microsoft Cloud revenue) are confirmed.
+  - Costco's: net sales, its growth and base, the tariff benefit and the warehouse count are confirmed. Members,
+    renewal rates and comparable sales stay `?`: the first two are not in the release, and table rows are not
+    indexed yet.
+  - McDonald's: global and U.S. comparable sales, systemwide sales and three loyalty figures are confirmed. Round 9
+    confirms its 4% and 3%.

@@ -320,7 +320,9 @@ def test_defined_eps_acronym_keeps_the_basic_alternative_and_other_metric_readin
 ])
 def test_an_acronym_that_does_not_restate_its_phrase_stays_unread(snapshot, words, metric):
     c = claim(f"Amgen reported {words} of $4.37.", "$4.37", 4.37, metric=metric, metric_text=words)
-    assert unread(verify(c, snapshot))
+    # The filed-facts check (_verify_filed) is what this pins; the company's 8-K release text can still confirm the
+    # figure afterwards (receipts.release_text, tests/test_release_text.py).
+    assert unread(verifier._verify_filed(c, snapshot))
 
 
 # --- 3. Net income margin is net margin -------------------------------------------------------------------------------
@@ -650,7 +652,9 @@ def test_noninterest_income_without_a_held_line_or_with_other_wording_stays_unre
                                                                                   scale, entity):
     value_text = f"${value} billion" if unit == "USD" else f"{value}%"
     c = claim(span, value_text, value, metric="other", metric_text=words, unit=unit, scale=scale, entity=entity)
-    assert unread(verify(c, snapshot))
+    # The filed-facts check (_verify_filed) is what this pins; the company's 8-K release text can still confirm the
+    # figure afterwards (receipts.release_text, tests/test_release_text.py).
+    assert unread(verifier._verify_filed(c, snapshot))
 
 
 # --- Round 4. A direction word signs only its own figure's clause ---------------------------------------------------
@@ -1790,7 +1794,9 @@ def test_a_wrong_dollar_change_is_wrong_against_the_change(snapshot, c, expected
 
 
 def test_a_dollar_change_without_its_base_on_file_is_unread(snapshot):
-    v = verify(tfc_change(32, period_text="second quarter of fiscal 2026"), snapshot)
+    # The filed-facts check (_verify_filed) is what this pins; the company's 8-K release text can still confirm the
+    # figure afterwards (receipts.release_text, tests/test_release_text.py).
+    v = verifier._verify_filed(tfc_change(32, period_text="second quarter of fiscal 2026"), snapshot)
     assert unread(v), v.explanation
     assert "3.667 billion" not in v.explanation
 
@@ -2057,7 +2063,9 @@ def cost_sales(value_text, value, *, metric="revenue", metric_text="net sales", 
     cost_sales("$93.9 billion", 93.9, metric_text="sales", span="Costco's sales were $93.9 billion."),
 ])
 def test_net_sales_are_never_checked_against_total_revenue(snapshot, c):
-    v = verify(c, snapshot, context=COST_CONTEXT)
+    # The filed-facts check (_verify_filed) is what this pins; the company's 8-K release text can still confirm the
+    # figure afterwards (receipts.release_text, tests/test_release_text.py).
+    v = verifier._verify_filed(c, snapshot, context=COST_CONTEXT)
     assert unread(v) and "no net sales figure" in v.explanation, v.explanation
     assert "95.723" not in v.explanation and "86.156" not in v.explanation
 
@@ -2115,7 +2123,10 @@ def alle_margin(span, value):
 
 
 def test_a_regional_margin_after_its_change_is_unread(snapshot):
-    v = verify(alle_margin("Adjusted operating margin in the region decreased 40 basis points to 13.9%", 13.9), snapshot)
+    # The filed-facts check (_verify_filed) is what this pins; the company's 8-K release text can still confirm the
+    # figure afterwards (receipts.release_text, tests/test_release_text.py).
+    v = verifier._verify_filed(alle_margin("Adjusted operating margin in the region decreased 40 basis points to 13.9%",
+                                           13.9), snapshot)
     assert unread(v) and "“region”" in v.explanation, v.explanation
 
 
@@ -2251,3 +2262,115 @@ def test_the_listing_rule_reads_tickers_that_are_words():
         assert verifier.listing_conflict(other, store, None, verifier.draft_line(other, text)) == "(NYSE: KEY)"
     finally:
         store.close()
+
+
+# --- Round 9. Words that never change what a figure measures are not qualifiers ------------------------------------
+# ChatGPT-style drafts that trial users paste returned "?" ("The wording “approximately” qualifies this figure"):
+# McDonald's Q2 2026 "quarterly revenue increased approximately **4% year over year to $7.10 billion**" (filed 3.74%,
+# $7.099B) and "Operating income also grew 3% to $3.34 billion" (3.3%); Costco's "Its gross margin declined slightly to
+# 11.02%". Hedges away from their number, discourse and degree adverbs, evaluative adjectives and linking verbs are
+# ignored (verify._NEUTRAL_WORDS); bounds and comparisons ("nearly", "more than", "below") and "representing" stay
+# qualifiers, and markdown emphasis is no wording.
+MCD_SUMMARY = (ROOT / "tests/fixtures/mcd_q2_2026_summary.txt").read_text()
+
+
+def mcd(span, value_text, value, metric="revenue_growth", metric_text="revenue", unit="%", scale="units",
+        comparison="YoY"):
+    return claim(span, value_text, value, metric=metric, metric_text=metric_text, unit=unit, scale=scale,
+                 entity="McDonald's", period_text="Q2 2026", comparison=comparison)
+
+
+def test_the_mcdonalds_summary_verifies_with_its_markdown_and_hedges(snapshot):
+    passages = extract.split_passages(MCD_SUMMARY)
+    start, passage = passages[3]
+    proposals = [
+        extract.ModelClaim(metric=m, metric_text=mt, value_text=vt, value=v, unit=u, scale=sc, period_text="",
+                           period_type="quarter", comparison=cmp, bases=[], forward_looking=False, entity="McDonald's",
+                           segment=None, span_text=span)
+        for m, mt, vt, v, u, sc, cmp, span in [
+            ("revenue_growth", "quarterly revenue increased approximately", "4%", 4.0, "%", "units", "YoY",
+             "McDonald's quarterly revenue increased approximately **4% year over year"),
+            ("revenue", "revenue", "$7.10 billion", 7.10, "USD", "billions", "none",
+             "McDonald's quarterly revenue increased approximately **4% year over year to $7.10 billion"),
+            ("operating_income", "Operating income also grew", "3%", 3.0, "%", "units", "none",
+             "Operating income also grew 3%"),
+        ]]
+    claims, _ = extract.build_claims([(start, passage, proposals)], [])
+    context = extract.infer_context(MCD_SUMMARY)
+    verdicts = [verify(c, snapshot, context=context, draft=MCD_SUMMARY) for c in claims]
+    assert [v.status for v in verdicts] == ["verified"] * 3, [v.explanation for v in verdicts]
+    assert "revenue grew 3.7% year over year" in verdicts[0].explanation
+    assert "$7.099 billion" in verdicts[1].explanation
+    assert "operating income grew 3.3% year over year" in verdicts[2].explanation
+
+
+@pytest.mark.parametrize("c,status", [
+    # a hedge away from its number, and one before it read as a hedge (no wider than the written precision for ✓)
+    (mcd("Revenue of approximately $7.1 billion grew 4% year over year", "4%", 4.0), "verified"),
+    (mcd("McDonald's quarterly revenue increased approximately **4% year over year", "4%", 4.0), "verified"),
+    (mcd("McDonald's quarterly revenue increased approximately 3.6% year over year", "3.6%", 3.6), "wrong"),
+    (mcd("McDonald's quarterly revenue increased approximately 10% year over year", "10%", 10.0), "wrong"),
+    # a discourse adverb
+    (mcd("Operating income also grew 3%", "3%", 3.0, metric="operating_income", metric_text="Operating income also grew",
+         comparison="none"), "verified"),
+    (mcd("Operating income also grew 10%", "10%", 10.0, metric="operating_income", metric_text="Operating income also "
+         "grew", comparison="none"), "wrong"),
+])
+def test_hedges_and_discourse_adverbs_are_not_qualifiers(snapshot, c, status):
+    assert verify(c, snapshot).status == status
+
+
+@pytest.mark.parametrize("span,value,status", [
+    ("AMD's operating margin rose sharply to 17.3%", 17.3, "verified"),   # 17.25%
+    ("AMD's operating margin rose sharply to 20.0%", 20.0, "wrong"),
+    ("AMD's operating margin rose slightly to 17.3%", 17.3, "verified"),
+])
+def test_degree_adverbs_are_not_qualifiers(snapshot, span, value, status):
+    c = claim(span, f"{value}%", value, metric="other", metric_text="operating margin", unit="%", entity="AMD",
+              period_text="Q2 2026")
+    assert verify(c, snapshot).status == status
+
+
+def test_a_costco_margin_that_declined_slightly_is_read_as_a_margin(snapshot):
+    # "slightly" no longer stops the reading; Costco's gross margin is on net sales, which NoCap doesn't hold.
+    text = "Its gross margin declined slightly to 11.02%"
+    c = claim(text, "11.02%", 11.02, metric="gross_margin", metric_text="gross margin", unit="%", entity="Costco",
+              period_text="")
+    v = verify(c, snapshot, context="Costco Wholesale, fourth quarter of fiscal year 2026", draft=text)
+    assert (v.status, v.reason) == ("unverifiable", "ambiguous") and "sales base" in v.explanation, v.explanation
+    assert "slightly" not in v.explanation
+
+
+@pytest.mark.parametrize("span,value_text,value,metric,metric_text,entity,period_text,unit,scale,status", [
+    ("Sales were an all-time quarterly record of $818 million", "$818 million", 818.0, "revenue", "Sales", "Nordson",
+     "Q3 FY2026", "USD", "millions", "verified"),
+    ("Sales were an all-time quarterly record of $850 million", "$850 million", 850.0, "revenue", "Sales", "Nordson",
+     "Q3 FY2026", "USD", "millions", "wrong"),
+    ("Diluted earnings per share remained flat at $0.32", "$0.32", 0.32, "eps_diluted", "Diluted earnings per share",
+     "Chipotle Mexican Grill", "Q2 2026", "USD/share", "units", "verified"),
+    ("Diluted earnings per share remained flat at $0.40", "$0.40", 0.40, "eps_diluted", "Diluted earnings per share",
+     "Chipotle Mexican Grill", "Q2 2026", "USD/share", "units", "wrong"),
+])
+def test_evaluative_adjectives_and_linking_verbs_are_not_qualifiers(snapshot, span, value_text, value, metric,
+                                                                   metric_text, entity, period_text, unit, scale,
+                                                                   status):
+    c = claim(span, value_text, value, metric=metric, metric_text=metric_text, unit=unit, scale=scale, entity=entity,
+              period_text=period_text)
+    assert verify(c, snapshot).status == status
+
+
+@pytest.mark.parametrize("span,words", [
+    ("Revenue of nearly $7.1 billion grew 4% year over year", "nearly"),
+    ("Revenue of more than $7 billion grew 4% year over year", "more than"),
+    ("Revenue below $8 billion grew 4% year over year", "below"),
+    ("Revenue of $7.10 billion, representing 4% year-over-year growth", "representing"),
+])
+def test_bounds_comparisons_and_shares_stay_qualifiers(snapshot, span, words):
+    v = verify(mcd(span, "4%", 4.0), snapshot)
+    assert unread(v) and f"“{words}”" in v.explanation, v.explanation
+
+
+def test_markdown_emphasis_is_no_wording():
+    assert verifier._without_markdown("increased **4% year over year** to __$7.10 billion__") == \
+        "increased   4% year over year   to   $7.10 billion  "
+    assert verifier._without_markdown("free_cash_flow") == "free_cash_flow"

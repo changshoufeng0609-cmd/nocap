@@ -2,6 +2,7 @@
 
 python eval/spot500_exclusions.py              # writes eval/spot500_v3_exclusions.json
 python eval/spot500_exclusions.py --set full   # writes eval/spot500_full_exclusions.json
+python eval/spot500_exclusions.py --set full2 --until <round-8 merge>   # writes eval/spot500_full2_history.json
 An existing output must match exactly.
 
 Source-only: the scan reads git history, test and verifier source text, and the
@@ -47,6 +48,14 @@ DERIVATIONS = {
     "full": (ROOT / "eval/spot500_full_exclusions.json", "8d69d3c19c3bdfbc3825b48df3e1cb8e7b0edfa0",
              ("ADI", "BAX", "CSGP", "TGT")),
 }
+# full2 tags (does not exclude) the companies the round-8 and name-resolution fixes name, over the range from
+# the integration tip full2 starts from to the round-8 merge. Fixes may extend existing test files, so this scan
+# also reads the lines added to test files that already existed.
+FULL2_SINCE = "22cd636b1a09232a37d8ac19d7d95af09847db9f"
+FULL2_UNTIL = "8c2fd7815ccd0d1108a5df39428f6b0f091a0c65"  # the fixed code on wip/day3-handoff that full2 measures
+FULL2_OUTPUT = ROOT / "eval/spot500_full2_history.json"
+FULL2_METHOD = ("As for v3, with one addition: the test scan reads every test file added in the range and the lines "
+                "added to test files that already existed.")
 TOKEN = re.compile(r"[^\W_]+|&")
 
 
@@ -201,6 +210,45 @@ def derive(db: Path, spot_set: str = "v3") -> dict:
     }
 
 
+def derive_full2(db: Path, until: str | None = None) -> dict:
+    until = until or FULL2_UNTIL
+    if not until:
+        raise ValueError("full2's derivation needs the round-8 merge commit")
+    span = f"{FULL2_SINCE}..{until}"
+    rows, table = companies_table(db)
+    scanner = Scanner(rows)
+    added_command = ("git", "diff", "--name-only", "--diff-filter=A", span, "--", "tests/")
+    modified_command = ("git", "diff", "-U0", "--no-color", "--diff-filter=M", span, "--", "tests/")
+    code_command = ("git", "diff", "-U0", "--no-color", span, "--", "receipts/")
+    listed = git(*added_command).split()
+    files = [path for path in listed if path not in DROPPED]
+    texts = {path: git("git", "show", f"{until}:{path}") for path in files}
+    modified_diff = git(*modified_command)
+    modified = [line for line in added_lines(modified_diff) if line[0] not in DROPPED]
+    tests_named, tests_rejected = scanner.scan(
+        [(path, i, line) for path in files for i, line in enumerate(texts[path].splitlines(), 1)] + modified)
+    code_diff = git(*code_command)
+    code_named, code_rejected = scanner.scan(list(added_lines(code_diff)))
+    return {
+        "version": "spot500_full2",
+        "range": {"since": FULL2_SINCE, "until": until, "since_role": "the integration tip full2 starts from",
+                  "until_role": "the round-8 merge that spot500_full2 measures"},
+        "companies_table": table,
+        "method": __doc__.split("Source-only:")[1].strip() + "\n" + FULL2_METHOD,
+        "verifier_fix_tests": {
+            "command": " ".join(added_command), "modified_command": " ".join(modified_command),
+            "listed": listed, "dropped": DROPPED,
+            "scanned": [{"path": path, "sha256": sha(texts[path].encode())} for path in files],
+            "modified_diff_sha256": sha(modified_diff.encode()),
+            "modified_files": sorted({path for path, _, _ in modified}),
+            "companies": sorted(tests_named), "evidence": tests_named, "rejected": tests_rejected},
+        "verifier_fix_code": {
+            "command": " ".join(code_command), "scope": "added lines only", "diff_sha256": sha(code_diff.encode()),
+            "companies": sorted(code_named), "evidence": code_named, "rejected": code_rejected},
+        "reviewer_probes": {"companies": [], "source": "no new probe companies"},
+    }
+
+
 def encode(record: dict) -> bytes:
     return json.dumps(record, sort_keys=True, indent=2, ensure_ascii=False).encode() + b"\n"
 
@@ -208,11 +256,16 @@ def encode(record: dict) -> bytes:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--companies-db", type=Path, default=ROOT / "data/snapshot/facts.sqlite")
-    parser.add_argument("--set", dest="spot_set", choices=sorted(DERIVATIONS), default="v3")
+    parser.add_argument("--set", dest="spot_set", choices=sorted([*DERIVATIONS, "full2"]), default="v3")
+    parser.add_argument("--until", help="full2 only: the round-8 merge commit")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
-    args.output = args.output or DERIVATIONS[args.spot_set][0]
-    raw = encode(derive(args.companies_db, args.spot_set))
+    if args.spot_set == "full2":
+        args.output = args.output or FULL2_OUTPUT
+        raw = encode(derive_full2(args.companies_db, args.until))
+    else:
+        args.output = args.output or DERIVATIONS[args.spot_set][0]
+        raw = encode(derive(args.companies_db, args.spot_set))
     if args.output.exists():
         if args.output.read_bytes() != raw:
             raise ValueError(f"Refusing changed frozen output: {args.output}")

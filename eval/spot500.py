@@ -9,12 +9,13 @@
 .venv/bin/python eval/spot500.py --set v3 --live --output eval/spot500_runs/v3-live-<date>.json
 .venv/bin/python eval/spot500.py --set full --stub oracle --output eval/spot500_runs/full-oracle-<date>.json
 .venv/bin/python eval/spot500.py --set full --live --budget 6 --concurrency 4 --output eval/spot500_runs/full-live-<date>.json
+.venv/bin/python eval/spot500.py --set full2 --stub oracle --budget 6 --output eval/spot500_runs/full2-oracle-<date>.json
 
 Live mode requires MODEL_API_KEY already exported; this runner never reads .env.
 Each output and its .run directory are single use, including interrupted runs.
 v1 is the default set. Later sets write only eval/spot500_runs/<set>-oracle-*.json
 or <set>-live-*.json, and refuse a live run once any <set>-live-* record exists.
-Only the full set has a budget allowance (cap up to $6, estimate up to $5.50); every
+Only the full and full2 sets have a budget allowance (cap up to $6, estimate up to $5.50); every
 other set refuses a cap of $1 or more. --concurrency runs up to four items at once;
 items that share an extraction request run one after another, so none is sent twice.
 """
@@ -47,11 +48,13 @@ V3_CORPUS = ROOT / "eval/corpus/spot500_v3.jsonl"
 V3_MANIFEST = ROOT / "eval/spot500_v3_manifest.json"
 FULL_CORPUS = ROOT / "eval/corpus/spot500_full.jsonl"
 FULL_MANIFEST = ROOT / "eval/spot500_full_manifest.json"
+FULL2_CORPUS = ROOT / "eval/corpus/spot500_full2.jsonl"
+FULL2_MANIFEST = ROOT / "eval/spot500_full2_manifest.json"
 RUNS = ROOT / "eval/spot500_runs"
-SETS = ("v1", "v2", "v3", "full")
+SETS = ("v1", "v2", "v3", "full", "full2")
 DEFAULT_BUDGET = 0.95
 # (admission cap limit, harness estimate limit) for a set with an explicit allowance.
-BUDGET_ALLOWANCES = {"full": (6.0, 5.5)}
+BUDGET_ALLOWANCES = {"full": (6.0, 5.5), "full2": (6.0, 5.5)}
 MAX_CONCURRENCY = 4
 
 
@@ -89,6 +92,8 @@ def set_files(spot_set: str = "v1") -> tuple[Path, Path]:
         return V3_CORPUS, V3_MANIFEST
     if spot_set == "full":
         return FULL_CORPUS, FULL_MANIFEST
+    if spot_set == "full2":
+        return FULL2_CORPUS, FULL2_MANIFEST
     raise ValueError(f"Unknown spot500 set: {spot_set}")
 
 
