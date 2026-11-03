@@ -188,7 +188,34 @@ export function SlideApp() {
             {inputError ? <p role="alert" className="text-sm text-bad">{inputError}</p> : null}
           </div>
 
-          {running ? <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm" role="status"><Loader2Icon className="size-4 animate-spin" aria-hidden />{STAGES[state.stage]}<Button variant="ghost" size="sm" className="ml-auto" onClick={invalidate}>Cancel</Button></div> : null}
+          {running ? (
+            <div className="space-y-2 border-b border-border bg-muted/25 px-4 py-3 text-sm" role="status">
+              <div className="flex items-center gap-2">
+                <Loader2Icon className="size-4 animate-spin" aria-hidden />
+                <span className="font-medium">{STAGES[state.stage]}</span>
+                <Button variant="ghost" size="sm" className="ml-auto" onClick={invalidate}>Cancel</Button>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 font-mono text-[0.68rem]" aria-hidden>
+                {([
+                  ["segmenting", "01 · SAM 3.1 Regions"],
+                  ["reading", "02 · Muse Spark OCR"],
+                  ["verifying", "03 · SEC Verifier"],
+                ] as const).map(([key, label]) => (
+                  <span
+                    key={key}
+                    className={cn(
+                      "rounded border px-2 py-1 text-center transition-colors",
+                      state.stage === key
+                        ? "border-foreground/50 bg-card font-semibold text-foreground shadow-2xs"
+                        : "border-border/60 bg-background/40 text-muted-foreground",
+                    )}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {state.error ? <div role="alert" className="space-y-2 border-b border-border bg-bad-tint/40 p-4 text-sm"><p className="font-medium text-bad">{state.error.message}</p><p className="text-xs text-muted-foreground">{formatErrorCost(state.error)}</p><p className="text-muted-foreground">{state.claims.length ? "The check is incomplete. Any readings below are partial results." : "No complete slide check is available."}</p>{state.error.retryable ? <Button variant="outline" size="sm" onClick={check}>Retry slide check</Button> : null}</div> : null}
           {state.done ? (
             <div className="space-y-2 border-b border-border px-4 py-3" role="status">
@@ -205,10 +232,17 @@ export function SlideApp() {
 
           {upload && dimensions ? (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/20 px-3 py-2.5">
                 {sample ? <p className="max-w-[75%] text-xs leading-relaxed text-muted-foreground"><span className="font-medium text-foreground/80">{sample.title}</span> · real SEC filing: {sample.source.form}, accession {sample.source.accession}, accepted {formatUtcMinutes(sample.source.accepted_utc)} · <a className="underline underline-offset-4" href={sample.source.url} target="_blank" rel="noopener noreferrer">View on SEC</a> · {sample.attribution}</p> : <p className="max-w-[65%] truncate text-xs text-muted-foreground" title={upload.name}>{upload.name}</p>}
-                <Button size="sm" variant="ghost" aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOutIcon /> : <ZoomInIcon />}{zoomed ? "Fit slide" : "Zoom in"}</Button>
-                {state.regions.length ? <label className="flex w-full items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" checked={showRegions} onChange={(e) => setShowRegions(e.target.checked)} className="accent-foreground" />Show chart/table regions ({state.regions.filter((r) => r.source === "sam").length} SAM, {state.regions.filter((r) => r.source === "spark").length} Spark)</label> : null}
+                <div className="flex flex-wrap items-center gap-2">
+                  {state.regions.length ? (
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground/85 shadow-2xs hover:bg-muted/60">
+                      <input type="checkbox" checked={showRegions} onChange={(e) => setShowRegions(e.target.checked)} className="accent-foreground" />
+                      Show chart/table regions ({state.regions.filter((r) => r.source === "sam").length} SAM, {state.regions.filter((r) => r.source === "spark").length} Spark)
+                    </label>
+                  ) : null}
+                  <Button size="sm" variant="ghost" aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOutIcon /> : <ZoomInIcon />}{zoomed ? "Fit slide" : "Zoom in"}</Button>
+                </div>
               </div>
               <div className="max-w-full overflow-x-auto bg-muted/30 p-3" tabIndex={zoomed ? 0 : undefined} aria-label={zoomed ? "Enlarged slide; scroll horizontally to inspect" : "Slide preview with extracted readings"}>
                 <div className={cn("relative", zoomed ? "w-[1100px] max-w-none" : "w-full")} style={{ aspectRatio: `${dimensions.width} / ${dimensions.height}` }}>
@@ -226,7 +260,18 @@ export function SlideApp() {
               <p className="border-t border-border px-4 py-3 text-xs leading-relaxed text-muted-foreground">Boxes mark model readings and may be imprecise. Select a numbered box or a reading to see the filing receipt. Use Zoom in for small labels.</p>
             </>
           ) : (
-            <div className="flex min-h-64 flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground"><FileImageIcon className="size-10 stroke-1" aria-hidden /><p className="font-serif text-xl">Give every label a receipt.</p><p className="max-w-sm text-sm leading-relaxed">Choose a clear screenshot of one earnings chart or table, including its title, units and period.</p><div className="flex flex-wrap justify-center gap-2"><Button variant="outline" onClick={() => fileInput.current?.click()}><UploadIcon />Choose slide image</Button><Button variant="secondary" onClick={() => void loadSample()} disabled={preparing || MOCK}><LandmarkIcon />Try a real SEC slide</Button></div><p className="max-w-sm text-xs leading-relaxed">The sample is page 9 of Bank of America&apos;s 2Q26 earnings presentation, filed with the SEC. Its live SAM 3.1 and Muse Spark run is recorded and replays at $0.</p></div>
+            <div className="m-4 flex min-h-64 flex-col items-center justify-center gap-3.5 rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center text-muted-foreground sm:m-5">
+              <div className="flex size-12 items-center justify-center rounded-full border border-border bg-card shadow-2xs">
+                <FileImageIcon className="size-6 stroke-1.5 text-foreground/75" aria-hidden />
+              </div>
+              <p className="font-serif text-xl text-foreground">Give every label a receipt.</p>
+              <p className="max-w-sm text-sm leading-relaxed">Choose a clear screenshot of one earnings chart or table, including its title, units and period.</p>
+              <div className="flex flex-wrap justify-center gap-2.5 pt-1">
+                <Button variant="default" onClick={() => void loadSample()} disabled={preparing || MOCK}><LandmarkIcon />Try a real SEC slide</Button>
+                <Button variant="outline" className="bg-card" onClick={() => fileInput.current?.click()}><UploadIcon />Choose slide image</Button>
+              </div>
+              <p className="max-w-sm text-xs leading-relaxed">The sample is page 9 of Bank of America&apos;s 2Q26 earnings presentation, filed with the SEC. Its live SAM 3.1 and Muse Spark run is recorded and replays at $0.</p>
+            </div>
           )}
         </section>
 

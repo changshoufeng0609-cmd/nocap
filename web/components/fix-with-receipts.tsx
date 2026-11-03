@@ -29,16 +29,18 @@ function sourceUrl(raw: string): string | undefined {
 function FilingReceipt({ fact, index }: { fact: Fact; index?: number }) {
   const href = sourceUrl(fact.url);
   return (
-    <li className="min-w-0 rounded-lg border border-border bg-background p-3 text-xs leading-relaxed">
+    <li className="receipt-slip min-w-0 rounded-b-lg px-3.5 pt-4 pb-3 text-xs leading-relaxed">
       <p className="font-medium text-foreground">
-        {index ? `Receipt ${index} · ` : ""}{fact.ticker} · {fact.form} · {formatFiscalPeriod(fact) ?? formatPeriodRange(fact)} · {fact.basis}
+        {index ? `Receipt ${index} · ` : ""}{fact.ticker} · <span className="rounded bg-foreground px-1 py-0.5 font-mono text-[0.65rem] font-semibold text-background">{fact.form}</span> · {formatFiscalPeriod(fact) ?? formatPeriodRange(fact)} · {fact.basis}
       </p>
-      <p className="mt-1">{formatValue(fact.value, fact.unit)} · {fact.metric.replace(/_/g, " ")}</p>
-      {fact.locator ? <blockquote className="mt-2 border-l-2 border-border pl-2 break-words text-muted-foreground">{fact.locator}</blockquote> : null}
-      <p className="mt-2 break-all font-mono text-[11px] text-muted-foreground">{fact.accession}</p>
-      <p className="text-muted-foreground">Accepted {formatUtc(fact.accepted_at)}</p>
+      <p className="mt-1.5 font-mono text-sm font-medium tabular-nums">{formatValue(fact.value, fact.unit)} <span className="font-sans text-xs font-normal text-muted-foreground">· {fact.metric.replace(/_/g, " ")}</span></p>
+      {fact.locator ? <blockquote className="mt-2 border-l-2 border-border pl-2.5 font-serif break-words text-muted-foreground">{fact.locator}</blockquote> : null}
+      <div className="mt-2 border-t border-dashed border-border pt-1.5">
+        <p className="break-all font-mono text-[11px] text-muted-foreground">{fact.accession}</p>
+        <p className="text-muted-foreground">Accepted {formatUtc(fact.accepted_at)}</p>
+      </div>
       {href ? (
-        <a href={href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+        <a href={href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 font-medium underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
           View on EDGAR <ExternalLinkIcon className="size-3" aria-hidden />
           <span className="sr-only">(opens in a new tab)</span>
         </a>
@@ -56,10 +58,10 @@ function diffNodes(result: FixResult, revised: boolean, prefix: string): ReactNo
     nodes.push(<Fragment key={`text-${index}`}>{text.slice(cursor, change.start).join("")}</Fragment>);
     nodes.push(revised ? (
       <Fragment key={`change-${index}`}>
-        <mark className="rounded-sm bg-ok-tint px-0.5 text-foreground underline decoration-ok-line decoration-2 underline-offset-4">{change.after}</mark>
-        <a href={`#${prefix}-change-${index}`} aria-label={`Receipt ${index + 1} for ${change.after}`} className="ml-0.5 align-super font-sans text-xs font-semibold text-ok underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-ring">[{index + 1}]</a>
+        <mark className="rounded-sm bg-ok-tint px-1 py-0.5 font-medium text-foreground underline decoration-ok-line decoration-2 underline-offset-4">{change.after}</mark>
+        <a href={`#${prefix}-change-${index}`} aria-label={`Receipt ${index + 1} for ${change.after}`} className="ml-0.5 align-super rounded bg-ok-tint px-1 py-px font-mono text-[0.7rem] font-semibold text-ok underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-ring">[{index + 1}]</a>
       </Fragment>
-    ) : <del key={`change-${index}`} className="rounded-sm bg-bad-tint px-0.5 decoration-bad/70">{change.before}</del>);
+    ) : <del key={`change-${index}`} className="rounded-sm bg-bad-tint px-1 py-0.5 text-bad decoration-bad-line decoration-2">{change.before}</del>);
     cursor = change.end;
   });
   nodes.push(<Fragment key="tail">{text.slice(cursor).join("")}</Fragment>);
@@ -143,12 +145,15 @@ function Revision({ result, request, prefix }: { result: FixResult; request: Fix
             <h3 className="mb-3 font-serif text-xl font-medium">Receipts for each correction</h3>
             <ol className="space-y-3">
               {result.changes.map((change, index) => (
-                <li key={`${change.claim_id}-${index}`} id={`${prefix}-change-${index}`} className="scroll-mt-6 rounded-lg border border-border p-4">
+                <li key={`${change.claim_id}-${index}`} id={`${prefix}-change-${index}`} className="scroll-mt-6 rounded-xl border border-border bg-muted/15 p-4 shadow-2xs">
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium">
-                    <span className="text-sm text-muted-foreground">[{index + 1}]</span><del className="text-bad">{change.before}</del><ArrowRightIcon className="size-4 text-muted-foreground" aria-hidden /><span className="text-ok">{change.after}</span>
+                    <span className="rounded border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-muted-foreground">[{index + 1}]</span>
+                    <del className="rounded bg-bad-tint px-1.5 py-0.5 font-mono text-sm text-bad decoration-bad-line decoration-2">{change.before}</del>
+                    <ArrowRightIcon className="size-4 text-muted-foreground" aria-hidden />
+                    <span className="rounded bg-ok-tint px-1.5 py-0.5 font-mono text-sm font-semibold text-ok">{change.after}</span>
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed">{change.explanation}</p>
-                  <ul className="mt-3 grid gap-2 sm:grid-cols-2" aria-label={`Sources for correction ${index + 1}`}>
+                  <p className="mt-2.5 text-sm leading-relaxed">{change.explanation}</p>
+                  <ul className="mt-3.5 grid gap-3 sm:grid-cols-2" aria-label={`Sources for correction ${index + 1}`}>
                     {change.evidence.map((fact, i) => <FilingReceipt key={`${fact.accession}-${i}`} fact={fact} />)}
                   </ul>
                 </li>

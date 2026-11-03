@@ -22,6 +22,10 @@ Rules:
   * Derived (source="derived"): Q4 = FY - 9M YTD (or FY - Q1 - Q2 - Q3); Q2/Q3 = YTD - prior YTD when
     no 3-month value was filed (cash flow). Never for EPS (not additive). accepted_at is the latest
     input's acceptance time.
+  * Capital expenditures (2026-11-02) are derived as operating cash flow is, plus the never-negative tests revenue's
+    quarters get (NON_NEGATIVE_METRICS). A concept in SOLE_LINE_CONCEPTS serves only at a company that tags none of the
+    metric's other concepts in the window, and ISOLATED_METRICS never move another metric's rows: they label no fiscal
+    period and change no filing's inferred precision.
 """
 from __future__ import annotations
 
@@ -92,7 +96,11 @@ NCI_CONCEPTS = ("NetIncomeLossAttributableToNoncontrollingInterest",
                 "NetIncomeLossAttributableToNonredeemableNoncontrollingInterest")
 # Metrics no quarter of which is ever negative: a derived quarter below zero or above its total proves its inputs
 # were reported on different bases or concepts, and a reported quarter above the year's 9M YTD is a full year.
-NON_NEGATIVE_METRICS = frozenset({"revenue", "cost_of_revenue", "research_and_development", "operating_expenses"})
+# Capital expenditures are payments, never negative: Honeywell's 9M 2026 of $369M, filed after a spin-off, less the
+# H1 of $538M filed before it gave a Q3 of -$169M, and 17 more derived capex quarters (of 3,660) were negative or
+# outside 10-75% of their year on 2026-11-02 (operating cash flow, which can be negative, has no such test).
+NON_NEGATIVE_METRICS = frozenset({"revenue", "cost_of_revenue", "research_and_development", "operating_expenses",
+                                  "capital_expenditures"})
 # Metrics XBRL adds up but whose differences are not the quarter's figure. A per-share dividend tagged for a period is
 # what the board declared during it: Eli Lilly declares two dividends in its second and fourth quarters and none in
 # its first and third, so FY - 9M was $3.23 for Q4 2025 (its $1.50 and the next $1.73) and 9M - H1 was $0 for Q3; CME's
@@ -104,6 +112,18 @@ NOT_DERIVED_METRICS = frozenset({"dividend_per_share"})
 # 790,000, Mosaic's $220,000 dividend) is never served (review fix 13).
 PER_SHARE_LIMITS = {"eps_basic": 1500.0, "eps_diluted": 1500.0, "dividend_per_share": 60.0}
 DIVIDEND_ROUNDING = 0.0051  # dividends are filed to the cent or the hundredth of a cent
+# Concepts a metric serves only at a company that tags none of the metric's other concepts in a 10-Q or 10-K of the
+# window: there they are the company's sole line for it. Amazon's "Purchases of property and equipment" is
+# PaymentsToAcquireProductiveAssets (it last tagged PaymentsToAcquirePropertyPlantAndEquipment in 2017). Of the 500
+# companies on 2026-11-02, 314 tag only PaymentsToAcquirePropertyPlantAndEquipment in the window, 87 only
+# PaymentsToAcquireProductiveAssets, 37 both and 62 neither. Where a company tags both, the two are often different lines
+# (FIS tags $43M of the first beside $385M of the second for H1 2024, in one 10-Q), so the property-and-equipment line
+# serves and the other never does; the two are never summed.
+SOLE_LINE_CONCEPTS: dict[str, frozenset[str]] = {"capital_expenditures": frozenset({"PaymentsToAcquireProductiveAssets"})}
+# Metrics added to a store whose other rows must not move (capital expenditures, 2026-11-02): their observations label
+# no fiscal period (build_calendar), and each filing's precision for the other metrics is inferred without them
+# (infer_decimals), as before they were added. Their own figures take the precision of every value the filing tags.
+ISOLATED_METRICS = frozenset({"capital_expenditures"})
 
 
 # --------------------------------------------------------------------------- data shapes
@@ -395,9 +415,14 @@ def collect_observations(usgaap: dict, filings: dict[str, Filing], stats: dict,
                 span = _span(start, end)
                 if (span == "instant") != spec.instant:
                     continue
-                dei[filing.accession][(e.get("fy"), e.get("fp"))] += 1
+                if metric not in ISOLATED_METRICS:  # a metric added later labels no fiscal period
+                    dei[filing.accession][(e.get("fy"), e.get("fp"))] += 1
                 obs.append(Obs(metric, out_concept, out_priority, start, end, float(e["val"]), filing, span,
                                formula=formula))
+    for metric, sole in SOLE_LINE_CONCEPTS.items():
+        # Only a company's sole line: where it tags another of the metric's concepts in the window, that one serves
+        if any(o.metric == metric and o.concept not in sole for o in obs):
+            obs = [o for o in obs if not (o.metric == metric and o.concept in sole)]
     if available_to_common:
         for e in usgaap.get(AVAILABLE_TO_COMMON, {}).get("units", {}).get("USD", []):
             filing = filings.get(e.get("accn"))
@@ -656,7 +681,7 @@ def build_calendar(obs: list[Obs], filings: dict[str, Filing], dei: dict[str, Co
     spans: dict[str, Counter] = defaultdict(Counter)
     for o in obs:
         f = o.filing
-        if f.form not in ANCHOR_FORMS or o.start is None:
+        if f.form not in ANCHOR_FORMS or o.start is None or o.metric in ISOLATED_METRICS:
             continue
         if o.span != ("12m" if f.form == "10-K" else "3m"):
             continue
@@ -1124,8 +1149,17 @@ def build_company(*, cik: int, ticker: str, names: list[str], fiscal_year_end: O
                                                stats["lease_income_notes"])
         warnings.append(f"revenue: contract revenue blocked until confirmed ({len(blocked)} figures): "
                         f"scripts/confirm_revenue.py checks them against the press-release totals")
+    # ISOLATED_METRICS never move another metric's rows: the other metrics keep the precision their own values give each
+    # filing, and the isolated ones take the precision of every value the filing tags. They are dropped and derived
+    # by the same rules, separately, and their rows come after the others'.
+    isolated = [o for o in selected if o.metric in ISOLATED_METRICS]
+    selected = [o for o in selected if o.metric not in ISOLATED_METRICS]
     decimals = infer_decimals(selected)  # before any drop, so no filing's precision moves
+    isolated_decimals = infer_decimals(selected + isolated)
     selected, stats["misdated_dropped"] = drop_misdated(selected, decimals)
+    isolated, isolated_misdated = drop_misdated(isolated, isolated_decimals)
+    stats["misdated_dropped"] = sorted(stats["misdated_dropped"] + isolated_misdated,
+                                       key=lambda r: (r["metric"], r["end"], r["rule"], r["accession"]))
     selected, stats["per_share_implausible"] = drop_implausible_per_share(selected)
     selected, stats["dividend_quarters_not_served"] = drop_irregular_dividends(selected)
     if stats["per_share_implausible"]:
@@ -1135,6 +1169,12 @@ def build_company(*, cik: int, ticker: str, names: list[str], fiscal_year_end: O
                         f"period and are not served (see the audit's misdated_dropped)")
     stats["derivations_skipped"] = []
     derived = derive(selected, cal, decimals, stats["derivations_skipped"], obs)
+    derived += derive(isolated, cal, isolated_decimals, stats["derivations_skipped"], obs)
+    selected += isolated
+
+    def precision(metric: str) -> dict[tuple[str, str], int]:
+        return isolated_decimals if metric in ISOLATED_METRICS else decimals
+
     rejected = list(rejected_derived)
     if rejected:
         def outranked(d: Derived) -> Optional[dict]:
@@ -1168,14 +1208,14 @@ def build_company(*, cik: int, ticker: str, names: list[str], fiscal_year_end: O
             derived_from=[o.filing.accession] if o.formula else [], form=o.filing.form,
             accession=o.filing.accession, accepted_at=o.filing.accepted_at, url=o.filing.url,
             locator=o.formula or o.note,
-            decimals=decimals.get((o.filing.accession, unit))), o.kind))
+            decimals=precision(o.metric).get((o.filing.accession, unit))), o.kind))
     for d in derived:
         if d.end < facts_start:
             continue
         unit = METRIC_CONCEPTS[d.metric].xbrl_unit
         last = max(d.inputs, key=_acc)
         accessions = list(dict.fromkeys(o.filing.accession for o in d.inputs))
-        precisions = [decimals[(a, unit)] for a in accessions if (a, unit) in decimals]
+        precisions = [precision(d.metric)[(a, unit)] for a in accessions if (a, unit) in precision(d.metric)]
         facts.append((Fact(
             cik=cik, ticker=ticker, metric=d.metric, concept=f"us-gaap:{d.concept}", basis="GAAP",
             value=d.value, unit=FACT_UNIT[unit], period_start=d.start, period_end=d.end,
@@ -1228,7 +1268,7 @@ def _stats(build: CompanyBuild, cal: dict, stored: list[Filing], today: date, la
 SHORT = {"revenue": "rev", "cost_of_revenue": "cor", "gross_profit": "gp", "research_and_development": "r&d",
          "operating_expenses": "opex", "operating_income": "opinc", "net_income": "ni", "eps_basic": "epsB",
          "eps_diluted": "epsD", "operating_cash_flow": "ocf", "net_interest_income": "nii",
-         "dividend_per_share": "dps", "repurchase_authorization_remaining": "buyb"}
+         "dividend_per_share": "dps", "repurchase_authorization_remaining": "buyb", "capital_expenditures": "capex"}
 
 
 def _q(p: Period) -> str:

@@ -105,6 +105,16 @@ METRIC_CONCEPTS: dict[str, MetricSpec] = {
     ), "USD/shares", True),
     "repurchase_authorization_remaining": MetricSpec(
         ("StockRepurchaseProgramRemainingAuthorizedRepurchaseAmount1",), "USD", False, instant=True),
+    # Capital expenditures: the cash paid for property and equipment, as the cash-flow statement reports it ("Purchases
+    # of property and equipment" at GOOGL and META, "Additions to property and equipment" at MSFT). Evidence-only: not
+    # in types.Metric, so extraction never proposes it; receipts.capex reads a figure as capex from its own words.
+    # PaymentsToAcquireProductiveAssets serves only at a company that tags no PaymentsToAcquirePropertyPlantAndEquipment
+    # in the window, where it is the company's sole capex line (AMZN); never both, never summed (receipts.ingest
+    # SOLE_LINE_CONCEPTS). Quarters derive from year-to-date figures as for operating cash flow.
+    "capital_expenditures": MetricSpec((
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+        "PaymentsToAcquireProductiveAssets",
+    ), "USD", True),
 }
 
 FACT_UNIT = {"USD": "USD", "USD/shares": "USD/share"}  # companyfacts unit -> types.Unit

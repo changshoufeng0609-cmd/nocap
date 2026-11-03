@@ -43,7 +43,7 @@ KEEPALIVE = ": keep-alive\n\n"  # an SSE comment; EventSource-style parsers igno
 # receipts module these import is listed (tests/test_code_review_fixes.py checks it): splits.py holds the split table.
 RESULT_MODULES = ("types.py", "extract.py", "coverage.py", "periods.py", "verify.py", "store.py", "splits.py",
                   "stream.py", "balance_sheet.py", "fiscal_labels.py", "ingest.py", "edgar.py",
-                  "filing_xbrl.py", "press_release.py", "release_gates.py", "release_text.py")
+                  "filing_xbrl.py", "press_release.py", "release_gates.py", "release_text.py", "capex.py")
 
 Event = tuple[str, dict[str, Any]]
 

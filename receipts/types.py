@@ -32,6 +32,9 @@ BalanceSheetMetric = Literal[
 # Alternative income lines stay outside extraction. They only explain ambiguity for unqualified net income;
 # a claim's own words must name the alternative before the verifier can select it.
 IncomeAlternativeMetric = Literal["net_income_to_common", "net_income_including_nci"]
+# Cash-flow lines outside extraction, as the balance-sheet items are: capital expenditures, the cash paid for property
+# and equipment (receipts.capex reads a figure as capex from its own words; receipts.ingest stores it).
+CashFlowMetric = Literal["capital_expenditures"]
 Basis = Literal["GAAP", "non-GAAP"]
 Unit = Literal["USD", "%", "USD/share", "shares", "other"]
 Scale = Literal["units", "thousands", "millions", "billions"]
@@ -71,7 +74,7 @@ class Fact(BaseModel):
 
     cik: int
     ticker: str
-    metric: Union[Metric, BalanceSheetMetric, IncomeAlternativeMetric]
+    metric: Union[Metric, BalanceSheetMetric, IncomeAlternativeMetric, CashFlowMetric]
     concept: Optional[str] = None  # e.g. "us-gaap:Revenues"; None for press-release cells
     basis: Basis                   # XBRL facts are GAAP; press-release cells may be non-GAAP
     segment: Optional[str] = None

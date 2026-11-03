@@ -4,7 +4,7 @@
  "inputs": {
   "companyfacts": "data/archive/companyfacts",
   "store": "data/snapshot",
-  "store_fingerprint": "1381a6507b55e7322c8b369e"
+  "store_fingerprint": "7562ac0df7d40c8a678bb4a7"
  },
  "rule": "A fact's value r names an n-for-1 or 1-for-n split when r or 1/r is within 1% of an n in receipts.verify.SPLIT_RATIOS; other values are ignored. Facts of one company and n within 120 days are one event, dated by its earliest and latest instant (or, without one, its duration's start and end). The direction comes from the per-share figures, never from the tag: versions of one period, the older filed before the event and the newer on or after it, restated by about n (within 15%); or, without such versions, the median quarterly EPS filed in the 400 days after the event against the 400 days before, beyond half the ratio's logarithm either way. An event neither confirms is rejected.",
  "summary": {
@@ -3110,7 +3110,7 @@
    "first_filed": "2026-10-29",
    "first_accn": "0000319201-26-000034",
    "first_form": "10-Q",
-   "pairs": 15,
+   "pairs": 17,
    "pair_examples": [
     [
      "eps_diluted",
@@ -3134,7 +3134,7 @@
      3.04
     ]
    ],
-   "evidence": "15 per-share versions restated by the ratio",
+   "evidence": "17 per-share versions restated by the ratio",
    "decision": "split",
    "direction": "forward",
    "first_accepted_at": "2026-10-29T20:08:32Z"

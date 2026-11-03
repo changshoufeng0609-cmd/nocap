@@ -94,20 +94,36 @@ export default function BenchmarksPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {benchmark.runs.map(run => {
             const score = run.sensitivity_score;
-            return <article key={run.target} className="min-w-0 rounded-xl border border-border bg-card p-5">
-              <h3 className="font-serif text-xl font-semibold">{run.label}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">{run.hosting} · {run.calls}/{run.planned} calls recorded</p>
+            return <article key={run.target} className="min-w-0 rounded-xl border border-border bg-card p-5 shadow-2xs">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h3 className="font-serif text-xl font-semibold">{run.label}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{run.hosting} · {run.calls}/{run.planned} calls recorded</p>
+                </div>
+                <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-muted-foreground">
+                  {run.gpu_usage_separate ? "Modal GPU · Open Weights" : "Meta Hosted API"}
+                </span>
+              </div>
               <p className="mt-2 text-xs font-medium text-muted-foreground">Post-hoc sensitivity · not the original contract</p>
               {score ? <>
                 <dl className="mt-5 grid grid-cols-2 gap-4 border-b border-border pb-4">
-                  <div><dt className="text-xs text-muted-foreground">Raw answers correct</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{score.correct}<span className="text-sm font-normal text-muted-foreground"> / {score.planned}</span></dd></div>
-                  <div><dt className="text-xs text-muted-foreground">Accepted answers correct</dt><dd className="mt-1 text-2xl font-semibold tabular-nums">{score.verified_accepted ? <>{score.verified_correct}<span className="text-sm font-normal text-muted-foreground"> / {score.verified_accepted}</span></> : "N/A"}</dd><p className="text-xs text-muted-foreground">{score.verified_accepted ? `${percent(score.verified_precision)} precision in this small sample` : "0 accepted answers · precision N/A"}</p></div>
-                  <div><dt className="text-xs text-muted-foreground">Verified-answer coverage</dt><dd className="mt-1 font-medium tabular-nums">{score.verified_accepted}/{score.planned} · {percent(score.verified_coverage)}</dd></div>
-                  <div><dt className="text-xs text-muted-foreground">Incorrect answers passed</dt><dd className="mt-1 font-medium tabular-nums">{score.unsafe_passed}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Raw answers correct</dt><dd className="mt-1 font-mono text-2xl font-semibold tabular-nums">{score.correct}<span className="text-sm font-normal text-muted-foreground"> / {score.planned}</span></dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Accepted answers correct</dt><dd className="mt-1 font-mono text-2xl font-semibold tabular-nums">{score.verified_accepted ? <>{score.verified_correct}<span className="text-sm font-normal text-muted-foreground"> / {score.verified_accepted}</span></> : "N/A"}</dd><p className="text-xs text-muted-foreground">{score.verified_accepted ? `${percent(score.verified_precision)} precision in this small sample` : "0 accepted answers · precision N/A"}</p></div>
+                  <div><dt className="text-xs text-muted-foreground">Verified-answer coverage</dt><dd className="mt-1 font-mono font-medium tabular-nums">{score.verified_accepted}/{score.planned} · {percent(score.verified_coverage)}</dd></div>
+                  <div><dt className="text-xs text-muted-foreground">Incorrect answers passed</dt><dd className="mt-1"><span className={score.unsafe_passed === 0 ? " inline-flex rounded bg-ok-tint px-2 py-0.5 font-mono text-sm font-semibold text-ok tabular-nums" : "font-mono font-medium tabular-nums text-bad"}>{score.unsafe_passed}</span></dd></div>
                 </dl>
-                <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-muted-foreground" aria-label={`${run.label} raw answer outcomes`}>
-                  <li>{score.correct} correct</li><li>{score.wrong} wrong</li><li>{score.abstain} model abstentions</li>
-                  <li>{score.unassessable} metadata unassessable</li><li>{score.format_error} format failures</li>
+                <div className="mt-3 flex h-2 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
+                  <div className="bg-ok" style={{ width: `${(score.correct / score.planned) * 100}%` }} title={`${score.correct} correct`} />
+                  <div className="bg-bad" style={{ width: `${(score.wrong / score.planned) * 100}%` }} title={`${score.wrong} wrong`} />
+                  <div className="bg-approx" style={{ width: `${(score.abstain / score.planned) * 100}%` }} title={`${score.abstain} abstained`} />
+                  <div className="bg-unk" style={{ width: `${((score.unassessable + score.format_error + score.api_error) / score.planned) * 100}%` }} title={`${score.unassessable + score.format_error + score.api_error} unassessable or error`} />
+                </div>
+                <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-muted-foreground" aria-label={`${run.label} raw answer outcomes`}>
+                  <li className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-ok" aria-hidden />{score.correct} correct</li>
+                  <li className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-bad" aria-hidden />{score.wrong} wrong</li>
+                  <li className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-approx" aria-hidden />{score.abstain} model abstentions</li>
+                  <li className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-unk" aria-hidden />{score.unassessable} metadata unassessable</li>
+                  <li>{score.format_error} format failures</li>
                   <li>{score.api_error} API failures · {score.not_run} not run</li>
                 </ul>
               </> : <p className="mt-6 rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">{run.status === "not_run" ? "Model run pending." : "Raw responses retained; offline sensitivity analysis pending."}</p>}

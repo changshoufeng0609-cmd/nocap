@@ -24,27 +24,28 @@ export function LogoMark({ className }: { className?: string }) {
 const META_MODELS = "Muse Spark, Muse Wonder & SAM 3.1";
 
 const NAV_LINK =
-  "rounded-md px-2 py-1 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2";
+  "rounded-md px-2.5 py-1 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2";
 
 function BuiltOn({ className }: { className?: string }) {
   return (
-    <p className={cn("w-fit max-w-full rounded-full border border-border bg-card/60 px-2.5 py-0.5 text-[11px] text-muted-foreground", className)}>
-      <span className="max-[379px]:hidden">Built on </span>Meta {META_MODELS} · SEC EDGAR
+    <p className={cn("inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-0.5 font-mono text-[11px] tracking-tight text-muted-foreground shadow-2xs", className)}>
+      <span className="size-1.5 shrink-0 rounded-full bg-ok" aria-hidden />
+      <span><span className="max-[379px]:hidden">Built on </span>Meta {META_MODELS} · SEC EDGAR</span>
     </p>
   );
 }
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-border/80">
-      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-7">
+    <header className="border-b-[3px] border-double border-border bg-gradient-to-b from-card/70 to-transparent">
+      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2.5">
-            <LogoMark className="size-7 shrink-0" />
-            <h1 className="font-serif text-[1.7rem] leading-none font-semibold tracking-[-0.015em]"><Link href="/">NoCap</Link></h1>
+            <LogoMark className="size-7 shrink-0 shadow-2xs" />
+            <h1 className="font-serif text-[1.75rem] leading-none font-semibold tracking-[-0.02em]"><Link href="/">NoCap</Link></h1>
           </div>
           <nav aria-label="Main navigation" className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <BuiltOn className="mr-2 hidden lg:block" />
+            <BuiltOn className="mr-2 hidden lg:inline-flex" />
             <Link href="/demo" className={NAV_LINK}>Demo</Link>
             <Link href="/benchmarks" className={NAV_LINK}>Benchmarks</Link>
             <ThemeToggle />

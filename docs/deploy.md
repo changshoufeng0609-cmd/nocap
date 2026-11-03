@@ -4,7 +4,7 @@
 
 [NoCap](https://receipts-nocap.vercel.app), the [2:52 demo](https://receipts-nocap.vercel.app/demo)
 and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public, and live checks are open for judging. <!-- verify-at-release -->
-The [November 2 release record](public-release-2026-11-02.json) <!-- verify-at-release --> lists the day's five Production releases, each with its anonymous acceptance. The [November 1 acceptance record](public-release-2026-11-01.json) binds several things together:
+The [November 2 release record](public-release-2026-11-02.json) <!-- verify-at-release --> lists the day's six Production releases, each with its anonymous acceptance. The [November 1 acceptance record](public-release-2026-11-01.json) binds several things together:
 - the source and the deployment;
 - the real browser checks;
 - the consented live smoke;
@@ -15,8 +15,8 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Setting | Current state |
 |---|---|
 | Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
-| Production deployment | `dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5`, READY, 43-second build from the GitHub commit; previous `dpl_H39vsq9VaVdogc9ZBqXPtRK4xrBr` kept for rollback <!-- verify-at-release --> |
-| Deployed public source | `898cb9af4a76de8d451fd6476e2671714d9f1841` (private `1bc620f`): round-8 and round-9 verifier fixes, release-name resolution, release statements and the second comprehensive test <!-- verify-at-release --> |
+| Production deployment | `dpl_E1P68ptYvyg9TF3zSB6hW36unmps`, READY, 47-second build from the GitHub commit; previous `dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5` kept for rollback <!-- verify-at-release --> |
+| Deployed public source | `33770eb5cde9c2a64a928957277dbdd59c3caf0f` (private `5210622`): rounds 10a-10c from the [AI-draft benchmark](../eval/ai_drafts.md), a fourth saved example and the demo video's new results card, on top of round 8, round 9, release-name resolution and release statements <!-- verify-at-release --> |
 | Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
 | Live access | Check, Fix, Slide and Ask are open until 2026-11-17 16:00 UTC (Nov 18 00:00 Taipei). Saved examples, recordings and benchmark inspection stay at $0. <!-- verify-at-release --> |
@@ -25,16 +25,20 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
 
 **This deployment (November 2 evening).**
-- **Releases that day:** five Production releases, each followed by anonymous desktop and 390px mobile acceptance that
-  passed 49 checks with 0 provider calls ([record](public-release-2026-11-02.json)):
+- **Releases that day:** six Production releases, each followed by anonymous desktop and 390px mobile acceptance with 0
+  provider calls: 49 checks each, and 51 for the sixth, whose fourth saved example adds one per device
+  ([record](public-release-2026-11-02.json)):
   1. `dpl_EAfhreQr…`: the fixes the first spot check prompted;
   2. `dpl_HhDVAiVh…`: comparison-base fixes;
   3. `dpl_48sU1dZP…`: non-GAAP margin fixes; measured by the first comprehensive test;
   4. `dpl_H39vsq9V…`: round-8 fixes and release-name resolution; measured by the second;
-  5. `dpl_Dk3MRYUi…`: release statements and round 9.
+  5. `dpl_Dk3MRYUi…`: release statements and round 9;
+  6. `dpl_E1P68ptY…`: rounds 10a-10c from the AI-draft benchmark, the fourth saved example and the new results card.
 - **Health:** 291,112 facts for 500 companies, snapshot 2026-11-01. The snapshot now also holds the release-text index:
   451 companies, 1,844 releases, 7 MB.
-- **Saved examples:** replayed 7/2/2, 5/3/0 and 6/1/2◷ at $0, as before.
+- **Saved examples:** replayed 7/2/2, 5/3/0 and 6/1/2◷ at $0, as before. The fourth, Muse Wonder's Reddit recap,
+  replayed 16 ✓, 1 ✗ (the planted EPS) and 6 ?. The 2:52 video's results card now shows the November 2 comprehensive
+  test, and its file matched SHA-256 `61282a27…`.
 - **Release statements, live:** in owner-pasted drafts, a figure such as NVIDIA's "Edge Computing business generated
   $7.2 billion" shows "Stated in the company's 8-K earnings release", with the quoted sentence and its EDGAR link.
 

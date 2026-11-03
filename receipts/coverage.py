@@ -57,6 +57,35 @@ _REFERENCE_MASKS = tuple(re.compile(pattern, re.IGNORECASE) for pattern in (
 ))
 
 
+# Round 11: the numeral of a product name ("Microsoft 365", "Gemini 4", "Windows 11", "iPhone 17") is no figure. Only a
+# 1-3 digit whole number with no unit, scale, sign or currency, right after a capitalized name word that is no period
+# word ("Q4 2026", "FY27", "Quarter 2"), hedge ("Nearly 30 new markets"), month, reference word or verb ("Opened 30
+# stores", "Adding 12 clients").
+_NOT_A_NAME = frozenset(
+    "q fy cy h quarter quarters fiscal year years half week weeks month months day days item items exhibit exhibits "
+    "section sections rule rules schedule note notes form page table chapter phase level tier step class series "
+    "number no top up down over under about around nearly almost approximately roughly some more less than at by to "
+    "from of in on for with and or the a an all only just total jan feb mar apr may jun jul aug sep sept oct nov dec "
+    "january february march april june july august september october november december".split())
+_PRODUCT_NUMERAL_RE = re.compile(r"(?<![\w$.,'’-])(?P<name>[A-Z][A-Za-z]+|i[A-Z][A-Za-z]+)\s(?P<num>\d{1,3})"
+                                 r"(?![\d.,]\d|\s?(?:%|percent\b|[BMKbmk]\b|bps\b|x\b))"
+                                 r"(?=[\s,;:.)!?]|$)")
+_UNIT_AFTER_RE = re.compile(r"\s*(?:million|billion|thousand|trillion|basis|points?|percent|times|shares?|employees?|"
+                            r"people|customers?|stores?|units?|locations?|markets?|countries|years?|months?|weeks?|"
+                            r"days?|quarters?)\b", re.I)
+
+
+def _product_numerals(text: str) -> list[tuple[int, int]]:
+    """The (start, end) of each product-name numeral (above)."""
+    out = []
+    for m in _PRODUCT_NUMERAL_RE.finditer(text):
+        name = m.group("name").casefold()
+        if name in _NOT_A_NAME or name.endswith(("ed", "ing")) or _UNIT_AFTER_RE.match(text, m.end()):
+            continue
+        out.append(m.span("num"))
+    return out
+
+
 def _scan(text: str) -> list[dict[str, Any]]:
     # Equal-length lexical normalization lets the existing scanner recognize
     # leading decimals and lower-case short scales while preserving all offsets.
@@ -121,6 +150,7 @@ def numeric_coverage(text: str, claims: Iterable[Claim]) -> CoverageSummary:
     cores = _value_cores(text, claims)
     dates = [(m.start(), m.end()) for pattern in _DATE_MASKS for m in pattern.finditer(text)]
     references = [(m.start(), m.end()) for pattern in _REFERENCE_MASKS for m in pattern.finditer(text)]
+    references += _product_numerals(text)  # round 11: "Microsoft 365", "Gemini 4"
     candidates, covered, excluded = 0, 0, 0
     uncovered: list[CoverageNumber] = []
     for token in _scan(text):

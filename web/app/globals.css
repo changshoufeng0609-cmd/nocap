@@ -245,6 +245,11 @@
   color: var(--ink);
   font-weight: 600;
   background-color: var(--tint);
+  border-radius: 0.22em;
+  padding-inline: 0.14em;
+  margin-inline: -0.04em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 /* The red-pen strike: a second background layer drawn left to right when the verdict lands. */
 .claim-value[data-strike] {
@@ -326,16 +331,22 @@
 .claim-mark[data-status="verified"] {
   color: var(--ok);
   background: var(--ok-tint);
-  border-color: color-mix(in oklch, var(--ok-line) 50%, transparent);
+  border-color: color-mix(in oklch, var(--ok-line) 55%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
 }
 .claim-mark[data-status="wrong"] {
   color: #fff;
   background: var(--bad-solid);
+  border-color: color-mix(in oklch, var(--bad) 82%, black);
+  box-shadow:
+    0 1px 2px color-mix(in oklch, var(--bad) 35%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 0.22);
 }
 .claim-mark[data-status="look_ahead"] {
   color: var(--time);
   background: var(--time-tint);
   border-color: color-mix(in oklch, var(--time-line) 60%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
 }
 .claim-mark[data-status="unverifiable"] {
   color: var(--unk);
@@ -346,6 +357,7 @@
   color: var(--approx);
   background: var(--approx-tint);
   border-color: color-mix(in oklch, var(--approx-line) 60%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
 }
 .claim-mark[data-status="pending"] {
   color: var(--pending);
@@ -391,14 +403,27 @@
   animation: receipts-shimmer 1.4s ease-in-out infinite;
 }
 
-/* A receipt card: perforated top edge, like a till slip. */
+/* A receipt card: perforated top edge and subtle thermal-paper depth, like an audit till slip. */
 .receipt-slip {
   position: relative;
+  --slip-bg: color-mix(in oklch, var(--card) 95%, var(--background));
   background:
     radial-gradient(circle at 6px -1px, transparent 4.5px, var(--card) 5px) top left / 12px 7px repeat-x,
-    linear-gradient(var(--card), var(--card)) 0 6px / 100% calc(100% - 6px) no-repeat;
-  filter: drop-shadow(0 0 0.5px color-mix(in oklch, var(--foreground) 35%, transparent))
-    drop-shadow(0 1px 1px color-mix(in oklch, var(--foreground) 6%, transparent));
+    linear-gradient(180deg, var(--card) 0%, var(--slip-bg) 100%) 0 6px / 100% calc(100% - 6px) no-repeat;
+  filter:
+    drop-shadow(0 0 0.5px color-mix(in oklch, var(--foreground) 34%, transparent))
+    drop-shadow(0 2px 4px color-mix(in oklch, var(--foreground) 5%, transparent))
+    drop-shadow(0 6px 14px color-mix(in oklch, var(--foreground) 3.5%, transparent));
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.2s ease;
+}
+.receipt-slip:hover {
+  transform: translateY(-1px);
+  filter:
+    drop-shadow(0 0 0.5px color-mix(in oklch, var(--foreground) 44%, transparent))
+    drop-shadow(0 4px 8px color-mix(in oklch, var(--foreground) 7%, transparent))
+    drop-shadow(0 10px 20px color-mix(in oklch, var(--foreground) 4.5%, transparent));
 }
 
 @keyframes receipts-shimmer {

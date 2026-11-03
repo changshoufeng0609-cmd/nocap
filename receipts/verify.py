@@ -944,11 +944,18 @@ _STABLE_AT_RE = re.compile(r"\b(?:(?:(?:nearly|almost|essentially)\s+)?unchanged
                            r"(?:remained|remains)\s+flat|held\s+steady)\s+at\b", re.I)
 
 
+# Round 11: "positive" right before a level's number restates its sign, as "negative" does (Alphabet's "operating cash
+# flow remained positive at $42.29 billion"; Centene's "negative $3.67 billion"). The figure stays positive, so a
+# negative filed value never matches it. Elsewhere ("positive operating cash flow") it still qualifies the measure.
+_POSITIVE_LEVEL_RE = re.compile(r"\bpositive(?=\s+at\s*$|\s*$)", re.I)
+
+
 def _leftover_words(text: str, phrase: tuple[int, int], company: set[str], qualifier: Optional[str]) -> list[str]:
     """Words of a metric description outside its metric phrase that are not framing (change and comparison words,
     totals, bases, periods, the company, the qualifier taken as segment). Any left means the wording says more than
     the phrase ('operating income from Reality Labs'), so the figure isn't read as the company-level metric."""
     text = _STABLE_AT_RE.sub(lambda m: " " * len(m.group()), text)
+    text = _POSITIVE_LEVEL_RE.sub(lambda m: " " * len(m.group()), text)  # round 11
     rest = f"{text[:phrase[0]]} {text[phrase[1]:]}"
     rest = re.sub(r"\b(?:fully[\s-])?taxable[\s-]equivalent\b", "taxable-equivalent", rest, flags=re.I)
     qual = {w.casefold() for w in (qualifier or "").split()}
@@ -1152,7 +1159,8 @@ def _named_income_line(claim: Claim) -> Optional[str]:
     if _per_share_wording(claim):
         return None
     income = claim.model_copy(update={"metric": "net_income"})
-    words = _local_level_description(income, growth=claim.unit == "%") or _trailing_qualifier(income)
+    words = (_local_level_description(income, growth=claim.unit == "%") or _trailing_qualifier(income)
+             or _line_name_before_change(income))
     if not words and claim.span_text.strip(" .;\n\t") == claim.value_text.strip(" .;\n\t"):
         words = claim.metric_text  # a number-only extraction has no recoverable source label
     common = bool(_COMMON_LINE_RE.search(words))
@@ -1160,6 +1168,29 @@ def _named_income_line(claim: Claim) -> Optional[str]:
     if common and including:
         return "ambiguous"
     return "net_income_to_common" if common else "net_income_including_nci" if including else None
+
+
+# Round 11: a named net-income line keeps its name across the change its clause states before the amount: "net
+# income available to common stockholders declined 25% to $26.17 billion" names the to-common line for $26.17 billion
+# (Alphabet), as "net income available to common stockholders was $26.17 billion" does. Only that shape: the line's
+# name right after "net income" (or "consolidated" right before it), a change verb, one percent and "to"/"at".
+_CHANGE_TO_AMOUNT_RE = re.compile(rf"\s*(?:{_DIRECTION_WORDS})\s+(?:by\s+)?(?:about\s+|approximately\s+|nearly\s+)?"
+                                  r"[+−-]?\d[\d.,]*\s?(?:%|percent)\s+(?:year[\s-]+over[\s-]+year\s+)?(?:to|at)\s*$",
+                                  re.I)
+
+
+def _line_name_before_change(claim: Claim) -> str:
+    """The words naming a net-income line whose change the clause states before the claim's amount (above), or ""."""
+    pos = _value_pos(claim)
+    if pos is None:
+        return ""
+    before = claim.span_text[:pos]
+    for m in re.finditer(r"\b(?:consolidated\s+)?net\s+(?:income|earnings|profit)\b", before, re.I):
+        name = re.match(rf"\s+(?:{_COMMON_LINE_RE.pattern}|{_INCLUDING_NCI_RE.pattern})", before[m.end():], re.I)
+        end = m.end() + (name.end() if name else 0)
+        if (name or _CONSOLIDATED_INCOME_RE.match(before, m.start())) and _CHANGE_TO_AMOUNT_RE.fullmatch(before[end:]):
+            return before[m.start():end]
+    return ""
 
 
 def _income_reading_claim(claim: Claim) -> Claim:
@@ -1298,7 +1329,8 @@ def _income_per_share(claim: Claim) -> Optional[_IncomeShare]:
             or _INCLUDING_NCI_RE.search(subject) or _CONSOLIDATED_INCOME_RE.search(subject)
             or _NON_GAAP_WORDS_RE.search(_EPS_BASIS_WORDS_RE.sub(" ", subject))  # managed, FTE, pro forma, organic...
             or re.search(r"\bsegments?\b|\btrailing\b|\bttm\b|\bltm\b|\btwelve[\s-]+months?\b", subject, re.I)
-            or any(ch.isalpha() and not ch.isascii() for ch in subject)):
+            or any(not word.isascii() and word.casefold() not in company  # the company's own accented name is
+                   for word in re.findall(r"[^\W\d_]+", subject))):        # its subject ("Estée Lauder")
         return None
     if verb is not None:
         # "<Company> earned $5.3 billion, or $2.65 a share" (newswire): the company itself must be the subject, and
@@ -1396,7 +1428,8 @@ _LOSS_LEAD_WORDS = frozenset(
     "reported reports posted posts recorded records booked books incurred incurs logged logs registered registers "
     "suffered suffers had has swung swings returned returns turned narrowed widened still also again meanwhile "
     "compared comparison with to from versus vs against than following into back in for during of was were is "
-    "improvement improved narrower narrowing wider widening smaller larger bigger deeper down up "
+    "improvement improved improving improve improves narrower narrowing wider widening smaller larger bigger deeper "
+    "worsened worsening down up "
     "substantial substantially significant significantly sharp sharply marked markedly dramatic dramatically "
     "considerable considerably notable major big huge massive steep hefty sizable sizeable record "
     "quarter quarters quarterly year years annual full-year fiscal period prior previous last same ago earlier "
@@ -1565,7 +1598,10 @@ def _level_reading(claim: Claim, company: set[str], segment: Optional[str], *, g
         checked_text = _level_sentence_framing(text, phrase) if index else text
         leftover = _leftover_words(checked_text, phrase, company, segment)
         rest = text[:phrase[0]] + text[phrase[1]:]
-        if leftover or any(char.isalpha() and not char.isascii() for char in rest):
+        # A non-ASCII letter outside the phrase is an unread qualifier, unless it is in the company's own name
+        # ("Estée Lauder reported revenue of ...": the accented name is the subject, not a qualifier).
+        if leftover or any(not word.isascii() and word.casefold() not in company
+                           for word in re.findall(r"[^\W\d_]+", rest)):
             if why is not None:
                 why.extend(leftover)
             return None
@@ -1796,6 +1832,33 @@ def _restated_non_gaap_amount(claim: Claim, line: Optional[DraftLine]) -> Option
     if _NON_GAAP_WORDS_RE.search(f"{claim.span_text} {claim.metric_text}"):
         return None  # its own words already say so (basis_conflict and the non-GAAP reading handle it)
     return " ".join(words.strip(" ,").split())
+
+
+# Round 11: a figure quoted without its clause's subject takes the subject's basis word: in "Excluding the impact of
+# investments in OpenAI, adjusted EPS increased 18% to $4.89", a $4.89 quoted as "to $4.89" is adjusted EPS (Microsoft),
+# as its "18%" quoted with "adjusted EPS" is. Only a non-GAAP word right before the claim's own metric in the clause
+# that holds the figure, with nothing between them and the figure but its change; a figure whose words or label already
+# give a basis is read as before.
+_CLAUSE_CUT_RE = re.compile(r"[,;:]|\b(?:and|but|while|whereas)\b", re.I)
+
+
+def _clause_non_gaap(claim: Claim, line: Optional[DraftLine]) -> bool:
+    """Whether the claim's clause subject puts it on a non-GAAP basis its own words don't state (above)."""
+    if (line is None or claim.basis is not None
+            or _NON_GAAP_WORDS_RE.search(f"{claim.span_text} {claim.metric_text}")
+            or _GAAP_WORD_RE.search(f"{claim.span_text} {claim.metric_text}")):
+        return False
+    before = line.text[:line.start]
+    cut = max([0, *sentence_breaks(before), *(m.end() for m in _CLAUSE_CUT_RE.finditer(before))])
+    clause = before[cut:]
+    phrases = _level_metric_phrases(claim.metric, clause) if claim.metric != "other" else []
+    if len(phrases) != 1:
+        return False
+    start, end = phrases[0]
+    if not re.search(r"\b(?:adjusted|non[\s-]?gaap)\s*$", clause[:start], re.I):
+        return False
+    return bool(_CHANGE_TO_AMOUNT_RE.fullmatch(clause[end:]) or re.fullmatch(
+        r"\s*(?:was|were|is|of|came\s+in\s+at|reached|totall?ed|rose\s+to|grew\s+to|fell\s+to)\s*", clause[end:], re.I))
 
 
 # Round 10c: an exclusion that opens a sentence or clause ("Excluding Deliveroo,", "Excluding the impact of
@@ -2987,6 +3050,8 @@ def _verify_filed(claim: Claim, store: EvidenceStore, *, as_of: Any = None, cont
         return plain("unverifiable", "ambiguous",
                      f"The sentence gives {claim.value_text} for {claim.entity or 'its company'}, but its exchange "
                      f"listing “{conflict}” names another company, so NoCap can't tell whose figure it is.")
+    if _clause_non_gaap(claim, line):  # round 11: "adjusted EPS increased 18% to $4.89", quoted "to $4.89"
+        claim = claim.model_copy(update={"basis": "non-GAAP"})
     # --- round 10c: a sentence's basis words reach the figures they govern beyond the claim's own span
     if amount := _restated_non_gaap_amount(claim, line):
         return plain("unverifiable", "ambiguous",
@@ -3024,6 +3089,14 @@ def _verify_filed(claim: Claim, store: EvidenceStore, *, as_of: Any = None, cont
         # "the $5.34 billion loss recorded in Q3 2025" of "Boeing still reported a net loss of $116 million, a
         # substantial improvement from ...": the company's own net loss (_company_loss), signed by its loss word
         reading_claim = reading_claim.model_copy(update={"metric": "net_income", "metric_text": "net loss"})
+    # --- capital-expenditures hook: a figure its own words name capex ("capital expenditures", "capex", "purchases of
+    # property and equipment") is checked against the filed cash paid for property and equipment by receipts.capex,
+    # never "✗"; None leaves every other figure to the rules below. Imported here: it imports this module.
+    from receipts import capex
+    if (spent := capex.check(original, store, as_of=as_of_dt, context=context, named=named, entity=entity, line=line,
+                             draft_period=draft_period)) is not None:
+        return spent
+    # --- end of the capital-expenditures hook
     reading = interpret(reading_claim, qualifiers)
     if reading is None:
         # --- balance-sheet hook: a figure no rule above reads may be a balance-sheet item ("cash and cash

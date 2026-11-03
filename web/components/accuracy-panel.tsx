@@ -41,7 +41,7 @@ export function AccuracyPanel({ data }: { data: AccuracyData }) {
   const fresh = current.without_company_in_development;
   const before = previous.rates;
   const url = (path: string) => `${data.github}${path}`;
-  return <section aria-labelledby="accuracy-test" className="space-y-5 rounded-xl border border-border bg-card p-5 sm:p-6">
+  return <section aria-labelledby="accuracy-test" className="space-y-5 rounded-xl border border-border bg-card p-5 shadow-xs sm:p-6">
     <div className="max-w-4xl space-y-2">
       <h2 id="accuracy-test" className="font-serif text-2xl font-semibold">Comprehensive accuracy test (current verifier)</h2>
       <p className="text-pretty leading-relaxed">{count(current.items)} frozen items from {count(current.companies)} {"S&P 500"} companies, run once on {formatDay(current.run_date)} against the deployed verifier.</p>
@@ -50,13 +50,13 @@ export function AccuracyPanel({ data }: { data: AccuracyData }) {
     <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {TILES.map(({ key, label }) => {
         const rate = current.rates[key];
-        return <div key={key} className="flex min-w-0 flex-col rounded-lg border border-border bg-background p-3 sm:p-4">
-          <dt className="text-xs leading-snug text-muted-foreground">{label}</dt>
-          <dd className="mt-auto flex flex-col pt-2 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2">
-            <span className="whitespace-nowrap text-2xl font-semibold tabular-nums">{fraction(rate)}</span>
-            <span className="text-sm font-medium tabular-nums text-muted-foreground">{rate.pct}</span>
+        return <div key={key} className="flex min-w-0 flex-col rounded-lg border border-border border-l-[3px] border-l-ok bg-background p-3.5 shadow-2xs sm:p-4">
+          <dt className="text-xs font-medium leading-snug text-muted-foreground">{label}</dt>
+          <dd className="mt-auto flex flex-col pt-2.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2">
+            <span className="whitespace-nowrap font-mono text-2xl font-semibold tabular-nums">{fraction(rate)}</span>
+            <span className="w-fit rounded bg-ok-tint px-1.5 py-0.5 font-mono text-xs font-semibold tabular-nums text-ok">{rate.pct}</span>
           </dd>
-          <dd className="mt-1 text-xs tabular-nums text-muted-foreground">95% interval <span className="whitespace-nowrap">{rate.ci95_pct[0]}–{rate.ci95_pct[1]}</span></dd>
+          <dd className="mt-1.5 font-mono text-[0.7rem] tabular-nums text-muted-foreground">95% interval <span className="whitespace-nowrap">{rate.ci95_pct[0]}–{rate.ci95_pct[1]}</span></dd>
         </div>;
       })}
     </dl>

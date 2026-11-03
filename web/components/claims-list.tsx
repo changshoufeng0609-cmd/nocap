@@ -49,8 +49,8 @@ export function ClaimsList({ claims, verdicts, selectedId, onSelect, streaming, 
               aria-expanded={selectedId === c.id}
               aria-controls={panelId}
               className={cn(
-                "group flex w-full items-start gap-3 rounded-md px-2 py-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring",
-                selectedId === c.id && "bg-muted",
+                "group flex w-full items-start gap-3 rounded-md px-2.5 py-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring",
+                selectedId === c.id && "bg-muted shadow-2xs ring-1 ring-border",
               )}
             >
               <StatusGlyph status={status} className="mt-0.5" />
@@ -65,7 +65,9 @@ export function ClaimsList({ claims, verdicts, selectedId, onSelect, streaming, 
                     {c.value_text}
                   </span>
                   {filed ? (
-                    <span className="shrink-0 font-mono text-xs font-medium text-bad tabular-nums">filed {filed}</span>
+                    <span className="shrink-0 rounded bg-bad-tint px-1.5 py-0.5 font-mono text-xs font-medium text-bad tabular-nums">
+                      filed {filed}
+                    </span>
                   ) : null}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">

@@ -66,29 +66,34 @@ export function PrivateCheck() {
       <h2 className="flex items-center gap-2 font-serif text-3xl font-medium"><ShieldCheckIcon className="size-6" />Private check</h2>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Muse Glimmer extracts your draft in the operator&apos;s Modal workspace. NoCap checks the claims against its SEC snapshot. Your draft is not sent to Meta Model API, Fireworks or Baseten, and is not saved in NoCap&apos;s response caches.</p>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">This is not offline: your browser, the NoCap server and the operator&apos;s Modal service handle the draft. Hosting and Modal policies still apply. Fix and Slide use Meta and are separate modes. Modal bills GPU time; the displayed admission estimate is not its invoice.</p>
-      <p role="status" className="my-4 rounded-lg border border-border p-3 text-sm">{MOCK ? "Private checks require the live API; mock mode sends no draft." : status?.message ?? "Checking private backend configuration…"}</p>
-      <section aria-label="Private draft" className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6">
-        <label htmlFor="private-draft" className="block text-sm font-medium">Draft · up to {MAX_DRAFT_CHARS.toLocaleString("en-US")} characters</label>
-        <Textarea id="private-draft" value={text} maxLength={MAX_DRAFT_CHARS} rows={9} autoComplete="off" spellCheck={false}
-          onChange={(e) => { reset(); setText(e.target.value); }} placeholder="Paste the financial draft to check in the operator's Modal workspace." />
-        <label className="block text-sm">Company and period (optional)
-          <input className="mt-1 block h-10 w-full rounded-md border border-input bg-transparent px-3" value={context} maxLength={300} autoComplete="off"
-            onChange={(e) => { reset(); setContext(e.target.value); }} placeholder="NVIDIA, Q2 FY2027" />
-        </label>
-        <label className="block text-sm">As of (optional, UTC or explicit timezone)
-          <input className="mt-1 block h-10 w-full rounded-md border border-input bg-transparent px-3" value={asOf} maxLength={40} autoComplete="off"
-            onChange={(e) => { reset(); setAsOf(e.target.value); }} placeholder="2026-08-26T20:00:00Z" />
-        </label>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant={status?.available ? "default" : "outline"} disabled={running || !text.trim() || !status?.available || MOCK} onClick={() => void check()}>{running ? <Loader2Icon className="animate-spin" /> : <ShieldCheckIcon />}Check privately</Button>
-          <Button variant="ghost" onClick={() => { reset(); setText(""); setContext(""); setAsOf(""); }}>Clear draft and results</Button>
-        </div>
-        <div className="space-y-2 border-t border-border pt-4">
+      <p role="status" className="my-4 rounded-lg border border-border bg-muted/35 px-3.5 py-3 text-sm">{MOCK ? "Private checks require the live API; mock mode sends no draft." : status?.message ?? "Checking private backend configuration…"}</p>
+      <section aria-label="Private draft" className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:p-6">
+        <div className="space-y-3 rounded-lg border border-border/80 bg-muted/25 p-3.5">
           {/* Where live Private checks are off, the replay is the one working action, so it takes the primary style. */}
-          <Button variant={status?.available ? "secondary" : "default"} disabled={running || MOCK || !recorded} onClick={replaySample}><HistoryIcon />Replay a recorded Private check</Button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">Zero-Charge Demo Replay · Modal Muse Glimmer</span>
+            <Button size="sm" variant={status?.available ? "secondary" : "default"} disabled={running || MOCK || !recorded} onClick={replaySample}><HistoryIcon />Replay a recorded Private check</Button>
+          </div>
           <p className="text-xs leading-relaxed text-muted-foreground">{recorded
             ? <>Recorded, not live: {SAMPLE.title}. The operator checked this public synthetic draft on their own Modal Glimmer deployment{recorded.recorded_utc ? ` (${formatUtcMinutes(recorded.recorded_utc)})` : ""}; NoCap replays that run at $0, with no model call and nothing sent to Modal. Only this exact sample is replayed; your own drafts never are.</>
             : "This server has no recorded Private check to replay."}</p>
+        </div>
+        <label htmlFor="private-draft" className="block text-sm font-medium">Draft · up to {MAX_DRAFT_CHARS.toLocaleString("en-US")} characters</label>
+        <Textarea id="private-draft" value={text} maxLength={MAX_DRAFT_CHARS} rows={9} autoComplete="off" spellCheck={false}
+          onChange={(e) => { reset(); setText(e.target.value); }} placeholder="Paste the financial draft to check in the operator's Modal workspace." />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block text-sm">Company and period (optional)
+            <input className="mt-1 block h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm" value={context} maxLength={300} autoComplete="off"
+              onChange={(e) => { reset(); setContext(e.target.value); }} placeholder="NVIDIA, Q2 FY2027" />
+          </label>
+          <label className="block text-sm">As of (optional, UTC or explicit timezone)
+            <input className="mt-1 block h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm" value={asOf} maxLength={40} autoComplete="off"
+              onChange={(e) => { reset(); setAsOf(e.target.value); }} placeholder="2026-08-26T20:00:00Z" />
+          </label>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <Button variant={status?.available ? "default" : "outline"} disabled={running || !text.trim() || !status?.available || MOCK} onClick={() => void check()}>{running ? <Loader2Icon className="animate-spin" /> : <ShieldCheckIcon />}Check privately</Button>
+          <Button variant="ghost" onClick={() => { reset(); setText(""); setContext(""); setAsOf(""); }}>Clear draft and results</Button>
         </div>
         {running ? <p role="status" className="text-sm text-muted-foreground">{text === SAMPLE.text && recorded ? "Loading the recorded Private check…" : "Waiting for Modal Glimmer and checking its claims…"}</p> : null}
         {error ? <p role="alert" className="text-sm text-bad">{error}</p> : null}

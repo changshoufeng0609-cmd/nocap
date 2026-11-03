@@ -214,7 +214,8 @@ _STOP = _stems(
     "into onto out off per via within across among between including include included includes "
     "be is are was were been being am has have had having do does did done can could will would shall should may might "
     "must there here then thus so very more most less least much many few several said says "
-    "reported report reports reporting posted posts recorded delivered deliver delivers delivering achieved achieve "
+    "reported report reports reporting posted posts posting recorded recording generating reaching hitting "
+    "delivered deliver delivers delivering achieved achieve "
     "achieves achieving generated generate generates totaled totalled totaling totalling reached reach reaches came come "
     "comes stood stand saw see sees showed show shows made make makes hit hits remained remain remains continued "
     "continue continues continuing currently current now today operates operate operated returned return returns "
@@ -285,6 +286,21 @@ _PHRASES: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\bsystem[\s-]+wide\b", re.I), " systemwide "),
 )
 _WORD_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_'’&-]*")
+# Round 11: exact expansions of a measure's short name, read as the short name on both sides before any figure is read:
+# "selling, general and administrative" is SG&A, "health benefits ratio" HBR, "research and development" R&D. The
+# words are replaced in place (padded with spaces), so every offset holds. Never fuzzy: only these exact spellings.
+_ALIASES: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\bselling,?\s+general,?\s+(?:and|&)\s+administrative\b", re.I), "SG&A"),
+    (re.compile(r"\bresearch\s+(?:and|&)\s+development\b", re.I), "R&D"),
+    (re.compile(r"\bhealth\s+benefits?\s+ratio\b", re.I), "HBR"),
+)
+
+
+def _aliased(text: str) -> str:
+    """text with each long form above written as its short name, left-aligned and padded: offsets kept."""
+    for rx, short in _ALIASES:
+        text = rx.sub(lambda m: short + " " * (len(m.group()) - len(short)), text)
+    return text
 
 
 def _words(text: str) -> list[str]:
@@ -950,6 +966,17 @@ class _ClaimFigure(NamedTuple):
     companions: frozenset[str] = frozenset()  # digits of the other current figures of the same measure in its clause
 
 
+# Round 11: a relative aside between a measure and its figure describes the measure, it doesn't name it: "health
+# benefits ratio (HBR), which measures medical expenses relative to premium revenue, remained at 92.7%". The claim's
+# sentence is read with such an aside blanked (offsets kept); a release sentence is read as before.
+_RELATIVE_ASIDE_RE = re.compile(r",\s*(?:which|that|who)\b[^,;:()]*,")
+
+
+def _without_relative_aside(text: str, a: int) -> str:
+    """text with the comma-enclosed relative asides before offset a blanked."""
+    return _RELATIVE_ASIDE_RE.sub(lambda m: " " * len(m.group()) if m.end() <= a else m.group(), text)
+
+
 def claim_figure(claim: Claim, line: Optional[_v.DraftLine], company: frozenset[str]) -> Optional[_ClaimFigure]:
     """The claim's figure as its own draft sentence reads it (its span without the draft); None when it can't be read."""
     number = _claim_number(claim)
@@ -964,9 +991,11 @@ def claim_figure(claim: Claim, line: Optional[_v.DraftLine], company: frozenset[
             return None
         text, a, b = claim.span_text, pos, pos + len(claim.value_text)
     a += figure_at  # "nearly 220 million": the hedge is read before the figure, as in a release
+    text = _without_relative_aside(_aliased(text), a)  # round 11
     nums = _numbers(text)
     fig = _figure(text, a, b, company, numbers=nums, count=cls.startswith("n:"), neg=neg, cls=cls)
-    fig.measure |= _content(claim.metric_text or "", company) | _content(claim.segment or "", company)
+    fig.measure |= (_content(_aliased(claim.metric_text or ""), company)
+                    | _content(_aliased(claim.segment or ""), company))
     q = set(fig.qualifiers) | _qualifiers(claim.metric_text or "")
     if claim.basis == "non-GAAP":
         q.add("adjusted")
@@ -1162,7 +1191,8 @@ def _stated(unit: Unit, read: "_ClaimFigure", company: frozenset[str], *, skip_n
     out = []
     for s0, s1 in _sentences(unit.text):
         sentence = written = unit.text[s0:s1]
-        if skip_names:  # offsets kept, so the receipt quotes the sentence as written
+        sentence = _aliased(sentence)  # round 11: offsets kept, so the receipt quotes the sentence as written
+        if skip_names:
             sentence = _NAME_PAREN_RE.sub(lambda m: " " * len(m.group()), sentence)
         if not _names_no_other_period(sentence, unit):
             continue  # another period: neither a match nor a conflict

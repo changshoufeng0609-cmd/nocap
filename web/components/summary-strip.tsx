@@ -11,11 +11,11 @@ import { cn } from "@/lib/utils";
 
 // A count tile takes its verdict's tint only when it has something to report.
 const TILE: Record<ResolvedDisplayStatus, string> = {
-  verified: "border-ok-line/35 bg-ok-tint/60",
-  wrong: "border-bad-line/40 bg-bad-tint/70",
-  look_ahead: "border-time-line/40 bg-time-tint/60",
-  unverifiable: "border-unk-line/40 bg-unk-tint/60",
-  approximate: "border-approx-line/40 bg-approx-tint/60",
+  verified: "border-ok-line/40 border-l-[3px] border-l-ok bg-ok-tint/65 shadow-[inset_0_1px_0_rgb(255_255_255/0.55)] dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]",
+  wrong: "border-bad-line/45 border-l-[3px] border-l-bad bg-bad-tint/75 shadow-[inset_0_1px_0_rgb(255_255_255/0.55)] dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]",
+  look_ahead: "border-time-line/45 border-l-[3px] border-l-time bg-time-tint/70 shadow-[inset_0_1px_0_rgb(255_255_255/0.55)] dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.06)]",
+  unverifiable: "border-unk-line/40 bg-unk-tint/60 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)] dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]",
+  approximate: "border-approx-line/40 bg-approx-tint/60 shadow-[inset_0_1px_0_rgb(255_255_255/0.4)] dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]",
 };
 
 /** ✓ ✗ ? ≈ counts, then latency, cost, model and the cached badge once the check is done. */
@@ -85,13 +85,13 @@ export function SummaryStrip({ state }: { state: CheckState }) {
               <span className="tabular-nums">{formatLatency(done.latency_s)} · {done.cost_is_estimate ? "estimated " : ""}{formatCost(done.cost_usd)}</span>
             )}
             <span aria-hidden>·</span>
-            <span className="font-mono">{done.model}</span>
+            <span className="rounded border border-border/80 bg-muted/60 px-1.5 py-0.5 font-mono text-[0.7rem] text-foreground/85">{done.model}</span>
             {meta?.cached ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span
                     tabIndex={0}
-                    className="ml-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 font-medium text-foreground/80 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="ml-0.5 inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 font-medium text-foreground/80 shadow-2xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <DatabaseZapIcon className="size-3" aria-hidden />
                     Cached

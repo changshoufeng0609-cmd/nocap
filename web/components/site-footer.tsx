@@ -18,7 +18,7 @@ export function SiteFooter() {
   }, []);
 
   return (
-    <footer className="mt-auto border-t border-border/80">
+    <footer className="mt-auto border-t-[3px] border-double border-border bg-card/35">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-1.5 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-start sm:justify-between sm:gap-8 sm:px-6">
         <div className="space-y-1.5 sm:shrink-0">
           <p className="font-medium text-foreground/80">Research and fact-checking only. Not investment advice.</p>

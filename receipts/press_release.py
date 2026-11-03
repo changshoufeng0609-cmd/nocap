@@ -1364,7 +1364,15 @@ def decide_table(t: PTable, m: TableMap, ctx: FilingContext) -> tuple[list[Fact]
                 and _CONTINUING_RE.search(f"{row.section} {row.label}")):  # a narrower measure than the metric
             _reject(rej, t, "continuing_operations_only", row=rm.row, detail=f"{row.section} / {row.label}")
             continue
-        row_marker = bool(_NONGAAP_RE.search(row.label) or _NONGAAP_RE.search(row.section))
+        # A reconciliation/adjustments block contains both the GAAP starting point and its adjusted total.
+        # Its caption is not a basis marker for every row: e.g. "Adjustments (excluding tax)" may remain the
+        # nearest section above an unadjusted "Diluted EPS" row. Keep the model's row basis in that case;
+        # explicit row/column markers and genuine non-GAAP section headings still take precedence.
+        section_marker = bool(_NONGAAP_RE.search(row.section))
+        if metric == "eps_diluted" and (_RECON_RE.search(row.section)
+                                        or re.match(r"\s*adjustments?\b", row.section, re.I)):
+            section_marker = False
+        row_marker = bool(_NONGAAP_RE.search(row.label) or section_marker)
         row_duration = strong_duration(row.label)  # "Operating cash flow -- trailing twelve months (TTM)"
 
         kept: dict[tuple, list[tuple[int, Decimal, Fact]]] = defaultdict(list)

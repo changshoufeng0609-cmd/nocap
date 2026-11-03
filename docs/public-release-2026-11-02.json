@@ -1,9 +1,9 @@
 {
   "record": "NoCap public releases on 2026-11-02 (Taipei)",
   "origin": "https://receipts-nocap.vercel.app",
-  "current_deployment": "dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5",
-  "current_public_source": "898cb9af4a76de8d451fd6476e2671714d9f1841",
-  "rollback_deployment": "dpl_H39vsq9VaVdogc9ZBqXPtRK4xrBr",
+  "current_deployment": "dpl_E1P68ptYvyg9TF3zSB6hW36unmps",
+  "current_public_source": "33770eb5cde9c2a64a928957277dbdd59c3caf0f",
+  "rollback_deployment": "dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5",
   "deployments": [
     {
       "deployment": "dpl_EAfhreQrZdaWr3HJg4q3jHuuVVsR",
@@ -73,6 +73,20 @@
         "provider_calls": 0,
         "new_spend_usd": 0,
         "started_utc": "2026-11-02T09:01:57Z"
+      }
+    },
+    {
+      "deployment": "dpl_E1P68ptYvyg9TF3zSB6hW36unmps",
+      "created_utc": "2026-11-02T12:22:49Z",
+      "public_source": "33770eb5cde9c2a64a928957277dbdd59c3caf0f",
+      "private_source": "5210622",
+      "change": "AI-draft benchmark fixes (rounds 10a-10c), a fourth saved example (Muse Wonder's Reddit recap) and the demo video's new results card",
+      "anonymous_acceptance": {
+        "status": "passed",
+        "checks": 51,
+        "provider_calls": 0,
+        "new_spend_usd": 0,
+        "note": "51 checks: the fourth saved example adds one per device"
       }
     }
   ],

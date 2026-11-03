@@ -384,8 +384,8 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
   else if (isDesktop && receipt) panel = receipt;
   else {
     panel = (
-      <div className="flex flex-col gap-3">
-        <div className="flex items-baseline justify-between gap-2">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/65 p-4 shadow-2xs">
+        <div className="flex items-baseline justify-between gap-2 border-b border-border/70 pb-2.5">
           <h2 className="font-serif text-xl font-medium tracking-tight">Claims</h2>
           <span className="text-xs text-muted-foreground">
             {claims.length ? "Select one to see its receipt" : null}
@@ -424,10 +424,10 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
             {companies?.length ? <>Evidence: <span className="font-medium text-foreground/80">{companies.length} S&amp;P 500 companies</span>, their latest eight fiscal quarters{snapshot ? <> in SEC data as of <span className="font-medium text-foreground/80">{formatDay(snapshot)}</span></> : null}. Other companies, periods and metrics return ? (unverifiable), never guessed.</> : "Evidence is limited to the companies in NoCap's SEC snapshot. Anything else returns ? (unverifiable), never guessed."}
           </p>
           {companies?.length ? (
-            <details className="mb-2 text-xs text-muted-foreground">
-              <summary className="w-fit cursor-pointer rounded-sm py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Covered tickers ({companies.length})</summary>
+            <details className="mb-3 rounded-lg border border-border/70 bg-card/50 px-3 py-1.5 text-xs text-muted-foreground">
+              <summary className="w-fit cursor-pointer rounded-sm py-0.5 font-medium text-foreground/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">Covered tickers ({companies.length})</summary>
               <p className="mt-1 leading-relaxed">Latest covered fiscal quarter. Coverage varies by metric.</p>
-              <div role="group" aria-label="Covered tickers and latest fiscal quarters" tabIndex={0} className="mt-1 max-h-32 overflow-y-auto rounded-sm leading-relaxed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <div role="group" aria-label="Covered tickers and latest fiscal quarters" tabIndex={0} className="mt-1.5 max-h-32 overflow-y-auto rounded-md border border-border/60 bg-background/60 p-2 font-mono text-[0.7rem] leading-relaxed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
                 <ul className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3">
                   {companies.map((ticker) => <li key={ticker}>{ticker} · <span className="inline-block">{coveredQuarters[ticker] ?? "quarter unavailable"}</span></li>)}
                 </ul>
@@ -438,11 +438,11 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
           <div
             className={cn(
               // overflow-clip keeps the rounded corners without making the card a scroll container, so the action bar can dock.
-              "overflow-clip rounded-xl border border-border bg-card shadow-[0_1px_3px_rgb(0_0_0/0.04)] transition-shadow",
+              "overflow-clip rounded-xl border border-border bg-card shadow-xs transition-shadow",
               "has-[#draft:focus-visible]:border-ring/60 has-[#draft:focus-visible]:ring-3 has-[#draft:focus-visible]:ring-ring/25",
             )}
           >
-            <div className="flex flex-col gap-4 border-b border-border px-4 py-4 sm:flex-row sm:items-start sm:gap-5 sm:px-6">
+            <div className="flex flex-col gap-4 border-b border-border bg-muted/20 px-4 py-4 sm:flex-row sm:items-start sm:gap-5 sm:px-6">
               <ExamplePicker
                 examples={examples}
                 error={examplesError}
@@ -534,14 +534,14 @@ export function ReceiptsApp({ active = true, livePaused = false, draftCachePolic
             )}
 
             {/* While editing, the bar docks to the bottom of the viewport so Check stays in view above a long draft. */}
-            <div className={cn("flex items-center justify-between gap-3 border-t border-border bg-card px-4 py-3 sm:px-6", !showResults && "sticky bottom-0 z-10")}>
+            <div className={cn("flex items-center justify-between gap-3 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-xs sm:px-6", !showResults && "sticky bottom-0 z-10")}>
               {showResults ? (
                 <Button variant="ghost" size="sm" className="-ml-2" onClick={edit}>
                   <PencilLineIcon />
                   Edit draft
                 </Button>
               ) : (
-                <span className={cn("text-xs tabular-nums", over ? "font-medium text-bad" : "text-muted-foreground")}>
+                <span className={cn("font-mono text-xs tabular-nums", over ? "font-medium text-bad" : "text-muted-foreground")}>
                   {draft.length.toLocaleString("en-US")} / {MAX_DRAFT_CHARS.toLocaleString("en-US")}
                 </span>
               )}

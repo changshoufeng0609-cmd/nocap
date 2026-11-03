@@ -108,23 +108,40 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
         </div>
       ) : null}
 
-      <dl className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-card">
-        <div className="flex flex-col gap-1 border-r border-border px-4 py-3">
-          <dt className="text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">Claimed</dt>
+      <dl className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-card shadow-2xs">
+        <div
+          className={cn(
+            "flex flex-col gap-1 border-r border-dashed border-border px-4 py-3",
+            struck && "bg-bad-tint/35",
+          )}
+        >
+          <dt className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">Claimed</dt>
           <dd
             className={cn(
               "font-mono text-xl font-medium tabular-nums",
-              struck && "text-bad line-through decoration-2",
+              struck && "text-bad line-through decoration-bad-line decoration-2",
             )}
           >
             {formatClaimed(claim)}
           </dd>
         </div>
-        <div className="flex flex-col gap-1 px-4 py-3">
-          <dt className="text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">
+        <div
+          className={cn(
+            "flex flex-col gap-1 px-4 py-3",
+            (status === "verified" || (struck && filed)) && "bg-ok-tint/25",
+            lookAhead && "bg-time-tint/25",
+          )}
+        >
+          <dt className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">
             {lookAhead ? "Filed later" : "Filed"}
           </dt>
-          <dd className={cn("font-mono text-xl font-medium tabular-nums", status === "verified" && "text-ok")}>
+          <dd
+            className={cn(
+              "font-mono text-xl font-medium tabular-nums",
+              (status === "verified" || (struck && filed)) && "text-ok",
+              lookAhead && "text-time",
+            )}
+          >
             {!verdict ? (
               <PendingDots className="text-muted-foreground" />
             ) : filed ? (
@@ -141,10 +158,21 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
 
       {verdict ? (
         <figure className="flex flex-col gap-1.5">
-          <figcaption className="text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">
+          <figcaption className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">
             Why
           </figcaption>
-          <blockquote className="border-l-2 border-border pl-3.5 font-serif text-[1.05rem] leading-relaxed text-pretty">
+          <blockquote
+            className={cn(
+              "rounded-r-md border-l-[3px] py-1.5 pr-3 pl-3.5 font-serif text-[1.05rem] leading-relaxed text-pretty",
+              struck
+                ? "border-bad-line/80 bg-bad-tint/20"
+                : status === "verified"
+                  ? "border-ok-line/70 bg-ok-tint/20"
+                  : lookAhead
+                    ? "border-time-line/75 bg-time-tint/20"
+                    : "border-border bg-muted/25",
+            )}
+          >
             {verdict.explanation}
           </blockquote>
         </figure>
@@ -154,7 +182,7 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
 
       {verdict ? (
         <section aria-label="Receipts" className="flex flex-col gap-2.5">
-          <h3 className="text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">
+          <h3 className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">
             {verdict.evidence.length
               ? `Receipts · ${verdict.evidence.length} ${verdict.evidence.length === 1 ? "filing" : "filings"}`
               : "Receipts"}
@@ -174,7 +202,7 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
       ) : null}
 
       <section aria-label="Extracted claim" className="flex flex-col gap-2">
-        <h3 className="text-[0.7rem] font-medium tracking-wide text-muted-foreground uppercase">
+        <h3 className="text-[0.7rem] font-semibold tracking-wider text-muted-foreground uppercase">
           Extracted by Muse Spark
         </h3>
         <dl className="flex flex-wrap gap-1.5 font-mono text-[0.7rem]">
@@ -188,9 +216,9 @@ export function ReceiptDetail({ claim, verdict, asOf, index, total, onPrev, onNe
             ...(claim.segment ? [["segment", claim.segment]] : []),
             ...(claim.forward_looking ? [["forward-looking", "yes"]] : []),
           ].map(([k, v]) => (
-            <div key={k} className="flex gap-1 rounded-md bg-muted px-1.5 py-1">
+            <div key={k} className="flex gap-1.5 rounded-md border border-border/70 bg-muted/70 px-2 py-1">
               <dt className="text-muted-foreground">{k}</dt>
-              <dd>{v}</dd>
+              <dd className="font-medium text-foreground/90">{v}</dd>
             </div>
           ))}
         </dl>
