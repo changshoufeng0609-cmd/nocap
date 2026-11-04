@@ -15,16 +15,20 @@ import time
 
 
 class ScreencastRecorder:
-    def __init__(self, context, page, path, size, fps=25, quality=92, crf=12):
+    def __init__(self, context, page, path, size, fps=25, quality=98, crf=10, fmt='png'):
         self.fps = fps
         self.size = size
         self.path = path
+        self.fmt = fmt
         self.cdp = context.new_cdp_session(page)
         self.queue: queue.Queue = queue.Queue()
+        in_codec = 'png' if fmt == 'png' else 'mjpeg'
+        scale_vf = (f'scale={size[0]}:{size[1]}:out_range=tv:out_color_matrix=bt709' if fmt == 'png'
+                    else f'scale={size[0]}:{size[1]}:in_range=full:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709')
         self.proc = subprocess.Popen(
             ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', str(fps),
-             '-c:v', 'mjpeg', '-i', 'pipe:0',
-             '-vf', f'scale={size[0]}:{size[1]}:in_range=full:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709',
+             '-c:v', in_codec, '-i', 'pipe:0',
+             '-vf', scale_vf,
              '-c:v', 'libx264', '-preset', 'veryfast', '-crf', str(crf), '-pix_fmt', 'yuv420p',
              '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv',
              '-r', str(fps), str(path)],
@@ -38,7 +42,7 @@ class ScreencastRecorder:
         self.max_gap_s = 0.0
         self._previous_ts = None
         self.cdp.on('Page.screencastFrame', self._frame)
-        self.cdp.send('Page.startScreencast', {'format': 'jpeg', 'quality': quality, 'maxWidth': size[0],
+        self.cdp.send('Page.startScreencast', {'format': fmt, 'quality': quality, 'maxWidth': size[0],
                                                'maxHeight': size[1], 'everyNthFrame': 1})
 
     def _write(self):

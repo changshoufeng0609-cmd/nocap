@@ -25,7 +25,7 @@ from render_walkthrough_v2 import DURATION_LIMITS, OUTPUT  # noqa: E402
 ROOT = Path(__file__).resolve().parents[2]
 # Key frames per cut: (shot, fraction of the shot); 'sam' is the middle of the SAM highlight overlay.
 KEYS = {
-    'main': [('cold', .75), ('title', .5), ('check', .5), ('tiles', .6), ('receipt', .8), ('sources', .6), ('eps', .85),
+    'main': [('stakes', .65), ('cold', .75), ('title', .5), ('check', .5), ('tiles', .6), ('receipt', .8), ('sources', .6), ('eps', .85),
              ('fix', .85), ('fix-receipts', .6), ('cutoff-receipt', .85), ('slide', .2), ('sam', .5), ('slide', .95),
              ('slide-receipt', .6), ('ask-result', .6), ('ask-quotes', .6), ('backends', .6), ('private', .25), ('private', .85),
              ('results', .6), ('end', .6)],
@@ -102,7 +102,8 @@ def main():
                                                 '-of', 'json', str(video)], text=True))
     v = next(s for s in probe['streams'] if s['codec_type'] == 'video')
     a = next(s for s in probe['streams'] if s['codec_type'] == 'audio')
-    assert (v['width'], v['height'], v['codec_name'], v['pix_fmt'], v['r_frame_rate']) == (1920, 1080, 'h264', 'yuv420p', '25/1'), v
+    expected_res = (1080, 1920) if args.cut == 'x' else (1920, 1080)
+    assert (v['width'], v['height'], v['codec_name'], v['pix_fmt'], v['r_frame_rate']) == (*expected_res, 'h264', 'yuv420p', '25/1'), v
     assert (a['codec_name'], a['sample_rate'], a['channels']) == ('aac', '48000', 2), a
     duration = float(probe['format']['duration'])
     low, high = DURATION_LIMITS[args.cut]
@@ -133,16 +134,17 @@ def main():
     review = folder / 'review'
     review.mkdir(exist_ok=True)
     step = 3 if args.cut == 'x' else 5
+    tw, th = (216, 384) if args.cut == 'x' else (384, 216)
     thumbs = []
     for i, t in enumerate(range(1, int(duration), step)):
         path = review / f'thumb-{i:03}.png'
-        grab(video, t, path, 384)
+        grab(video, t, path, tw)
         thumbs.append((t, path))
     cols = 6
     rows = (len(thumbs) + cols - 1) // cols
-    sheet = Image.new('RGB', (cols * 384, rows * 216), 'black')
+    sheet = Image.new('RGB', (cols * tw, rows * th), 'black')
     for i, (t, path) in enumerate(thumbs):
-        sheet.paste(Image.open(path).convert('RGB').resize((384, 216)), ((i % cols) * 384, (i // cols) * 216))
+        sheet.paste(Image.open(path).convert('RGB').resize((tw, th)), ((i % cols) * tw, (i // cols) * th))
         path.unlink()
     sheet.save(folder / 'contact-sheet.jpg', quality=82)
     # Full-size key frames.
@@ -162,7 +164,7 @@ def main():
     result = {
         'status': 'passed', 'version': manifest['version'], 'cut': args.cut,
         'video': video.name, 'video_sha256': sha(video), 'video_bytes': video.stat().st_size, 'duration_s': duration,
-        'resolution': [1920, 1080], 'video_codec': f"h264 {v.get('profile', '')} yuv420p 25 fps".replace('  ', ' '), 'audio': 'aac 48 kHz stereo',
+        'resolution': list(expected_res), 'video_codec': f"h264 {v.get('profile', '')} yuv420p 25 fps".replace('  ', ' '), 'audio': 'aac 48 kHz stereo',
         'faststart': True, 'full_decode': 'passed', 'loudness': level,
         'music': {'final_chord': music['final_chord'], 'level_in_export_lufs': music['level_in_export_lufs'],
                   'undocked_level_in_mix_lufs': music['undocked_level_lufs'], 'pcm_sha256': music['pcm_sha256']},

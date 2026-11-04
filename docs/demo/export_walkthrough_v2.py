@@ -264,6 +264,12 @@ def main():
         x_folder = x[0]
         for suffix, target_name in zip(('.mp4', '.en.srt', '.en.vtt'), X_ASSETS):
             shutil.copy2(x_folder / f'{OUTPUT["x"]}{suffix}', ASSETS / target_name)
+            if target_name.endswith(('.mp4', '.vtt')):
+                shutil.copy2(x_folder / f'{OUTPUT["x"]}{suffix}', PUBLIC / target_name)
+    if (source / 'render' / 'card-stakes.png').exists():
+        shutil.copy2(source / 'render' / 'card-stakes.png', PUBLIC / 'poster.png')
+    if (source / 'render' / 'card-title-x.png').exists():
+        shutil.copy2(source / 'render' / 'card-title-x.png', PUBLIC / 'poster-x.png')
 
     if not keep_gif:
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{start:.2f}', '-i', str(ASSETS / 'receipts-demo.mp4'), '-t', f'{GIF_SECONDS:.2f}',

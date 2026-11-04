@@ -40,7 +40,7 @@ SPLIT_EVENTS: dict[str, tuple[SplitEvent, ...]] = {
     "CRWD": (SplitEvent(4, True, date(2026, 6, 3), date(2026, 6, 3), datetime.fromisoformat('2026-08-27T01:03:35Z')),),
     "CTAS": (SplitEvent(4, True, date(2024, 5, 2), date(2024, 5, 2), datetime.fromisoformat('2024-07-25T18:01:02Z')),),
     "CVNA": (SplitEvent(5, True, date(2026, 5, 5), date(2026, 5, 8), datetime.fromisoformat('2026-07-29T20:11:13Z')),),
-    "DD": (SplitEvent(3, False, date(2026, 1, 1), date(2026, 6, 30), datetime.fromisoformat('2026-08-04T16:17:46Z')),),
+    "DD": (SplitEvent(3, False, date(2026, 6, 24), date(2026, 6, 24), datetime.fromisoformat('2026-08-04T16:17:46Z')),),
     "DECK": (SplitEvent(6, True, date(2024, 9, 13), date(2024, 9, 13), datetime.fromisoformat('2024-10-31T15:40:56Z')),),
     "ETR": (SplitEvent(2, True, date(2024, 10, 31), date(2024, 10, 31), datetime.fromisoformat('2025-02-18T20:59:23Z')),),
     "FAST": (SplitEvent(2, True, date(2025, 5, 21), date(2025, 5, 21), datetime.fromisoformat('2025-07-17T16:01:04Z')),),

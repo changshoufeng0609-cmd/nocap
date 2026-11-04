@@ -1,0 +1,45 @@
+{
+ "record": "NoCap public releases on 2026-11-03 (Taipei)",
+ "origin": "https://receipts-nocap.vercel.app",
+ "current_deployment": "dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj",
+ "current_public_source": "904efa1f2540fceb7c9b8b3c2bff16ec593993f5",
+ "rollback_deployment": "dpl_E1P68ptYvyg9TF3zSB6hW36unmps",
+ "deployments": [
+  {
+   "deployment": "dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj",
+   "created_utc": "2026-11-03T04:07:21Z",
+   "build_seconds": 41.9,
+   "public_source": "904efa1f2540fceb7c9b8b3c2bff16ec593993f5",
+   "private_source": "f6730ca",
+   "change": "round 11; capital expenditures (never ✗); adjusted-EPS evidence (82 append-only rows at six companies); accented company names; the Nov 3 filings (25 companies, 16 earnings releases); web UI polish",
+   "anonymous_acceptance": {
+    "status": "passed",
+    "checks": 51,
+    "provider_calls": 0,
+    "new_spend_usd": 0,
+    "started_utc": "2026-11-03T04:08:31Z"
+   }
+  }
+ ],
+ "deploy_procedure": "Each release: export with secret and PII scan, release-identity commit whose tree equals the private commit's export, SSH push to GitHub main (repo private until submission), Production deployment from that commit, then anonymous desktop and 390px mobile acceptance at $0.",
+ "evidence": {
+  "snapshot_fingerprint": "7562ac0df7d40c8a678bb4a7",
+  "health_facts": 305353,
+  "companies": 500,
+  "data_snapshot": "2026-11-03",
+  "release_text_manifest_sha256": "1166c1142b770d19b242c13a3fa497aad46694b3ee96fd1eccb8952fe1da4541",
+  "release_text": {
+   "companies": 451,
+   "releases": 1859,
+   "units": 134114
+  },
+  "largest_file": "data/snapshot/facts.sqlite, 50,286,592 bytes (over GitHub's 50 MB warning, under its 100 MB limit)"
+ },
+ "tests_at_current_private_source": {
+  "python": 4428,
+  "python_skipped": 4,
+  "python_fresh_clone": 4420,
+  "python_fresh_clone_skipped": 12,
+  "frontend_checks": 244
+ }
+}

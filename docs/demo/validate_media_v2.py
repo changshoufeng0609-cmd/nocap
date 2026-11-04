@@ -41,12 +41,12 @@ def loudness(path):
     return (float(re.search(r'I:\s+(-?[\d.]+) LUFS', summary).group(1)), float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', summary).group(1)))
 
 
-def check_video(path, captions, expected_duration, limits, srt, vtt):
+def check_video(path, captions, expected_duration, limits, srt, vtt, resolution=(1920, 1080)):
     vp = probe(path)
     duration = float(vp['format']['duration'])
     assert abs(duration - expected_duration) < 0.05 and limits[0] <= duration <= limits[1] + .05, duration
     vs = next(s for s in vp['streams'] if s['codec_type'] == 'video')
-    assert (vs['width'], vs['height'], vs['codec_name']) == (1920, 1080, 'h264')
+    assert (vs['width'], vs['height'], vs['codec_name']) == (*resolution, 'h264'), (vs['width'], vs['height'], vs['codec_name'])
     assert any(s['codec_type'] == 'audio' and s['codec_name'] == 'aac' for s in vp['streams'])
     head = open(path, 'rb').read(4096)
     assert head.find(b'moov') != -1 and (head.find(b'mdat') == -1 or head.find(b'moov') < head.find(b'mdat')), 'not +faststart'
@@ -93,7 +93,7 @@ def main():
     if manifest['x_cut']:
         x = manifest['x_cut']
         xp, x_lufs, x_peak, x_cues = check_video(ASSETS / 'nocap-x.mp4', x['captions'], x['duration_s'], DURATION_LIMITS['x'],
-                                                 ASSETS / 'nocap-x.en.srt', ASSETS / 'nocap-x.en.vtt')
+                                                 ASSETS / 'nocap-x.en.srt', ASSETS / 'nocap-x.en.vtt', resolution=(1080, 1920))
         assert x['audio']['music']['final_chord'] == 'Dmaj9' and x['audio']['mix']['loudnorm_output']['normalization_type'] == 'linear'
         x_record = {'video_probe': xp, 'caption_cues': x_cues, 'audio_integrated_lufs': x_lufs, 'audio_true_peak_dbfs': x_peak,
                     'full_video_decode': 'passed'}

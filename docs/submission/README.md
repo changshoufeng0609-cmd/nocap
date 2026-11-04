@@ -8,7 +8,7 @@ Product and team name: **NoCap**. Sole contributor: **SHOU-FENG CHANG (`Robert_C
 | [Evidence map](evidence-map.md) | The source, denominator and limit behind every number, plus the development record: test history, reviews, releases. |
 | [X drafts](x-posts.md) | One short post, two alternative openers and an optional four-post thread; not posted. |
 | [Threads and LinkedIn drafts](social-posts.md) | Traditional Chinese Threads copy, an English LinkedIn post and video descriptions, with counts and source notes; not posted. |
-| [Demo kit](../demo/README.md) | The 2:52 video, the 56-second X cut, the 20-second GIF, captions and recording provenance. |
+| [Demo kit](../demo/README.md) | The 2:50 pitch demo, the 60-second vertical X/Threads cut, the 20-second GIF, captions and recording provenance. |
 
 ## Status at submission
 

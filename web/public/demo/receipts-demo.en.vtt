@@ -1,79 +1,157 @@
 WEBVTT
 
-00:00:00.350 --> 00:00:04.504
-One wrong number in an earnings story becomes a public correction.
+1
+00:00:00.600 --> 00:00:04.341
+18%. One number in an earnings story.
 
-00:00:04.504 --> 00:00:11.157
-This AI-drafted story has two planted errors. NoCap flags both, with the filed figures.
+2
+00:00:04.691 --> 00:00:07.681
+If it's wrong, it becomes a public correction.
 
-00:00:11.157 --> 00:00:16.157
-NoCap checks every financial number in a draft against SEC filings.
+3
+00:00:08.581 --> 00:00:13.173
+And AI-written drafts make numbers cheap to produce, and costly to check.
 
-00:00:16.157 --> 00:00:21.323
-Muse Spark pulls out each claim. Code checks every one against the filings.
+4
+00:00:13.273 --> 00:00:19.848
+Financial journalists and analysts trace each figure back to SEC filings by hand, one filing at a time.
 
-00:00:23.014 --> 00:00:28.482
-Seven verified. Two wrong. Two unverifiable, because NoCap won't guess.
+5
+00:00:20.448 --> 00:00:23.738
+NoCap gives every number a receipt from the filing.
 
-00:00:28.932 --> 00:00:34.014
-The draft says revenue grew 18% from a year ago. That's the quarterly rate.
+6
+00:00:23.738 --> 00:00:26.614
+Models propose; code decides.
 
-00:00:34.014 --> 00:00:39.569
+7
+00:00:27.414 --> 00:00:29.324
+This is the real interface.
+
+8
+00:00:29.324 --> 00:00:33.564
+An AI-drafted NVIDIA story with two planted errors. Check.
+
+9
+00:00:33.564 --> 00:00:35.954
+Seven verified. Two wrong.
+
+10
+00:00:35.954 --> 00:00:39.168
+Two unverifiable, because NoCap never guesses.
+
+11
+00:00:39.168 --> 00:00:42.678
+The draft says revenue rose 18% from a year ago.
+
+12
+00:00:42.678 --> 00:00:47.807
 The receipt does the math from the filings: 105.85%.
 
-00:00:40.719 --> 00:00:44.897
-Each receipt cites the filing, down to when EDGAR accepted it.
+13
+00:00:47.807 --> 00:00:49.637
+The 18% was quarter over quarter.
 
-00:00:45.397 --> 00:00:51.259
-And $2.22 is adjusted EPS. The GAAP figure was $2.46.
+14
+00:00:49.637 --> 00:00:55.675
+Each receipt names the filing, its accession number, and when EDGAR accepted it.
 
-00:00:52.209 --> 00:00:58.766
-Fix with receipts: Muse Wonder proposes corrected numbers, and code lets only the digits change.
+15
+00:00:55.675 --> 00:01:00.205
+GAAP earnings per diluted share: the draft says $2.22.
 
-00:00:58.766 --> 00:01:03.109
-Then the whole draft is checked again: nine verified, zero wrong.
+16
+00:01:00.205 --> 00:01:02.827
+The filing says $2.46.
 
-00:01:04.159 --> 00:01:06.448
-Each correction keeps its receipt.
+17
+00:01:02.827 --> 00:01:09.184
+Fix with receipts. Muse Wonder proposes the corrections, and code lets only the digits change.
 
-00:01:07.298 --> 00:01:13.243
-Time travel: check this roundup as of July 29, 4 p.m. UTC.
+18
+00:01:09.184 --> 00:01:11.474
+Then the whole draft is checked again:
 
-00:01:13.243 --> 00:01:20.365
-Microsoft's revenue figure is right, but its filing reached EDGAR hours later, so it's marked not public yet.
+19
+00:01:11.474 --> 00:01:13.657
+nine verified, zero wrong.
 
-00:01:21.615 --> 00:01:26.297
-Now a real SEC slide: Bank of America's earnings presentation.
+20
+00:01:13.657 --> 00:01:18.721
+Time travel. A June-quarter roundup, checked as of July 29.
 
-00:01:26.297 --> 00:01:31.722
-Its recorded live run: three model calls, 21 seconds, about three cents.
+21
+00:01:18.721 --> 00:01:22.991
+A figure whose filing wasn't public yet is look-ahead, not wrong:
 
-00:01:32.911 --> 00:01:39.240
-SAM 3.1 finds both bar charts, and Muse Spark reads 32 printed labels.
+22
+00:01:22.991 --> 00:01:26.470
+six verified, one wrong, two look-ahead.
 
-00:01:39.240 --> 00:01:47.075
-Only the five GAAP bars verify. The rest are non-GAAP, untracked or ambiguous, so they stay unverifiable.
+23
+00:01:26.470 --> 00:01:29.060
+A real Bank of America earnings slide.
 
-00:01:47.675 --> 00:01:49.839
-Each reading opens its receipt.
+24
+00:01:29.060 --> 00:01:34.426
+SAM 3.1 finds the chart regions, and Muse Spark reads 32 printed labels.
 
-00:01:51.389 --> 00:01:56.673
-Ask a question of Meta's entire 10-K: more than half a million characters.
+25
+00:01:34.426 --> 00:01:41.762
+Ask a whole filing. Muse Spark reads Meta's entire 10-K, about 101,000 tokens, in one request.
 
-00:01:56.673 --> 00:02:05.766
-One Muse Spark request reads all of it in six seconds: 101,135 input tokens, no retrieval, no truncation.
+26
+00:01:41.762 --> 00:01:45.044
+Code keeps only the quotes it finds word for word.
 
-00:02:06.416 --> 00:02:10.147
-Code keeps only exact quotes it can find in the filing.
+27
+00:01:45.044 --> 00:01:51.214
+Private mode: the same check on open weights, Muse Glimmer, on the operator's own Modal GPU.
 
-00:02:11.197 --> 00:02:21.092
-Same verifier, four backends: Spark Open found all 27 gold claims, and Glimmer reads unpublished drafts on our own GPU.
+28
+00:01:51.214 --> 00:01:53.762
+The draft never leaves that deployment.
 
-00:02:21.342 --> 00:02:30.430
-Private check runs on Glimmer: one real run on our own Modal GPU, one figure verified, one planted error caught.
+29
+00:01:54.012 --> 00:01:57.222
+Under the hood, four Meta models.
 
-00:02:30.680 --> 00:02:39.566
-Across 1,000 test items, NoCap caught 306 of 360 planted errors and never marked one verified.
+30
+00:01:57.222 --> 00:02:01.087
+Muse Spark 1.3 extracts typed claims and plans the lookups.
 
-00:02:40.754 --> 00:02:50.076
-NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17.
+31
+00:02:01.087 --> 00:02:05.317
+Deterministic code decides, against SEC EDGAR:
+
+32
+00:02:05.317 --> 00:02:10.309
+value, period, scale, GAAP or non-GAAP, company, and a point-in-time gate.
+
+33
+00:02:10.309 --> 00:02:14.419
+Muse Wonder 1.0 proposes corrections that code re-checks.
+
+34
+00:02:14.419 --> 00:02:19.349
+SAM 3.1 and Muse Spark read slides. Muse Glimmer runs Private.
+
+35
+00:02:20.049 --> 00:02:25.329
+It covers all 500 S&P 500 companies, the latest eight fiscal quarters.
+
+36
+00:02:25.329 --> 00:02:33.093
+In a one-shot test on 1,000 fresh items from 400 companies, NoCap caught 306 of 360 planted errors.
+
+37
+00:02:33.093 --> 00:02:39.157
+It marked none of them verified, and flagged 17 of 1,298 true figures as wrong.
+
+38
+00:02:39.307 --> 00:02:42.257
+Try it live through November 17.
+
+39
+00:02:42.257 --> 00:02:48.146
+NoCap, built by Robert Chang during the Meta Global AI Developer Hackathon.

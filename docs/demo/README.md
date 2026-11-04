@@ -1,8 +1,38 @@
 # NoCap demo kit
 
-[Watch the 2:52 walkthrough](assets/receipts-demo.mp4) · [56-second X cut](assets/nocap-x.mp4) · [20-second GIF](assets/receipts-demo.gif) · [English SRT](assets/receipts-demo.en.srt) · [English VTT](assets/receipts-demo.en.vtt)
+[Watch the 2:50 pitch demo](assets/receipts-demo.mp4) · [60-second vertical X/Threads cut](assets/nocap-x.mp4) · [20-second GIF](assets/receipts-demo.gif) · [English SRT](assets/receipts-demo.en.srt) · [English VTT](assets/receipts-demo.en.vtt)
 
-The current export is **version 2.1** (October 31): a re-edit of the October 30 v2 recording of the real
+## Current export: the pitch demo (November 4)
+
+The submission video is a **2:50 pitch demo**. Illustrative animation carries the story; real footage of the NoCap
+interface proves each step:
+
+| Time | Part | What is on screen |
+|---|---|---|
+| 0:00–0:27 | Animation: the problem | One wrong number becomes a public correction; AI drafts make numbers cheap to write and costly to check |
+| 0:27–1:53 | **Real interface** | Check an AI-drafted NVIDIA story (7 ✓ 2 ✗ 2 ?); receipts for 18% vs 105.85% and $2.22 vs $2.46; Fix with receipts (9 ✓ 0 ✗); time travel as of July 29 (6 ✓ 1 ✗ 2 ◷); a Bank of America slide (SAM 3.1, 32 labels); a whole Meta 10-K in one Muse Spark request; Private on Muse Glimmer |
+| 1:53–2:19 | Animation: under the hood | Four Meta models propose; deterministic code decides against SEC EDGAR |
+| 2:19–2:50 | Animation: proof and call to action | All 500 S&P 500 companies; one-shot test: 306 of 360 planted errors caught, none marked verified, 17 of 1,298 true figures flagged |
+
+The four key product moments are enlarged and framed, and every product segment carries a chip naming the Meta
+model it uses. The screen footage is a new capture of the current interface (November 4, from the release source)
+with live model requests paused: draft checks replay cached extraction, and Fix, Slide, Ask and Private replay
+recorded live runs for the same inputs (Fix from October 29; the slide, the 10-K question and the Private check from
+October 30). The capture made **zero provider calls and $0 of new provider usage**. Figures in the animation come only
+from NoCap's real checks; the end card says the animation is illustrative.
+
+| Artifact | Verified properties |
+|---|---|
+| MP4 | 170.33 s (2:50.3); 1920 × 1080; H.264, yuv420p, 24 fps; AAC 48 kHz; `+faststart`; SHA-256 `a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b` |
+| Audio | Integrated −14.0 LUFS; true peak −1.4 dBTP; English narration (edge-tts `en-US-BrianNeural`) over a music bed made from free sample libraries |
+| Captions | 39 English cues, burned in; SRT `1212bdb4…`, VTT `86e684d7…` |
+| Checks | Reading-time check 0 misses; text contrast meets WCAG targets in every scene; speech recognition of the final mix scores 0.962 against the script; no black frames |
+| Vertical cut | `nocap-x.mp4` for X and Threads: 59.83 s, 1080 × 1920, 24 fps; 16 English cues; −14.0 LUFS; SHA-256 `ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf`. Same animation series, with each product moment lifted from the same capture and enlarged to nearly the full frame width; ends on the one-shot test (306/360 caught, none passed as verified, 17/1,298 flagged, verified calls right 736/738) |
+| Records | [validation](assets/validation.json), [manifest](assets/manifest.json); the previous walkthrough's records are in [historical](assets/historical/) |
+
+## Previous version
+
+Version **2.1** (October 31, superseded on November 4): a re-edit of the October 30 v2 recording of the real
 NoCap interface plus one short take of the Private tab recorded on October 31; no v2 scene was re-recorded.
 It opens on the stakes, shows one disclosure card, then walks through Check, a receipt close-up, Fix with
 receipts, time travel, a real SEC slide (SAM 3.1 regions, 32 readings, five verified GAAP bars), exact quotes
@@ -98,7 +128,7 @@ same voice. It runs 8.24 s, against 8.52 s for the old line, and the slot keeps 
 The disclosure card at 0:11 states the same in six lines. Rendering, narration, export and validation
 made **zero provider calls and $0 of new provider usage**.
 
-## Current exports
+## Version 2.1 exports (October 31, superseded)
 
 | Artifact | Verified properties |
 |---|---|

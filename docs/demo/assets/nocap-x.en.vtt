@@ -1,28 +1,62 @@
 WEBVTT
 
-00:00:00.100 --> 00:00:03.954
-One wrong number in an earnings story becomes a public correction.
+00:00:00.200 --> 00:00:02.649
+One wrong number means
+a public correction.
 
-00:00:03.954 --> 00:00:10.657
-This AI-drafted story has two planted errors. NoCap flags both, with the filed figures.
+00:00:02.649 --> 00:00:07.887
+NoCap: Muse Spark finds every number,
+code checks it against SEC filings.
 
-00:00:10.657 --> 00:00:15.957
-NoCap checks every financial number in a draft against SEC filings.
+00:00:07.887 --> 00:00:11.055
+An AI-drafted NVIDIA story,
+two planted errors.
 
-00:00:15.957 --> 00:00:20.988
-The draft says revenue grew 18% from a year ago. That's the quarterly rate.
+00:00:11.055 --> 00:00:14.822
+Seven verified, two wrong,
+two unverifiable. No guessing.
 
-00:00:20.988 --> 00:00:26.544
-The receipt does the math from the filings: 105.85%.
+00:00:14.822 --> 00:00:17.342
+Revenue up 18%
+from a year ago?
 
-00:00:27.044 --> 00:00:33.551
-Fix with receipts: Muse Wonder proposes corrected numbers, and code lets only the digits change.
+00:00:17.342 --> 00:00:20.022
+The receipt says 105.85%.
 
-00:00:33.551 --> 00:00:37.894
-Then the whole draft is checked again: nine verified, zero wrong.
+00:00:20.022 --> 00:00:22.481
+18% was quarter
+over quarter.
 
-00:00:38.744 --> 00:00:45.272
-SAM 3.1 finds both bar charts, and Muse Spark reads 32 printed labels.
+00:00:22.481 --> 00:00:27.200
+GAAP EPS: $2.22 in the draft,
+$2.46 in the filing.
 
-00:00:45.572 --> 00:00:54.894
-NoCap, for financial journalists and analysts. Built during this hackathon by Robert Chang. Try it live through November 17.
+00:00:27.200 --> 00:00:31.240
+Fix: Muse Wonder proposes,
+only digits may change.
+
+00:00:31.240 --> 00:00:34.399
+Recheck: nine verified,
+zero wrong.
+
+00:00:34.399 --> 00:00:39.593
+Slides too: SAM 3.1 finds the charts,
+Muse Spark reads 32 labels.
+
+00:00:39.593 --> 00:00:44.953
+In testing, 306 of 360 planted errors
+were caught, none passed as verified,
+
+00:00:44.953 --> 00:00:47.606
+and 17 of 1,298 true figures flagged.
+
+00:00:47.606 --> 00:00:51.979
+Its verified calls were right
+736 of 738 times.
+
+00:00:51.979 --> 00:00:54.665
+Built for financial journalists and analysts.
+
+00:00:54.665 --> 00:00:59.530
+receipts-nocap.vercel.app,
+live through November 17.

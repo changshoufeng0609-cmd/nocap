@@ -1,10 +1,10 @@
-# Deploy and run NoCap (updated 2026-11-02)
+# Deploy and run NoCap (updated 2026-11-03)
 
 ## Current deployment state
 
-[NoCap](https://receipts-nocap.vercel.app), the [2:52 demo](https://receipts-nocap.vercel.app/demo)
+[NoCap](https://receipts-nocap.vercel.app), the [2:50 pitch demo](https://receipts-nocap.vercel.app/demo)
 and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public, and live checks are open for judging. <!-- verify-at-release -->
-The [November 2 release record](public-release-2026-11-02.json) <!-- verify-at-release --> lists the day's six Production releases, each with its anonymous acceptance. The [November 1 acceptance record](public-release-2026-11-01.json) binds several things together:
+The [November 3 release record](public-release-2026-11-03.json) <!-- verify-at-release --> lists the day's Production release with its anonymous acceptance; the [November 2 record](public-release-2026-11-02.json) lists that day's six. The [November 1 acceptance record](public-release-2026-11-01.json) binds several things together:
 - the source and the deployment;
 - the real browser checks;
 - the consented live smoke;
@@ -15,8 +15,8 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Setting | Current state |
 |---|---|
 | Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
-| Production deployment | `dpl_E1P68ptYvyg9TF3zSB6hW36unmps`, READY, 47-second build from the GitHub commit; previous `dpl_Dk3MRYUiu8XnnHiA4EXYMqtbBAA5` kept for rollback <!-- verify-at-release --> |
-| Deployed public source | `33770eb5cde9c2a64a928957277dbdd59c3caf0f` (private `5210622`): rounds 10a-10c from the [AI-draft benchmark](../eval/ai_drafts.md), a fourth saved example and the demo video's new results card, on top of round 8, round 9, release-name resolution and release statements <!-- verify-at-release --> |
+| Production deployment | `dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj`, READY, 42-second build from the GitHub commit; previous `dpl_E1P68ptYvyg9TF3zSB6hW36unmps` kept for rollback <!-- verify-at-release --> |
+| Deployed public source | `904efa1f2540fceb7c9b8b3c2bff16ec593993f5` (private `f6730ca`): round 11, capital expenditures, adjusted-EPS evidence, accented company names, the November 3 filings and a web UI polish, on top of rounds 8-10c (10a-10c from the [AI-draft benchmark](../eval/ai_drafts.md)), release-name resolution and release statements <!-- verify-at-release --> |
 | Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
 | Live access | Check, Fix, Slide and Ask are open until 2026-11-17 16:00 UTC (Nov 18 00:00 Taipei). Saved examples, recordings and benchmark inspection stay at $0. <!-- verify-at-release --> |
@@ -24,7 +24,19 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Model-quality evidence | [One-time held-out results](../eval/heldout_results.md), [separate four-model Q&A](../eval/qa_results.md) and the [one-shot comprehensive 500-company tests](../eval/spot500_methods.md#results-of-the-one-live-run-november-2-2026-after-round-8) |
 | Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
 
-**This deployment (November 2 evening).**
+**This deployment (November 3).**
+- **Release:** `dpl_A46sNhrp…`, anonymous desktop and 390px mobile acceptance passed 51 checks with 0 provider calls
+  ([record](public-release-2026-11-03.json)).
+- **What changed:** capital expenditures are checked against the filed cash paid for property and equipment (12,914
+  rows at 434 companies; never ✗); round 11 closes six "?" gaps from owner-pasted drafts; 82 adjusted-EPS rows at CBOE,
+  FTNT, IVZ, KLAC, PWR and YUM are kept, every earlier row unchanged; "Estée Lauder" is read like "Estee Lauder"; the
+  November 3 top-up adds 25 companies' new filings and 16 earnings releases (GS, XOM, BSX, EL and others) for $0.43;
+  and the web interface was polished.
+- **Health:** 305,353 facts for 500 companies, snapshot 2026-11-03. The release-text index holds 451 companies and
+  1,859 releases. `data/snapshot/facts.sqlite` is 50.3 MB, over GitHub's 50 MB warning and under its 100 MB limit.
+- **Saved examples:** replayed 7/2/2, 5/3/0, 6/1/2◷ and 16/1/6 at $0, unchanged.
+
+**Previous deployment (November 2 evening).**
 - **Releases that day:** six Production releases, each followed by anonymous desktop and 390px mobile acceptance with 0
   provider calls: 49 checks each, and 51 for the sixth, whose fourth saved example adds one per device
   ([record](public-release-2026-11-02.json)):

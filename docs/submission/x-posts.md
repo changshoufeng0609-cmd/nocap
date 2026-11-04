@@ -75,10 +75,10 @@ Replies under whichever opener you post, in this order.
 3/4 Frozen held-out test: NoCap caught 44/48 planted errors, with 1 false alarm in 47 unmodified sentences; 22/110 true figures stayed ?. Trap drafts: 20/20 caught, 0/52 true figures flagged. Small seeded tests, run Oct 29 before the S&P 500 expansion; not general accuracy.
 ```
 
-<!-- 252 as typed, X count 214. Live through 2026-11-17 16:00 UTC: README.md:17. 2:52 walkthrough with recorded runs and a synthetic voice: README.md:13. Time travel: docs/demo/video-script.md:26. Meta's whole 10-K in one Muse Spark request: README.md:71. --> <!-- verify-at-release -->
+<!-- 252 as typed, X count 214. Live through 2026-11-17 16:00 UTC: README.md:17. 2:50 pitch demo with recorded runs and a synthetic voice: README.md:13. Time travel: docs/demo/video-script.md:26. Meta's whole 10-K in one Muse Spark request: README.md:71. --> <!-- verify-at-release -->
 
 ```text
-4/4 Live checks run through Nov 17. The full 2:52 walkthrough adds time travel and Meta's whole 10-K in one Muse Spark request (recorded runs, synthetic voice): https://receipts-nocap.vercel.app/demo
+4/4 Live checks run through Nov 17. The full 2:50 pitch demo adds time travel and Meta's whole 10-K in one Muse Spark request (recorded runs, synthetic voice): https://receipts-nocap.vercel.app/demo
 Code: https://github.com/changshoufeng0609-cmd/nocap
 ```
 
@@ -105,7 +105,7 @@ Thanks for trying NoCap! Today's live checks hit the $5 daily cap, so live work 
 ## Attachment and release notes — do not paste
 
 - Submission status: the authenticated form contains earlier copy, links and the sole-member roster; refresh from the final submission kit before submission; the optional X URL is empty. Fields are recorded in [completion plan](../completion-plan.md#actual-form-observed). No final consent or submission has occurred; these posts remain unpublished drafts. Publish before the form is submitted, so its X field can carry the post's URL.
-- After owner review, attach the 56-second X cut ([`nocap-x.mp4`](../demo/assets/nocap-x.mp4): it opens on the red ✗s, with 44 px burned-in captions for muted autoplay, and its end card carries the disclosure and "Now covering all 500 S&P 500 companies") or the full walkthrough; the audio-free 20-second GIF works as a shorter teaser. Assets, validation and [narration sources](../demo/narration-license.md) are in the demo kit; use the current export (X cut SHA-256 `3b03ca6c…`, end cards with the all-500 line), not an earlier-branded, earlier-voiced or pre-coverage file.
+- Attach the 60-second vertical cut ([`nocap-x.mp4`](../demo/assets/nocap-x.mp4), SHA-256 `ce63636b…`): it opens on a CORRECTION / 1 ERROR card with large burned-in captions for muted autoplay, enlarges each product moment, and ends on the one-shot test, the site URL and the GitHub URL; or attach the 2:50 pitch demo. The audio-free 20-second GIF works as a shorter teaser.
 - Suggested media description: “NoCap checks an AI-drafted NVIDIA earnings story, opens SEC evidence receipts, rechecks a numeric correction, applies a historical cutoff, reads a real Bank of America SEC slide with SAM 3.1 and asks Meta's whole 10-K. The end card says NoCap now covers all 500 S&P 500 companies. Real interface with zooms and synthetic narration; cached extraction and recorded live runs are disclosed.”
 - Suggested media description for the X cut: “NoCap flags two planted errors in an AI-drafted NVIDIA earnings story, shows the SEC receipt, rechecks a numeric correction and finds the two bar charts on a real Bank of America SEC slide with SAM 3.1. The end card says NoCap now covers all 500 S&P 500 companies. Real interface, synthetic narration; cached extraction and recorded live runs are disclosed.”
 - The short GIF is a continuous 20-second excerpt (seconds 16.56–36.56 of the walkthrough) at original speed. Describe only visible actions; it does not contain every workflow or spoken narration.
