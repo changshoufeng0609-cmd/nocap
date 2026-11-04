@@ -1,10 +1,10 @@
-# Deploy and run NoCap (updated 2026-11-03)
+# Deploy and run NoCap (updated 2026-11-04)
 
 ## Current deployment state
 
 [NoCap](https://receipts-nocap.vercel.app), the [2:50 pitch demo](https://receipts-nocap.vercel.app/demo)
 and the [financial Q&A explorer](https://receipts-nocap.vercel.app/benchmarks) are public, and live checks are open for judging. <!-- verify-at-release -->
-The [November 3 release record](public-release-2026-11-03.json) <!-- verify-at-release --> lists the day's Production release with its anonymous acceptance; the [November 2 record](public-release-2026-11-02.json) lists that day's six. The [November 1 acceptance record](public-release-2026-11-01.json) binds several things together:
+The [November 4 release record](public-release-2026-11-04.json) <!-- verify-at-release --> lists the current Production release with its anonymous acceptance; the [November 3](public-release-2026-11-03.json) and [November 2](public-release-2026-11-02.json) records list the earlier ones. The [November 1 acceptance record](public-release-2026-11-01.json) binds several things together:
 - the source and the deployment;
 - the real browser checks;
 - the consented live smoke;
@@ -15,8 +15,8 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Setting | Current state |
 |---|---|
 | Project / team | `receipts-nocap` / `changshoufeng0609-cmds-projects`, Services / Node 24 |
-| Production deployment | `dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj`, READY, 42-second build from the GitHub commit; previous `dpl_E1P68ptYvyg9TF3zSB6hW36unmps` kept for rollback <!-- verify-at-release --> |
-| Deployed public source | `904efa1f2540fceb7c9b8b3c2bff16ec593993f5` (private `f6730ca`): round 11, capital expenditures, adjusted-EPS evidence, accented company names, the November 3 filings and a web UI polish, on top of rounds 8-10c (10a-10c from the [AI-draft benchmark](../eval/ai_drafts.md)), release-name resolution and release statements <!-- verify-at-release --> |
+| Production deployment | `dpl_5MMwdRR5RBun7quLiFCiuGPmHzrf`, READY, 46-second build from the GitHub commit; previous `dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj` kept for rollback <!-- verify-at-release --> |
+| Deployed public source | `62c4216069d9cf9b1122c60844d39fbcb4b1b384` (private `c59135f`): the 2:50 pitch demo, the 60-second vertical cut, the retimed /demo player and the November 4 filings, on top of round 11, capital expenditures, adjusted-EPS evidence, accented company names, the November 3 filings and a web UI polish, on top of rounds 8-10c (10a-10c from the [AI-draft benchmark](../eval/ai_drafts.md)), release-name resolution and release statements <!-- verify-at-release --> |
 | Public entry points | `/`, `/demo`, `/benchmarks`, downloadable questions/model records |
 | Protection | `prod_deployment_urls_and_all_previews`; the new generated deployment URL returns anonymous 302, while the Production domain is public |
 | Live access | Check, Fix, Slide and Ask are open until 2026-11-17 16:00 UTC (Nov 18 00:00 Taipei). Saved examples, recordings and benchmark inspection stay at $0. <!-- verify-at-release --> |
@@ -24,7 +24,13 @@ The [October 30 record](public-release-fix-2026-10-30.json) remains for the prev
 | Model-quality evidence | [One-time held-out results](../eval/heldout_results.md), [separate four-model Q&A](../eval/qa_results.md) and the [one-shot comprehensive 500-company tests](../eval/spot500_methods.md#results-of-the-one-live-run-november-2-2026-after-round-8) |
 | Development provenance | [65 reconstructed source-history commits](source-history.md); original private history unchanged |
 
-**This deployment (November 3).**
+**This deployment (November 4).**
+- **Release:** `dpl_5MMwdRR5…`, anonymous desktop and 390px mobile acceptance passed 51 checks with 0 provider calls
+  ([record](public-release-2026-11-04.json)); /demo plays the 2:50 pitch demo (`a7dd806d…`, 39 captions).
+- **Health:** 308,598 facts for 500 companies, snapshot 2026-11-04, after two November 4 top-ups (55 companies,
+  including JPM, PNC, UNH, COF and VRTX; $0.89 of Muse Spark mapping).
+
+**Previous deployment (November 3).**
 - **Release:** `dpl_A46sNhrp…`, anonymous desktop and 390px mobile acceptance passed 51 checks with 0 provider calls
   ([record](public-release-2026-11-03.json)).
 - **What changed:** capital expenditures are checked against the filed cash paid for property and equipment (12,914

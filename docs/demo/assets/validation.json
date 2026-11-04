@@ -17,17 +17,13 @@
       }
     ],
     "format": {
-      "duration": "170.325000",
-      "size": "55770317"
+      "duration": "177.825000",
+      "size": "70631766"
     }
   },
   "gif_probe": {
-    "programs": [],
-    "stream_groups": [],
     "streams": [
       {
-        "codec_name": "gif",
-        "codec_type": "video",
         "width": 960,
         "height": 540,
         "r_frame_rate": "10/1"
@@ -35,21 +31,21 @@
     ],
     "format": {
       "duration": "20.000000",
-      "size": "4194287"
+      "size": "5595702"
     }
   },
   "full_video_decode": "passed",
   "asset_sha256": {
-    "receipts-demo.mp4": "a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b",
-    "receipts-demo.en.srt": "1212bdb47a6b8d5c3c7e4363b76f88529c810524f83a09ae0d10e5a4ee5df15d",
-    "receipts-demo.en.vtt": "86e684d75644ac89edfe77ded3e5222c356cb2af51316692106b29093a9c23e9",
-    "receipts-demo.gif": "98f5694804b14f183ac375c364a25de86a00e912b41940645f3bba2da6190524",
-    "nocap-x.mp4": "ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf",
+    "receipts-demo.mp4": "60fd6b694dcde7d527bf755f5fa485c87de408dfaec9c4171c3e4ce8a10a33c2",
+    "receipts-demo.en.srt": "00b05325d1bd72e22e079c905a18fd74c10bc4faddc03f345419db57b5b9d9b7",
+    "receipts-demo.en.vtt": "0fb6ea6176e09044ceeec0ee0b4413efcd000a327d84a67fd937a6afd614e997",
+    "receipts-demo.gif": "638f7d73b97abcc3529b197f783a6a51712b4be63e1b38dd098156677a3b2d8f",
+    "nocap-x.mp4": "7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d",
     "nocap-x.en.srt": "ee73edffbaed52ac7d907f2907233886515974c6b1612d1d5d2b58882c26eb46",
     "nocap-x.en.vtt": "3df732fb7715739c0a5cb441b04c27d96a92736a08a6a7ac7e266d2521768bf2"
   },
-  "caption_cues": 39,
-  "caption_timing": "SRT and VTT carry the same 39 cues as data/eval_runs/demo-opuscar/narration.md",
+  "caption_cues": 41,
+  "caption_timing": "SRT and VTT carry the same 41 cues as data/eval_runs/demo-opuscar/narration.md",
   "audio_integrated_lufs": -14.0,
   "audio_true_peak_dbfs": -1.4,
   "checks": {
@@ -58,5 +54,5 @@
     "text_contrast_failures": 0,
     "black_frames": 0
   },
-  "notes": "Pitch demo: illustrative Halftone Dossier animation (figures from NoCap's real checks) cut with a new capture of the real interface (source a6a2665, live requests paused, 0 provider calls, $0). The vertical X/Threads cut (59.83 s, 1080 × 1920) is the same series: animation plus clippings of the same capture; reading-time check 0 misses, minimum text contrast 9.0:1. The GIF is unchanged from the v2.2 export."
+  "notes": "Pitch demo: illustrative Halftone Dossier animation (figures from NoCap's real checks) cut with a new capture of the real interface (source a6a2665, live requests paused, 0 provider calls, $0). The vertical X/Threads cut (59.83 s, 1080 × 1920) is the same series: animation plus clippings of the same capture; reading-time check 0 misses, minimum text contrast 9.0:1. The GIF is the pitch demo's 0:28–0:48 at original speed: 960 × 540, 10 fps."
 }

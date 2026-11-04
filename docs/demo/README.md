@@ -1,10 +1,10 @@
 # NoCap demo kit
 
-[Watch the 2:50 pitch demo](assets/receipts-demo.mp4) · [60-second vertical X/Threads cut](assets/nocap-x.mp4) · [20-second GIF](assets/receipts-demo.gif) · [English SRT](assets/receipts-demo.en.srt) · [English VTT](assets/receipts-demo.en.vtt)
+[Watch the 2:58 pitch demo](assets/receipts-demo.mp4) · [60-second vertical X/Threads cut](assets/nocap-x.mp4) · [20-second GIF](assets/receipts-demo.gif) · [English SRT](assets/receipts-demo.en.srt) · [English VTT](assets/receipts-demo.en.vtt)
 
 ## Current export: the pitch demo (November 4)
 
-The submission video is a **2:50 pitch demo**. Illustrative animation carries the story; real footage of the NoCap
+The submission video is a **2:58 pitch demo**. Illustrative animation carries the story; real footage of the NoCap
 interface proves each step:
 
 | Time | Part | What is on screen |
@@ -12,7 +12,7 @@ interface proves each step:
 | 0:00–0:27 | Animation: the problem | One wrong number becomes a public correction; AI drafts make numbers cheap to write and costly to check |
 | 0:27–1:53 | **Real interface** | Check an AI-drafted NVIDIA story (7 ✓ 2 ✗ 2 ?); receipts for 18% vs 105.85% and $2.22 vs $2.46; Fix with receipts (9 ✓ 0 ✗); time travel as of July 29 (6 ✓ 1 ✗ 2 ◷); a Bank of America slide (SAM 3.1, 32 labels); a whole Meta 10-K in one Muse Spark request; Private on Muse Glimmer |
 | 1:53–2:19 | Animation: under the hood | Four Meta models propose; deterministic code decides against SEC EDGAR |
-| 2:19–2:50 | Animation: proof and call to action | All 500 S&P 500 companies; one-shot test: 306 of 360 planted errors caught, none marked verified, 17 of 1,298 true figures flagged |
+| 2:19–2:58 | Animation: proof, how to use, call to action | All 500 S&P 500 companies; one-shot test: 306 of 360 planted errors caught, none marked verified, 17 of 1,298 true figures flagged; then how to use it: paste a draft, press Check, click any number for its receipt, no sign-up |
 
 The four key product moments are enlarged and framed, and every product segment carries a chip naming the Meta
 model it uses. The screen footage is a new capture of the current interface (November 4, from the release source)
@@ -23,11 +23,12 @@ from NoCap's real checks; the end card says the animation is illustrative.
 
 | Artifact | Verified properties |
 |---|---|
-| MP4 | 170.33 s (2:50.3); 1920 × 1080; H.264, yuv420p, 24 fps; AAC 48 kHz; `+faststart`; SHA-256 `a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b` |
+| MP4 | 177.83 s (2:57.8); 1920 × 1080; H.264, yuv420p, 24 fps; AAC 48 kHz; `+faststart`; SHA-256 `60fd6b694dcde7d527bf755f5fa485c87de408dfaec9c4171c3e4ce8a10a33c2`. A 7.67-second how-to-use beat was inserted at 2:39.0 on November 4 |
 | Audio | Integrated −14.0 LUFS; true peak −1.4 dBTP; English narration (edge-tts `en-US-BrianNeural`) over a music bed made from free sample libraries |
-| Captions | 39 English cues, burned in; SRT `1212bdb4…`, VTT `86e684d7…` |
+| Captions | 41 English cues, burned in; SRT `00b05325…`, VTT `0fb6ea61…` |
 | Checks | Reading-time check 0 misses; text contrast meets WCAG targets in every scene; speech recognition of the final mix scores 0.962 against the script; no black frames |
-| Vertical cut | `nocap-x.mp4` for X and Threads: 59.83 s, 1080 × 1920, 24 fps; 16 English cues; −14.0 LUFS; SHA-256 `ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf`. Same animation series, with each product moment lifted from the same capture and enlarged to nearly the full frame width; ends on the one-shot test (306/360 caught, none passed as verified, 17/1,298 flagged, verified calls right 736/738) |
+| Vertical cut | `nocap-x.mp4` for X and Threads: 59.83 s, 1080 × 1920, 24 fps; 16 English cues; −14.0 LUFS; SHA-256 `7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d`. Same animation series, with each product moment lifted from the same capture and enlarged to nearly the full frame width; ends on the one-shot test (306/360 caught, none passed as verified, 17/1,298 flagged, verified calls right 736/738) |
+| GIF | `receipts-demo.gif`: the pitch demo's 0:28–0:48 at original speed; 960 × 540, 10 fps; 5,595,702 bytes; SHA-256 `638f7d73b97abcc3529b197f783a6a51712b4be63e1b38dd098156677a3b2d8f` |
 | Records | [validation](assets/validation.json), [manifest](assets/manifest.json); the previous walkthrough's records are in [historical](assets/historical/) |
 
 ## Previous version

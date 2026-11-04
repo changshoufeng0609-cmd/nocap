@@ -145,13 +145,21 @@ It covers all 500 S&P 500 companies, the latest eight fiscal quarters.
 In a one-shot test on 1,000 fresh items from 400 companies, NoCap caught 306 of 360 planted errors.
 
 37
-00:02:33.093 --> 00:02:39.157
+00:02:33.093 --> 00:02:39.000
 It marked none of them verified, and flagged 17 of 1,298 true figures as wrong.
 
 38
-00:02:39.307 --> 00:02:42.257
-Try it live through November 17.
+00:02:39.150 --> 00:02:43.520
+Paste any earnings draft about an S&P 500 company, press Check,
 
 39
-00:02:42.257 --> 00:02:48.146
+00:02:43.520 --> 00:02:46.500
+and click any number to see its receipt. No sign-up.
+
+40
+00:02:46.807 --> 00:02:49.757
+Try it live through November 17.
+
+41
+00:02:49.757 --> 00:02:55.646
 NoCap, built by Robert Chang during the Meta Global AI Developer Hackathon.

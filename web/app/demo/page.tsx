@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
   title: "Demo · NoCap",
-  description: "A 2:50 pitch demo and a vertical X/Threads cut: check an AI-drafted earnings story against SEC filings, fix it with receipts, apply a historical cutoff, read a real SEC slide with SAM 3.1, ask a whole 10-K and replay a real Private check.",
+  description: "A 2:58 pitch demo and a vertical X/Threads cut: check an AI-drafted earnings story against SEC filings, fix it with receipts, apply a historical cutoff, read a real SEC slide with SAM 3.1, ask a whole 10-K and replay a real Private check.",
 };
 
 export default function DemoPage() {
@@ -18,7 +18,7 @@ export default function DemoPage() {
         <div className="max-w-3xl space-y-3">
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Team NoCap · Meta Global AI Developer Hackathon</p>
           <h2 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Every financial number needs a receipt.</h2>
-          <p className="text-pretty text-muted-foreground">Follow an AI-drafted earnings story to SEC receipts and verified corrections, then a real SEC slide and a whole 10-K, in 2 minutes 50 seconds — or switch to the 9:16 vertical cut built for X and Threads.</p>
+          <p className="text-pretty text-muted-foreground">Follow an AI-drafted earnings story to SEC receipts and verified corrections, then a real SEC slide and a whole 10-K, in 2 minutes 58 seconds — or switch to the 9:16 vertical cut built for X and Threads.</p>
         </div>
         <DemoPlayer />
         <section aria-labelledby="workflow-title" className="space-y-4">

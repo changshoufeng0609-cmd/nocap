@@ -2,22 +2,22 @@
   "schema_version": 5,
   "product_brand": "NoCap",
   "version": "v3 pitch demo",
-  "duration_s": 170.325,
+  "duration_s": 177.825,
   "format": "1920x1080, 24 fps, H.264 yuv420p +faststart, AAC 48 kHz",
   "asset_sha256": {
-    "receipts-demo.mp4": "a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b",
-    "receipts-demo.en.srt": "1212bdb47a6b8d5c3c7e4363b76f88529c810524f83a09ae0d10e5a4ee5df15d",
-    "receipts-demo.en.vtt": "86e684d75644ac89edfe77ded3e5222c356cb2af51316692106b29093a9c23e9",
-    "receipts-demo.gif": "98f5694804b14f183ac375c364a25de86a00e912b41940645f3bba2da6190524",
-    "nocap-x.mp4": "ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf",
+    "receipts-demo.mp4": "60fd6b694dcde7d527bf755f5fa485c87de408dfaec9c4171c3e4ce8a10a33c2",
+    "receipts-demo.en.srt": "00b05325d1bd72e22e079c905a18fd74c10bc4faddc03f345419db57b5b9d9b7",
+    "receipts-demo.en.vtt": "0fb6ea6176e09044ceeec0ee0b4413efcd000a327d84a67fd937a6afd614e997",
+    "receipts-demo.gif": "638f7d73b97abcc3529b197f783a6a51712b4be63e1b38dd098156677a3b2d8f",
+    "nocap-x.mp4": "7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d",
     "nocap-x.en.srt": "ee73edffbaed52ac7d907f2907233886515974c6b1612d1d5d2b58882c26eb46",
     "nocap-x.en.vtt": "3df732fb7715739c0a5cb441b04c27d96a92736a08a6a7ac7e266d2521768bf2"
   },
   "public_copies": {
-    "web/public/demo/receipts-demo.mp4": "a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b",
-    "web/public/demo/receipts-demo.en.vtt": "86e684d75644ac89edfe77ded3e5222c356cb2af51316692106b29093a9c23e9",
+    "web/public/demo/receipts-demo.mp4": "60fd6b694dcde7d527bf755f5fa485c87de408dfaec9c4171c3e4ce8a10a33c2",
+    "web/public/demo/receipts-demo.en.vtt": "0fb6ea6176e09044ceeec0ee0b4413efcd000a327d84a67fd937a6afd614e997",
     "web/public/demo/poster.png": "8b4cc60bd44fecaa649e3b804ba5322a0a7dbaab2f94ee8e8b1473c790825596",
-    "web/public/demo/nocap-x.mp4": "ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf",
+    "web/public/demo/nocap-x.mp4": "7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d",
     "web/public/demo/nocap-x.en.vtt": "3df732fb7715739c0a5cb441b04c27d96a92736a08a6a7ac7e266d2521768bf2",
     "web/public/demo/poster-x.png": "d58668a30022c893a38911f5a22b841410e80e9fc250cdb26f35786a2b4dd854"
   },
@@ -39,8 +39,8 @@
     },
     {
       "start": 139.6,
-      "end": 170.35,
-      "part": "animation: 500 companies, one-shot test, call to action"
+      "end": 177.83,
+      "part": "animation: 500 companies, one-shot test, how to use (inserted Nov 4 at 2:39.0, 7.67 s), call to action"
     }
   ],
   "capture": {
@@ -66,7 +66,7 @@
     "engine": "edge-tts",
     "voice": "en-US-BrianNeural",
     "rate": "+10%",
-    "lines": 25
+    "lines": 26
   },
   "animation": "Lemo-Opuscar Halftone Dossier style, drawn in code; figures only from NoCap's real checks",
   "music": "generated from free sample libraries (Karoryfer, VCSL)",
@@ -78,6 +78,13 @@
     "format": "1080x1920, 24 fps, H.264 yuv420p +faststart, AAC 48 kHz",
     "voice": "edge-tts en-US-BrianNeural",
     "loudness_lufs": -14.0,
-    "captions": 16
+    "captions": 16,
+    "end_card": "adds \"Paste a draft → Check → click any number for its receipt. No sign-up.\" (Nov 4)"
+  },
+  "gif": {
+    "source": "receipts-demo.mp4 28.0–48.0 s at original speed",
+    "size": "960x540",
+    "fps": 10,
+    "bytes": 5595702
   }
 }

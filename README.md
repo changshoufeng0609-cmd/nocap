@@ -8,9 +8,9 @@ Built by **Robert Chang · Team NoCap** for the [Meta Global AI Developer Hackat
 
 ![NoCap checks a saved NVIDIA earnings draft, shows its verdict counts and opens the receipt for a wrong growth figure](docs/demo/assets/receipts-demo.gif)
 
-Twenty seconds of the walkthrough at original speed, zoomed in on the real interface: a saved NVIDIA draft returns 7 ✓, 2 ✗ and 2 ?, and the receipt for "up 18% from a year ago" computes the filed year-over-year growth, 105.85%.
+Twenty seconds of the pitch demo at original speed, on the real interface: a saved NVIDIA draft returns 7 ✓, 2 ✗ and 2 ?, and the receipt for "up 18% from a year ago" computes the filed year-over-year growth, 105.85%.
 
-**[Watch the 2:50 pitch demo](https://receipts-nocap.vercel.app/demo).** <!-- verify-at-release --> Illustrative animation tells the story; real footage of the NoCap interface, recorded locally with live model requests paused, proves each step: Check uses cached model output, and Fix, Slide, Ask and Private replay recorded live runs with the waits cut. Narration by edge-tts (`en-US-BrianNeural`), not the author's voice. [Demo kit](docs/demo/README.md).
+**[Watch the 2:58 pitch demo](https://receipts-nocap.vercel.app/demo).** <!-- verify-at-release --> Illustrative animation tells the story; real footage of the NoCap interface, recorded locally with live model requests paused, proves each step: Check uses cached model output, and Fix, Slide, Ask and Private replay recorded live runs with the waits cut. Narration by edge-tts (`en-US-BrianNeural`), not the author's voice. [Demo kit](docs/demo/README.md).
 
 ## Try it
 

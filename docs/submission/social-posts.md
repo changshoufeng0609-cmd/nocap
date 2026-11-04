@@ -5,7 +5,7 @@
 - [ ] 等 release 通過公開存取檢查後才發布；確認即時檢查的開放期間、預算設定與公開原始碼皆符合文案。所有 `<!-- verify-at-release -->` 都要在發布當下核對。
 - [ ] 登出後，重新開啟本文的產品、示範影片與 GitHub 連結；本次只做離線核對，沒有驗證公開狀態。
 - [ ] **GitHub repo 要到 11/4 最後一次補資料後才公開。** 網站 11/1 已上線，在那之前發文的話，刪掉 Threads 回覆四的「原始碼」那一行和 LinkedIn 的「Source:」那一行，否則讀者會看到 404；不然就等 repo 公開後再發。刪行後字數記得重算。
-- [ ] Threads 建議附 `docs/demo/assets/nocap-x.mp4`（60 秒直式），SHA-256：`ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf`。LinkedIn 建議附 `docs/demo/assets/receipts-demo.mp4`（2:52），SHA-256：`61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0`（11/2 更新結果卡）。本機檔案雜湊已核對；來源：`docs/demo/README.md:3`、`:105`、`:108`。
+- [ ] Threads 建議附 `docs/demo/assets/nocap-x.mp4`（60 秒直式），SHA-256：`7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d`。LinkedIn 建議附 `docs/demo/assets/receipts-demo.mp4`（2:52），SHA-256：`61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0`（11/2 更新結果卡）。本機檔案雜湊已核對；來源：`docs/demo/README.md:3`、`:105`、`:108`。
 - [ ] 先完整看過、聽過所選影片；兩版都是燒錄式英文字幕、英文合成旁白，保留字幕與重播揭露。下方中文影片說明不是中文字幕。來源：`docs/demo/README.md:91`、`:107`、`docs/demo/video-script.md:109-112`。
 - [ ] **尚未發布、排程或送出任何貼文。** 由 Robert Chang 決定是否發布、使用哪個帳號、是否加回覆串及附哪支影片；有改字或加標註就重新計數。
 
@@ -99,7 +99,7 @@ SAM 3.1 找出簡報裡的圖表區域，交給 Muse Spark 1.3 讀數字。框�
 NoCap 在 AI 撰寫的 NVIDIA 財報新聞草稿中，標出兩個刻意植入的錯誤，展示 SEC 文件憑據，重新驗證數字修正，並用 SAM 3.1 找出 Bank of America 真實 SEC 簡報上的兩張長條圖。片尾說明 NoCap 現已涵蓋全部 500 家 S&P 500 公司。畫面為真實介面，旁白為合成語音；影片已揭露使用快取的模型擷取結果與先前錄下的即時執行。附燒錄式英文字幕及英文旁白。
 ```
 
-### 影片說明：2:50 完整版（pitch demo）
+### 影片說明：2:58 完整版（pitch demo）
 
 作者備註：若改附 `docs/demo/assets/receipts-demo.mp4`，使用這段說明。
 
@@ -158,12 +158,12 @@ If you write or edit earnings coverage, I'd welcome feedback: which figures are 
 
 ### LinkedIn video description
 
-作者備註：建議附 **2:50 完整版（pitch demo）** `docs/demo/assets/receipts-demo.mp4`。它能讓寫稿、編稿的人看清楚憑據、修正後重查、歷史截點與整份申報文件提問的流程；60 秒直式版適合快速預覽，但沒有完整展示這些步驟。選片後使用相符的說明，保留英文字幕與重播揭露。內容依據：`docs/submission/x-posts.md:101-102`。
+作者備註：建議附 **2:58 完整版（pitch demo）** `docs/demo/assets/receipts-demo.mp4`。它能讓寫稿、編稿的人看清楚憑據、修正後重查、歷史截點與整份申報文件提問的流程；60 秒直式版適合快速預覽，但沒有完整展示這些步驟。選片後使用相符的說明，保留英文字幕與重播揭露。內容依據：`docs/submission/x-posts.md:101-102`。
 
 <!-- Length: 469 characters as typed. Main-video actions/disclosures: docs/submission/x-posts.md:101. 2:52: README.md:13. SAM 3.1/whole Meta 10-K: README.md:70-71. All 500 companies: README.md:20, :140. English synthetic narration and burned-in English captions: docs/demo/README.md:91, :107. -->
 
 ```text
-A 2:50 pitch demo of NoCap checking an AI-drafted NVIDIA earnings story: opening SEC evidence receipts, rechecking a numeric correction, applying a historical cutoff, reading a real Bank of America SEC slide with SAM 3.1 and asking questions of Meta's whole 10-K. The end card says NoCap now covers all 500 S&P 500 companies. Real interface with zooms, burned-in English captions and synthetic English narration. Cached extraction and recorded live runs are disclosed.
+A 2:58 pitch demo of NoCap checking an AI-drafted NVIDIA earnings story: opening SEC evidence receipts, rechecking a numeric correction, applying a historical cutoff, reading a real Bank of America SEC slide with SAM 3.1 and asking questions of Meta's whole 10-K. The end card says NoCap now covers all 500 S&P 500 companies. Real interface with zooms, burned-in English captions and synthetic English narration. Cached extraction and recorded live runs are disclosed.
 ```
 
 作者備註：若選 60 秒直式短版，改用下段，避免描述短版未出現的流程。

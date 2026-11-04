@@ -1,0 +1,38 @@
+{
+ "record": "NoCap public releases on 2026-11-04 (Taipei)",
+ "origin": "https://receipts-nocap.vercel.app",
+ "current_deployment": "dpl_5MMwdRR5RBun7quLiFCiuGPmHzrf",
+ "current_public_source": "62c4216069d9cf9b1122c60844d39fbcb4b1b384",
+ "rollback_deployment": "dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj",
+ "deployments": [
+  {
+   "deployment": "dpl_5MMwdRR5RBun7quLiFCiuGPmHzrf",
+   "build_seconds": 45.6,
+   "public_source": "62c4216069d9cf9b1122c60844d39fbcb4b1b384",
+   "private_source": "c59135f",
+   "change": "the 2:50 pitch demo and the 60-second vertical cut; the retimed /demo player; Nov 4 top-ups (55 companies); DuPont's split date",
+   "anonymous_acceptance": {
+    "status": "passed",
+    "checks": 51,
+    "provider_calls": 0,
+    "new_spend_usd": 0
+   }
+  }
+ ],
+ "deploy_procedure": "Export with secret and PII scan, release-identity commit whose tree equals the private commit's export, SSH push to GitHub main, Production deployment from that commit, then anonymous desktop and 390px mobile acceptance at $0.",
+ "evidence": {
+  "snapshot_fingerprint": "c33562e0383d3704689cd575",
+  "health_facts": 308598,
+  "companies": 500,
+  "data_snapshot": "2026-11-04",
+  "demo_video_sha256": "a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b",
+  "vertical_cut_sha256": "ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf"
+ },
+ "tests_at_current_private_source": {
+  "python": 4428,
+  "python_skipped": 4,
+  "python_fresh_clone": 4420,
+  "python_fresh_clone_skipped": 12,
+  "frontend_checks": 244
+ }
+}

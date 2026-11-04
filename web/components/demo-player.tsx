@@ -42,7 +42,7 @@ const FOUR_ACTS = [
   { id: "act-1", code: "ACT I · 0:00–0:27", title: "The Problem: One Wrong Number", start: 0, end: 27.21 },
   { id: "act-2", code: "ACT II · 0:27–1:53", title: "Real Product: Check · Receipts · Fix · Cutoff · Slide · 10-K · Private", start: 27.21, end: 113.46 },
   { id: "act-3", code: "ACT III · 1:53–2:19", title: "Under the Hood: Four Meta Models, Code Decides", start: 113.46, end: 139.6 },
-  { id: "act-4", code: "ACT IV · 2:19–2:50", title: "Proof: 500 Companies & a One-Shot Test", start: 139.6, end: 170.35 },
+  { id: "act-4", code: "ACT IV · 2:19–2:58", title: "Proof, How to Use & Try It", start: 139.6, end: 177.83 },
 ];
 
 const FIVE_BEATS = [
@@ -158,11 +158,21 @@ const MAIN_CHAPTERS: Chapter[] = [
     id: "proof",
     time: "2:19",
     start: 139.6,
-    end: 170.35,
+    end: 159.0,
     title: "500 Companies & a One-Shot Test",
     model: "1,000 frozen test items",
     models: ["spark", "wonder", "sam", "glimmer"],
     summary: "All 500 S&P 500 companies, eight quarters. One-shot test: 306 of 360 planted errors caught, none marked verified, 17 of 1,298 true figures flagged.",
+  },
+  {
+    id: "howto",
+    time: "2:39",
+    start: 159.0,
+    end: 177.83,
+    title: "How to Use It & Try It Live",
+    model: "No sign-up",
+    models: [],
+    summary: "Paste any earnings draft about an S&P 500 company, press Check, and click any number to see its receipt. Live through November 17.",
   },
 ];
 
@@ -286,9 +296,11 @@ const MAIN_CUES: Cue[] = [
   { id: "c34", start: 134.42, end: 139.35, time: "2:14", text: "SAM 3.1 and Muse Spark read slides. Muse Glimmer runs Private." },
   { id: "c35", start: 140.05, end: 145.33, time: "2:20", text: "It covers all 500 S&P 500 companies, the latest eight fiscal quarters." },
   { id: "c36", start: 145.33, end: 153.09, time: "2:25", text: "In a one-shot test on 1,000 fresh items from 400 companies, NoCap caught 306 of 360 planted errors." },
-  { id: "c37", start: 153.09, end: 159.16, time: "2:33", text: "It marked none of them verified, and flagged 17 of 1,298 true figures as wrong." },
-  { id: "c38", start: 159.31, end: 162.26, time: "2:39", text: "Try it live through November 17." },
-  { id: "c39", start: 162.26, end: 168.15, time: "2:42", text: "NoCap, built by Robert Chang during the Meta Global AI Developer Hackathon." },
+  { id: "c37", start: 153.09, end: 159.0, time: "2:33", text: "It marked none of them verified, and flagged 17 of 1,298 true figures as wrong." },
+  { id: "c38", start: 159.15, end: 163.52, time: "2:39", text: "Paste any earnings draft about an S&P 500 company, press Check," },
+  { id: "c39", start: 163.52, end: 166.5, time: "2:43", text: "and click any number to see its receipt. No sign-up." },
+  { id: "c40", start: 166.81, end: 169.76, time: "2:46", text: "Try it live through November 17." },
+  { id: "c41", start: 169.76, end: 175.65, time: "2:49", text: "NoCap, built by Robert Chang during the Meta Global AI Developer Hackathon." },
 ];
 
 const X_CUES: Cue[] = [
@@ -348,8 +360,8 @@ export function DemoPlayer() {
 
   function handleSwitchCut(nextCut: CutId) {
     if (nextCut === cut) return;
-    const currentDuration = cut === "main" ? 170.33 : 59.83;
-    const targetDuration = nextCut === "main" ? 170.33 : 59.83;
+    const currentDuration = cut === "main" ? 177.83 : 59.83;
+    const targetDuration = nextCut === "main" ? 177.83 : 59.83;
     const progress = currentTime / currentDuration;
     const targetTime = Math.min(targetDuration - 0.5, Math.max(0, progress * targetDuration));
     setCut(nextCut);
@@ -383,7 +395,7 @@ export function DemoPlayer() {
               }`}
             >
               <span className="font-mono text-[0.7rem] uppercase tracking-wider opacity-80">16:9</span>
-              Pitch Demo (2:50)
+              Pitch Demo (2:58)
             </button>
             <button
               type="button"
@@ -539,7 +551,7 @@ export function DemoPlayer() {
               preload="metadata"
               poster="/demo/poster.png"
               onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-              aria-label="NoCap pitch demo, 2 minutes 50 seconds (16:9)"
+              aria-label="NoCap pitch demo, 2 minutes 58 seconds (16:9)"
               className="aspect-video w-full bg-[#0f1b16]"
             >
               <source src="/demo/receipts-demo.mp4" type="video/mp4" />
@@ -675,7 +687,7 @@ export function DemoPlayer() {
 
         {/* Recording disclosure */}
         <figcaption className="rounded-lg border border-border/70 bg-muted/35 p-3.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-          <strong className="font-medium text-foreground">Recording disclosure:</strong> The 2:50 pitch demo combines illustrative animation, whose
+          <strong className="font-medium text-foreground">Recording disclosure:</strong> The 2:58 pitch demo combines illustrative animation, whose
           figures come from NoCap&rsquo;s real checks, with the real NoCap interface, recorded locally on November 4, 2026 from the release
           source with live model requests paused, plus original music and English captions. Draft checks replay cached extraction. Fix,
           Slide, Ask and Private replay recorded live runs for the same inputs (Fix from October 29; the Bank of America slide, the Meta
