@@ -1,9 +1,9 @@
 {
-  "exported_on": "2026-11-04",
+  "exported_on": "2026-11-05",
   "development_began": "2026-10-27",
-  "source_private_commit": "a6d609917a06c6ffb1e8969e453a7a2236c49ffb",
+  "source_private_commit": "e9d8e5fdcb907e8870bfe51e8906b2bf7035bfab",
   "source_private_branch": "wip/day3-handoff",
-  "source_archive_sha256": "06768c7749824397d7731743286f855633b6d7ac41a308612432246372fb5657",
+  "source_archive_sha256": "f948c76696f66e0444290b2f4f3ba330af5414b019b81c10627ade7e49e6b5ff",
   "public_history": "Clean main release updates; filtered source-only reconstructed development history is published separately on source-history. Private original history remains unchanged.",
   "public_video_sha256": "60fd6b694dcde7d527bf755f5fa485c87de408dfaec9c4171c3e4ce8a10a33c2",
   "public_x_cut_sha256": "7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d",
