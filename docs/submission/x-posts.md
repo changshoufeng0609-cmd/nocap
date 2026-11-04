@@ -1,6 +1,6 @@
 # NoCap — X drafts
 
-**Unpublished drafts, updated 2026-11-01 for the S&P 500 coverage.** The owner decides whether and from which account to post. At submission, live checks are open through 2026-11-17 16:00 UTC under a $5 daily cap, and saved examples plus three recorded samples (two real SEC documents and one Private check) always replay at $0. <!-- verify-at-release --> No official handle or event hashtag has been verified; leave them out until confirmed.
+**Unpublished drafts, updated 2026-11-01 for the S&P 500 coverage.** The owner decides whether and from which account to post. At submission, live checks are open through 2026-11-17 16:00 UTC under a $5 daily cap, and saved examples plus three recorded samples (two real SEC documents and one Private check) always replay at $0. No official handle or event hashtag has been verified; leave them out until confirmed.
 
 A comment above each post gives its length and the source of each figure, with line numbers as of November 2. "As typed" counts every character, with links at full length; "X count" follows X's rules, where each link counts as 23 and ✓ and ✗ count as 2.
 
@@ -75,7 +75,7 @@ Replies under whichever opener you post, in this order.
 3/4 Frozen held-out test: NoCap caught 44/48 planted errors, with 1 false alarm in 47 unmodified sentences; 22/110 true figures stayed ?. Trap drafts: 20/20 caught, 0/52 true figures flagged. Small seeded tests, run Oct 29 before the S&P 500 expansion; not general accuracy.
 ```
 
-<!-- 252 as typed, X count 214. Live through 2026-11-17 16:00 UTC: README.md:17. 2:58 pitch demo with recorded runs and a synthetic voice: README.md:13. Time travel: docs/demo/video-script.md:26. Meta's whole 10-K in one Muse Spark request: README.md:71. --> <!-- verify-at-release -->
+<!-- 252 as typed, X count 214. Live through 2026-11-17 16:00 UTC: README.md:17. 2:58 pitch demo with recorded runs and a synthetic voice: README.md:13. Time travel: docs/demo/video-script.md:26. Meta's whole 10-K in one Muse Spark request: README.md:71. -->
 
 ```text
 4/4 Live checks run through Nov 17. The full 2:58 pitch demo adds time travel and Meta's whole 10-K in one Muse Spark request (recorded runs, synthetic voice): https://receipts-nocap.vercel.app/demo
@@ -112,7 +112,7 @@ Thanks for trying NoCap! Today's live checks hit the $5 daily cap, so live work 
 - Keep the captions and replay disclosure with the video. The slide segment replays the [October 30 recorded live run](../check-a-slide.md#real-sec-slide-sample-2026-10-30) on a real Bank of America SEC slide (3 calls, $0.0302); the filing segment replays the recorded whole-10-K request ([run](../ask.md#whole-filing-live-validation-2026-10-30)). The video remains a replay.
 - Every post above is within 280 characters both as typed and as X counts it. After any edit, recount: X counts each link as 23 characters and ✓, ✗ and emoji as 2 each. Recheck the final composed posts and any confirmed tags before publication. Do not add unsupported performance, customer, accuracy or time-savings claims.
 - The coverage lines describe the November 1 snapshot, which covers all 500 companies. If a later latest-quarter top-up changes the company count, update every "500" (main post, both alternatives and 2/4) before posting. The October 31 mapping figures in 2/4 (467 companies, 1,969 calls, $42.97) describe that day and stay as they are.
-- Public links are [the live product](https://receipts-nocap.vercel.app), [the demo player](https://receipts-nocap.vercel.app/demo) and [the repository](https://github.com/changshoufeng0609-cmd/nocap); recheck their anonymous access after the release, and post 4/4 only once the repository is public. <!-- verify-at-release --> Any official mention/hashtag and the posting account need owner confirmation. No post has been sent, scheduled or published.
+- Public links are [the live product](https://receipts-nocap.vercel.app), [the demo player](https://receipts-nocap.vercel.app/demo) and [the repository](https://github.com/changshoufeng0609-cmd/nocap); recheck their anonymous access after the release, and post 4/4 only once the repository is public. Any official mention/hashtag and the posting account need owner confirmation. No post has been sent, scheduled or published.
 - Before posting, confirm the release's anonymous acceptance and that live checks are open; if the daily cap is reached, visitors see saved examples and recorded samples only, and the second ready reply says so. Admission accounting is not a provider billing hard cap.
 
 Evidence and limitations: [submission evidence map](evidence-map.md).

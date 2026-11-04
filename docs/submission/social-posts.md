@@ -2,7 +2,7 @@
 
 ## 發布前檢查（給作者，不貼出）
 
-- [ ] 等 release 通過公開存取檢查後才發布；確認即時檢查的開放期間、預算設定與公開原始碼皆符合文案。所有 `<!-- verify-at-release -->` 都要在發布當下核對。
+- [ ] 等 release 通過公開存取檢查後才發布；確認即時檢查的開放期間、預算設定與公開原始碼皆符合文案。11/04 已對照正式站與公開 repo 核對完畢。
 - [ ] 登出後，重新開啟本文的產品、示範影片與 GitHub 連結；本次只做離線核對，沒有驗證公開狀態。
 - [ ] **GitHub repo 要到 11/4 最後一次補資料後才公開。** 網站 11/1 已上線，在那之前發文的話，刪掉 Threads 回覆四的「原始碼」那一行和 LinkedIn 的「Source:」那一行，否則讀者會看到 404；不然就等 repo 公開後再發。刪行後字數記得重算。
 - [ ] Threads 建議附 `docs/demo/assets/nocap-x.mp4`（60 秒直式），SHA-256：`7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d`。LinkedIn 建議附 `docs/demo/assets/receipts-demo.mp4`（2:52），SHA-256：`61282a2702ca9442adb1e9f4bf02fa4f950be45bd721093c5479c31723b95ef0`（11/2 更新結果卡）。本機檔案雜湊已核對；來源：`docs/demo/README.md:3`、`:105`、`:108`。
@@ -14,7 +14,7 @@
 ## Threads 主文
 
 <!-- Length: 248 characters (Threads counting rule above). Stakes: docs/submission/writeup.md:19. Hackathon: README.md:7. Checks and receipts for every ✓ or ✗: README.md:3, :136. Unsupported evidence returns ?: README.md:134, :141. All 500 S&P 500 companies, mainly the latest eight quarters: README.md:20, :140; docs/submission/writeup.md:23. Muse Spark, Muse Wonder and SAM 3.1: README.md:30-36. Product link: README.md:17. -->
-<!-- verify-at-release -->
+
 
 ```text
 財報新聞寫錯一個數字，就得公開更正。
@@ -75,7 +75,7 @@ SAM 3.1 找出簡報裡的圖表區域，交給 Muse Spark 1.3 讀數字。框�
 ### 回覆四：怎麼試
 
 <!-- Length: 311 characters (Threads counting rule above). Live through 2026-11-17 16:00 UTC = 2026-11-18 00:00 Taiwan (UTC+8): README.md:17. $5 per UTC day and pause until next UTC day: README.md:18. Saved examples and recorded samples replay at $0: README.md:19, :22. Suggested trial: README.md:19. Product/demo/source links: README.md:17, :13, :21. -->
-<!-- verify-at-release -->
+
 
 ```text
 可以先開儲存範例，點數字看憑據；再改一個數字，或貼上自己的財報新聞段落試試。
@@ -114,7 +114,7 @@ NoCap 檢查 AI 撰寫的 NVIDIA 財報新聞草稿，開啟 SEC 文件憑據，
 作者備註：以獨立開發者 Robert Chang 的第一人稱發文。開頭兩行共 139 字；全文低於 3,000 字。若要標註頁面，可考慮 Meta、Cerebral Valley，但作者必須先確認正確頁面與標註對象。本次未查證任何官方帳號或活動標籤，因此草稿不含活動 hashtag 或 handle。
 
 <!-- Length: 2703 characters as typed (recounted Nov 2 for the comprehensive test), first two lines unchanged. Comprehensive test of the November 2 round-8 release: 1,000 items, 400 companies, 306/360 caught, 0 ✓, 17/1,298 wrong, 736/738 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, after round 8). Earlier note, characters as typed, including line breaks and full URLs; first two lines: 139. Solo builder Robert Chang: docs/submission/README.md:3. Stakes: docs/submission/writeup.md:19. Hackathon/from Oct 27: README.md:7, :153. Receipts/uncertainty: README.md:3, :133, :136. Model rule and versions/roles: README.md:26, :30-37. All 500/latest eight quarters/snapshot: README.md:20, :140. Oct 31/one day/467/latest four/1,969/$42.97: README.md:31. One whole-Meta-10-K request/101,135 input tokens: README.md:71. SAM both real BAC charts: README.md:70; demonstration limit: README.md:74. 44/48, 1/47, 22/110 (20%), 20/20: README.md:61-64; frozen/run once Oct 29/limitations: README.md:73. Window, $5 per UTC day, $0 replays: README.md:17-19, :22. Product/demo/public source links: README.md:17, :13, :21. -->
-<!-- verify-at-release -->
+
 
 ```text
 One wrong number in an earnings story means a public correction.

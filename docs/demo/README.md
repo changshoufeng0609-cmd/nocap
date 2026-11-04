@@ -185,7 +185,7 @@ export (`9d5bb223…`). Its anonymous production acceptance, on November 1 with 
 - the browser-downloaded MP4 and VTT match their SHA-256 hashes.
 
 The [release record](../public-release-2026-11-01.json) has the details. The next release must deploy the new MP4 and
-VTT and check their new hashes. <!-- verify-at-release -->
+VTT and check their new hashes.
 
 ## Reproduce
 

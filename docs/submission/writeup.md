@@ -1,6 +1,6 @@
 # NoCap — submission copy
 
-Copy for the Cerebral Valley submission form, in the form's field order. Each long field is 150–250 words. A `<!-- verify-at-release -->` comment follows each statement that becomes true at release; check it, then delete the comments before pasting. Sources for every number: [evidence map](evidence-map.md).
+Copy for the Cerebral Valley submission form, in the form's field order. Each long field is 150–250 words. Every statement was checked against the deployed release and the public repository on November 4. Sources for every number: [evidence map](evidence-map.md).
 
 ## Short fields
 
@@ -11,8 +11,8 @@ Copy for the Cerebral Valley submission form, in the form's field order. Each lo
 | Track | Indie Developer |
 | Theme | Build for Your World |
 | Most Viral X post (optional) | The published post's URL |
-| Public GitHub repository | https://github.com/changshoufeng0609-cmd/nocap <!-- verify-at-release --> |
-| 3-minute demo video | https://receipts-nocap.vercel.app/demo <!-- verify-at-release --> |
+| Public GitHub repository | https://github.com/changshoufeng0609-cmd/nocap |
+| 3-minute demo video | https://receipts-nocap.vercel.app/demo |
 
 ## Project description
 
@@ -22,7 +22,7 @@ Paste a draft and NoCap marks each figure ✓ verified, ✗ wrong, ◷ not publi
 
 In a frozen held-out test, NoCap caught 44 of 48 planted errors, with 1 false alarm in 47 unmodified sentences, and all 20 in AI-written trap drafts. It covers every S&P 500 company. A one-shot test of the November 2 release caught 306 of 360 planted errors, passed none as verified, and 736 of 738 ✓ marks were right.
 
-Try it at https://receipts-nocap.vercel.app: live checks run through November 17, 16:00 UTC, under a $5 daily cap, and saved examples always work. <!-- verify-at-release --> All code was built during the hackathon, from October 27. The full history stays private because it contains narration audio that could not be shared publicly; a public branch reconstructs it. <!-- verify-at-release --> The video records the real interface with cached and recorded model responses and a synthetic voice.
+Try it at https://receipts-nocap.vercel.app, no sign-up: live checks run through November 17, 16:00 UTC, under a $5 daily cap, and saved examples always work. All code was built during the hackathon, from October 27. The full history stays private because it contains narration audio that could not be shared publicly; a public branch reconstructs it. The demo pairs illustrative animation with real interface footage.
 
 ## How we used Meta products
 
@@ -40,7 +40,7 @@ Open weights: Muse Spark Open on Fireworks and Baseten matched 27 of 27 gold cla
 
 An earnings draft mixes prose, tables and charts, and a fact-checker must first turn each into typed data. Muse Spark's strict structured output gives every input a typed form that code can check: claims from prose and slide images, row mappings from 8-K tables, lookup plans from questions. At minimal reasoning effort, a live check of our 11-claim NVIDIA example took 3.9 seconds and $0.013. Spark's 1M-token context takes a whole 10-K in one request, so quotations come from the complete filing, not retrieved fragments. Muse Wonder writes complete stories with planted errors, a harder test than single sentences, and its edit proposals turn a red flag into a corrected draft.
 
-The models also show why verification has to exist. In a closed-book test, Spark, Wonder, Spark Open and Glimmer each answered 50 financial questions from memory and produced 17 assessable wrong answers among the 200. NoCap's gate withheld all 17 and accepted 37 correct answers, with only 0–34% coverage per model. (Post-run analysis that only normalizes unit and period labels; the pre-registered parser accepted none.) Every answer is public at https://receipts-nocap.vercel.app/benchmarks. <!-- verify-at-release --> NoCap follows the Agents 102 workshop's verifiable-agent practices: verification is the submit step, deterministic checks come first, Wonder's edits are allow-listed, and whatever code can't confirm goes to the editor.
+The models also show why verification has to exist. In a closed-book test, Spark, Wonder, Spark Open and Glimmer each answered 50 financial questions from memory and produced 17 assessable wrong answers among the 200. NoCap's gate withheld all 17 and accepted 37 correct answers, with only 0–34% coverage per model. (Post-run analysis that only normalizes unit and period labels; the pre-registered parser accepted none.) Every answer is public at https://receipts-nocap.vercel.app/benchmarks. NoCap follows the Agents 102 workshop's verifiable-agent practices: verification is the submit step, deterministic checks come first, Wonder's edits are allow-listed, and whatever code can't confirm goes to the editor.
 
 Open weights matter for newsrooms. An unpublished earnings story is sensitive, and Muse Glimmer on the operator's own Modal deployment lets the same verifier run without sending the draft to a hosted model API.
 

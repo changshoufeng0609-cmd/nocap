@@ -1,9 +1,9 @@
 {
  "record": "NoCap public releases on 2026-11-04 (Taipei)",
  "origin": "https://receipts-nocap.vercel.app",
- "current_deployment": "dpl_5MMwdRR5RBun7quLiFCiuGPmHzrf",
- "current_public_source": "62c4216069d9cf9b1122c60844d39fbcb4b1b384",
- "rollback_deployment": "dpl_A46sNhrpkmZ2xNvpijaVze8eWLuj",
+ "current_deployment": "dpl_5TxkzsFYSFGGvvojpogFtQF1VaX5",
+ "current_public_source": "382d7936954e8cd5567c32b4dc6c7c12b973882d",
+ "rollback_deployment": "dpl_5MMwdRR5RBun7quLiFCiuGPmHzrf",
  "deployments": [
   {
    "deployment": "dpl_5MMwdRR5RBun7quLiFCiuGPmHzrf",
@@ -11,6 +11,19 @@
    "public_source": "62c4216069d9cf9b1122c60844d39fbcb4b1b384",
    "private_source": "c59135f",
    "change": "the 2:50 pitch demo and the 60-second vertical cut; the retimed /demo player; Nov 4 top-ups (55 companies); DuPont's split date",
+   "anonymous_acceptance": {
+    "status": "passed",
+    "checks": 51,
+    "provider_calls": 0,
+    "new_spend_usd": 0
+   }
+  },
+  {
+   "deployment": "dpl_5TxkzsFYSFGGvvojpogFtQF1VaX5",
+   "build_seconds": 62.5,
+   "public_source": "382d7936954e8cd5567c32b4dc6c7c12b973882d",
+   "private_source": "cf0503e",
+   "change": "how-to-use beat in the pitch demo (2:58, 41 captions) and on the vertical cut's end card; README GIF from the pitch demo",
    "anonymous_acceptance": {
     "status": "passed",
     "checks": 51,
@@ -25,8 +38,8 @@
   "health_facts": 308598,
   "companies": 500,
   "data_snapshot": "2026-11-04",
-  "demo_video_sha256": "a7dd806de86bbaa05a303ec377ad85cf270a6b605ca149dcfe909e1564b9722b",
-  "vertical_cut_sha256": "ce63636be6197cbd8f4f309d7fc03d12c9118ab994a00e0648654879b1d6dbcf"
+  "demo_video_sha256": "60fd6b694dcde7d527bf755f5fa485c87de408dfaec9c4171c3e4ce8a10a33c2",
+  "vertical_cut_sha256": "7c1ac2cc71033b6177c30863d5b51be612f0d3da1341c46a7d002e702326501d"
  },
  "tests_at_current_private_source": {
   "python": 4428,
