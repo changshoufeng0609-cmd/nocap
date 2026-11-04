@@ -13,7 +13,7 @@
 
 ## Threads 主文
 
-<!-- Length: 248 characters (Threads counting rule above). Stakes: docs/submission/writeup.md:19. Hackathon: README.md:7. Checks and receipts for every ✓ or ✗: README.md:3, :136. Unsupported evidence returns ?: README.md:134, :141. All 500 S&P 500 companies, mainly the latest eight quarters: README.md:20, :140; docs/submission/writeup.md:23. Muse Spark, Muse Wonder and SAM 3.1: README.md:30-36. Product link: README.md:17. -->
+<!-- Length: 248 characters (Threads counting rule above). Stakes: README.md:5. Hackathon: README.md:7. Checks and receipts for every ✓ or ✗: README.md:3, :136. Unsupported evidence returns ?: README.md:134, :141. All 500 S&P 500 companies, mainly the latest eight quarters: README.md:20, :140; docs/submission/writeup.md:23. Muse Spark, Muse Wonder and SAM 3.1: README.md:30-36. Product link: README.md:17. -->
 
 
 ```text
@@ -113,7 +113,7 @@ NoCap 檢查 AI 撰寫的 NVIDIA 財報新聞草稿，開啟 SEC 文件憑據，
 
 作者備註：以獨立開發者 Robert Chang 的第一人稱發文。開頭兩行共 139 字；全文低於 3,000 字。若要標註頁面，可考慮 Meta、Cerebral Valley，但作者必須先確認正確頁面與標註對象。本次未查證任何官方帳號或活動標籤，因此草稿不含活動 hashtag 或 handle。
 
-<!-- Length: 2703 characters as typed (recounted Nov 2 for the comprehensive test), first two lines unchanged. Comprehensive test of the November 2 round-8 release: 1,000 items, 400 companies, 306/360 caught, 0 ✓, 17/1,298 wrong, 736/738 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, after round 8). Earlier note, characters as typed, including line breaks and full URLs; first two lines: 139. Solo builder Robert Chang: docs/submission/README.md:3. Stakes: docs/submission/writeup.md:19. Hackathon/from Oct 27: README.md:7, :153. Receipts/uncertainty: README.md:3, :133, :136. Model rule and versions/roles: README.md:26, :30-37. All 500/latest eight quarters/snapshot: README.md:20, :140. Oct 31/one day/467/latest four/1,969/$42.97: README.md:31. One whole-Meta-10-K request/101,135 input tokens: README.md:71. SAM both real BAC charts: README.md:70; demonstration limit: README.md:74. 44/48, 1/47, 22/110 (20%), 20/20: README.md:61-64; frozen/run once Oct 29/limitations: README.md:73. Window, $5 per UTC day, $0 replays: README.md:17-19, :22. Product/demo/public source links: README.md:17, :13, :21. -->
+<!-- Length: 2703 characters as typed (recounted Nov 2 for the comprehensive test), first two lines unchanged. Comprehensive test of the November 2 round-8 release: 1,000 items, 400 companies, 306/360 caught, 0 ✓, 17/1,298 wrong, 736/738 ✓ right: README.md:65, :72; eval/spot500_methods.md (Results, after round 8). Earlier note, characters as typed, including line breaks and full URLs; first two lines: 139. Solo builder Robert Chang: docs/submission/README.md:3. Stakes: README.md:5. Hackathon/from Oct 27: README.md:7, :153. Receipts/uncertainty: README.md:3, :133, :136. Model rule and versions/roles: README.md:26, :30-37. All 500/latest eight quarters/snapshot: README.md:20, :140. Oct 31/one day/467/latest four/1,969/$42.97: README.md:31. One whole-Meta-10-K request/101,135 input tokens: README.md:71. SAM both real BAC charts: README.md:70; demonstration limit: README.md:74. 44/48, 1/47, 22/110 (20%), 20/20: README.md:61-64; frozen/run once Oct 29/limitations: README.md:73. Window, $5 per UTC day, $0 replays: README.md:17-19, :22. Product/demo/public source links: README.md:17, :13, :21. -->
 
 
 ```text

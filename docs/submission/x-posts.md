@@ -18,7 +18,7 @@ Try it: https://receipts-nocap.vercel.app
 
 ## Alternative openers for A/B choice
 
-Alternatives to the main post, not extra posts. The form takes one post URL ([submission copy](writeup.md)), so pick one opener and put the thread under it.
+Alternatives to the main post, not extra posts. The form takes one post URL, so pick one opener and put the thread under it.
 
 ### Alternative A: the stakes
 
